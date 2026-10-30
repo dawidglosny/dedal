@@ -62,6 +62,22 @@ export const groups: DocGroup[] = [
     cases: dashboardCases,
   },
   {
+    slug: 'templates-in-storage',
+    title: 'Templates in a database or CMS',
+    description: 'Stored templates in a real project: validation, caching, versions, preview, publishing, CI.',
+    intro: intros.guideStorage,
+    file: '',
+    cases: [],
+  },
+  {
+    slug: 'templates-from-figma',
+    title: 'Templates from Figma',
+    description: 'A naming convention and a converter over the Figma REST API: design the page, publish, get a template.',
+    intro: intros.guideFigma,
+    file: '',
+    cases: [],
+  },
+  {
     slug: 'layout',
     intro: intros.layout,
     title: 'Layout',
@@ -123,6 +139,7 @@ export const groups: DocGroup[] = [
 export const parts: { title: string; groups: string[] }[] = [
   { title: 'Get started', groups: ['why', 'quick-start', 'introduction'] },
   { title: 'Learn', groups: ['tutorial', 'production', 'dashboard'] },
+  { title: 'Guides', groups: ['templates-in-storage', 'templates-from-figma'] },
   { title: 'Features', groups: ['layout', 'data', 'sections', 'cache', 'rendering'] },
   { title: 'Troubleshooting', groups: ['errors', 'devtools'] },
 ]

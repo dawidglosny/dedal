@@ -36,7 +36,7 @@ const registry = { grid: Grid, card: Card, badge: Badge } satisfies Registry<Con
 <Render tree={page} registry={registry} />`
 
 const features = [
-  ['Structure is data', 'Templates are plain JSON — store them, version them, generate them from a design tool. Rearranging a screen doesn’t change code.'],
+  ['Structure is data', 'Templates are plain JSON — store them, version them, generate them from Figma. Rearranging a screen doesn’t change code.'],
   ['One typed contract', 'A TypeScript type of components and props, shared by the server and every frontend. Registries are checked at compile time.'],
   ['Data placed by selectors', '`card`, `#featured`, `card > :slot(badge)` — CSS syntax instead of indexes. Adding a heading doesn’t shift the data.'],
   ['Explicit rules for missing data', 'Fewer items than places, a failing API, an empty section: safe defaults, a strict mode, and a report of everything dropped.'],
@@ -148,7 +148,7 @@ export default function Home() {
         <h2>How it works</h2>
       <div className="flow">
         {[
-          ['Structure', 'a JSON template — in code, in a database, from a design tool'],
+          ['Structure', 'a JSON template — in code, in a database, from Figma'],
           ['+ Data', 'from your APIs, attached by CSS-like selectors'],
           ['Screen description', 'plain JSON — cached, sent over the network'],
           ['Components', 'the frontend’s registry: name → component'],

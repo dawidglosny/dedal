@@ -46,7 +46,7 @@ const withData = ui.page<Ctx>({
 // #endregion
 
 // #region tutorial-template-as-data
-// a template store — in a real project a database, a CMS or a design-tool export; here JSON in memory.
+// a template store — in a real project a database, a CMS or a Figma export; here JSON in memory.
 // The editors saved version 2 of "latest": a new heading, two columns, four cards.
 const storage = new Map<string, string>([
   [
@@ -292,7 +292,7 @@ Why a selector, and not just a list in order? Because the template will change �
     slug: 'tutorial-template-as-data',
     title: '4. The template as data',
     level: 'ok',
-    description: `So far the template was TypeScript code: changing it means a code change and a release. Now the same kind of block lives **outside the code** — in a database, a CMS, or as an export from a design tool. \`node()\` only builds an object like \`{ component: 'card', props: { … } }\`, so a template can be plain JSON.
+    description: `So far the template was TypeScript code: changing it means a code change and a release. Now the same kind of block lives **outside the code** — in a database, a CMS, or as an export from Figma (*Templates in a database or CMS*, *Templates from Figma*). \`node()\` only builds an object like \`{ component: 'card', props: { … } }\`, so a template can be plain JSON.
 
 Here the editors saved version 2 of the "latest" template — a new heading, two columns, four cards:
 

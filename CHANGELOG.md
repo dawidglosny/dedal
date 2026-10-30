@@ -3,7 +3,8 @@
 ## Unreleased
 
 Documentation:
-- the docs menu in four parts — *Get started*, *Learn*, *Features*, *Troubleshooting*; a group's cases are shown only for the group being read (the others collapsed, with a count), and a legend explains the colored dots.
+- a new *Guides* part: *Templates in a database or CMS* (the stored shape, validation, caching through `ui.query`, the version in the cache key, drafts and preview, publishing, CI) and *Templates from Figma* (a naming convention and a converter over the Figma REST API); the code in both was run as written,
+- the docs menu in parts — *Get started*, *Learn*, *Guides*, *Features*, *Troubleshooting*; a group's cases are shown only for the group being read (the others collapsed, with a count), and a legend explains the colored dots.
 
 ## 0.6.5
 

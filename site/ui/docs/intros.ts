@@ -15,7 +15,7 @@ A screen built from components mixes three different things in the same code:
 They change at different times, for different reasons, by different people. But when the structure lives in component code (\`<Grid><Card title={…} /> …</Grid>\`), every rearrangement — a new block, a different order, three items instead of four on mobile, an A/B variant — is a code change and a release, made once per frontend.
 
 Dedal keeps them apart:
-- **structure** is a template — plain JSON, which can live in code, in a database, or come from a design tool,
+- **structure** is a template — plain JSON, which can live in code, in a database, or come from Figma (*Templates from Figma*),
 - **data** is attached to it by selectors in CSS syntax (\`card\`, \`#featured\`, \`card > :slot(badge)\`) — the way CSS attaches styles to HTML, here it attaches data to the structure,
 - **components** are chosen by the frontend's registry: component name → its component.
 
@@ -53,7 +53,7 @@ Not a kind of company or industry, but a property of the UI: **its structure cha
 - **dashboards** — which widgets, in what order, per role or per customer,
 - **onboarding and multi-step flows** — the steps and their order tuned by product, not by code,
 - **stores** — campaign pages, category layouts, A/B tests of the page structure,
-- **one design system, many products** — templates designed once (even exported from a design tool) and served to all of them.
+- **one design system, many products** — templates designed once (even in Figma — *Templates from Figma*) and served to all of them.
 
 ## When it doesn't
 
@@ -243,6 +243,257 @@ console.log(renderToString(<Render tree={page} registry={registry} />))
 - **The template as data** — move the structure out of the code, into JSON stored on the server: *Tutorial*, step 4.
 - **See inside** — the devtools panel shows where every prop came from: *Devtools*, "How to enable it".
 - **Learn it properly** — *Tutorial*, then *Layout*, *Data*, *Sections*.`,
+
+  guideStorage: `**In short:** keep templates outside the code — in a database, a CMS, a key-value store — and load them per request without hitting the store every time. This guide covers the whole loop: the stored shape, validation, caching, versions, preview and publishing. *Tutorial*, step 4 shows the idea; this is the version for a real project.
+
+## The stored shape
+
+One record per page: a block per section, and a version that changes on every publish. Keep a draft and a published copy, so editors can work without touching the live page.
+
+\`\`\`json
+{
+  "version": 3,
+  "sections": {
+    "news": { "component": "section", "props": { "title": "Latest" }, "children": [
+      { "component": "card", "repeat": 2, "slots": { "badge": { "component": "badge" } } }
+    ] }
+  }
+}
+\`\`\`
+
+## Loading, validating, caching
+
+The contract is types only, so a template from storage isn't checked by the compiler — validate it when it's loaded (and when it's saved, below). Read published templates through \`ui.query\`: they are cached in the instance, refreshed in the background, and one call to \`ui.invalidate\` drops them after a publish.
+
+\`\`\`ts
+// templates.ts
+import type { BlockDefinition } from 'dedal'
+import type { Contract } from './ui/contract'
+import { ui } from './ui/home'
+
+// ---- guide 1: templates in storage ----
+
+/** A stored template: one block per section, and a version that changes on every publish. */
+export type StoredTemplate = { version: number; sections: Record<string, unknown> }
+
+/** Your storage — a database table, a CMS, a key-value store. */
+export interface TemplateStore {
+  get(name: string, state: 'published' | 'draft'): Promise<StoredTemplate | undefined>
+}
+
+// the contract is types only — the list of names is what runs
+const components = { section: 1, card: 1, badge: 1 } satisfies Record<keyof Contract, 1>
+
+/** Checks a template from outside the code; throws with the path of the first bad node. */
+export function validate(block: unknown, path: string): asserts block is BlockDefinition<Contract> {
+  if (typeof block !== 'object' || block === null) throw new Error(\`\${path}: not an object\`)
+  const { component, slots, children } = block as { component?: unknown; slots?: Record<string, unknown>; children?: unknown }
+  if (typeof component !== 'string' || !(component in components)) throw new Error(\`\${path}: unknown component \${JSON.stringify(component)}\`)
+  if (children !== undefined && !Array.isArray(children)) throw new Error(\`\${path}: children must be an array\`)
+  for (const [name, content] of Object.entries(slots ?? {})) [content].flat().forEach((child, i) => validate(child, \`\${path}:\${name}.\${i}\`))
+  ;(children as unknown[] | undefined)?.forEach((child, i) => validate(child, \`\${path}.\${i}\`))
+}
+
+export function validateTemplate(template: StoredTemplate): Record<string, BlockDefinition<Contract>> {
+  for (const [key, block] of Object.entries(template.sections)) validate(block, key)
+  return template.sections as Record<string, BlockDefinition<Contract>>
+}
+
+export function createTemplates(store: TemplateStore) {
+  // published templates are read through a query: cached in the instance, refreshed in the background
+  const published = ui.query({
+    key: (name: string) => ['template', name],
+    fn: async (name: string) => {
+      const template = await store.get(name, 'published')
+      if (!template) throw new Error(\`template "\${name}" is not published\`)
+      return { version: template.version, sections: validateTemplate(template) }
+    },
+    staleTime: 60_000,
+  })
+
+  return {
+    published,
+    /** Drafts skip the cache — editors see their last save. */
+    draft: async (name: string) => {
+      const template = await store.get(name, 'draft')
+      if (!template) throw new Error(\`template "\${name}" has no draft\`)
+      return { version: template.version, sections: validateTemplate(template) }
+    },
+    /** After publishing: drop the cached template and the pages built from it. */
+    onPublish: (name: string) => ui.invalidate(['template', name]),
+  }
+}
+\`\`\`
+
+\`validate\` checks component names and the shape of the tree. If you want to check prop values too, add a schema per component (any validation library) next to the contract — the shape is plain JSON.
+
+## The page per request
+
+Create the page from the current template — creating a page is cheap; the cache lives in the instance. Put the template **version** in the page cache key: a new publish is served right away, without waiting for the old entry to go stale. A preview reads the draft and isn't cached.
+
+\`\`\`ts
+/** The page for one request — from the published template, or from the draft for a preview. */
+export async function homePage({ preview = false } = {}) {
+  const template = preview ? await templates.draft('home') : await templates.published('home')
+  return ui.page({
+    sections: Object.entries(template.sections).map(([key, block]) => ui.section(key, block)),
+    data: async () => {
+      const articles = await fetchArticles()
+      return {
+        news: {
+          card: articles.map(article => ({ title: article.title, href: article.url })),
+          'card > :slot(badge)': articles.map(article => ({ label: article.category })),
+        },
+      }
+    },
+    // the version in the key: a new publish is served right away; previews are never cached
+    cache: preview ? undefined : { key: () => ['home', template.version] },
+  })
+}
+\`\`\`
+
+Build a preview with \`{ trace: true }\` and render the devtools panel: editors see where every prop comes from before they publish.
+
+## Publishing
+
+1. The editor (or a design-tool export, see *Templates from Figma*) saves a **draft** — validate it on save and refuse an invalid one.
+2. A preview renders the draft.
+3. Publishing copies the draft to **published** with a new version, then calls \`templates.onPublish(name)\`.
+4. Rollback = publish an older version again.
+
+## Validating in CI
+
+Run the same \`validateTemplate\` over every stored template in CI, and over the templates in your repository if you keep fixtures there — a renamed component in the contract shows up as a failing build, not as an empty spot on the page.
+
+\`\`\`ts
+// scripts/validate-templates.ts
+for (const name of await store.list()) // your store's list of template names
+  validateTemplate((await store.get(name, 'published'))!)
+\`\`\`
+
+## What to watch out for
+
+- **The release order:** add a component to every registry before any template uses it — an older frontend renders the registry's \`fallback\` (nothing by default).
+- **\`defaults\`** from the instance options are added by \`node()\` — a stored template carries its props itself.
+- **Data doesn't care about the template:** the loader places data by selectors (\`card\`), so editors can add, remove and move cards without a code change. Changing the **contract** (a renamed prop, a removed component) is a code change — and a reason to validate stored templates.`,
+
+  guideFigma: `**In short:** design the page in Figma with your design-system components, publish, and get a Dedal template — no hand-written JSON. Dedal has no Figma plugin; what it needs is a naming convention and a small converter over the Figma REST API, shown here in full.
+
+## The convention
+
+Figma already has everything a template needs, if the names line up with the contract:
+
+- **an instance of a design-system component → a node.** The main component's name (or the component set's, for variants) is the contract name: \`card\`, \`badge\`.
+- **component properties → props.** Text and boolean properties lose Figma's id suffix (\`title#12:0\` → \`title\`); variant properties keep their name (\`size=md\` → \`size: "md"\`).
+- **a layer \`slot:badge\` inside an instance → the slot \`badge\`.** An instance with that name is a single slot; a frame \`slot:actions\` with instances in it is a list slot.
+- **a frame named after a contract component → a container node**, with props in the name: \`section title=Latest\`, \`grid columns=3\`. Its layers become children.
+- **any other frame or group is only layout in Figma** — its instances go to the parent. Spacing, sizes and colors stay in the components and the design tokens; a template carries structure and props, not pixels.
+- **the page frame:** every top-level layer is a section — its name is the section key (\`news\`), its first layer the section root.
+
+Texts typed in Figma become template props. For a heading that is the content; for a card that will get data, it is a placeholder the data replaces.
+
+## The converter
+
+It reads the response of the file nodes endpoint (\`GET /v1/files/:file_key/nodes?ids=<frame id>\`): the frame's \`document\`, plus \`components\` and \`componentSets\` — maps from ids to names. Validation runs on the result, so a component that isn't in the contract fails with the name of the layer.
+
+\`\`\`ts
+// figma.ts
+import type { BlockDefinition } from 'dedal'
+import type { Contract } from './ui/contract'
+import { validate } from './templates'
+
+/** The parts of a node from the Figma REST API that the converter reads (GET /v1/files/:key/nodes?ids=…). */
+export type FigmaNode = {
+  name: string
+  type: string // 'FRAME', 'GROUP', 'INSTANCE', 'TEXT', …
+  componentId?: string
+  componentProperties?: Record<string, { type: 'TEXT' | 'BOOLEAN' | 'VARIANT' | 'INSTANCE_SWAP'; value: string | boolean }>
+  children?: FigmaNode[]
+}
+/** \`components\` and \`componentSets\` from the same response: id → name. */
+export type FigmaMeta = {
+  components: Record<string, { name: string; componentSetId?: string }>
+  componentSets: Record<string, { name: string }>
+}
+
+const value = (raw: string) => (raw === 'true' ? true : raw === 'false' ? false : raw !== '' && !isNaN(Number(raw)) ? Number(raw) : raw)
+
+/** "grid columns=3 gap=md" → { component: 'grid', props: { columns: 3, gap: 'md' } } */
+const parseLayerName = (name: string) => {
+  const [component, ...pairs] = name.trim().split(/\\s+/)
+  return { component, props: Object.fromEntries(pairs.map(pair => pair.split('=')).map(([key, raw]) => [key, value(raw ?? '')])) }
+}
+
+/**
+ * A Figma frame → templates, one per section. Conventions:
+ * - every top-level layer of the frame is a section; its name is the section key, its first layer the section root,
+ * - an instance of a design-system component → a node; the component (or component set) name is the contract name,
+ *   its component properties are props ("title#12:0" → "title"; variants as they are),
+ * - a frame named after a contract component ("grid columns=3") → a container node; its layers → children,
+ * - a layer named "slot:badge" inside an instance → the slot "badge"; a frame "slot:actions" with instances → a list slot,
+ * - any other frame or group is only layout in Figma — its instances go to the parent.
+ */
+export function fromFigma(frame: FigmaNode, meta: FigmaMeta, known: Record<string, unknown>) {
+  const nameOf = (node: FigmaNode) => {
+    const component = meta.components[node.componentId ?? '']
+    return component?.componentSetId ? meta.componentSets[component.componentSetId]?.name : component?.name
+  }
+
+  const toBlocks = (node: FigmaNode): unknown[] => {
+    if (node.type === 'INSTANCE') {
+      const props = Object.fromEntries(
+        Object.entries(node.componentProperties ?? {})
+          .filter(([, property]) => property.type !== 'INSTANCE_SWAP')
+          .map(([key, property]) => [key.split('#')[0], property.value])
+      )
+      const slots: Record<string, unknown> = {}
+      for (const layer of node.children ?? []) {
+        if (!layer.name.startsWith('slot:')) continue // the component's own layers stay in the component
+        const name = layer.name.slice('slot:'.length)
+        slots[name] = layer.type === 'INSTANCE' ? toBlocks({ ...layer, name: '' })[0] : (layer.children ?? []).flatMap(toBlocks)
+      }
+      const component = nameOf(node)
+      if (!component) throw new Error(\`layer "\${node.name}": an instance of a component that isn't in this file's components\`)
+      return [{ component, ...(Object.keys(props).length && { props }), ...(Object.keys(slots).length && { slots }) }]
+    }
+    const { component, props } = parseLayerName(node.name)
+    const children = (node.children ?? []).flatMap(toBlocks)
+    if (component in known) return [{ component, ...(Object.keys(props).length && { props }), ...(children.length && { children }) }]
+    return children // layout only
+  }
+
+  const sections: Record<string, BlockDefinition<Contract>> = {}
+  for (const layer of frame.children ?? []) {
+    const [root] = (layer.children ?? []).flatMap(toBlocks)
+    validate(root, layer.name)
+    sections[layer.name] = root
+  }
+  return sections
+}
+\`\`\`
+
+A "Home" frame with a \`section title=Latest\` frame and three card instances (each with a \`slot:badge\` badge) becomes:
+
+\`\`\`json
+{ "news": { "component": "section", "props": { "title": "Latest" }, "children": [
+  { "component": "card", "props": { "title": "Article title" },
+    "slots": { "badge": { "component": "badge", "props": { "label": "Category" } } } },
+  … ] } }
+\`\`\`
+
+An instance of a component that isn't in the contract stops the conversion: \`hero: unknown component "Button/Primary"\`.
+
+## From Figma to the page
+
+1. Designers build the page frame with library components and publish.
+2. A job — triggered by a Figma webhook, a button in your admin, or a schedule — fetches the frame (\`GET /v1/files/:file_key/nodes?ids=…\` with an access token in \`X-Figma-Token\`) and runs \`fromFigma\`.
+3. The result is saved as a **draft** in your template store — the rest is *Templates in a database or CMS*: preview, publish with a new version, \`onPublish\`.
+
+## What to watch out for
+
+- **Names are the contract.** Renaming a component in Figma without renaming it in the contract (or the other way round) fails validation — on purpose. Agree on the names with the design team, like any API.
+- **One instance = one node.** The converter doesn't collapse repeated instances into \`repeat\`; that's fine — a template with three \`card\` nodes works the same.
+- **Figma's API shape can change** — keep the converter small and covered by a test with a saved response.`,
 
   introduction: `This page shows how Dedal works: who does what, how data flows from a template to the screen, and a small example followed step by step. At the end — a glossary of the terms used throughout the documentation. Why Dedal exists and when to use it: *Why Dedal*.
 

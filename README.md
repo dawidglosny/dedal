@@ -32,7 +32,7 @@ That property shows up in many places:
 - **dashboards** — which widgets, in what order, per role or per customer,
 - **onboarding and flows** — the steps and their order tuned by product, not by code,
 - **stores** — campaign pages, category layouts, A/B tests of the page structure,
-- **one design system, many products** — templates designed once (even exported from a design tool) and served to all of them.
+- **one design system, many products** — templates designed once (even in Figma — [Templates from Figma](https://dawidglosny.github.io/dedal/docs/templates-from-figma/)) and served to all of them.
 
 It's probably not worth it when:
 - the UI is mostly forms, state and interactions (an editor, a checkout) rather than blocks assembled from a known set,
@@ -89,7 +89,7 @@ Change the structure in storage and the page follows — no frontend release (wi
 
 ## What you get
 
-- **Structure is data.** Templates are plain JSON — store them, version them, generate them from a design tool. Changing a page doesn't change code.
+- **Structure is data.** Templates are plain JSON — store them, version them, generate them from Figma. Changing a page doesn't change code.
 - **One typed contract.** A TypeScript type lists components and their props. Templates written in code (`ui.node()`) and registries are checked against it at compile time.
 - **Data placed by selectors.** `card`, `#featured`, `card > :slot(badge)`, `card:nth-child(odd)` — CSS syntax you already know, instead of fragile indexes. Adding a heading to a template doesn't shift the data.
 - **Explicit rules for missing data.** Fewer articles than cards, an API that fails, an empty section — each case has a default that keeps the page alive and an option to make it strict. Nothing disappears silently: everything is in the report.
