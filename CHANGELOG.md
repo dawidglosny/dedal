@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.2
 
 Documentation only, no changes to the API or behavior:
 - README rewritten as an introduction: what Dedal is for, when it fits and when it doesn't, how it compares with React Server Components, Web Components and CMSs; the API reference moved to [docs/API.md](docs/API.md) (with a new section on templates stored as JSON), the changelog to this file,

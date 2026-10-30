@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Search } from './search'
 
 export const GITHUB = 'https://github.com/dawidglosny/dedal'
-export const VERSION = '0.6.1'
+export const VERSION = '0.6.2'
 
 export function Header() {
   return (

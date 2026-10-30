@@ -98,7 +98,7 @@ Dedal doesn't replace your framework or your components — it decides **what** 
 ## Installation
 
 ```bash
-npm i github:dawidglosny/dedal#v0.6.1
+npm i github:dawidglosny/dedal#v0.6.2
 ```
 
 Requires Node 20.9+. React 18+ only for `dedal/react` (an optional peer dependency). The package builds on install.
@@ -122,4 +122,4 @@ Requires Node 20.9+. React 18+ only for `dedal/react` (an optional peer dependen
 
 ## Status
 
-Version **0.6.1**. The API may still change before 1.0 — see [CHANGELOG.md](CHANGELOG.md). Plans (an Astro renderer, pruning empty containers, cache adapters): [docs/ROADMAP.md](docs/ROADMAP.md).
+Version **0.6.2**. The API may still change before 1.0 — see [CHANGELOG.md](CHANGELOG.md). Plans (an Astro renderer, pruning empty containers, cache adapters): [docs/ROADMAP.md](docs/ROADMAP.md).

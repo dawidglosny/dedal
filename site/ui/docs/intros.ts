@@ -275,7 +275,7 @@ app/(radix)/radix/…      — Next routes that render PageView with the chosen 
 
 In a larger project blocks are usually extracted into separate modules (e.g. \`blocks.ts\`), and each page into its own file.
 
-Installation: \`npm i github:dawidglosny/dedal#v0.6.1\`. You need TypeScript and React (for \`dedal/react\`, React 18+); the server can be anything (Node 20.9+) — here it's Next.js (App Router, Server Components).`,
+Installation: \`npm i github:dawidglosny/dedal#v0.6.2\`. You need TypeScript and React (for \`dedal/react\`, React 18+); the server can be anything (Node 20.9+) — here it's Next.js (App Router, Server Components).`,
 
   layout: `The layout is the structure of a section: which components, in what order, in which slots, with which props — **without data**. You describe it with blocks: \`node(component, { props, children, slots, alias })\`.
 
