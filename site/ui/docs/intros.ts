@@ -283,7 +283,7 @@ Each step has:
 - a description — what we're doing and why,
 - the code — the real files behind these docs (contract, instance, toProps, registry — the same as in \`examples/next\`) and the page code for this step,
 - the result — the page built from this code,
-- "See it live" — what to open in the devtools panel (the **dedal** button in the bottom right corner, or \`Alt+Shift+S\`),
+- "See it live" — what to open in the devtools panel (the **dedal** button with the logo in the bottom-right corner, or \`Alt+Shift+S\`),
 - the devtools report — the same thing as text.
 
 Later steps use blocks from earlier ones — it's worth going in order (the "next" link at the bottom of the page).
@@ -749,6 +749,10 @@ Without debug mode nothing changes: the \`build\` / \`resolve\` result is the sa
 - **React without RSC (SPA, SSR)** — the same components: \`<Render debug>\`, \`<DevtoolsData>\`, \`<Devtools />\`. \`inspect()\` also works in the browser.
 - **Backend → frontend (an API with JSON)** — the backend does \`build(ctx, { trace: true })\` only for trusted requests; the frontend calls \`resolve\` and \`inspect()\` (pure functions) on its side and renders as above.
 - **Without React** — \`mountDevtools()\` from \`dedal/devtools/panel\` after the page loads; embed the payload as \`<script type="application/json" data-dedal-devtools>\`, replacing \`<\` with \`\\u003c\`. Without node markers in the DOM the panel shows *tree*, *sections* and *timing*, but doesn't highlight elements, and \`pick\` won't find anything.
+
+## Opening the panel
+
+With debug mode on, a button sits in the bottom-right corner of the page: the Dedal logo (a blue labyrinth "D" with an orange core) and the label **dedal**. Click it, or press \`Alt+Shift+S\`, to open the panel; \`⇤\` / \`⇥\` moves both to the other side of the screen. The button exists only where the app renders \`<Devtools />\` — in debug mode; a page without it has no button, no panel and no devtools code.
 
 ## node — a single element of the page
 
