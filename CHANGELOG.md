@@ -1,17 +1,17 @@
 # Changelog
 
-## Unreleased
+## 0.6.6
+
+No changes to the API or behavior. The package gains JSDoc descriptions for the 26 exported types that had none.
 
 Documentation:
-- clarity: *Introduction* shows the example before the data-flow diagram and defines a section in plain words; *Data*, *Sections* and *Cache* start the dense parts with a plain sentence; *Tutorial* step 2 shows only the three components it starts with; *Another domain: a dashboard* comes right after the tutorial,
-- README: *Size and speed* — bundle sizes of the entry points, benchmark timings, the number of tests,
-- *Limitations* — what Dedal doesn't do, or doesn't do yet — and *Glossary* as pages of their own, in the *Reference* part of the menu,
-- `CONTRIBUTING.md`: setup, where things are, the docs site and the examples, what a pull request needs,
-- the API reference on the docs site (from `docs/API.md` — one source), with a *Reference* part in the menu; the docs pages render tables, `###` headings and links,
-- a type reference generated from the JSDoc (TypeDoc, `npm run docs:types`) at `/types/`; the 26 exported types that had no description got one,
-- a new *Guides* part: *Templates in a database or CMS* (the stored shape, validation, caching through `ui.query`, the version in the cache key, drafts and preview, publishing, CI) and *Templates from Figma* (a naming convention and a converter over the Figma REST API); the code in both was run as written,
-- three more guides: *Adopting in an existing app* (one block first, the registry as an adapter over existing components), *A client without React* (the page format, a renderer in a few dozen lines, older mobile apps via the app version in `ctx`, types on the client) and *Testing* (build reports, `onIssue: 'throw'`, devtools messages and snapshots in tests); the code was run as written,
-- the docs menu in parts — *Get started*, *Learn*, *Guides*, *Features*, *Troubleshooting*; a group's cases are shown only for the group being read (the others collapsed, with a count), and a legend explains the colored dots.
+- the headline: "Change screens without changing code", with "structure, data and components — kept apart, joined at the last moment" right below (README, the docs site),
+- a *Guides* part: *Templates in a database or CMS* (the stored shape, validation, caching through `ui.query`, the version in the cache key, drafts and preview, publishing, CI), *Templates from Figma* (a naming convention and a converter over the Figma REST API), *Adopting in an existing app* (one block first, the registry as an adapter over existing components), *A client without React* (the page format, a renderer in a few dozen lines, older mobile apps via the app version in `ctx`) and *Testing* (build reports, `onIssue: 'throw'`, devtools messages, snapshots); the code in every guide was run as written,
+- a *Reference* part: the API reference on the site (from `docs/API.md` — one source), a type reference generated from the JSDoc (TypeDoc, `npm run docs:types`) at `/types/`, *Glossary* and *Limitations* as pages of their own,
+- the menu in parts — *Get started*, *Learn*, *Guides*, *Features*, *Troubleshooting*, *Reference*; a group's cases shown only for the group being read, and a legend for the colored dots,
+- clarity: *Introduction* shows the example before the data-flow diagram and defines a section in plain words; *Data*, *Sections* and *Cache* start the dense parts with a plain sentence; *Tutorial* step 2 shows only the three components it starts with; *Another domain: a dashboard* comes right after the tutorial; the docs pages render tables, `###` headings and links,
+- README: *Size and speed* (bundle sizes, benchmark timings, the number of tests), links to *Limitations* and the type reference,
+- `CONTRIBUTING.md`: setup, where things are, the docs site and the examples, what a pull request needs.
 
 ## 0.6.5
 

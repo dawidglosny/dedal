@@ -82,13 +82,14 @@ export default function Home() {
         <LogoMark size={96} className="hero-logo" />
         <div className="hero-badge">v{VERSION} · TypeScript · zero dependencies</div>
         <h1>
-          Structure, data and components.
+          Change screens
           <br />
-          <span>Kept apart, joined at the last moment.</span>
+          <span>without changing code.</span>
         </h1>
+        <p className="hero-sub">Structure, data and components — kept apart, joined at the last moment.</p>
         <p className="hero-lead">
-          A server-driven UI engine for TypeScript. The structure of a screen lives as data, so it can change{' '}
-          <strong>without a code change or a release</strong> — while your components and your APIs stay exactly as they are.
+          A server-driven UI engine for TypeScript. The structure of a screen lives as data, so it can change without a code change or a release — while your
+          components and your APIs stay exactly as they are.
         </p>
         <div className="hero-actions">
           <Link href="/docs/quick-start/" className="button button-primary">

@@ -2,7 +2,9 @@
 
 # Dedal
 
-**Structure, data and components — kept apart, joined at the last moment.**
+**Change screens without changing code.**
+
+Structure, data and components — kept apart, joined at the last moment.
 
 Dedal is a TypeScript engine for **server-driven UI**. In a typical component tree three different things are tangled together in one place:
 
@@ -125,7 +127,7 @@ Dedal doesn't replace your framework or your components — it decides **what** 
 ## Installation
 
 ```bash
-npm i github:dawidglosny/dedal#v0.6.5
+npm i github:dawidglosny/dedal#v0.6.6
 ```
 
 Requires Node 20.9+. React 18+ only for `dedal/react` (an optional peer dependency). The package builds on install.
@@ -154,4 +156,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) — setup, where things are, the docs sit
 
 ## Status
 
-Version **0.6.5**. The API may still change before 1.0 — see [CHANGELOG.md](CHANGELOG.md). Plans (an Astro renderer, pruning empty containers, cache adapters): [docs/ROADMAP.md](docs/ROADMAP.md).
+Version **0.6.6**. The API may still change before 1.0 — see [CHANGELOG.md](CHANGELOG.md). Plans (an Astro renderer, pruning empty containers, cache adapters): [docs/ROADMAP.md](docs/ROADMAP.md).
