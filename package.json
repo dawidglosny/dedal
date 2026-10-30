@@ -1,6 +1,6 @@
 {
   "name": "dedal",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "private": true,
   "description": "Dedal — a server-driven UI engine independent of framework and component library",
   "type": "module",

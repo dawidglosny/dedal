@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.3
 
 Documentation only, no changes to the API or behavior:
 - the tutorial rebuilt around the core idea: 7 steps plus a debugging exercise — the finished page and its JSON first, contract and registry together, and a new step *The template as data* (a stored, validated JSON template changed without touching the code); shared sections, streaming and cache moved to a new group, *Going to production*,
