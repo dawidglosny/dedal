@@ -13,6 +13,7 @@ import {
   Link,
   Section,
   Separator,
+  Skeleton,
   Tabs,
   Text,
 } from '@radix-ui/themes'
@@ -188,4 +189,23 @@ export const radixThemes = {
   ),
 
   separator: () => <Separator size="4" my="4" />,
+
+  skeleton: ({ label, count = 3 }) => (
+    <Section size="2">
+      <Flex direction="column" gap="4">
+        {label && <Text color="gray">{label}</Text>}
+        <Grid columns={String(Math.min(count, 3))} gap="4">
+          {Array.from({ length: count }, (_, i) => (
+            <Card key={i} size="2">
+              <Flex direction="column" gap="3">
+                <Skeleton height="96px" />
+                <Skeleton height="14px" width="35%" />
+                <Skeleton height="20px" />
+              </Flex>
+            </Card>
+          ))}
+        </Grid>
+      </Flex>
+    </Section>
+  ),
 } satisfies Registry<Contract>

@@ -8,7 +8,8 @@ npm start       # bundle the client, start the server on http://localhost:3000
 ```
 
 - `/` — the page; `/?device=mobile` — the mobile variant (one column, three cards),
-- `/api/home?device=desktop|mobile` — the page as JSON (`ResolvedPage`), what the browser renders.
+- `/api/home?device=desktop|mobile` — the page as JSON (`ResolvedPage`), what the browser renders; the deferred section "For you" comes as a placeholder,
+- `/api/section?key=forYou&device=…` — that section on its own (`page.section()`), fetched by the browser after the page.
 
 ## Try it: change the layout without touching the code
 
@@ -32,13 +33,16 @@ In a real project the file is a database row, a CMS entry or a design-tool expor
 | `src/server.ts` | `node:http`: the page as JSON and the static files |
 | `client/components.ts` | the design system: `ds-hero`, `ds-card`, `ds-badge`… — they know nothing about Dedal |
 | `client/registry.ts` | contract → tag names (`satisfies Registry<Contract>`: a missing component is a compile error) |
-| `client/render.ts` | the renderer — about 20 lines: props → element properties, slots → `slot="name"`, children → the default slot |
+| `client/render.ts` | the renderer — about 20 lines: props → element properties, slots → `slot="name"`, children → the default slot; `replaceSection` for deferred sections |
+| `client/main.ts` | fetches the page, renders it, then fetches and swaps in the deferred sections |
 
 ## What the example shows
 
 **Layout as data.** The template is a JSON file, not TypeScript, read on every request. The page object is created per request from it (cheap — the cache lives in the instance), and the template version is part of the cache key, so a new version is served right away. Because the contract is types only, templates from outside the code are validated at runtime (`src/templates.ts`).
 
 **Web Components are a registry, not an alternative.** Web Components make a component work in any framework; Dedal decides which components make up the page and with what data. Here they meet in the registry: component name → tag. A Dedal slot maps directly onto a native named `<slot>`.
+
+**A deferred section without `<Suspense>`.** "For you" is slow (800 ms) and marked `defer`, so the page arrives without it, with a `skeleton` placeholder from the contract. The browser renders the page, then fetches every section with `deferred: true` from `/api/section` and swaps it in (`replaceSection` in `client/render.ts`). If the section's own request returns no section — its loader failed (it is `optional`) or it was empty — the placeholder is removed.
 
 **Framework independence in practice.** The core (`build`, `resolve`) has no idea what renders the result. The same `ResolvedPage` could be rendered by `dedal/react`, by this renderer, or by a mobile app.
 

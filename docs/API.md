@@ -146,6 +146,9 @@ await home.section('forYou', ctx)       // the section alone → resolve → <Re
 - The cache lives as long as the instance: create it once (at module level), not in every request.
 - Query results and pages from the cache are frozen (read-only): `[...items].sort()` instead of `items.sort()`.
 - `<Render deferred={({ sectionKey, fallback }) => <Suspense fallback={fallback}>…</Suspense>}>` — streaming deferred sections in Next.
+- `defer.fallback` is a block (structure from the contract, part of the page result and its cache), rendered by the registry — e.g. a skeleton component. Not the same as `<Render fallback>` (a component for names missing from the registry).
+- `page.section(key, ctx)` after the page has gone out: a loader error with `optional` → a result with no sections (`report.failedSections`) — remove the placeholder; without `optional` → it throws (in Next: the nearest error boundary); an empty section with `onEmpty: 'remove'` → no sections (`report.removedSections`).
+- Without `<Suspense>` (an SPA, Web Components, a mobile app): an endpoint with `page.section()` + `resolve`; the client renders the page, fetches every section with `deferred: true` and swaps it in. Example: `examples/web-components`.
 
 ### Debug (`trace`, `dedal/devtools`)
 
@@ -207,7 +210,7 @@ export const registry = {
 
 - No hooks and no state — works in React Server Components, with SSR and on the client; registry components can be client components.
 - Slots go to props named after the slot, layout children to `children` (the contract's `children` prop stays when the node has no children).
-- Unknown component → `fallback` (nothing by default).
+- Unknown component → `fallback` (nothing by default — without it the node renders nothing, with its children and slots). `fallback` receives `{ component, nodeKey }`: visible in development, `null` plus logging in production. Release order: the component in the registry first, then in templates.
 - React is an optional `peerDependency`; the `dedal` core doesn't import it.
 
 Example: [`examples/next`](../examples/next) — the same page on Radix Themes and shadcn/ui (one contract, two registries), switching `ctx`, debug mode, a JSON endpoint. Documentation by example (a tutorial, every feature, warning and error as a live page): the [documentation site](https://dawidglosny.github.io/dedal/), sources in [`site`](../site).

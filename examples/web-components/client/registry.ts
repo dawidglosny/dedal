@@ -9,4 +9,5 @@ export const registry = {
   grid: 'ds-grid',
   card: 'ds-card',
   badge: 'ds-badge',
+  skeleton: 'ds-skeleton',
 } satisfies Registry<Contract>

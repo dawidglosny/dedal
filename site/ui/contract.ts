@@ -29,6 +29,8 @@ export type Contract = {
   tabs: { labels: string[]; content?: Slot[] }
   list: { items: { title: string; href: string; meta?: string }[] }
   separator: Record<string, never>
+  /** A loading placeholder — e.g. the fallback of a deferred section. */
+  skeleton: { label?: string; count?: number }
 }
 
 /** Page context — serializable (may go over the network or into a cache key). */

@@ -12,4 +12,9 @@ const articles: Article[] = [
 
 export const api = {
   latest: async (count: number): Promise<Article[]> => articles.slice(0, count),
+  /** Slow and personal — a good candidate for a deferred section. */
+  recommended: async (): Promise<Article[]> => {
+    await new Promise(resolve => setTimeout(resolve, 800))
+    return [...articles].reverse().slice(0, 3)
+  },
 }

@@ -32,6 +32,8 @@ export type DocCase = {
   tasks?: { symptom: string; hint: string; solution: string }[]
   /** Collapse the case code (spoiler — e.g. exercises solved with devtools first). */
   codeCollapsed?: boolean
+  /** Render without the `deferred` prop: deferred sections show only their placeholder (`defer.fallback`). */
+  placeholderOnly?: boolean
   /** Registry override — e.g. without a component, to show a missing one. Default: Radix Themes. */
   registry?: Partial<Registry<Contract>>
   run: () => Promise<CaseOutput>

@@ -28,6 +28,24 @@ export function renderNode<C>(node: ResolvedNode<C>, registry: Registry<C>): Ele
   return element
 }
 
+/** Renders the page; every section root is marked with its key, so a deferred section can be swapped in later. */
 export function renderPage<C>(page: ResolvedPage<C>, registry: Registry<C>, root: Element) {
-  root.replaceChildren(...page.sections.map(({ tree }) => renderNode(tree, registry)))
+  root.replaceChildren(...page.sections.map(({ key, tree }) => section(key, renderNode(tree, registry))))
+}
+
+const section = (key: string, element: Element) => {
+  element.setAttribute('data-section', key)
+  return element
+}
+
+/**
+ * Swaps a deferred section's placeholder for the section itself — or removes the placeholder when the section's
+ * own request returned no section (its loader failed with `optional`, or it was empty).
+ */
+export function replaceSection<C>(root: Element, key: string, result: ResolvedPage<C>, registry: Registry<C>) {
+  const placeholder = root.querySelector(`[data-section="${key}"]`)
+  const [built] = result.sections
+  if (!placeholder) return
+  if (built) placeholder.replaceWith(section(key, renderNode(built.tree, registry)))
+  else placeholder.remove()
 }

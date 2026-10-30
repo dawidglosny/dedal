@@ -14,11 +14,16 @@ const port = Number(process.env.PORT ?? 3000)
 createServer(async (request, response) => {
   const url = new URL(request.url ?? '/', 'http://localhost')
 
-  // the page as JSON: any frontend with a registry for this contract can render it
-  if (url.pathname === '/api/home') {
-    const ctx: Ctx = { device: url.searchParams.get('device') === 'mobile' ? 'mobile' : 'desktop' }
+  const ctx: Ctx = { device: url.searchParams.get('device') === 'mobile' ? 'mobile' : 'desktop' }
+
+  // the page as JSON: any frontend with a registry for this contract can render it; deferred sections as placeholders
+  // a deferred section on its own: /api/section?key=forYou — the same ctx as the page
+  if (url.pathname === '/api/home' || url.pathname === '/api/section') {
     try {
-      const resolved = ui.resolve(await (await homePage()).build(ctx), { ctx })
+      const page = await homePage()
+      const key = url.searchParams.get('key')
+      const result = url.pathname === '/api/section' && key ? await page.section(key, ctx) : await page.build(ctx)
+      const resolved = ui.resolve(result, { ctx })
       response.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify(resolved))
     } catch (error) {
       // e.g. an invalid template: the message says which node and why

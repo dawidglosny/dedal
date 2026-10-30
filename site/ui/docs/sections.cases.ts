@@ -1,6 +1,6 @@
 import type { Ctx } from '../contract'
 import { articles, build, cards, ui } from './shared'
-import type { DocCase } from './types'
+import type { CaseOutput, DocCase } from './types'
 
 const { node, section } = ui
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
@@ -87,8 +87,9 @@ const deferred = ui.page<Ctx>({
   sections: [
     section('news', cards(ui, 'Latest', 3)),
     section('forYou', cards(ui, 'For you', 3), {
-      // the page result holds only the fallback; the section is built by page.section() in its own request
-      defer: { fallback: node('section', { props: { title: 'For you', description: 'Loading recommendations…' } }) },
+      // the page result holds only the fallback — a block like any other, here a skeleton from the contract;
+      // the section itself is built by page.section() in its own request
+      defer: { fallback: node('skeleton', { props: { label: 'Loading recommendations…', count: 3 } }) },
       data: async () => {
         await wait(800) // a slow recommendations API
         return { card: (await articles(6)).slice(3) }
@@ -97,6 +98,53 @@ const deferred = ui.page<Ctx>({
   ],
   data: async () => ({ news: { card: await articles(3) } }),
 })
+// #endregion
+
+// #region defer-placeholder
+// the same page; the frontend renders it without the `deferred` prop:
+//   <Render tree={resolved} registry={registry} />
+// every deferred section shows its fallback — rendered by the registry, like any node
+const placeholderPage = deferred
+// #endregion
+
+// #region defer-failures
+// a deferred section whose API is down
+const recommendations = section('recommended', cards(ui, 'Recommended', 3), {
+  defer: { fallback: node('skeleton', { props: { label: 'Loading recommendations…', count: 3 } }) },
+  optional: true, // without it, page.section() throws — after the page has already gone out
+  data: async () => {
+    throw new Error('recommendations API: 503')
+  },
+})
+
+const withFailingDeferred = ui.page<Ctx>({
+  sections: [section('news', cards(ui, 'Latest', 3)), recommendations],
+  data: async () => ({ news: { card: await articles(3) } }),
+  onSectionError: (error, { section }) => console.warn(`[docs] ${section}:`, (error as Error).message),
+})
+
+// the deferred section's own request — what <Suspense> (or your endpoint) gets:
+//   await withFailingDeferred.section('recommended', ctx)
+//   → { sections: [], report: { failedSections: { recommended: 'recommendations API: 503' } } }
+//   → nothing to render: the placeholder is replaced by nothing
+// #endregion
+
+// #region defer-endpoint
+// without <Suspense> — an SPA, Web Components, a mobile app: the deferred section gets its own endpoint
+//
+// server: GET /api/pages/home/sections/:key?device=…
+//   const ctx = ctxFrom(request)
+//   const result = ui.resolve(await home.section(key, ctx), { ctx })
+//   return Response.json(result)                  // a ResolvedPage with that one section — or none
+//
+// client: render the page (deferred sections show their placeholder), then fetch each of them
+//   for (const { key, deferred } of page.sections.filter(section => section.deferred)) {
+//     const { sections } = await (await fetch(`/api/pages/home/sections/${key}?device=${device}`)).json()
+//     sections[0] ? replaceSection(key, sections[0]) : removeSection(key)   // none: failed or empty
+//   }
+//
+// a working version: examples/web-components (src/server.ts, client/main.ts)
+const viaEndpoint = deferred
 // #endregion
 
 // #region unknown-data
@@ -176,6 +224,51 @@ export const sectionCases: DocCase[] = [
     description:
       '`defer: { fallback }` — the page result contains only a fallback, and the loader doesn\'t run. The content is built by `page.section(key, ctx)` in a separate request; in Next — an async component in `<Suspense>`, streamed in once the slow API responds (here 800 ms).\n\nOutside the page cache — the place for personalised data. Devtools combine the page and section payloads; in *timing* the section has its own block.',
     run: build(ui, deferred),
+  },
+  {
+    slug: 'defer-placeholder',
+    title: 'Deferred: the placeholder',
+    level: 'ok',
+    placeholderOnly: true,
+    description: `What the reader sees before a deferred section arrives — and what the page shows if nothing fetches it.
+
+\`defer.fallback\` is a **block**, like any template: built on the server, part of the page result (and of the page cache), rendered by the frontend's registry. So the placeholder can be anything from the contract — here a \`skeleton\` component that mimics the cards that will replace it. Keep it close to the size of the real section, so the page doesn't jump when the content arrives.
+
+The result below is rendered without the \`deferred\` prop: \`<Render>\` shows the placeholder and nothing more. With \`deferred\` (previous case), the same placeholder goes into \`<Suspense fallback>\` and is replaced by the section once it's built.
+
+Not to be confused with \`<Render fallback>\` — the component for names missing from the registry (*Rendering*).`,
+    run: build(ui, placeholderPage),
+  },
+  {
+    slug: 'defer-failures',
+    title: 'Deferred: when the section fails or is empty',
+    level: 'error',
+    description: `A deferred section is built after the page has already gone out, so a failure can't stop the page — but it still has to end somewhere. What \`page.section(key, ctx)\` returns:
+
+- **the loader throws, the section is \`optional\`** — a result with no sections, the error in \`report.failedSections\` and in \`onSectionError\`. Nothing to render: the placeholder disappears. Shown below.
+- **the loader throws, the section isn't \`optional\`** — \`page.section()\` throws. In Next the error happens inside an already streamed \`<Suspense>\`, so it goes to the nearest error boundary (\`error.tsx\`); with an endpoint, to its error response.
+- **the section is empty** — with \`onEmpty: 'remove'\` (default) a result with no sections, the key in \`report.removedSections\`: the placeholder disappears. \`'keep'\`, a block or \`'error'\` work as for any section.
+
+In practice: make deferred sections \`optional\` — they are usually the "nice to have" part of the page (recommendations, personalised blocks) — and log \`onSectionError\`.`,
+    run: async (): Promise<CaseOutput> => {
+      const ctx: Ctx = { device: 'desktop' }
+      return { ui, page: withFailingDeferred, ctx, result: await withFailingDeferred.section('recommended', ctx, { trace: true }) }
+    },
+  },
+  {
+    slug: 'defer-endpoint',
+    title: 'Deferred without Suspense',
+    level: 'ok',
+    placeholderOnly: true,
+    description: `\`<Suspense>\` streaming is a React feature. Elsewhere — a single-page app, Web Components, a mobile app, a backend that only serves JSON — a deferred section gets **its own endpoint**: the server calls \`page.section(key, ctx)\` and \`resolve\`, the client renders the page with its placeholders and then fetches each deferred section and swaps it in.
+
+- \`ResolvedPage.sections[i].deferred === true\` marks a placeholder — that's how a custom renderer knows what to fetch,
+- the endpoint returns a \`ResolvedPage\` with one section — or with none, when the section failed (\`optional\`) or was empty: then remove the placeholder,
+- \`ctx\` travels with the request (query string, headers), so it must be serializable — the same \`ctx\` as for the page,
+- the section's own request skips the page cache; cache its data with \`ui.query\` if it's shared, not per user.
+
+The result below is the page as the client first renders it — with the placeholder. \`examples/web-components\` implements the whole loop (\`/api/section\` and the swap in \`client/main.ts\`).`,
+    run: build(ui, viaEndpoint),
   },
   {
     slug: 'unknown-data',

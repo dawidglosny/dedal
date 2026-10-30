@@ -82,6 +82,12 @@ export const live: Record<string, string> = {
     '*sections* → `! popular removed — none of the required nodes got data` — even though the hero got data. *tree* → the section "removed — no data; layout before assign" with the hero and cards.',
   defer:
     '*timing* → a separate block `section forYou (streamed separately)`; *tree* → the `forYou` section. This site is static, so the section was built ahead of time — in a running app (`examples/next`) the fallback shows first and the content arrives after ~800 ms.',
+  'defer-placeholder':
+    '*tree* → the `forYou` section is a single `skeleton` node with its own ID — the placeholder is part of the page like any node. *sections* → `forYou` with `source: deferred`.',
+  'defer-failures':
+    '*sections* → `✗ recommended failed — the loader threw "recommendations API: 503"`; *tree* is empty — this is the result of the section\'s own request, and it has nothing to render. *timing* → the `recommended` loader in red.',
+  'defer-endpoint':
+    '*tree* → `forYou` is the `skeleton` placeholder — what the client renders before it fetches the section from its endpoint.',
   'unknown-data':
     '*sections* → `! newz unknownData — … Did you mean: news?`. The `news` section got nothing — in *tree*, cards without ●, `source: none`.',
   'loader-undefined': '*sections* → `! news no data — the section loader returned undefined for this section, so it shows its layout only`.',

@@ -11,9 +11,11 @@ export type Contract = {
   grid: { columns?: 1 | 2 | 3 | 4 }
   card: { heading?: string; href?: string; size?: 'sm' | 'md' | 'lg'; badge?: Slot }
   badge: { label?: string; tone?: 'neutral' | 'accent' }
+  /** A loading placeholder — the fallback of a deferred section. */
+  skeleton: { label?: string; count?: number }
 }
 
 /** Every component name at runtime — to validate templates that come from outside the code. */
-export const components = ['hero', 'button', 'section', 'grid', 'card', 'badge'] as const satisfies readonly (keyof Contract)[]
+export const components = ['hero', 'button', 'section', 'grid', 'card', 'badge', 'skeleton'] as const satisfies readonly (keyof Contract)[]
 
 export type Ctx = { device: 'desktop' | 'mobile' }

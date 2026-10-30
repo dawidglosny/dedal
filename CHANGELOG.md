@@ -3,6 +3,8 @@
 ## Unreleased
 
 Documentation only:
+- deferred sections and fallbacks: *Sections* explains the two different fallbacks (`defer.fallback` — a block; `<Render fallback>` — a component for missing names), what replaces the placeholder when a deferred section fails or is empty, and deferred sections without `<Suspense>` (an endpoint); new cases *Deferred: the placeholder*, *Deferred: when the section fails or is empty*, *Deferred without Suspense*; *Rendering* covers `<Render fallback>` (props, development vs production, release order),
+- `examples/web-components`: a deferred section "For you" with a skeleton placeholder, served by its own endpoint and swapped in by the browser,
 - the docs site's landing page explains Dedal at a glance: the benefit in the first lines, the three parts (structure, data, components) and who changes each, a before/after example, and how Dedal compares with React Server Components, Web Components, CMSs and hand-made JSON.
 
 ## 0.6.4

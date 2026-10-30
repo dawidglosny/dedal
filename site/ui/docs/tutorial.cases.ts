@@ -69,7 +69,7 @@ const storage = new Map<string, string>([
 // the contract is types only — a template from outside the code is checked at runtime
 const components = {
   container: 1, section: 1, grid: 1, flex: 1, hero: 1, card: 1, badge: 1, avatar: 1,
-  button: 1, image: 1, tabs: 1, list: 1, separator: 1,
+  button: 1, image: 1, tabs: 1, list: 1, separator: 1, skeleton: 1,
 } satisfies Record<keyof Contract, 1>
 
 function validate(block: unknown, path: string): asserts block is BlockDefinition<Contract> {

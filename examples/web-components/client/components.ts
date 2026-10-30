@@ -84,6 +84,23 @@ class DsBadge extends DsElement {
   }
 }
 
+class DsSkeleton extends DsElement {
+  label = ''
+  count = 3
+  template() {
+    const box = '<div class="box"><i style="height:72px"></i><i style="width:35%"></i><i></i></div>'
+    return `<style>
+        section { margin: 40px 0; } p { margin: 0 0 16px; color: #4d5b78; }
+        .grid { display: grid; gap: 16px; grid-template-columns: repeat(${Math.min(Number(this.count), 3)}, minmax(0, 1fr)); }
+        .box { display: flex; flex-direction: column; gap: 10px; padding: 20px; border: 1px solid #dfe7f5; border-radius: 12px; background: #fff; }
+        i { display: block; height: 14px; border-radius: 6px; background: linear-gradient(90deg, #e8efff, #f5f8fd, #e8efff); background-size: 200% 100%;
+          animation: shimmer 1.2s infinite linear; }
+        @keyframes shimmer { to { background-position: -200% 0; } }
+      </style>
+      <section>${this.label ? `<p>${escape(this.label)}</p>` : ''}<div class="grid">${box.repeat(Number(this.count))}</div></section>`
+  }
+}
+
 export function defineComponents() {
   customElements.define('ds-hero', DsHero)
   customElements.define('ds-button', DsButton)
@@ -91,4 +108,5 @@ export function defineComponents() {
   customElements.define('ds-grid', DsGrid)
   customElements.define('ds-card', DsCard)
   customElements.define('ds-badge', DsBadge)
+  customElements.define('ds-skeleton', DsSkeleton)
 }

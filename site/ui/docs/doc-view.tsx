@@ -316,11 +316,15 @@ export async function DocView({ group, docCase }: { group: DocGroup; docCase: Do
                 registry={registry}
                 debug
                 fallback={missing}
-                deferred={({ sectionKey, fallback }) => (
-                  <Suspense fallback={fallback}>
-                    <DeferredCaseSection output={run.output} sectionKey={sectionKey} registry={registry} />
-                  </Suspense>
-                )}
+                deferred={
+                  docCase.placeholderOnly
+                    ? undefined
+                    : ({ sectionKey, fallback }) => (
+                        <Suspense fallback={fallback}>
+                          <DeferredCaseSection output={run.output} sectionKey={sectionKey} registry={registry} />
+                        </Suspense>
+                      )
+                }
               />
             </Theme>
           </div>

@@ -501,6 +501,25 @@ async function Deferred({ sectionKey, ctx }: { sectionKey: string; ctx: Ctx }) {
 
 Without the \`deferred\` prop, \`<Render>\` shows only the fallback. A deferred section is outside the page cache (only the placeholder is cached) — a good place for per-user data.
 
+**The placeholder is a block.** \`defer.fallback\` is structure, like any template: built on the server, part of the page result and its cache, rendered by the registry. Use a component from the contract — a skeleton that mimics the section, so the page doesn't jump when the content arrives (*Deferred: the placeholder*).
+
+**When the section fails or is empty.** The page has already gone out, so \`page.section()\` decides what replaces the placeholder:
+- loader error, section \`optional\` — no sections in the result (\`report.failedSections\`, \`onSectionError\`): the placeholder disappears,
+- loader error, section not \`optional\` — \`page.section()\` throws: in Next the error goes to the nearest error boundary, with an endpoint to its error response,
+- empty section with \`onEmpty: 'remove'\` — no sections (\`report.removedSections\`): the placeholder disappears.
+
+Deferred sections are usually the optional part of a page, so mark them \`optional\` (*Deferred: when the section fails or is empty*).
+
+**Without \`<Suspense>\`** (a single-page app, Web Components, a mobile app): give deferred sections their own endpoint — \`page.section(key, ctx)\` + \`resolve\` on the server; on the client, render the page, find sections with \`deferred: true\`, fetch each one and swap it in (or remove the placeholder when the result has no section). \`ctx\` travels with the request (*Deferred without Suspense*, \`examples/web-components\`).
+
+## Two fallbacks
+
+The word appears in two unrelated places:
+- \`defer: { fallback }\` — a **block** shown in place of a deferred section until its content arrives. Defined on the server, part of the page.
+- \`<Render fallback={…}>\` — a **React component** rendered instead of a node whose component isn't in the registry. Defined on the frontend; see *Rendering*.
+
+(And \`<Suspense fallback>\` is React's own: in the \`deferred\` callback it receives the first one, already rendered.)
+
 ## Page stages
 
 \`page.build(ctx)\` is three stages in a single call (plus cache). They are also available separately — e.g. when you want to cache the layout independently of the data:
@@ -615,7 +634,7 @@ card: ({ title, href, size = 'md', badge, footer }) => (
 
 \`satisfies Registry<Contract>\` checks at compile time that all components are present and the props match. The registry is an adapter: the contract describes what the page needs, and the registry translates it to the API of a specific library (badge \`variant: 'secondary'\` → \`variant="soft"\` in Radix Themes) — switching libraries is a change to the registry, not to the server.
 
-\`<Render>\` uses no hooks or state — it works in React Server Components, in SSR and on the client; components in the registry can be client components (\`'use client'\`). Options: \`fallback\` (a component for components missing from the registry, receives \`{ component, nodeKey }\`), \`deferred\` (rendering a deferred section, see *Sections*), \`debug\` (markers for devtools).
+\`<Render>\` uses no hooks or state — it works in React Server Components, in SSR and on the client; components in the registry can be client components (\`'use client'\`). Options: \`fallback\` (a component for components missing from the registry, receives \`{ component, nodeKey }\` — below), \`deferred\` (how to render a deferred section: receives \`{ sectionKey, fallback }\`, where \`fallback\` is the section's placeholder already rendered; without it only the placeholder shows — see *Sections*), \`debug\` (markers for devtools).
 
 ## Problems that don't break the page
 
@@ -625,6 +644,27 @@ card: ({ title, href, size = 'md', badge, footer }) => (
 - data for an ID that isn't in the layout (layout and data from different builds).
 
 A component missing from the registry renders \`fallback\` (or nothing). Why: one bad article shouldn't take down the whole page. Where you'd rather have a hard error (tests, CI) — \`resolve(result, { onIssue: 'throw' })\`.
+
+## The fallback for a missing component
+
+\`<Render fallback={Missing}>\` renders \`Missing\` instead of every node whose component isn't in the registry. It receives \`{ component, nodeKey }\` — the name from the template and the node's ID. Without \`fallback\` such a node renders nothing, together with its children and slots.
+
+\`\`\`tsx
+// development: make it visible
+const Missing = ({ component, nodeKey }: { component: string; nodeKey: string }) => (
+  <div style={{ border: '2px dashed red', padding: 8 }}>Missing component “{component}” ({nodeKey})</div>
+)
+
+// production: render nothing, but report it
+const Missing = ({ component }: { component: string }) => {
+  reportMissing(component) // your logging / metrics
+  return null
+}
+\`\`\`
+
+When it happens: a template uses a component the frontend doesn't have yet — a stored template edited before the frontend release, an older mobile app, a typo in a JSON template. That's why the order of releases is: **the component in the registry first, then in templates**. Devtools list every missing component and the nodes it affects (*Component missing from the registry*).
+
+Not to be confused with \`defer: { fallback }\` — the placeholder of a deferred section (*Sections*).
 
 ## What to watch out for
 
