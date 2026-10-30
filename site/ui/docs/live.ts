@@ -29,6 +29,14 @@ export const live: Record<string, string> = {
   'production-queries-cache':
     '*timing* → under `hero` and `page data`, the query `["production","articles",8]` — one fetch, shared: the second loader waits for the same call (deduplication). *sections* → `cache key: ["page","production-home","desktop"]`.',
 
+  // dashboard
+  'dashboard-roles':
+    '`pick` on a number → *node* shows the `stat` widget, its data (a metric from the analytics API) and `assigned by stat`. *tree* → two sections, `kpis` and `activity`, with the panels `#orders` and `#tickets`.',
+  'dashboard-customer-layout':
+    '*sections* → `kpis`: `! stat — 4 data items for 2 nodes` (the surplus is skipped), and `cache key` with the customer and the layout version. `pick` on the table panel → `span: 2 ← template` — from the saved JSON.',
+  'dashboard-missing':
+    '*sections* → `✗ incidents failed — the loader threw "status API: 503"`. *timing* → the `incidents` loader in red, `page data` next to it.',
+
   // layout
   'blocks-repeat':
     '*tree* → section `news`: a grid and three cards with the IDs `news.0.0`, `news.0.1`, `news.0.2`. Click `pick` and point at a card on the page — *node* shows its ID, a suggested selector and props (`size: "md" ← default`).',

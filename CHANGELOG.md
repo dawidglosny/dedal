@@ -5,7 +5,8 @@
 Documentation only, no changes to the API or behavior:
 - README, landing page and *Why Dedal* start from the general idea — structure, data and components kept apart and joined at the last moment — instead of one use case,
 - *Who it is for* defined by a property of the UI (structure changing on a different schedule, by different people, or from a different system than the components), with examples across domains: mobile apps, content sites, dashboards, onboarding, stores, many products on one design system,
-- where Dedal came from moved to the end of *Why Dedal*.
+- where Dedal came from moved to the end of *Why Dedal*,
+- a new docs group, *Another domain: a dashboard* — the same engine on a different contract: widgets per role, a layout saved per customer as JSON, a failing data source; the tutorial notes that its content-site example is just one domain.
 
 ## 0.6.3
 

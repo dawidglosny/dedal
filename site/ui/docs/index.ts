@@ -1,4 +1,5 @@
 import { cacheCases } from './cache.cases'
+import { dashboardCases } from './dashboard.cases'
 import { dataCases } from './data.cases'
 import { devtoolsCases } from './devtools.cases'
 import { errorCases } from './errors.cases'
@@ -43,6 +44,14 @@ export const groups: DocGroup[] = [
     intro: intros.production,
     file: 'production.cases.ts',
     cases: productionCases,
+  },
+  {
+    slug: 'dashboard',
+    title: 'Another domain: a dashboard',
+    description: 'The same engine on a different contract: widgets per role, layouts saved per customer, a failing data source.',
+    intro: intros.dashboard,
+    file: 'dashboard.cases.ts',
+    cases: dashboardCases,
   },
   {
     slug: 'layout',

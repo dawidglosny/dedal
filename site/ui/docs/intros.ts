@@ -260,7 +260,7 @@ export default async function Page() {
 
 Each case page shows one thing: a description, the code (the same code that runs), the result and the devtools report — or the exception, when the build fails. The "See it live" box tells you what to open in the devtools panel (the **dedal** button in the bottom right corner). The dot next to a case in the menu: green — works, yellow — warning in devtools, red — error in devtools, purple — build throws an exception.
 
-Reading order: *Why Dedal* if you haven't yet, *Tutorial* (a whole page step by step) and *Going to production*, then *Layout*, *Data* and *Sections* — your everyday tools. *Cache & queries* and *Rendering* — once the page already works. *Errors* and *Devtools* — when something doesn't work.`,
+Reading order: *Why Dedal* if you haven't yet, *Tutorial* (a whole page step by step), *Going to production* and *Another domain: a dashboard*, then *Layout*, *Data* and *Sections* — your everyday tools. *Cache & queries* and *Rendering* — once the page already works. *Errors* and *Devtools* — when something doesn't work.`,
 
   tutorial: `In seven steps you will build the home page of a news site — and then change its layout without touching the code. Each step adds one thing and shows the result live; step 8 is an exercise: the same page with five hidden mistakes to find in the devtools panel.
 
@@ -272,6 +272,8 @@ Reading order: *Why Dedal* if you haven't yet, *Tutorial* (a whole page step by 
 - **6. Variants** — mobile and desktop from one template set, \`patch\` and \`remove\`.
 - **7. When data is missing** — empty sections, failing APIs, too few articles.
 - **8. Debugging** — an exercise with the devtools panel.
+
+The example is a content site because it is easy to picture, but nothing in Dedal is specific to content: the same steps apply to a mobile app screen, a dashboard or an onboarding flow — *Another domain: a dashboard* shows one.
 
 Shared sections, streaming and cache — the things you add before production — are in *Going to production*, after the tutorial. If the idea of server-driven UI is new to you, read *Why Dedal* and *Introduction* first.
 
@@ -311,6 +313,17 @@ Installation: \`npm i github:dawidglosny/dedal#v0.6.3\`. You need TypeScript and
 - **Queries and page cache** — a data source fetched once and shared by loaders and requests; the whole page result cached per key, refreshed in the background.
 
 The details of each are in the groups that follow: *Sections* (loaders, \`optional\`, \`defer\`) and *Cache & queries* (keys, statuses, store, invalidation).`,
+
+  dashboard: `**In short:** the tutorial builds a content page, but nothing in Dedal is about content. This group uses the same engine for an analytics dashboard — a different contract, different components, different data — to show that the idea carries over.
+
+The three parts map one to one:
+- **structure** — which widgets, in what order and how wide. It depends on the role (an admin, support, a viewer) and on the customer, who can arrange their own dashboard and save it,
+- **data** — metrics, time series, tickets, incidents, each from its own source,
+- **components** — a widget library: stat cards, a chart, a table, alerts.
+
+What changes between the domains is only the contract and the registry. Templates, selectors, \`patch\` and \`remove\`, stored layouts with validation and versioned cache keys, the rules for missing data and devtools work the same way.
+
+The same reasoning applies to other screens assembled from a known set of blocks: mobile app screens, onboarding flows, store pages, settings pages.`,
 
   layout: `**In short:** the layout is the skeleton of a section — "a heading, then a grid of six cards, each with a badge" — with no articles in it yet. Write it once, fill it with any data, adjust it per page or device without copying it.
 

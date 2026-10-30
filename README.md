@@ -125,7 +125,7 @@ Requires Node 20.9+. React 18+ only for `dedal/react` (an optional peer dependen
 
 ## Documentation
 
-- **Guide** — **[dawidglosny.github.io/dedal](https://dawidglosny.github.io/dedal/)**: why Dedal, how it works, a tutorial (ending with a template edited without a release), and every feature, warning and error as a live page with its code, result and devtools report.
+- **Guide** — **[dawidglosny.github.io/dedal](https://dawidglosny.github.io/dedal/)**: why Dedal, how it works, a tutorial (ending with a template edited without a release), the same engine in another domain (a dashboard), and every feature, warning and error as a live page with its code, result and devtools report.
 - **API reference** — [docs/API.md](docs/API.md): formats, design rules, every option.
 - **Examples**
   - [`examples/next`](examples/next) — Next.js: one page, two component libraries (Radix Themes and shadcn/ui), cache, streaming, devtools,
