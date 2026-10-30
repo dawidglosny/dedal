@@ -6,7 +6,7 @@ const { node, repeat, section } = ui
 
 // #region bindings
 const bindings = ui.page<Ctx>({
-  sections: [section('news', cards(ui, 'Najnowsze', 3))],
+  sections: [section('news', cards(ui, 'Latest', 3))],
   // data: section key → { selector: items }; items go to the matched nodes in tree order
   data: async () => {
     const list = await articles(3)
@@ -23,7 +23,7 @@ const bindings = ui.page<Ctx>({
 // #region to-props
 // ui/dedal.ts — instance options shared by all pages:
 //   defaults: { card: { size: 'md' }, badge: { variant: 'secondary' } }
-//   toProps: { card: ({ props, data }) => (data ? { ...props, title: data.headline, href: `/artykul/${data.slug}`, … } : props) }
+//   toProps: { card: ({ props, data }) => (data ? { ...props, title: data.headline, href: `/article/${data.slug}`, … } : props) }
 const toPropsPage = ui.page<Ctx>({
   sections: [section('news', node('grid', { props: { columns: 3 }, children: [repeat(node('card'), 3)] }))],
   // data in the shape of the API (Article) — toProps maps it to the contract props (title, href, image…)
@@ -33,7 +33,7 @@ const toPropsPage = ui.page<Ctx>({
 
 // #region null-items
 const nullItems = ui.page<Ctx>({
-  sections: [section('news', cards(ui, 'Najnowsze', 3))],
+  sections: [section('news', cards(ui, 'Latest', 3))],
   data: async () => {
     const [first, , third] = await articles(3)
     // null = no data for this node: with the default onShortage: 'remove' the node disappears
@@ -44,7 +44,7 @@ const nullItems = ui.page<Ctx>({
 
 // #region shortage-remove
 const shortageRemove = ui.page<Ctx>({
-  sections: [section('news', cards(ui, '2 artykuły na 4 miejsca', 4))],
+  sections: [section('news', cards(ui, '2 articles for 4 places', 4))],
   // default onShortage: 'remove' — nodes without data are removed
   data: async () => ({ news: { card: await articles(2) } }),
 })
@@ -52,7 +52,7 @@ const shortageRemove = ui.page<Ctx>({
 
 // #region shortage-keep
 const shortageKeep = ui.page<Ctx>({
-  sections: [section('news', cards(ui, '2 artykuły na 4 miejsca', 4), { policies: { onShortage: 'keep' } })],
+  sections: [section('news', cards(ui, '2 articles for 4 places', 4), { policies: { onShortage: 'keep' } })],
   // onShortage: 'keep' — nodes without data stay (layout props only), e.g. placeholders
   data: async () => ({ news: { card: await articles(2) } }),
 })
@@ -60,7 +60,7 @@ const shortageKeep = ui.page<Ctx>({
 
 // #region surplus
 const surplus = ui.page<Ctx>({
-  sections: [section('news', cards(ui, '6 artykułów na 3 miejsca', 3))],
+  sections: [section('news', cards(ui, '6 articles for 3 places', 3))],
   // default onSurplus: 'ignore' — the surplus is skipped and listed in devtools
   data: async () => ({ news: { card: await articles(6) } }),
 })
@@ -68,7 +68,7 @@ const surplus = ui.page<Ctx>({
 
 // #region binding-no-match
 const bindingNoMatch = ui.page<Ctx>({
-  sections: [section('news', cards(ui, 'Najnowsze', 3))],
+  sections: [section('news', cards(ui, 'Latest', 3))],
   // typo: "crad" — no node matches, the section gets no data and is removed (onEmpty)
   data: async () => ({ news: { crad: await articles(3) } }),
 })
@@ -99,7 +99,7 @@ const dropped = ui.page<Ctx>({
     section(
       'news',
       node('section', {
-        props: { title: 'Najnowsze' },
+        props: { title: 'Latest' },
         children: [
           node('grid', { props: { columns: 2 }, children: [repeat(node('card'), 2)] }),
           node('grid', { alias: 'more', props: { columns: 2 }, children: [repeat(node('card'), 2)] }),
@@ -122,7 +122,7 @@ export const dataCases: DocCase[] = [
     title: 'Bindings',
     level: 'ok',
     description:
-      'Data strony to `{ kluczSection: { selector: items } }`. Każdy wpis to binding: selector wybiera node w section, a kolejne items trafiają do kolejnych trafionych node w kolejności drzewa (sloty przed children).\n\nData nigdy nie przechodzą między section — key section jest jawny. Binding może mieć własne zasady: `{ items, onShortage, onSurplus }`.',
+      'Page data is `{ sectionKey: { selector: items } }`. Each entry is a binding: the selector picks nodes in the section, and consecutive items go to consecutive matched nodes in tree order (slots before children).\n\nData never crosses between sections — the section key is explicit. A binding can have its own rules: `{ items, onShortage, onSurplus }`.',
     run: build(ui, bindings),
   },
   {
@@ -130,7 +130,7 @@ export const dataCases: DocCase[] = [
     title: 'toProps and defaults',
     level: 'ok',
     description:
-      'Data mogą mieć kształt API, a nie propsów komponentu. `toProps` (opcja instancji) mapuje je per component na propsy kontraktu — czysty moduł bez IO, działa na serwerze i na froncie.\n\n`defaults` to domyślne props component — `node()` dokłada je przy tworzeniu bloku. Pierwszeństwo: `defaults` → props z layoutu (blok, patch) → data. `toProps` dostaje props z layoutu i data, a jego wynik to ostateczne props (stąd `...props` w mapowaniu); bez `toProps` data są łączone z props (deep merge). W devtools przy propsie widać źródło: `← default`, `← template`, `← patch …`, `← data`.',
+      'Data can have the shape of the API rather than the component\'s props. `toProps` (an instance option) maps it, per component, to the contract props — a pure module without IO that works on the server and on the frontend.\n\n`defaults` are default component props — `node()` adds them when the block is created. Precedence: `defaults` → props from the layout (block, patch) → data. `toProps` gets the props from the layout and the data, and its result is the final props (hence `...props` in the mapping); without `toProps` data is merged into props (deep merge). In devtools, next to each prop you can see its source: `← default`, `← template`, `← patch …`, `← data`.',
     run: build(ui, toPropsPage),
   },
   {
@@ -138,7 +138,7 @@ export const dataCases: DocCase[] = [
     title: 'null items',
     level: 'warning',
     description:
-      '`null` (albo `undefined`) w liście oznacza „brak data dla tego node” — np. gdy API zwróci dziurę. Taki node podlega `onShortage` jak przy zbyt krótkiej liście.\n\nDevtools: `! card — 3 data items for 3 nodes (1 null)` i `1 node removed — nothing to fill it with`.',
+      '`null` (or `undefined`) in the list means "no data for this node" — e.g. when the API returns a gap. Such a node is subject to `onShortage`, just like with a list that\'s too short.\n\nDevtools: `! card — 3 data items for 3 nodes (1 null)` and `1 node removed — nothing to fill it with`.',
     run: build(ui, nullItems),
   },
   {
@@ -146,7 +146,7 @@ export const dataCases: DocCase[] = [
     title: 'Missing data (remove)',
     level: 'warning',
     description:
-      'Mniej data niż node. Domyślne `onShortage: "remove"` usuwa node bez data — section pokazuje tyle card, ile przyszło.\n\nDevtools: `! card — 2 data items for 4 nodes`, `2 nodes removed — nothing to fill them with (onShortage: \'remove\')`.',
+      'Less data than nodes. The default `onShortage: "remove"` removes nodes without data — the section shows as many cards as there are items.\n\nDevtools: `! card — 2 data items for 4 nodes`, `2 nodes removed — nothing to fill them with (onShortage: \'remove\')`.',
     run: build(ui, shortageRemove),
   },
   {
@@ -154,7 +154,7 @@ export const dataCases: DocCase[] = [
     title: 'Missing data (keep)',
     level: 'warning',
     description:
-      '`onShortage: "keep"` (w `policies` section, instancji albo bindingu) zostawia node bez data — z samymi propsami z layoutu. Przydatne dla stałych miejsc (np. placeholder). `"error"` zamienia brak w wyjątek (zob. *Errors*).\n\nDevtools: `2 nodes left empty (onShortage: \'keep\')`; w *tree* card bez ●.',
+      '`onShortage: "keep"` (in the `policies` of a section, the instance or a binding) keeps nodes without data — with only the props from the layout. Useful for fixed places (e.g. a placeholder). `"error"` turns the shortage into an exception (see *Errors*).\n\nDevtools: `2 nodes left empty (onShortage: \'keep\')`; in *tree*, cards without ●.',
     run: build(ui, shortageKeep),
   },
   {
@@ -162,7 +162,7 @@ export const dataCases: DocCase[] = [
     title: 'Unused data',
     level: 'warning',
     description:
-      'Więcej data niż node — nadmiar jest pomijany (`onSurplus: "ignore"`). Devtools pokazują, które items się nie zmieściły: `3 data items not shown — no node left for them:` i lista z indeksem i skrótem.\n\n`onSurplus: "error"` zamienia nadmiar w wyjątek.',
+      'More data than nodes — the surplus is skipped (`onSurplus: "ignore"`). Devtools show which items didn\'t fit: `3 data items not shown — no node left for them:` followed by a list with the index and a summary.\n\n`onSurplus: "error"` turns the surplus into an exception.',
     run: build(ui, surplus),
   },
   {
@@ -170,7 +170,7 @@ export const dataCases: DocCase[] = [
     title: 'Binding that matches nothing',
     level: 'error',
     description:
-      'Selector bindingu nie trafia w żaden node (literówka, zmieniony blok) — data nie trafiają na stronę. Gdy to jedyny binding, section nie dostaje nic i znika (`onEmpty`).\n\nDevtools: `✗ crad — 3 data items for 0 nodes`, `No node in this section matches “crad” — the data is not shown. Did you mean: card?`; section w *sections* i *tree* jako „removed — no data”, z layoutem sprzed `assign`.',
+      'The binding\'s selector matches no node (a typo, a changed block) — the data never reaches the page. When it\'s the only binding, the section gets nothing and disappears (`onEmpty`).\n\nDevtools: `✗ crad — 3 data items for 0 nodes`, `No node in this section matches “crad” — the data is not shown. Did you mean: card?`; the section appears in *sections* and *tree* as "removed — no data", with the layout from before `assign`.',
     run: build(ui, bindingNoMatch),
   },
   {
@@ -178,7 +178,7 @@ export const dataCases: DocCase[] = [
     title: 'Binding order',
     level: 'error',
     description:
-      'Node zajęty przez wcześniejszy binding jest pomijany przez kolejne. Ogólny `card` wpisany przed szczegółowym `#featured` zabiera wszystkie card — `#featured` nic nie dostaje.\n\nDevtools: `“#featured” matches nodes already filled by “card” — the data is not shown. Move “#featured” before “card” in this section’s data.`',
+      'A node taken by an earlier binding is skipped by the later ones. The general `card` placed before the specific `#featured` takes all the cards — `#featured` gets nothing.\n\nDevtools: `“#featured” matches nodes already filled by “card” — the data is not shown. Move “#featured” before “card” in this section’s data.`',
     run: build(ui, bindingOrder),
   },
   {
@@ -186,7 +186,7 @@ export const dataCases: DocCase[] = [
     title: 'Dropped data',
     level: 'warning',
     description:
-      'Gdy `onShortage: "remove"` usuwa node, znikają też jego potomkowie — razem z data, które dostali. Tu grid `#more` nie dostał data, więc zniknął z dwiema card, choć te miały artykuły.\n\nDevtools: `news.1.0, news.1.1 had data, but their parent news.1 was removed (nothing to fill it with) — the data is not shown.`',
+      'When `onShortage: "remove"` removes a node, its descendants disappear too — along with the data they got. Here the `#more` grid got no data, so it disappeared together with its two cards, even though they had articles.\n\nDevtools: `news.1.0, news.1.1 had data, but their parent news.1 was removed (nothing to fill it with) — the data is not shown.`',
     run: build(ui, dropped),
   },
 ]

@@ -42,7 +42,7 @@ const registry = {
 const html = (element: ReactNode) => renderToStaticMarkup(<>{element}</>)
 
 describe('Render', () => {
-  it('renderuje stronę z resolve(): sekcje po kolei, sloty jako propsy, dzieci jako children', async () => {
+  it('renders a page from resolve(): sections in order, slots as props, child nodes as children', async () => {
     const home = ui.page({
       sections: [
         section('top', node('hero', { slots: { media: node('image') } })),
@@ -62,25 +62,25 @@ describe('Render', () => {
     )
   })
 
-  it('slot-lista trafia do komponentu jako tablica elementów', () => {
+  it('a slot list reaches the component as an array of elements', () => {
     const root = ui.layout(
       node('tabs', { props: { labels: ['X', 'Y'] }, slots: { content: [node('text'), node('text')] } }),
       't'
     )
-    const { tree } = ui.resolveTree(root, { 't:content.0': { children: 'pierwszy' }, 't:content.1': { children: 'drugi' } })
+    const { tree } = ui.resolveTree(root, { 't:content.0': { children: 'first' }, 't:content.1': { children: 'second' } })
 
     expect(html(<Render tree={tree} registry={registry} />)).toBe(
-      '<section><div><b>X</b><p>pierwszy</p></div><div><b>Y</b><p>drugi</p></div></section>'
+      '<section><div><b>X</b><p>first</p></div><div><b>Y</b><p>second</p></div></section>'
     )
   })
 
-  it('prop children z kontraktu zostaje, gdy węzeł nie ma dzieci w layoucie', () => {
-    const { tree } = ui.resolveTree(ui.layout(node('text', { props: { children: 'tekst' } }), 'x'))
+  it('the children prop from the contract stays when the node has no children in the layout', () => {
+    const { tree } = ui.resolveTree(ui.layout(node('text', { props: { children: 'text' } }), 'x'))
 
-    expect(html(<Render tree={tree} registry={registry} />)).toBe('<p>tekst</p>')
+    expect(html(<Render tree={tree} registry={registry} />)).toBe('<p>text</p>')
   })
 
-  it('nieznany komponent: domyślnie nic, z fallbackiem — fallback', () => {
+  it('unknown component: nothing by default, the fallback when given', () => {
     const tree = { key: 'x', component: 'video' } as never
     const partial: Partial<Registry<Contract>> = { card: registry.card }
 
@@ -96,7 +96,7 @@ describe('Render', () => {
     ).toBe('<i data-missing="video" data-key="x"></i>')
   })
 
-  it('nadaje key z ID węzła', () => {
+  it('sets key from the node ID', () => {
     const { tree } = ui.resolveTree(ui.layout(node('grid', { children: [node('card')] }), 'k'), {
       'k.0': { title: 'A' },
     })
@@ -105,24 +105,24 @@ describe('Render', () => {
   })
 })
 
-describe('Render: sekcje odroczone', () => {
+describe('Render: deferred sections', () => {
   const home = ui.page({
     sections: [
       section('top', node('text', { props: { children: 'top' } })),
       section('forYou', node('card'), {
-        defer: { fallback: node('text', { props: { children: 'ładowanie…' } }) },
-        data: () => ({ card: [{ title: 'Dla Ciebie' }] }),
+        defer: { fallback: node('text', { props: { children: 'loading…' } }) },
+        data: () => ({ card: [{ title: 'For you' }] }),
       }),
     ],
   })
 
-  it('domyślnie renderuje zaślepkę', async () => {
+  it('renders the fallback by default', async () => {
     const resolved = ui.resolve(await home.build())
 
-    expect(html(<Render tree={resolved} registry={registry} />)).toBe('<p>top</p><p>ładowanie…</p>')
+    expect(html(<Render tree={resolved} registry={registry} />)).toBe('<p>top</p><p>loading…</p>')
   })
 
-  it('deferred dostaje klucz sekcji i zaślepkę (np. do <Suspense>)', async () => {
+  it('deferred receives the section key and the fallback (e.g. for <Suspense>)', async () => {
     const resolved = ui.resolve(await home.build())
     const section = ui.resolve(await home.section('forYou'))
 
@@ -139,12 +139,12 @@ describe('Render: sekcje odroczone', () => {
       />
     )
 
-    expect(rendered).toBe('<p>top</p><div data-section="forYou"><p>ładowanie…</p><a>Dla Ciebie</a></div>')
+    expect(rendered).toBe('<p>top</p><div data-section="forYou"><p>loading…</p><a>For you</a></div>')
   })
 })
 
 describe('Render debug', () => {
-  it('owija każdy węzeł (także w slotach) w znacznik z kluczem', () => {
+  it('wraps every node (slots included) in a marker element with its key', () => {
     const { tree } = ui.resolveTree(ui.layout(node('hero', { props: { title: 'H' }, slots: { media: node('image') } }), 'h'))
 
     expect(html(<Render tree={tree} registry={registry} debug />)).toBe(
@@ -154,7 +154,7 @@ describe('Render debug', () => {
     )
   })
 
-  it('bez debug DOM bez zmian', () => {
+  it('without debug the DOM is unchanged', () => {
     const { tree } = ui.resolveTree(ui.layout(node('image'), 'i'))
 
     expect(html(<Render tree={tree} registry={registry} />)).toBe('<figure></figure>')
@@ -162,7 +162,7 @@ describe('Render debug', () => {
 })
 
 describe('DevtoolsData', () => {
-  it('osadza payload jako JSON, którego dane nie zamkną skryptu', () => {
+  it('embeds the payload as JSON whose data cannot close the script', () => {
     const payload = { evil: '</script><script>alert(1)</script>', comment: '<!--' }
     const markup = html(<DevtoolsData payload={payload} />)
 
@@ -174,8 +174,8 @@ describe('DevtoolsData', () => {
   })
 })
 
-describe('typy Registry', () => {
-  it('wymaga wszystkich komponentów i sprawdza propsy', () => {
+describe('Registry types', () => {
+  it('requires all components and checks props', () => {
     // @ts-expect-error — no "text" component
     const missing: Registry<Contract> = { ...registry, text: undefined }
     // @ts-expect-error — the component requires a prop outside the contract

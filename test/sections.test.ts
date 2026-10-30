@@ -15,7 +15,7 @@ const setup = () => {
   const api = {
     menu: vi.fn(async (service: string) => ({ items: [{ label: `${service} 1` }, { label: `${service} 2` }] })),
     articles: vi.fn(async () => [{ title: 'a' }, { title: 'b' }]),
-    forUser: vi.fn(async (userId: string) => [{ title: `dla ${userId}` }]),
+    forUser: vi.fn(async (userId: string) => [{ title: `for ${userId}` }]),
   }
 
   const menuQuery = ui.query({
@@ -29,7 +29,7 @@ const setup = () => {
   const main = section('main', node('container', { children: [repeat(node('card'), 2)] }))
   const forYou = section('forYou', node('container', { children: [node('card')] }), {
     defer: { fallback: node('skeleton') },
-    data: async (ctx: Ctx) => ({ card: await api.forUser(ctx.userId ?? 'anonim') }),
+    data: async (ctx: Ctx) => ({ card: await api.forUser(ctx.userId ?? 'anonymous') }),
   })
 
   return { ui, node, repeat, section, api, menuQuery, header, main, forYou }
@@ -38,7 +38,7 @@ const setup = () => {
 const titles = (data: Record<string, unknown>) => Object.values(data).map(value => (value as { title?: string; label?: string }).title ?? (value as { label?: string }).label)
 
 describe('ui.query', () => {
-  it('cache’uje wynik według klucza z parametrów', async () => {
+  it('caches the result by a key built from params', async () => {
     const { menuQuery, api } = setup()
 
     await menuQuery({ service: 'sport' })
@@ -48,7 +48,7 @@ describe('ui.query', () => {
     expect(api.menu).toHaveBeenCalledTimes(2)
   })
 
-  it('zapytanie bez parametrów można wywołać bez argumentu', async () => {
+  it('a query without params can be called without an argument', async () => {
     const { ui } = setup()
     const fn = vi.fn(async () => ['x'])
     const config = ui.query({ key: () => ['config'], fn })
@@ -58,7 +58,7 @@ describe('ui.query', () => {
     expect(fn).toHaveBeenCalledTimes(1)
   })
 
-  it('wynik jest zamrożoną kopią — także przy pierwszym pobraniu', async () => {
+  it('the result is a frozen copy — also on the first fetch', async () => {
     const { ui } = setup()
     const source = { items: [3, 1, 2] }
     const numbers = ui.query({ key: () => ['numbers'], fn: async () => source })
@@ -69,19 +69,19 @@ describe('ui.query', () => {
     expect(Object.isFrozen(source)).toBe(false)
   })
 
-  it('strona i zapytanie o tym samym kluczu to różne wpisy', async () => {
+  it('a page and a query with the same key are separate entries', async () => {
     const { ui, node, section } = setup()
-    const pageLoad = vi.fn(async () => ({ a: { card: [{ title: 'strona' }] } }))
-    const menu = ui.query({ key: () => ['same'], fn: async () => 'zapytanie' })
+    const pageLoad = vi.fn(async () => ({ a: { card: [{ title: 'page' }] } }))
+    const menu = ui.query({ key: () => ['same'], fn: async () => 'query' })
     const home = ui.page({ sections: [section('a', node('card'))], data: pageLoad, cache: { key: () => ['same'] } })
 
     await home.build()
-    expect(await menu()).toBe('zapytanie')
-    expect(titles((await home.build()).data)).toEqual(['strona'])
+    expect(await menu()).toBe('query')
+    expect(titles((await home.build()).data)).toEqual(['page'])
     expect(pageLoad).toHaveBeenCalledTimes(1)
   })
 
-  it('ui.invalidate działa na zapytania i strony', async () => {
+  it('ui.invalidate works on queries and pages', async () => {
     const { ui, menuQuery, api } = setup()
 
     await menuQuery({ service: 'sport' })
@@ -92,8 +92,8 @@ describe('ui.query', () => {
   })
 })
 
-describe('loadery sekcji', () => {
-  it('wspólna sekcja przynosi dane sama, równolegle z data strony', async () => {
+describe('section loaders', () => {
+  it('a shared section fetches its own data, in parallel with the page data', async () => {
     const { ui, header, main, api } = setup()
     const home = ui.page<Ctx>({ sections: [header, main], data: async () => ({ main: { card: await api.articles() } }) })
 
@@ -103,7 +103,7 @@ describe('loadery sekcji', () => {
     expect(result.report.unknownData).toEqual([])
   })
 
-  it('zapytanie w loaderze sekcji dzieli dane między stronami', async () => {
+  it('a query in a section loader shares data across pages', async () => {
     const { ui, header, main, api } = setup()
     const home = ui.page<Ctx>({ sections: [header, main] })
     const article = ui.page<Ctx>({ sections: [header, main] })
@@ -114,7 +114,7 @@ describe('loadery sekcji', () => {
     expect(api.menu).toHaveBeenCalledTimes(1)
   })
 
-  it('loader nie jest wywoływany dla sekcji nieobecnej w wariancie ani usuniętej przez remove', async () => {
+  it('the loader is not called for a section absent from the variant or removed by remove', async () => {
     const { ui, node, section, main } = setup()
     const desktopOnly = vi.fn(async () => ({ card: [{ title: 'x' }] }))
     const removed = vi.fn(async () => ({ card: [{ title: 'y' }] }))
@@ -133,21 +133,21 @@ describe('loadery sekcji', () => {
     expect(result.report.removedSections).toEqual(['gone'])
   })
 
-  it('dane sekcji z własnym loaderem zwrócone przez data strony = błąd', async () => {
+  it('data for a section with its own loader returned by the page data = error', async () => {
     const { ui, header } = setup()
     const home = ui.page<Ctx>({ sections: [header], data: () => ({ header: { menu: [] } }) })
 
     await expect(home.build({ service: 's' })).rejects.toThrow('page data returned data for section "header"')
   })
 
-  it('błąd loadera sekcji przerywa build z kluczem sekcji', async () => {
+  it('a section loader error aborts build with the section key', async () => {
     const { ui, node, section } = setup()
     const home = ui.page({ sections: [section('ads', node('card'), { data: () => Promise.reject(new Error('timeout')) })] })
 
     await expect(home.build()).rejects.toThrow('section "ads": loader threw: timeout')
   })
 
-  it('optional: błąd usuwa sekcję i trafia do report.failedSections', async () => {
+  it('optional: an error removes the section and is listed in report.failedSections', async () => {
     const { ui, node, section, main } = setup()
     const onSectionError = vi.fn()
     const home = ui.page<Ctx>({
@@ -162,7 +162,7 @@ describe('loadery sekcji', () => {
     expect(onSectionError).toHaveBeenCalledWith(expect.any(Error), { section: 'ads' })
   })
 
-  it('etapy osobno: nieudana opcjonalna sekcja to null w PageData (przechodzi przez JSON)', async () => {
+  it('separate stages: a failed optional section is null in PageData (survives JSON)', async () => {
     const { ui, node, section, main } = setup()
     const home = ui.page<Ctx>({
       sections: [main, section('ads', node('card'), { optional: true, data: () => Promise.reject(new Error('x')) })],
@@ -177,8 +177,8 @@ describe('loadery sekcji', () => {
   })
 })
 
-describe('sekcje odroczone', () => {
-  it('build: zaślepka z deferred, loader sekcji nie jest wywoływany', async () => {
+describe('deferred sections', () => {
+  it('build: fallback from deferred, the section loader is not called', async () => {
     const { ui, main, forYou, api } = setup()
     const home = ui.page<Ctx>({ sections: [main, forYou] })
 
@@ -189,7 +189,7 @@ describe('sekcje odroczone', () => {
     expect(api.forUser).not.toHaveBeenCalled()
   })
 
-  it('page.section buduje samą sekcję z jej loaderem, bez data strony', async () => {
+  it('page.section builds just the section with its loader, without the page data', async () => {
     const { ui, main, forYou } = setup()
     const pageLoad = vi.fn(async () => ({ main: { card: [{ title: 'a' }] } }))
     const home = ui.page<Ctx>({ sections: [main, forYou], data: pageLoad })
@@ -198,11 +198,11 @@ describe('sekcje odroczone', () => {
 
     expect(result.sections.map(({ key }) => key)).toEqual(['forYou'])
     expect(result.sections[0].deferred).toBeUndefined()
-    expect(titles(result.data)).toEqual(['dla u1'])
+    expect(titles(result.data)).toEqual(['for u1'])
     expect(pageLoad).not.toHaveBeenCalled()
   })
 
-  it('cache strony nie zależy od użytkownika — część spersonalizowana jest poza wpisem', async () => {
+  it('the page cache does not depend on the user — the personalized part is outside the entry', async () => {
     const { ui, main, forYou, api } = setup()
     const home = ui.page<Ctx>({ sections: [main, forYou], cache: { key: ctx => ['home', ctx.service] } })
 
@@ -210,24 +210,24 @@ describe('sekcje odroczone', () => {
     const second = await home.build({ service: 's', userId: 'u2' })
 
     expect(second).toBe(first)
-    expect(titles((await home.section('forYou', { service: 's', userId: 'u2' })).data)).toEqual(['dla u2'])
+    expect(titles((await home.section('forYou', { service: 's', userId: 'u2' })).data)).toEqual(['for u2'])
     expect(api.forUser).toHaveBeenCalledTimes(1)
   })
 
-  it('dane sekcji odroczonej z data strony = błąd', async () => {
+  it('deferred section data from the page data = error', async () => {
     const { ui, forYou } = setup()
     const home = ui.page<Ctx>({ sections: [forYou], data: () => ({ forYou: { card: [] } }) })
 
     await expect(home.build({ service: 's' })).rejects.toThrow('deferred section loads its own data')
   })
 
-  it('page.section dla nieznanej sekcji rzuca', async () => {
+  it('page.section throws for an unknown section', async () => {
     const { ui, main } = setup()
 
     await expect(ui.page<Ctx>({ sections: [main] }).section('nope', { service: 's' })).rejects.toThrow('no section "nope"')
   })
 
-  it('resolve przenosi deferred', async () => {
+  it('resolve carries deferred over', async () => {
     const { ui, main, forYou } = setup()
     const resolved = ui.resolve(await ui.page<Ctx>({ sections: [main, forYou] }).build({ service: 's' }))
 
@@ -248,7 +248,7 @@ describe('onEmpty', () => {
   const build = (options: Parameters<typeof section>[2], data: Record<string, unknown>) =>
     ui.page({ sections: [section('news', listBlock, options), section('ads', node('banner'))], data: () => ({ news: data }) as never }).build()
 
-  it('domyślnie usuwa sekcję, która oczekiwała danych i ich nie dostała', async () => {
+  it('by default removes a section that expected data and got none', async () => {
     const result = await build({}, { item: [] })
 
     expect(result.sections.map(({ key }) => key)).toEqual(['ads'])
@@ -256,14 +256,14 @@ describe('onEmpty', () => {
     expect(result.report.emptySections).toEqual(['news'])
   })
 
-  it('sekcje statyczne (bez danych) nie podlegają', async () => {
+  it('static sections (without data) are not affected', async () => {
     const result = await build({}, { item: [{ title: 'a' }] })
 
     expect(result.sections.map(({ key }) => key)).toEqual(['news', 'ads'])
     expect(result.report.emptySections).toEqual([])
   })
 
-  it("'keep' zostawia pustą sekcję, ale raportuje ją jako pustą", async () => {
+  it("'keep' keeps the empty section but reports it as empty", async () => {
     const result = await build({ onEmpty: 'keep' }, { item: [] })
 
     expect(result.sections.map(({ key }) => key)).toEqual(['news', 'ads'])
@@ -271,26 +271,26 @@ describe('onEmpty', () => {
     expect(result.report.removedSections).toEqual([])
   })
 
-  it("'error' rzuca z kluczem sekcji", async () => {
+  it("'error' throws with the section key", async () => {
     await expect(build({ onEmpty: 'error' }, { item: [] })).rejects.toThrow('section "news": no node got data')
   })
 
-  it('blok zastępuje pustą sekcję (stan pusty)', async () => {
-    const result = await build({ onEmpty: node('empty-state', { props: { text: 'Brak wyników' } }) }, { item: [] })
+  it('a block replaces the empty section (empty state)', async () => {
+    const result = await build({ onEmpty: node('empty-state', { props: { text: 'No results' } }) }, { item: [] })
 
-    expect(result.sections[0]).toEqual({ key: 'news', layout: { id: 'news', component: 'empty-state', props: { text: 'Brak wyników' } } })
+    expect(result.sections[0]).toEqual({ key: 'news', layout: { id: 'news', component: 'empty-state', props: { text: 'No results' } } })
     expect(result.report.emptySections).toEqual(['news'])
   })
 
-  it('required: sekcja jest pusta, gdy dane dostał tylko węzeł spoza required', async () => {
-    const withTitle = { list: [{ title: 'Nagłówek' }], item: [] }
+  it('required: the section is empty when only a node outside required got data', async () => {
+    const withTitle = { list: [{ title: 'Heading' }], item: [] }
 
     expect((await build({}, withTitle)).sections.map(({ key }) => key)).toEqual(['news', 'ads'])
     expect((await build({ required: 'item' }, withTitle)).sections.map(({ key }) => key)).toEqual(['ads'])
-    expect(titles((await build({ required: 'item' }, { ...withTitle, item: [{ title: 'x' }] })).data)).toContain('Nagłówek')
+    expect(titles((await build({ required: 'item' }, { ...withTitle, item: [{ title: 'x' }] })).data)).toContain('Heading')
   })
 
-  it('loader sekcji zwracający puste listy też usuwa sekcję', async () => {
+  it('a section loader returning empty lists also removes the section', async () => {
     const result = await ui.page({ sections: [section('news', listBlock, { data: async () => ({ item: [] }) })] }).build()
 
     expect(result.sections).toEqual([])

@@ -42,11 +42,11 @@ const aboutBlock = node('container', {
 
 // --- page: one definition for desktop and mobile
 const loader = vi.fn(async (ctx: Ctx) => {
-  const articles = Array.from({ length: ctx.device === 'desktop' ? 12 : 4 }, (_, i) => ({ title: `Artykuł ${i}` }))
+  const articles = Array.from({ length: ctx.device === 'desktop' ? 12 : 4 }, (_, i) => ({ title: `Article ${i}` }))
 
   return {
-    breadcrumbs: { breadcrumbs: [{ items: ['Sklep', 'Kategoria'] }] },
-    pageHeader: { 'page-title': [{ title: 'Kategoria' }] },
+    breadcrumbs: { breadcrumbs: [{ items: ['Shop', 'Category'] }] },
+    pageHeader: { 'page-title': [{ title: 'Category' }] },
     mainContent: { card: articles },
     pagination: { pagination: [{ page: ctx.page }] },
   }
@@ -79,8 +79,8 @@ const sectionOf = (result: { sections: { key: string; layout: LayoutNode<Contrac
 
 const cards = (root: LayoutNode<Contract>) => ui.select(root, 'card')
 
-describe('page: strona kategorii', () => {
-  it('desktop: sekcje w kolejności, ID z prefiksem sekcji, patche i dane', async () => {
+describe('page: category page', () => {
+  it('desktop: sections in order, IDs prefixed with the section, patches and data', async () => {
     const result = await categoryPage.build({ device: 'desktop', page: 1 })
 
     expect(result.dedal).toBe(WIRE_VERSION)
@@ -97,8 +97,8 @@ describe('page: strona kategorii', () => {
     expect(cards(main).map(card => card.id)).toEqual(Array.from({ length: 9 }, (_, i) => `mainContent.0.${i}`))
     expect(cards(main).every(card => card.props.preload === true && card.props.loading === 'eager')).toBe(true)
 
-    expect(result.data['mainContent.0.0']).toEqual({ title: 'Artykuł 0' })
-    expect(result.data['pageHeader.0']).toEqual({ title: 'Kategoria' })
+    expect(result.data['mainContent.0.0']).toEqual({ title: 'Article 0' })
+    expect(result.data['pageHeader.0']).toEqual({ title: 'Category' })
     expect(result.data['pagination.0']).toEqual({ page: 1 })
     expect(result.report.sections.mainContent.bindings[0]).toMatchObject({ matched: 9, assigned: 9, unused: 3 })
 
@@ -107,7 +107,7 @@ describe('page: strona kategorii', () => {
     expect(sectionOf(result, 'about').props).toEqual({ tone: null })
   })
 
-  it('mobile: remove działa przed patch, nadmiarowe dane trafiają do raportu', async () => {
+  it('mobile: remove runs before patch, surplus data goes to the report', async () => {
     const result = await categoryPage.build({ device: 'mobile', page: 2 })
     const main = sectionOf(result, 'mainContent')
 
@@ -120,22 +120,22 @@ describe('page: strona kategorii', () => {
     expect(result.report.sections.mainContent.bindings[0]).toMatchObject({ matched: 3, assigned: 3, unused: 1 })
   })
 
-  it('sekcje bez danych zostają bez zmian i bez raportu', async () => {
+  it('sections without data stay unchanged and unreported', async () => {
     const result = await categoryPage.build({ device: 'desktop', page: 1 })
 
     expect(sectionOf(result, 'promo').children![0].component).toBe('banner')
     expect(result.report.sections.promo).toBeUndefined()
   })
 
-  it('wynik jest czystym JSON-em', async () => {
+  it('the result is plain JSON', async () => {
     const result = await categoryPage.build({ device: 'mobile', page: 1 })
 
     expect(JSON.parse(JSON.stringify(result))).toEqual(result)
   })
 })
 
-describe('page: etapy osobno', () => {
-  it('layout() nie wywołuje loadera i daje ten sam layout co build() bez danych', () => {
+describe('page: separate stages', () => {
+  it('layout() does not call the loader and gives the same layout as build() without data', () => {
     loader.mockClear()
     const { sections } = categoryPage.layout({ device: 'desktop', page: 1 })
 
@@ -144,7 +144,7 @@ describe('page: etapy osobno', () => {
     expect(cards(sections.find(s => s.key === 'mainContent')!.layout)).toHaveLength(9)
   })
 
-  it('layout → load → assign daje to samo co build()', async () => {
+  it('layout → load → assign gives the same as build()', async () => {
     const ctx: Ctx = { device: 'mobile', page: 3 }
     const { sections } = categoryPage.layout(ctx)
     const staged = categoryPage.assign(sections, await categoryPage.load(ctx), ctx)
@@ -152,7 +152,7 @@ describe('page: etapy osobno', () => {
     expect(staged).toEqual(await categoryPage.build(ctx))
   })
 
-  it('layout przechodzi przez JSON (np. cache albo sieć) bez wpływu na wynik', async () => {
+  it('passing the layout through JSON (e.g. cache or network) does not affect the result', async () => {
     const ctx: Ctx = { device: 'desktop', page: 1 }
     const cached = JSON.parse(JSON.stringify(categoryPage.layout(ctx).sections))
 
@@ -160,8 +160,8 @@ describe('page: etapy osobno', () => {
   })
 })
 
-describe('page: zasady i błędy', () => {
-  it('zasady sekcji nadpisują zasady instancji', async () => {
+describe('page: policies and errors', () => {
+  it('section policies override instance policies', async () => {
     const keeping = createDedal<Contract>({ assign: { onShortage: 'keep' } })
     const block = keeping.node('grid', { children: [keeping.repeat(keeping.node('card'), 3)] })
     const home = keeping.page({
@@ -175,7 +175,7 @@ describe('page: zasady i błędy', () => {
     expect(cards(sectionOf(result, 'pruned'))).toHaveLength(1)
   })
 
-  it('raportuje dane bez sekcji i usunięte sekcje', async () => {
+  it('reports data without a section and removed sections', async () => {
     const home = ui.page({
       sections: [section('a', node('card')), section('b', node('card'), { remove: 'card' })],
       data: () => ({ a: { card: [] }, ghost: { card: ['x'] } }),
@@ -188,7 +188,7 @@ describe('page: zasady i błędy', () => {
     expect(result.report.removedSections).toEqual(['b', 'a'])
   })
 
-  it('błąd assign zawiera klucz sekcji', async () => {
+  it('an assign error includes the section key', async () => {
     const home = ui.page({
       sections: [section('news', node('grid', { children: [node('card')] }), { policies: { onShortage: 'error' } })],
       data: () => ({ news: { card: [] } }),
@@ -197,13 +197,13 @@ describe('page: zasady i błędy', () => {
     await expect(home.build()).rejects.toThrow('section "news": assign:')
   })
 
-  it('odrzuca zduplikowane klucze sekcji', () => {
+  it('rejects duplicate section keys', () => {
     const home = ui.page({ sections: [section('a', node('card')), section('a', node('card'))] })
 
     expect(() => home.layout()).toThrow('duplicate section key "a"')
   })
 
-  it('build() wywołuje sections(ctx) raz', async () => {
+  it('build() calls sections(ctx) once', async () => {
     const sections = vi.fn(() => [section('a', node('card', { props: { size: 'small' } }))])
     const home = ui.page({ sections, data: () => ({ a: { card: [{}] } }) })
 
@@ -212,7 +212,7 @@ describe('page: zasady i błędy', () => {
     expect(sections).toHaveBeenCalledTimes(1)
   })
 
-  it('strona bez loadera', async () => {
+  it('a page without a loader', async () => {
     const result = await ui.page({ sections: [section('a', node('card'))] }).build()
 
     expect(result.data).toEqual({})

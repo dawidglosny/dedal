@@ -1,8 +1,8 @@
 {
   "name": "dedal",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "private": true,
-  "description": "Dedal — silnik server-driven UI niezależny od frameworka i biblioteki komponentów",
+  "description": "Dedal — a server-driven UI engine independent of framework and component library",
   "type": "module",
   "sideEffects": false,
   "exports": {

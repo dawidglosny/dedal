@@ -29,7 +29,7 @@ const home = ui.page<Ctx>({
       { patch: { 'grid > card:nth-child(2)': { size: 'lg' } } }
     ),
     section('tabs', node('tabs', { slots: { content: [node('text'), node('text')] } }), {
-      data: async () => ({ text: [{ value: 'a' }, 'nie-obiekt'] }),
+      data: async () => ({ text: [{ value: 'a' }, 'not-an-object'] }),
     }),
     section('forYou', node('card'), { defer: { fallback: node('skeleton') } }),
   ],
@@ -45,7 +45,7 @@ const build = async (trace = true) => {
 }
 
 describe('inspect', () => {
-  it('indeksuje wszystkie węzły ze strukturą', async () => {
+  it('indexes all nodes with their structure', async () => {
     const { payload } = await build()
     const featured = payload.nodes['news.0']
 
@@ -61,7 +61,7 @@ describe('inspect', () => {
     expect(payload.nodes['tabs:content.1'].path).toEqual([{ slot: 'content', index: 1 }])
   })
 
-  it('propsy z wartością i pochodzeniem', async () => {
+  it('props with value and source', async () => {
     const { payload } = await build()
 
     expect(payload.nodes['news.1'].props).toEqual({
@@ -71,7 +71,7 @@ describe('inspect', () => {
     expect(payload.nodes['news.2'].props.size).toEqual({ value: 'md', source: { from: 'default' } })
   })
 
-  it('bez trace: propsy bez pochodzenia, sekcje bez źródła', async () => {
+  it('without trace: props without source, sections without data source', async () => {
     const { payload } = await build(false)
 
     expect(payload.nodes['news.1'].props.size).toEqual({ value: 'lg' })
@@ -79,14 +79,14 @@ describe('inspect', () => {
     expect(payload.page).not.toHaveProperty('cacheKey')
   })
 
-  it('dane węzła z selektorem, który je przypisał', async () => {
+  it('node data with the selector that assigned it', async () => {
     const { payload } = await build()
 
     expect(payload.nodes['news.0'].data).toEqual({ value: { title: 'F' }, selector: '#featured' })
     expect(payload.nodes['news.1'].data).toEqual({ value: { title: 'A' }, selector: 'grid > card' })
   })
 
-  it('sekcje: źródło danych, odroczone, raport przypisań', async () => {
+  it('sections: data source, deferred, assignment report', async () => {
     const { payload } = await build()
 
     expect(payload.sections.map(({ key, source, deferred }) => [key, source, deferred])).toEqual([
@@ -97,14 +97,14 @@ describe('inspect', () => {
     expect(payload.sections[0].report?.bindings.map(({ selector }) => selector)).toEqual(['#featured', 'grid > card'])
   })
 
-  it('problemy przy węźle i na poziomie strony', async () => {
+  it('issues on the node and at page level', async () => {
     const { payload } = await build()
 
     expect(payload.nodes['tabs:content.1'].issues).toEqual([expect.stringContaining('is not an object')])
     expect(payload.page.unknownData).toEqual(['ghost'])
   })
 
-  it('sugerowany selektor trafia dokładnie w swój węzeł — dla każdego węzła', async () => {
+  it('the suggested selector matches exactly its node — for every node', async () => {
     const { result, payload } = await build()
 
     for (const inspected of Object.values(payload.nodes)) {
@@ -116,7 +116,7 @@ describe('inspect', () => {
     }
   })
 
-  it('sugeruje najkrótszy selektor', async () => {
+  it('suggests the shortest selector', async () => {
     const { payload } = await build()
 
     expect(payload.nodes['news.0'].selector).toBe('#featured')
@@ -125,7 +125,7 @@ describe('inspect', () => {
     expect(payload.nodes['news.0:media'].selector).toBe('#featured > image:slot(media)')
   })
 
-  it('pomija propsy undefined (np. z toProps)', () => {
+  it('skips undefined props (e.g. from toProps)', () => {
     const withUndefined = createDedal<Contract>({ toProps: { card: ({ props }) => ({ ...props, title: undefined }) } })
     const root = withUndefined.layout(withUndefined.node('card'), 'c')
     const result = { dedal: 1 as const, sections: [{ key: 'c', layout: root }], data: {}, report: { sections: {}, unknownData: [], removedSections: [], failedSections: [], emptySections: [] } }
@@ -135,7 +135,7 @@ describe('inspect', () => {
     expect(JSON.parse(JSON.stringify(payload))).toEqual(payload)
   })
 
-  it('payload przechodzi przez JSON bez zmian', async () => {
+  it('the payload round-trips through JSON unchanged', async () => {
     const { payload } = await build()
 
     expect(JSON.parse(JSON.stringify(payload))).toEqual(payload)
@@ -143,7 +143,7 @@ describe('inspect', () => {
 })
 
 describe('selectNodes', () => {
-  it('daje te same węzły co select() z rdzenia', async () => {
+  it('returns the same nodes as select() from the core', async () => {
     const { result, payload } = await build()
     const root = result.sections[0].layout
 
@@ -154,7 +154,7 @@ describe('selectNodes', () => {
     }
   })
 
-  it('obejmuje wszystkie sekcje i rzuca SyntaxError dla złej składni', async () => {
+  it('covers all sections and throws SyntaxError for invalid syntax', async () => {
     const { payload } = await build()
 
     expect(selectNodes(payload, 'text')).toEqual(['tabs:content.0', 'tabs:content.1'])
@@ -163,7 +163,7 @@ describe('selectNodes', () => {
 })
 
 describe('mergePayloads', () => {
-  it('treść sekcji odroczonej zastępuje zaślepkę', async () => {
+  it('deferred section content replaces the fallback', async () => {
     const { payload } = await build()
     const sectionResult = await home.section('forYou', { device: 'desktop' })
     const merged = mergePayloads([payload, inspect(sectionResult, ui.resolve(sectionResult))])
@@ -176,7 +176,7 @@ describe('mergePayloads', () => {
   })
 })
 
-describe('diagnoza danych sekcji', () => {
+describe('section data diagnosis', () => {
   const block = node('grid', {
     children: [
       node('card', { alias: 'featured', slots: { media: node('image') } }),
@@ -191,7 +191,7 @@ describe('diagnoza danych sekcji', () => {
   }
   const sectionOf = async (data: Record<string, unknown>, trace = true) => (await payloadFor(data, trace)).sections.find(({ key }) => key === 's')!
 
-  it('selektor bez trafień: utracone dane i poprawiony selektor, który trafia', async () => {
+  it('a selector with no matches: lost data and a corrected selector that matches', async () => {
     const { diagnosis } = await sectionOf({
       card: [{ title: 'A' }],
       crad: [{ title: 'B' }, { title: 'C' }],
@@ -208,17 +208,17 @@ describe('diagnoza danych sekcji', () => {
     ])
   })
 
-  it('selektor trafia, ale węzły zajęły wcześniejsze bindingi — kolejność', async () => {
+  it('the selector matches, but earlier bindings claimed the nodes — order', async () => {
     const { diagnosis } = await sectionOf({ card: [{ title: 'A' }, { title: 'B' }, { title: 'C' }], '#featured': [{ title: 'X' }] })
 
     expect(diagnosis!.unmatched).toEqual([{ selector: '#featured', lost: 1, reason: 'claimed', suggestions: [], claimedBy: ['card'] }])
   })
 
-  it('pusty binding bez trafień i sekcja bez problemów — bez diagnozy', async () => {
+  it('an empty binding with no matches and a section without problems — no diagnosis', async () => {
     expect((await sectionOf({ card: [{ title: 'A' }, { title: 'B' }, { title: 'C' }], crad: [] })).diagnosis).toBeUndefined()
   })
 
-  it('usunięte węzły z bindingiem i dane odrzucone z usuniętym przodkiem', async () => {
+  it('removed nodes with their binding and data dropped with a removed ancestor', async () => {
     const { diagnosis } = await sectionOf({
       'grid > grid': [null],
       card: [{ title: 'A' }, { title: 'B' }, { title: 'C' }],
@@ -234,7 +234,7 @@ describe('diagnoza danych sekcji', () => {
     ])
   })
 
-  it('sekcja usunięta przez dane (literówka w jedynym selektorze) zostaje w payloadzie z layoutem i diagnozą', async () => {
+  it('a section removed by data (a typo in its only selector) stays in the payload with its layout and diagnosis', async () => {
     const payload = await payloadFor({ crad: [{ title: 'A' }] })
     const removed = payload.sections.find(({ key }) => key === 's')!
 
@@ -245,16 +245,16 @@ describe('diagnoza danych sekcji', () => {
     expect(JSON.parse(JSON.stringify(payload))).toEqual(payload)
   })
 
-  it('bez trace sekcja usunięta przez dane nie trafia do payloadu', async () => {
+  it('without trace a section removed by data is left out of the payload', async () => {
     const payload = await payloadFor({ crad: [{ title: 'A' }] }, false)
 
     expect(payload.sections).toEqual([])
     expect(payload.page.removedSections).toEqual(['s'])
   })
 
-  it('onEmpty z blokiem: diagnoza na layoucie sprzed zastąpienia, węzły bloku zastępczego bez kolizji', async () => {
+  it('onEmpty with a block: diagnosis on the layout before replacement, replacement block nodes without collisions', async () => {
     const page = ui.page({
-      sections: [section('s', block, { onEmpty: node('text', { props: { value: 'Brak' } }) })],
+      sections: [section('s', block, { onEmpty: node('text', { props: { value: 'None' } }) })],
       data: () => ({ s: { crad: [{ title: 'A' }] } }),
     })
     const result = await page.build(undefined, { trace: true })
@@ -398,9 +398,9 @@ describe('searchNodes: data', () => {
       data: () => ({
         news: {
           card: [
-            { title: 'Pierwszy', author: { name: 'Anna Nowak' } },
-            { title: 'Krótki tytuł', tags: ['sport'] },
-            { title: 'Zgubiony artykuł' },
+            { title: 'First', author: { name: 'Anna Nowak' } },
+            { title: 'Short title', tags: ['sport'] },
+            { title: 'Lost article' },
           ],
         },
       }),
@@ -408,12 +408,12 @@ describe('searchNodes: data', () => {
     const result = await page.build(undefined, { trace: true })
     const payload = inspect(result, ui.resolve(result, { trace: true }))
 
-    expect(searchNodes(payload, 'krótki').byData).toEqual([{ id: 'news.1', path: 'title', value: 'Krótki tytuł' }])
+    expect(searchNodes(payload, 'short').byData).toEqual([{ id: 'news.1', path: 'title', value: 'Short title' }])
     expect(searchNodes(payload, 'nowak').byData).toEqual([{ id: 'news.0', path: 'author.name', value: 'Anna Nowak' }])
     expect(searchNodes(payload, 'sport').byData).toEqual([{ id: 'news.1', path: 'tags[0]', value: 'sport' }])
-    expect(searchNodes(payload, 'zgubiony')).toMatchObject({ byData: [], lost: [{ section: 'news', selector: 'card', index: 2 }] })
-    expect(searchSummary(searchNodes(payload, 'zgubiony'), 'zgubiony').text).toContain('Found only in data that is not on the page (1).')
-    expect(searchSummary(searchNodes(payload, 'krótki'), 'krótki').text).toBe('1 node with “krótki” in their data — highlighted on the page')
+    expect(searchNodes(payload, 'lost')).toMatchObject({ byData: [], lost: [{ section: 'news', selector: 'card', index: 2 }] })
+    expect(searchSummary(searchNodes(payload, 'lost'), 'lost').text).toContain('Found only in data that is not on the page (1).')
+    expect(searchSummary(searchNodes(payload, 'short'), 'short').text).toBe('1 node with “short” in their data — highlighted on the page')
     expect(searchNodes(payload, 'k').byData).toEqual([])
   })
 })

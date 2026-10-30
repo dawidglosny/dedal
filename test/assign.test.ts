@@ -30,29 +30,29 @@ const build = () =>
 const ids = (root: { id: string; children?: { id: string }[] } | null) => root?.children?.map(child => child.id)
 
 describe('assign', () => {
-  it('przypisuje dane po kolei, w kolejności drzewa', () => {
+  it('assigns data in order, following tree order', () => {
     const { data } = ui.assign(build(), {
-      'heading': [{ title: 'Najnowsze' }],
+      'heading': [{ title: 'Latest' }],
       card: ['a', 'b', 'c', 'd'],
     })
 
-    expect(data).toEqual({ 'n.0': { title: 'Najnowsze' }, 'n.1': 'a', 'n.2': 'b', 'n.3': 'c', 'n.4': 'd' })
+    expect(data).toEqual({ 'n.0': { title: 'Latest' }, 'n.1': 'a', 'n.2': 'b', 'n.3': 'c', 'n.4': 'd' })
   })
 
-  it('wcześniejszy selektor zajmuje węzły, kolejne je pomijają', () => {
+  it('an earlier selector claims nodes, later ones skip them', () => {
     const { data } = ui.assign(build(), { '#hero': ['hero'], card: ['a', 'b', 'c'] })
 
     expect(data).toEqual({ 'n.1': 'hero', 'n.2': 'a', 'n.3': 'b', 'n.4': 'c' })
   })
 
-  it('węzeł zajęty, ale bez danych nie jest dopełniany przez kolejne selektory', () => {
+  it('a claimed node without data is not filled by later selectors', () => {
     const { data, layout } = ui.assign(build(), { '#hero': [], card: ['a', 'b', 'c', 'd'] })
 
     expect(data).toEqual({ 'n.2': 'a', 'n.3': 'b', 'n.4': 'c' })
     expect(ids(layout)).not.toContain('n.1')
   })
 
-  it('przypisuje dane do zawartości slotów', () => {
+  it('assigns data to slot contents', () => {
     const { data } = ui.assign(build(), {
       'profile': [{ name: 'Jan' }],
       'profile > :slot(cover)': [{ src: 'bg.webp' }],
@@ -61,7 +61,7 @@ describe('assign', () => {
     expect(data).toEqual({ 'n.5.0': { name: 'Jan' }, 'n.5.0:cover': { src: 'bg.webp' } })
   })
 
-  it('wynik jest czystym JSON-em', () => {
+  it('the result is plain JSON', () => {
     const result = ui.assign(build(), { card: [{ title: 'a' }] })
 
     expect(JSON.parse(JSON.stringify(result))).toEqual(result)
@@ -69,14 +69,14 @@ describe('assign', () => {
 })
 
 describe('onShortage', () => {
-  it("domyślnie 'remove': usuwa węzły bez danych", () => {
+  it("'remove' by default: removes nodes without data", () => {
     const { layout, report } = ui.assign(build(), { card: ['a', 'b'] })
 
     expect(ids(layout)).toEqual(['n.0', 'n.1', 'n.2', 'n.5'])
     expect(report.removed).toEqual(['n.3', 'n.4'])
   })
 
-  it("'keep': zostawia węzły bez danych", () => {
+  it("'keep': keeps nodes without data", () => {
     const root = build()
     const { layout, data, report } = ui.assign(root, { card: ['a'] }, { onShortage: 'keep' })
 
@@ -86,20 +86,20 @@ describe('onShortage', () => {
     expect(report.removed).toEqual([])
   })
 
-  it("'error': rzuca błąd z listą wszystkich braków", () => {
+  it("'error': throws an error listing all shortages", () => {
     expect(() => ui.assign(build(), { card: ['a'], 'heading': [] }, { onShortage: 'error' })).toThrow(
       /"card": missing data for 3 node\(s\) \(n\.2, n\.3, n\.4\)[\s\S]*"heading": missing data for 1 node\(s\)/
     )
   })
 
-  it('null i undefined w danych to brak danych dla węzła', () => {
+  it('null and undefined in data mean no data for the node', () => {
     const { layout, data } = ui.assign(build(), { card: ['a', null, undefined, 'd'] })
 
     expect(data).toEqual({ 'n.1': 'a', 'n.4': 'd' })
     expect(ids(layout)).toEqual(['n.0', 'n.1', 'n.4', 'n.5'])
   })
 
-  it('zasada pojedynczego selektora nadpisuje zasadę wywołania', () => {
+  it('a per-selector policy overrides the call policy', () => {
     const { layout } = ui.assign(
       build(),
       { 'heading': { items: [], onShortage: 'keep' }, card: ['a'] },
@@ -109,7 +109,7 @@ describe('onShortage', () => {
     expect(ids(layout)).toEqual(['n.0', 'n.1', 'n.5'])
   })
 
-  it('domyślna zasada instancji, nadpisywalna w wywołaniu', () => {
+  it('instance default policy, overridable per call', () => {
     const keeping = createDedal<TestComponents>({ assign: { onShortage: 'keep' } })
     const root = build()
 
@@ -118,7 +118,7 @@ describe('onShortage', () => {
     expect(keeping.assign(root, { card: [] }, { onShortage: undefined }).layout).toBe(root)
   })
 
-  it('usunięcie przodka odrzuca dane potomków', () => {
+  it('removing an ancestor drops the data of its descendants', () => {
     const { layout, data, report } = ui.assign(build(), {
       'stack': [],
       'profile': [{ name: 'Jan' }],
@@ -129,7 +129,7 @@ describe('onShortage', () => {
     expect(report.dropped).toEqual(['n.5.0'])
   })
 
-  it('usunięcie korzenia daje layout null', () => {
+  it('removing the root yields a null layout', () => {
     const { layout, data } = ui.assign(build(), { 'grid': [], card: ['a'] })
 
     expect(layout).toBeNull()
@@ -138,21 +138,21 @@ describe('onShortage', () => {
 })
 
 describe('onSurplus', () => {
-  it("domyślnie 'ignore': raportuje nadmiarowe dane", () => {
+  it("'ignore' by default: reports surplus data", () => {
     const { report } = ui.assign(build(), { 'heading': ['a', 'b', 'c'] })
 
     expect(report.bindings[0]).toMatchObject({ matched: 1, assigned: 1, unused: 2 })
   })
 
-  it("'error': rzuca błąd", () => {
+  it("'error': throws an error", () => {
     expect(() => ui.assign(build(), { 'heading': ['a', 'b'] }, { onSurplus: 'error' })).toThrow(
       '"heading": 1 data item(s) without a node'
     )
   })
 })
 
-describe('raport i wejście', () => {
-  it('raportuje każdy selektor', () => {
+describe('report and input', () => {
+  it('reports every selector', () => {
     const { report } = ui.assign(build(), { '#hero': ['h'], card: ['a'], '#missing': ['x'] }, {}, { trace: true })
 
     expect(report.bindings).toEqual([
@@ -172,7 +172,7 @@ describe('raport i wejście', () => {
     ])
   })
 
-  it('trace: utracone dane z indeksem i skrótem wartości', () => {
+  it('trace: lost data with index and value preview', () => {
     const long = { title: 'x'.repeat(200) }
     const { report } = ui.assign(build(), { card: ['a', 'b', 'c', 'd', { id: 7 }, long] }, {}, { trace: true })
 
@@ -182,7 +182,7 @@ describe('raport i wejście', () => {
     ])
   })
 
-  it('bez trace raport nie ma listy węzłów ani utraconych danych (JSON bez zmian)', () => {
+  it('without trace the report has no node list or lost data (JSON unchanged)', () => {
     const { report } = ui.assign(build(), { card: ['a', 'b', 'c', 'd', 'e'] })
 
     expect(report.bindings[0]).not.toHaveProperty('nodes')
@@ -191,7 +191,7 @@ describe('raport i wejście', () => {
     expect(report.bindings[0].unused).toBe(1)
   })
 
-  it('nie mutuje layoutu ani danych wejściowych', () => {
+  it('does not mutate the input layout or data', () => {
     const root = build()
     const snapshot = JSON.parse(JSON.stringify(root))
     const items = Object.freeze(['a'])
@@ -201,23 +201,23 @@ describe('raport i wejście', () => {
     expect(root).toEqual(snapshot)
   })
 
-  it('odrzuca dane, które nie są tablicą', () => {
+  it('rejects data that is not an array', () => {
     expect(() => ui.assign(build(), { card: 'a' as never })).toThrow(TypeError)
     expect(() => ui.assign(build(), { card: { items: 'a' } as never })).toThrow(TypeError)
   })
 
-  it('przepuszcza błąd składni selektora', () => {
+  it('propagates a selector syntax error', () => {
     expect(() => ui.assign(build(), { 'card >': [] })).toThrow(SyntaxError)
   })
 })
 
-describe('skrót utraconych danych', () => {
-  it('obiekt: pierwsze 3 proste pola, bez zagnieżdżeń; tablica: liczba elementów', () => {
-    const article = { id: 7, author: { name: 'A' }, headline: 'Tytuł', tags: ['x'], excerpt: 'Lead', url: '/a' }
+describe('lost data preview', () => {
+  it('object: first 3 primitive fields, no nesting; array: item count', () => {
+    const article = { id: 7, author: { name: 'A' }, headline: 'Title', tags: ['x'], excerpt: 'Lead', url: '/a' }
     const { report } = ui.assign(build(), { card: ['a', 'b', 'c', 'd', article, [1, 2, 3]] }, {}, { trace: true })
 
     expect(report.bindings[0].unusedItems).toEqual([
-      { index: 4, preview: '{"id":7,"headline":"Tytuł","excerpt":"Lead"}' },
+      { index: 4, preview: '{"id":7,"headline":"Title","excerpt":"Lead"}' },
       { index: 5, preview: '[3 el.]' },
     ])
   })

@@ -11,7 +11,7 @@ const build = () =>
   )
 
 describe('patch', () => {
-  it('nakłada propsy na pasujące węzły', () => {
+  it('applies props to matching nodes', () => {
     const result = patch(build(), { 'grid > card': { size: 'small' } })
 
     expect(result.children!.slice(1, 4).map(card => card.props)).toEqual([
@@ -22,7 +22,7 @@ describe('patch', () => {
     expect(result.children![4].children![0].props).toMatchObject({ size: 'medium' })
   })
 
-  it('późniejszy wpis wygrywa', () => {
+  it('a later entry wins', () => {
     const result = patch(build(), {
       card: { size: 'small' },
       'card:nth-child(2)': { size: 'large' },
@@ -37,7 +37,7 @@ describe('patch', () => {
     ])
   })
 
-  it('dopasowuje do drzewa wejściowego, nie do wyniku wcześniejszych wpisów', () => {
+  it('matches against the input tree, not the result of earlier entries', () => {
     const result = patch(build(), {
       card: { size: 'small' },
       '[size=small]': { variant: 'overlay' },
@@ -46,7 +46,7 @@ describe('patch', () => {
     expect(result.children![1].props).toMatchObject({ size: 'small', variant: 'vertical' })
   })
 
-  it('łączy propsy głęboko', () => {
+  it('deep-merges props', () => {
     const root = layout(node('stack', { props: { style: { height: 'auto', width: '100%' } } }), 's')
 
     expect(patch(root, { '*': { style: { height: 'max-content' } } }).props).toEqual({
@@ -54,7 +54,7 @@ describe('patch', () => {
     })
   })
 
-  it('nie mutuje wejścia i współdzieli niezmienione poddrzewa', () => {
+  it('does not mutate the input and shares unchanged subtrees', () => {
     const root = build()
     const snapshot = JSON.parse(JSON.stringify(root))
     const result = patch(root, { 'heading': { size: 'large' } })
@@ -65,7 +65,7 @@ describe('patch', () => {
     expect(result.children![4]).toBe(root.children![4])
   })
 
-  it('zwraca to samo drzewo, gdy nic nie pasuje', () => {
+  it('returns the same tree when nothing matches', () => {
     const root = build()
 
     expect(patch(root, { '#missing': { size: 'large' } })).toBe(root)
@@ -73,30 +73,30 @@ describe('patch', () => {
 })
 
 describe('remove', () => {
-  it('usuwa węzły razem z poddrzewem', () => {
+  it('removes nodes together with their subtree', () => {
     const result = remove(build(), 'stack')!
 
     expect(result.children!.map(child => child.id)).toEqual(['s.0', 's.1', 's.2', 's.3'])
   })
 
-  it('przyjmuje listę selektorów i dopasowuje do drzewa wejściowego', () => {
+  it('accepts a selector list and matches against the input tree', () => {
     // after removing s.1, card s.2 doesn't become :nth-child(2) — positions are counted in the input
     const result = remove(build(), ['card:nth-child(2)', 'card:nth-child(3)'])!
 
     expect(result.children!.map(child => child.id)).toEqual(['s.0', 's.3', 's.4'])
   })
 
-  it('pomija children, gdy usunięto wszystkie dzieci', () => {
+  it('omits children when all children were removed', () => {
     const root = layout(node('stack', { children: [node('card')] }), 's')
 
     expect(remove(root, 'card')).toEqual({ id: 's', component: 'stack', props: {} })
   })
 
-  it('zwraca null, gdy usunięto korzeń', () => {
+  it('returns null when the root was removed', () => {
     expect(remove(build(), 'grid')).toBeNull()
   })
 
-  it('nie mutuje wejścia i zwraca to samo drzewo, gdy nic nie pasuje', () => {
+  it('does not mutate the input and returns the same tree when nothing matches', () => {
     const root = build()
     const snapshot = JSON.parse(JSON.stringify(root))
 

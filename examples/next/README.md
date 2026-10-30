@@ -1,68 +1,68 @@
-# Dedal × Next.js — Radix Themes i shadcn/ui
+# Dedal × Next.js — Radix Themes and shadcn/ui
 
-Ta sama strona (kontrakt, template, dane) renderowana dwiema bibliotekami komponentów. Różni się wyłącznie rejestr.
+The same page (contract, template, data) rendered with two component libraries. Only the registry differs.
 
 ```bash
-npm run dedal   # build paczki → npm pack → instalacja z vendor/ (jedna kopia Reacta, jak u konsumenta)
+npm run dedal   # build the package → npm pack → install from vendor/ (a single copy of React, as for a consumer)
 npm run build && npm start
 ```
 
-- `/shadcn` — shadcn/ui (Tailwind v4, komponenty w `components/ui`),
+- `/shadcn` — shadcn/ui (Tailwind v4, components in `components/ui`),
 - `/radix` — Radix Themes (`@radix-ui/themes`),
-- `?device=desktop|mobile` — `ctx.device` (liczba kolumn, wyróżniona karta),
-- `?debug=1` — panel devtools (przycisk „dedal” w prawym dolnym rogu: „pick” element strony, drzewo, sekcje, selektor na żywo) oraz widok z `inspect()` (`dedal/devtools`): sekcje i źródła danych, klucz cache'u, drzewo węzłów z sugerowanymi selektorami, pochodzenie propsów (default / template / patch / dane), przypisania; build z `trace` omija cache,
-- `/api/home?device=mobile` — ta sama strona jako JSON (topologia middleware → front).
-- `/docs` — dokumentacja na przykładach: każda możliwość, ostrzeżenie i błąd jako osobna strona z opisem, kodem, wynikiem i raportem devtools (zob. niżej).
+- `?device=desktop|mobile` — `ctx.device` (number of columns, featured card),
+- `?debug=1` — the devtools panel (the "dedal" button in the bottom-right corner: "pick" a page element, tree, sections, live selector) and a view from `inspect()` (`dedal/devtools`): sections and data sources, cache key, node tree with suggested selectors, prop origin (default / template / patch / data), assignments; a build with `trace` bypasses the cache,
+- `/api/home?device=mobile` — the same page as JSON (middleware → front end topology).
+- `/docs` — documentation by example: every feature, warning and error as a separate page with a description, code, result and devtools report (see below).
 
-## Struktura
+## Structure
 
-| Plik | Rola |
+| File | Role |
 |---|---|
-| `ui/contract.ts` | kontrakt: słownictwo Radix/shadcn, neutralne wartości (`sm \| md \| lg`, `default \| secondary \| outline`) |
-| `ui/to-props.ts` | dane z API → propsy kontraktu (nie wie nic o bibliotekach) |
-| `ui/home.page.ts` | bloki i strona: sloty `media`, `actions`, `badge`, `footer`, dane do slotów selektorami, `cache` |
-| `ui/registries/shadcn.tsx` | kontrakt → komponenty shadcn + klasy Tailwinda |
-| `ui/registries/radix-themes.tsx` | kontrakt → komponenty Radix Themes i ich skale (`size="1".."9"`, `variant="soft"`…) |
-| `ui/docs/*.cases.ts` | przypadki dokumentacji pogrupowane jak w menu (layout, data, sections, cache, rendering, errors, devtools); kod pokazany na stronie to region `// #region <slug>` z tych plików |
-| `ui/docs/doc-view.tsx`, `ui/docs/run.ts` | strona przypadku: build z `trace`, `resolve`, raport devtools albo złapany wyjątek |
-| `ui/page-view.tsx` | wspólny widok: `build` → `resolve` → `<Render registry={...}>` |
-| `components/ui/*` | komponenty shadcn (card, badge, button, tabs, avatar, separator) — kod w projekcie, jak po `shadcn add` |
-| `app/(shadcn)`, `app/(radix)` | osobne root layouty: Tailwind i style Radix Themes się nie mieszają |
+| `ui/contract.ts` | contract: Radix/shadcn vocabulary, neutral values (`sm \| md \| lg`, `default \| secondary \| outline`) |
+| `ui/to-props.ts` | API data → contract props (knows nothing about the libraries) |
+| `ui/home.page.ts` | blocks and page: slots `media`, `actions`, `badge`, `footer`, data into slots via selectors, `cache` |
+| `ui/registries/shadcn.tsx` | contract → shadcn components + Tailwind classes |
+| `ui/registries/radix-themes.tsx` | contract → Radix Themes components and their scales (`size="1".."9"`, `variant="soft"`…) |
+| `ui/docs/*.cases.ts` | documentation cases grouped as in the menu (layout, data, sections, cache, rendering, errors, devtools); the code shown on the page is the `// #region <slug>` region from these files |
+| `ui/docs/doc-view.tsx`, `ui/docs/run.ts` | case page: build with `trace`, `resolve`, devtools report or the caught exception |
+| `ui/page-view.tsx` | shared view: `build` → `resolve` → `<Render registry={...}>` |
+| `components/ui/*` | shadcn components (card, badge, button, tabs, avatar, separator) — code in the project, as after `shadcn add` |
+| `app/(shadcn)`, `app/(radix)` | separate root layouts: Tailwind and Radix Themes styles don't mix |
 
-Komponenty w `components/ui` zostały przepisane ręcznie według źródeł shadcn/ui (styl new-york, Tailwind v4, pakiet `radix-ui`).
-Można je wygenerować oficjalnie: `npx shadcn@latest add card badge button tabs avatar separator`.
+The components in `components/ui` were rewritten by hand from the shadcn/ui sources (new-york style, Tailwind v4, the `radix-ui` package).
+They can be generated officially: `npx shadcn@latest add card badge button tabs avatar separator`.
 
-## Co pokazuje przykład
+## What the example shows
 
-- **Jeden kontrakt, dwie biblioteki** — `satisfies Registry<Contract>` pilnuje, żeby oba rejestry miały wszystkie komponenty i zgodne propsy.
-- **Tłumaczenie wartości w rejestrze** — `badge.variant: 'secondary'` to w shadcn `variant="secondary"`, a w Radix `variant="soft"`; `grid.gap: 'md'` to `gap-6` albo `gap="4"`.
-- **Sloty** — hero (`media`, `actions` jako lista przycisków), karta (`badge`, `footer` z awatarem autora).
-- **Dane do slotów selektorami** — `'card > :slot(badge)': categories`, `'card > :slot(footer)': authors`.
-- **`remove` w sekcji** — „Więcej” usuwa stopki kart (`card > :slot(footer)`), 5 artykułów na 8 miejsc → 3 karty znikają.
-- **Cache** — `ui.page({ ..., cache: { key: ctx => ['home', ctx.device] } })`: strona z pamięci (świeża 5 s), potem odświeżanie w tle (loader ma sztuczne 20 ms jak API).
-- **Zapytanie** — `articlesQuery` (`ui.query`): artykuły cache'owane w instancji, wspólne dla strony i sekcji odroczonej.
-- **Sekcja odroczona** — „Dla Ciebie” (`defer`): strona wychodzi od razu z zaślepką, a sekcja (wolne API, 600 ms) jest dostreamowana przez `<Suspense>` (`ui/page-view.tsx`).
-- **RSC + komponenty klienckie** — renderer działa na serwerze; zakładki (Radix Tabs) są interaktywne na kliencie.
+- **One contract, two libraries** — `satisfies Registry<Contract>` ensures both registries have all components and matching props.
+- **Translating values in the registry** — `badge.variant: 'secondary'` is `variant="secondary"` in shadcn and `variant="soft"` in Radix; `grid.gap: 'md'` is `gap-6` or `gap="4"`.
+- **Slots** — hero (`media`, `actions` as a list of buttons), card (`badge`, `footer` with the author's avatar).
+- **Data into slots via selectors** — `'card > :slot(badge)': categories`, `'card > :slot(footer)': authors`.
+- **`remove` in a section** — "More" removes card footers (`card > :slot(footer)`), 5 articles for 8 places → 3 cards disappear.
+- **Cache** — `ui.page({ ..., cache: { key: ctx => ['home', ctx.device] } })`: the page from memory (fresh for 5 s), then refreshed in the background (the loader has an artificial 20 ms delay like an API).
+- **Query** — `articlesQuery` (`ui.query`): articles cached in the instance, shared by the page and the deferred section.
+- **Deferred section** — "For you" (`defer`): the page goes out immediately with a placeholder, and the section (slow API, 600 ms) is streamed in via `<Suspense>` (`ui/page-view.tsx`).
+- **RSC + client components** — the renderer runs on the server; the tabs (Radix Tabs) are interactive on the client.
 
-## Dokumentacja na przykładach (`/docs`)
+## Documentation by example (`/docs`)
 
-Tutorial krok po kroku, a potem każda możliwość paczki, każde ostrzeżenie i każdy błąd jako osobna strona — pogrupowane w menu po lewej:
+A step-by-step tutorial, then every package feature, every warning and every error as a separate page — grouped in the menu on the left:
 
-| Grupa | Przypadki |
+| Group | Cases |
 |---|---|
-| Tutorial | 12 kroków: strona główna serwisu od contract, przez data, sloty, section wspólne, warianty, patch, braki data, streaming, query i cache, po render i devtools; krok 13 — ćwiczenie z debugowania (5 ukrytych pomyłek, zadania z rozwiązaniami) |
-| Layout | bloki i `repeat`, sloty, aliasy, `patch` i selektory, patch bez trafień, `remove`, usunięcie korzenia section, warianty `ctx` |
-| Data | bindings, `toProps` i `defaults`, items `null`, braki (`onShortage: 'remove'` / `'keep'`), nadmiar, binding bez trafień, kolejność bindingów, dropped |
-| Sections | loader section vs `data` strony, `optional` i `onSectionError`, `onEmpty` (`remove` / `keep` / blok), `required`, `defer` (streaming), `unknownData`, loader bez `return` |
-| Cache & queries | cache strony, key `undefined`, statusy query (`miss` / `hit` / `stale` / `bypass`), `invalidate` |
-| Rendering | brak component w registry, data nie-obiekt, wyjątek w `toProps`, `toProps` zwraca nie-obiekt, data bez node, `onIssue: 'throw'` |
-| Errors (thrown) | każdy wyjątek przerywający build albo `resolve` — z treścią komunikatu |
-| Devtools | panel, timing, build bez `trace` |
+| Tutorial | 12 steps: a site's home page from the contract, through data, slots, shared sections, variants, patch, missing data, streaming, query and cache, to render and devtools; step 13 — a debugging exercise (5 hidden mistakes, tasks with solutions) |
+| Layout | blocks and `repeat`, slots, aliases, `patch` and selectors, patch without matches, `remove`, removing a section root, `ctx` variants |
+| Data | bindings, `toProps` and `defaults`, `null` items, shortages (`onShortage: 'remove'` / `'keep'`), surplus, binding without matches, binding order, dropped |
+| Sections | section loader vs page `data`, `optional` and `onSectionError`, `onEmpty` (`remove` / `keep` / block), `required`, `defer` (streaming), `unknownData`, loader without `return` |
+| Cache & queries | page cache, `undefined` key, query statuses (`miss` / `hit` / `stale` / `bypass`), `invalidate` |
+| Rendering | component missing from the registry, non-object data, exception in `toProps`, `toProps` returns a non-object, data without a node, `onIssue: 'throw'` |
+| Errors (thrown) | every exception that aborts a build or `resolve` — with the message text |
+| Devtools | panel, timing, build without `trace` |
 
-Każda grupa ma stronę wprowadzającą (`/docs/layout`, `/docs/data`…): po co ta część istnieje, jak działa, dlaczego tak zaprojektowana, jak używać i na co uważać — a `/docs` (Introduction) to punkt startu dla kogoś nowego: czym jest server-driven UI i jaki problem rozwiązuje, co robi Dedal, podział ról serwer / front, jak płyną data, przykład od definicji strony po JSON (`PageResult`, `ResolvedPage`) i render, słownik pojęć, typowe zadania (np. dodanie nowego component). Treść: `ui/docs/intros.ts`. Strony czyta się po kolei (link „next” na dole: wprowadzenie grupy, potem jej przypadki).
+Each group has an introduction page (`/docs/layout`, `/docs/data`…): why this part exists, how it works, why it is designed this way, how to use it and what to watch out for — and `/docs` (Introduction) is the starting point for someone new: what server-driven UI is and what problem it solves, what Dedal does, the server / front end split of roles, how data flows, an example from the page definition through JSON (`PageResult`, `ResolvedPage`) to render, a glossary, common tasks (e.g. adding a new component). Content: `ui/docs/intros.ts`. The pages are read in order (the "next" link at the bottom: the group introduction, then its cases).
 
-Strona przypadku: opis (co to jest, kiedy się pojawia, co zrobić), ramka „Zobacz na żywo” — co otworzyć w panelu devtools i czego tam szukać (`ui/docs/live.ts`; przy przypadkach z wyjątkiem — dlaczego panel jest pusty), kod (region z `ui/docs/*.cases.ts` — ten sam, który się wykonuje), wynik (Radix Themes), raport devtools (to samo co „copy report” w panelu) albo złapany wyjątek. Kropka przy przypadku w menu: zielona — działa, żółta — ostrzeżenie w devtools, czerwona — błąd w devtools, fioletowa — build rzuca wyjątek. Panel devtools jest włączony na każdej stronie.
+Case page: a description (what it is, when it appears, what to do), a "See it live" box — what to open in the devtools panel and what to look for there (`ui/docs/live.ts`; for cases with an exception — why the panel is empty), the code (a region from `ui/docs/*.cases.ts` — the same one that runs), the result (Radix Themes), the devtools report (the same as "copy report" in the panel) or the caught exception. The dot next to a case in the menu: green — works, yellow — warning in devtools, red — error in devtools, purple — the build throws an exception. The devtools panel is enabled on every page.
 
-## Znane różnice między bibliotekami
+## Known differences between the libraries
 
-- Radix Themes renderuje fallback awatara (inicjały) dopiero po hydracji — w HTML z serwera `rt-AvatarFallback` jest pusty. shadcn renderuje inicjały już na serwerze.
+- Radix Themes renders the avatar fallback (initials) only after hydration — in the server HTML `rt-AvatarFallback` is empty. shadcn renders the initials already on the server.

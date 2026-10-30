@@ -35,11 +35,11 @@ const block = cards =>
     ],
   })
 
-const article = i => ({ title: `Tytuł ${i}`, url: `/a/${i}`, image: { src: `/img/${i}.jpg`, alt: 'x' }, tags: ['a', 'b'] })
+const article = i => ({ title: `Title ${i}`, url: `/a/${i}`, image: { src: `/img/${i}.jpg`, alt: 'x' }, tags: ['a', 'b'] })
 
 const bindings = cards => ({
   '#hero': [article(0)],
-  heading: [{ title: 'Sekcja' }],
+  heading: [{ title: 'Section' }],
   card: Array.from({ length: cards - 2 }, (_, i) => article(i)), // 2 cards without data → onShortage: 'remove'
 })
 
@@ -77,21 +77,21 @@ for (const [sectionCount, cards] of [
   const result = page.assign(sections, data)
   const iterations = nodes > 3000 ? 100 : 500
 
-  console.log(`\n== ${sectionCount} sekcji × ${cards} kart → ${nodes} węzłów ==`)
+  console.log(`\n== ${sectionCount} sections × ${cards} cards → ${nodes} nodes ==`)
   time('page.layout (layout+remove+patch)', () => page.layout(), iterations)
   time('page.assign', () => page.assign(sections, data), iterations)
   time('resolve', () => ui.resolve(result), iterations)
   time('resolve trace', () => ui.resolve(result, { trace: true }), iterations)
-  await timeAsync('build + resolve (pełny request)', async () => ui.resolve(await page.build()), iterations)
+  await timeAsync('build + resolve (full request)', async () => ui.resolve(await page.build()), iterations)
   row('JSON PageResult', `${(JSON.stringify(result).length / 1024).toFixed(0)} KB`)
 
   const sectionBlock = block(cards)
   const sectionLayout = layout(sectionBlock, 's0')
-  time('  layout() 1 sekcja', () => layout(sectionBlock, 's0'), iterations * 5)
-  time('  remove() 1 sekcja', () => remove(sectionLayout, REMOVE), iterations * 5)
-  time('  patch() 1 sekcja (4 selektory)', () => patch(sectionLayout, PATCH), iterations * 5)
-  time('  assign() 1 sekcja', () => assign(sectionLayout, data.s0), iterations * 5)
-  time('  resolveTree() 1 sekcja', () => resolveTree(sectionLayout, {}), iterations * 5)
+  time('  layout() 1 section', () => layout(sectionBlock, 's0'), iterations * 5)
+  time('  remove() 1 section', () => remove(sectionLayout, REMOVE), iterations * 5)
+  time('  patch() 1 section (4 selectors)', () => patch(sectionLayout, PATCH), iterations * 5)
+  time('  assign() 1 section', () => assign(sectionLayout, data.s0), iterations * 5)
+  time('  resolveTree() 1 section', () => resolveTree(sectionLayout, {}), iterations * 5)
 }
 
 // unique selectors (e.g. composed from data) must not grow the process without bound
@@ -101,4 +101,4 @@ const heapBefore = process.memoryUsage().heapUsed
 for (let i = 0; i < 200_000; i++) select(single, `card[slug=a${i}]`)
 globalThis.gc?.()
 console.log()
-row('200k unikalnych selektorów', `heap +${((process.memoryUsage().heapUsed - heapBefore) / 1024 / 1024).toFixed(1)} MB`)
+row('200k unique selectors', `heap +${((process.memoryUsage().heapUsed - heapBefore) / 1024 / 1024).toFixed(1)} MB`)

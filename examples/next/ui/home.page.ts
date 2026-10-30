@@ -33,10 +33,10 @@ const cardsBlock = ({
   })
 
 const tabsBlock = node('section', {
-  props: { title: 'Na skróty' },
+  props: { title: 'Shortcuts' },
   children: [
     node('tabs', {
-      props: { labels: ['Najnowsze', 'Popularne'] },
+      props: { labels: ['Latest', 'Popular'] },
       slots: { content: [node('list'), node('list')] },
     }),
   ],
@@ -56,7 +56,7 @@ export const home = ui.page<Ctx>({
     section('hero', heroBlock),
     section(
       'latest',
-      cardsBlock({ title: 'Najnowsze', description: 'Karty ze slotami: badge i stopka z autorem', columns: device === 'mobile' ? 1 : 3, cards: 6 }),
+      cardsBlock({ title: 'Latest', description: 'Cards with slots: a badge and an author footer', columns: device === 'mobile' ? 1 : 3, cards: 6 }),
       // featured first card (spanning 2 columns) only where the grid has more than 1 column
       device === 'desktop' ? { patch: { 'grid > card:first-child': { size: 'lg' } } } : {}
     ),
@@ -64,9 +64,9 @@ export const home = ui.page<Ctx>({
     // streamed through <Suspense>, outside the page cache (the place for personalized data)
     section(
       'forYou',
-      cardsBlock({ title: 'Dla Ciebie', description: 'Sekcja odroczona — streamowana osobno', columns: device === 'mobile' ? 1 : 3, cards: 3 }),
+      cardsBlock({ title: 'For you', description: 'Deferred section — streamed separately', columns: device === 'mobile' ? 1 : 3, cards: 3 }),
       {
-        defer: { fallback: node('section', { props: { title: 'Dla Ciebie', description: 'Ładowanie rekomendacji…' } }) },
+        defer: { fallback: node('section', { props: { title: 'For you', description: 'Loading recommendations…' } }) },
         data: async () => {
           await new Promise(resolve => setTimeout(resolve, 600)) // simulated slow recommendations API
           // the query result is read-only — copy before reverse()
@@ -81,7 +81,7 @@ export const home = ui.page<Ctx>({
     ),
     section('divider', node('separator')),
     section('shortcuts', tabsBlock),
-    section('more', cardsBlock({ title: 'Więcej', columns: device === 'mobile' ? 2 : 4, cards: 8 }), {
+    section('more', cardsBlock({ title: 'More', columns: device === 'mobile' ? 2 : 4, cards: 8 }), {
       // compact version: no author footer, smaller cards
       remove: 'card > :slot(footer)',
       patch: { card: { size: 'sm' } },
@@ -103,8 +103,8 @@ export const home = ui.page<Ctx>({
         hero: [featured],
         image: [featured],
         'hero > :slot(actions)': [
-          { label: 'Czytaj', href: `/artykul/${featured.slug}` },
-          { label: 'Wszystkie artykuły', href: '#latest' },
+          { label: 'Read', href: `/article/${featured.slug}` },
+          { label: 'All articles', href: '#latest' },
         ],
       },
       latest: {

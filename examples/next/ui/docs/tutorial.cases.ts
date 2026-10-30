@@ -12,7 +12,7 @@ const welcome = ui.page<Ctx>({
   sections: [
     section(
       'welcome',
-      node('section', { props: { title: 'Witaj w Dedalu', description: 'Ta section to jeden node z props — zgodnych z contract.' } })
+      node('section', { props: { title: 'Welcome to Dedal', description: 'This section is a single node with props — matching the contract.' } })
     ),
   ],
 })
@@ -21,12 +21,12 @@ const welcome = ui.page<Ctx>({
 // #region tutorial-first-block
 // a block: a section with a grid of three cards — a plain value, reusable in any page
 const staticNews = node('section', {
-  props: { title: 'Najnowsze' },
+  props: { title: 'Latest' },
   children: [
     node('grid', {
       props: { columns: 3 },
       // repeat: one card definition, three nodes (each with its own ID)
-      children: [repeat(node('card', { props: { title: 'Tytuł artykułu', href: '#' } }), 3)],
+      children: [repeat(node('card', { props: { title: 'Article title', href: '#' } }), 3)],
     }),
   ],
 })
@@ -37,7 +37,7 @@ const firstBlock = ui.page<Ctx>({ sections: [section('news', staticNews)] })
 // #region tutorial-data
 // the same block without fixed texts — data will fill the cards
 const latest = node('section', {
-  props: { title: 'Najnowsze' },
+  props: { title: 'Latest' },
   children: [node('grid', { props: { columns: 3 }, children: [repeat(node('card'), 3)] })],
 })
 
@@ -75,7 +75,7 @@ const newsData = (list: Article[]) => ({
 })
 
 const withSlots = ui.page<Ctx>({
-  sections: [section('news', cards('Najnowsze', 3))],
+  sections: [section('news', cards('Latest', 3))],
   data: async () => ({ news: newsData(await articles(3)) }),
 })
 // #endregion
@@ -88,13 +88,13 @@ const hero = section('hero', node('hero', { slots: { media: node('image'), actio
     return {
       hero: [featured],
       image: [featured],
-      'hero > :slot(actions)': [{ label: 'Czytaj', href: `/artykul/${featured.slug}` }],
+      'hero > :slot(actions)': [{ label: 'Read', href: `/article/${featured.slug}` }],
     }
   },
 })
 
 const withHero = ui.page<Ctx>({
-  sections: [hero, section('news', cards('Najnowsze', 3))],
+  sections: [hero, section('news', cards('Latest', 3))],
   // page data covers the other sections; both loaders run in parallel
   data: async () => ({ news: newsData((await articles(4)).slice(1)) }),
 })
@@ -105,7 +105,7 @@ const withVariants = ui.page<Ctx>({
   // sections depend on ctx: on mobile one column and two cards
   sections: ({ device }) => [
     hero,
-    section('news', device === 'mobile' ? cards('Najnowsze', 2, 1) : cards('Najnowsze', 3)),
+    section('news', device === 'mobile' ? cards('Latest', 2, 1) : cards('Latest', 3)),
   ],
   data: async ({ device }) => ({ news: newsData((await articles(device === 'mobile' ? 3 : 4)).slice(1)) }),
 })
@@ -117,11 +117,11 @@ const withPatches = ui.page<Ctx>({
     hero,
     section(
       'news',
-      cards('Najnowsze', 3, device === 'mobile' ? 1 : 3),
+      cards('Latest', 3, device === 'mobile' ? 1 : 3),
       // the first card featured (two columns wide) — only where the grid has room for it
       device === 'desktop' ? { patch: { 'card:first-child': { size: 'lg' } } } : {}
     ),
-    section('more', cards('Więcej', 4, device === 'mobile' ? 2 : 4), {
+    section('more', cards('More', 4, device === 'mobile' ? 2 : 4), {
       // the same block in a compact version: no author footer, small cards
       remove: 'card > :slot(footer)',
       patch: { card: { size: 'sm' } },
@@ -138,10 +138,10 @@ const withPatches = ui.page<Ctx>({
 const withMissingData = ui.page<Ctx>({
   sections: ({ device }) => [
     hero,
-    section('news', cards('Najnowsze', 3, device === 'mobile' ? 1 : 3)),
+    section('news', cards('Latest', 3, device === 'mobile' ? 1 : 3)),
     // no active promotions → the section disappears (default onEmpty: 'remove')
-    section('promotions', cards('Promocje', 3)),
-    section('recommendations', cards('Polecane', 3), {
+    section('promotions', cards('Promotions', 3)),
+    section('recommendations', cards('Recommended', 3), {
       optional: true, // the recommendations API failing must not take the whole page down
       data: async () => {
         throw new Error('recommendations API: 503')
@@ -157,10 +157,10 @@ const withMissingData = ui.page<Ctx>({
 const withDeferred = ui.page<Ctx>({
   sections: ({ device }) => [
     hero,
-    section('news', cards('Najnowsze', 3, device === 'mobile' ? 1 : 3)),
+    section('news', cards('Latest', 3, device === 'mobile' ? 1 : 3)),
     // slow, personalised recommendations: the page goes out right away with a fallback, the section is streamed later
-    section('forYou', cards('Dla Ciebie', 3), {
-      defer: { fallback: node('section', { props: { title: 'Dla Ciebie', description: 'Ładowanie rekomendacji…' } }) },
+    section('forYou', cards('For you', 3), {
+      defer: { fallback: node('section', { props: { title: 'For you', description: 'Loading recommendations…' } }) },
       data: async () => {
         await wait(800)
         return newsData((await articles(7)).slice(4))
@@ -178,15 +178,15 @@ const latestArticles = ui.query({ key: (count: number) => ['tutorial', 'articles
 const heroFromQuery = section('hero', node('hero', { slots: { media: node('image'), actions: [node('button')] } }), {
   data: async () => {
     const [featured] = await latestArticles(8) // the same query as the page data below — fetched once
-    return { hero: [featured], image: [featured], 'hero > :slot(actions)': [{ label: 'Czytaj', href: `/artykul/${featured.slug}` }] }
+    return { hero: [featured], image: [featured], 'hero > :slot(actions)': [{ label: 'Read', href: `/article/${featured.slug}` }] }
   },
 })
 
 const home = ui.page<Ctx>({
   sections: ({ device }) => [
     heroFromQuery,
-    section('news', cards('Najnowsze', 3, device === 'mobile' ? 1 : 3), device === 'desktop' ? { patch: { 'card:first-child': { size: 'lg' } } } : {}),
-    section('more', cards('Więcej', 4, device === 'mobile' ? 2 : 4), { remove: 'card > :slot(footer)', patch: { card: { size: 'sm' } } }),
+    section('news', cards('Latest', 3, device === 'mobile' ? 1 : 3), device === 'desktop' ? { patch: { 'card:first-child': { size: 'lg' } } } : {}),
+    section('more', cards('More', 4, device === 'mobile' ? 2 : 4), { remove: 'card > :slot(footer)', patch: { card: { size: 'sm' } } }),
   ],
   data: async () => {
     const list = await latestArticles(8)
@@ -222,7 +222,7 @@ const debugging = ui.page<Ctx>({
     section(
       'news',
       node('section', {
-        props: { title: 'Najnowsze' },
+        props: { title: 'Latest' },
         children: [
           node('grid', {
             props: { columns: device === 'mobile' ? 1 : 3 },
@@ -234,15 +234,15 @@ const debugging = ui.page<Ctx>({
         ],
       })
     ),
-    section('promotions', cards('Promocje', 3)),
-    section('recommendations', cards('Polecane', 3), {
+    section('promotions', cards('Promotions', 3)),
+    section('recommendations', cards('Recommended', 3), {
       optional: true,
       data: async () => {
         throw new Error('recommendations API: 503')
       },
     }),
-    section('more', cards('Więcej', 3, device === 'mobile' ? 2 : 3), { remove: 'card > :slot(footer)', patch: { card: { size: 'sm' } } }),
-    section('popular', cards('Popularne', 3), {
+    section('more', cards('More', 3, device === 'mobile' ? 2 : 3), { remove: 'card > :slot(footer)', patch: { card: { size: 'sm' } } }),
+    section('popular', cards('Popular', 3), {
       data: async () => {
         await wait(600) // a slow "most read" service, called on every request
         return newsData((await articles(10)).slice(7))
@@ -251,7 +251,7 @@ const debugging = ui.page<Ctx>({
   ],
   data: async () => {
     const list = await latestTwelve()
-    const lead = list[11] // chosen by the editors: "Ostatni artykuł z mocka"
+    const lead = list[11] // chosen by the editors: "Last mock article"
     return {
       news: { ...newsData(list.slice(1, 5)), '#lead': [lead] },
       promotion: { card: list.slice(5, 8) },
@@ -267,13 +267,13 @@ export const tutorialCases: DocCase[] = [
     title: '1. Contract',
     level: 'ok',
     files: [{ title: 'contract', file: 'ui/contract.ts' }],
-    description: `Zaczynamy od **contract** — typu, który opisuje, jakie component może mieć strona i jakie mają props. To jedyne miejsce, które serwer i front muszą znać wspólnie.
+    description: `We start with the **contract** — a type that describes which components a page can have and what props they take. It is the only thing the server and the frontend must both know.
 
-- \`card: { title: string; href: string; size?: 'sm' | 'md' | 'lg'; badge?: Slot }\` — props card; \`Slot\` to miejsce na inny component (badge, avatar),
-- wartości są neutralne (\`sm | md | lg\`), a nie z konkretnej biblioteki — każda registry (shadcn, Radix, własny DS) tłumaczy je po swojemu,
-- \`Ctx\` — kontekst requestu (tu \`device\`), od którego mogą zależeć section i data.
+- \`card: { title: string; href: string; size?: 'sm' | 'md' | 'lg'; badge?: Slot }\` — the card's props; \`Slot\` is a place for another component (badge, avatar),
+- the values are neutral (\`sm | md | lg\`), not taken from a specific library — each registry (shadcn, Radix, your own DS) translates them in its own way,
+- \`Ctx\` — the request context (here \`device\`) that sections and data can depend on.
 
-Poniżej pierwsza strona: jedna section z jednym node \`section\` i jego props. Jeszcze bez data — tylko layout.`,
+Below is the first page: one section with one \`section\` node and its props. No data yet — just layout.`,
     run: build(ui, welcome),
   },
   {
@@ -281,24 +281,24 @@ Poniżej pierwsza strona: jedna section z jednym node \`section\` i jego props. 
     title: '2. Instance and the first block',
     level: 'ok',
     files: [{ title: 'instance', file: 'ui/dedal.ts' }],
-    description: `**Instancja** (\`createDedal<Contract>(options)\`) to punkt wejścia: z niej bierzesz \`node\`, \`repeat\`, \`section\`, \`page\`, \`query\`, \`resolve\`. Tworzysz ją raz na projekt (moduł), z domyślnymi props component i mapowaniami data (o nich w kroku 4).
+    description: `The **instance** (\`createDedal<Contract>(options)\`) is the entry point: it gives you \`node\`, \`repeat\`, \`section\`, \`page\`, \`query\`, \`resolve\`. You create it once per project (in a module), with default component props and data mappings (more on those in step 4).
 
-**Blok** to drzewo node: \`node(component, { props, children, slots })\`. \`repeat(node, 3)\` powiela node — tu jedną definicję card na trzy. Blok to zwykła wartość: można go eksportować, parametryzować i używać w wielu stronach.
+A **block** is a tree of nodes: \`node(component, { props, children, slots })\`. \`repeat(node, 3)\` duplicates a node — here one card definition becomes three. A block is a plain value: you can export it, parametrise it and use it in many pages.
 
-Każdy node dostaje ID z pozycji (\`news.0.0\`, \`news.0.1\`…) — po nim layout spotyka się z data.
+Every node gets an ID from its position (\`news.0.0\`, \`news.0.1\`…) — this is how layout meets data.
 
-Card mają na razie wpisane na sztywno \`title\` — w następnym kroku zastąpią je data.`,
+For now the cards have a hard-coded \`title\` — in the next step data will replace it.`,
     run: build(ui, firstBlock),
   },
   {
     slug: 'tutorial-data',
     title: '3. Page data and bindings',
     level: 'ok',
-    description: `Blok nie ma już tekstów — data przychodzą z \`data\` strony. Kształt: \`{ kluczSection: { selector: items } }\`. Każdy wpis to **binding**: selector \`card\` wybiera node w section \`news\`, a kolejne artykuły trafiają do kolejnych card.
+    description: `The block no longer has texts — data comes from the page's \`data\`. The shape: \`{ sectionKey: { selector: items } }\`. Each entry is a **binding**: the selector \`card\` picks nodes in the \`news\` section, and consecutive articles go to consecutive cards.
 
-Dlaczego selector, a nie po prostu lista? Bo blok może się zmieniać (dojdzie nagłówek, druga siatka) — binding \`card\` dalej trafia w card, niezależnie od ich miejsca.
+Why a selector and not just a list? Because the block can change (a heading gets added, a second grid) — the \`card\` binding still hits the cards, wherever they are.
 
-\`data\` to zwykła funkcja async — wołasz w niej API, bazę, cokolwiek. Tu mock \`articles(3)\`.`,
+\`data\` is a plain async function — in it you call an API, a database, anything. Here it's the mock \`articles(3)\`.`,
     run: build(ui, withData),
   },
   {
@@ -309,92 +309,92 @@ Dlaczego selector, a nie po prostu lista? Bo blok może się zmieniać (dojdzie 
       { title: 'toProps', file: 'ui/to-props.ts' },
       { title: 'instance options', file: 'ui/dedal.ts' },
     ],
-    description: `Artykuł z API ma pola \`headline\`, \`slug\`, \`cover\` — a card w contract chce \`title\`, \`href\`, \`image\`. Tłumaczy to **toProps**: per component funkcja \`({ props, data }) => props\`.
+    description: `An article from the API has the fields \`headline\`, \`slug\`, \`cover\` — while the card in the contract wants \`title\`, \`href\`, \`image\`. **toProps** translates between them: a per-component function \`({ props, data }) => props\`.
 
-- dostaje props z layoutu i data node; jej wynik to ostateczne props — dlatego rozwija \`...props\`,
-- jest wołana też dla node bez data (\`data: undefined\`) — stąd warunek \`data ? … : props\`,
-- to czysty moduł bez IO: działa na serwerze i na froncie.
+- it gets the props from the layout and the node's data; its result is the final props — that's why it spreads \`...props\`,
+- it is also called for nodes without data (\`data: undefined\`) — hence the \`data ? … : props\` condition,
+- it's a pure module without IO: it works on the server and on the frontend.
 
-**defaults** (\`card: { size: 'md' }\`) to domyślne props component — \`node()\` dokłada je przy tworzeniu bloku. Pierwszeństwo: \`defaults\` → props z layoutu → data.
+**defaults** (\`card: { size: 'md' }\`) are default component props — \`node()\` adds them when the block is created. Precedence: \`defaults\` → props from the layout → data.
 
-Strona jest ta sama co w kroku 3 — zmienia się tylko zrozumienie, skąd card mają \`title\` i \`size\`.`,
+The page is the same as in step 3 — the only thing that changes is understanding where the cards get \`title\` and \`size\` from.`,
     run: build(ui, toPropsStep),
   },
   {
     slug: 'tutorial-slots',
     title: '5. Slots',
     level: 'ok',
-    description: `Card ma w contract dwa **sloty**: \`badge\` i \`footer\`. W bloku wypełniamy je node (\`badge\`, \`avatar\`) — to serwer decyduje, co jest w slocie.
+    description: `In the contract, a card has two **slots**: \`badge\` and \`footer\`. In the block we fill them with nodes (\`badge\`, \`avatar\`) — the server decides what goes into a slot.
 
-Data do slotów przypisuje się selectorem \`:slot(nazwa)\`: \`card > :slot(badge)\` to badge w każdej card. Data są przygotowane **per component**: artykuły dla card, kategorie dla badge, autorzy dla avatar — pomocnicza \`newsData(list)\` składa to w bindings.
+Data is assigned to slots with the \`:slot(name)\` selector: \`card > :slot(badge)\` is the badge in every card. Data is prepared **per component**: articles for cards, categories for badges, authors for avatars — the \`newsData(list)\` helper assembles them into bindings.
 
-Blok jest teraz funkcją \`cards(title, count, columns)\` — użyjemy go dla kilku section.`,
+The block is now a function \`cards(title, count, columns)\` — we'll use it for several sections.`,
     run: build(ui, withSlots),
   },
   {
     slug: 'tutorial-shared-section',
     title: '6. A shared section with a loader',
     level: 'ok',
-    description: `Hero (wyróżniony artykuł) ma być na wielu stronach. Zamiast powtarzać jego data w \`data\` każdej strony, section dostaje **własny loader**: \`section(key, block, { data })\` — zwraca bindings tylko tej section.
+    description: `The hero (a featured article) should appear on many pages. Instead of repeating its data in every page's \`data\`, the section gets **its own loader**: \`section(key, block, { data })\` — it returns bindings for that section only.
 
-Taką section definiuje się raz (eksport z modułu) i dodaje do dowolnej strony — tak robi się header, footer, menu. Loader section i \`data\` strony działają **równolegle**.
+You define such a section once (export it from a module) and add it to any page — that's how you do a header, footer or menu. The section loader and the page's \`data\` run **in parallel**.
 
-Data strony nie mogą zwracać nic pod key section z loaderem — to błąd (nie wiadomo, które wygrywa).`,
+Page data must not return anything under the key of a section that has a loader — that's an error (it would be unclear which one wins).`,
     run: build(ui, withHero),
   },
   {
     slug: 'tutorial-variants',
     title: '7. Variants (ctx)',
     level: 'ok',
-    description: `\`sections\` może być funkcją \`ctx\`. Tu na \`mobile\` section \`news\` ma jedną kolumnę i dwie card; \`data\` też dostaje \`ctx\` i pobiera tyle artykułów, ile trzeba.
+    description: `\`sections\` can be a function of \`ctx\`. Here, on \`mobile\`, the \`news\` section has one column and two cards; \`data\` also gets \`ctx\` and fetches as many articles as needed.
 
-Ten sam mechanizm obsługuje A/B testy, wersje językowe, różne układy per serwis — warianty to zwykły kod na serwerze, front nic o nich nie wie.
+The same mechanism handles A/B tests, language versions, different layouts per site — variants are plain code on the server, and the frontend knows nothing about them.
 
-Ten krok jest renderowany z \`device: "mobile"\`.`,
+This step is rendered with \`device: "mobile"\`.`,
     run: build(ui, withVariants, { device: 'mobile' }),
   },
   {
     slug: 'tutorial-patch-remove',
     title: '8. patch and remove',
     level: 'ok',
-    description: `Często potrzebujesz bloku „prawie takiego samego”. Zamiast go kopiować, section modyfikuje blok:
+    description: `You often need a block that's "almost the same". Instead of copying it, the section modifies the block:
 
-- \`patch: { 'card:first-child': { size: 'lg' } }\` — pierwsza card wyróżniona (tylko na desktop),
-- \`remove: 'card > :slot(footer)'\` + \`patch: { card: { size: 'sm' } }\` — section „Więcej” to ten sam blok \`cards\` w wersji kompaktowej.
+- \`patch: { 'card:first-child': { size: 'lg' } }\` — the first card is featured (on desktop only),
+- \`remove: 'card > :slot(footer)'\` + \`patch: { card: { size: 'sm' } }\` — the "More" section is the same \`cards\` block in a compact version.
 
-Selektory mają składnię CSS (\`:first-child\`, \`>\`, \`:slot()\`, \`#alias\`, \`[size=lg]\`) — ten sam matcher działa w patch, remove, bindings i devtools.`,
+Selectors use CSS syntax (\`:first-child\`, \`>\`, \`:slot()\`, \`#alias\`, \`[size=lg]\`) — the same matcher works in patch, remove, bindings and devtools.`,
     run: build(ui, withPatches),
   },
   {
     slug: 'tutorial-missing-data',
     title: '9. When data is missing',
     level: 'error',
-    description: `Prawdziwe API bywa puste albo nie działa. Dedal każe zdecydować jawnie, co wtedy:
+    description: `A real API is sometimes empty or down. Dedal makes you decide explicitly what happens then:
 
-- **promocje** — źródło zwraca pustą listę; section, w której żaden node nie dostał data, domyślnie znika (\`onEmpty: 'remove'\`),
-- **polecane** — API rzuca błąd; \`optional: true\` usuwa tylko tę section, a błąd trafia do \`onSectionError\` (logi). Bez \`optional\` cały build by się wywrócił.
+- **promotions** — the source returns an empty list; a section in which no node got data disappears by default (\`onEmpty: 'remove'\`),
+- **recommended** — the API throws an error; \`optional: true\` removes only this section, and the error goes to \`onSectionError\` (logs). Without \`optional\` the whole build would fail.
 
-Strona się renderuje, a devtools mówią, co zniknęło i dlaczego — to pierwszy krok, w którym panel pokazuje błąd i ostrzeżenie.`,
+The page renders, and devtools tell you what disappeared and why — this is the first step in which the panel shows an error and a warning.`,
     run: build(ui, withMissingData),
   },
   {
     slug: 'tutorial-defer',
     title: '10. A deferred section (streaming)',
     level: 'ok',
-    description: `Rekomendacje „Dla Ciebie” są wolne (800 ms) i spersonalizowane. \`defer: { fallback }\` sprawia, że wynik strony zawiera tylko zaślepkę, a loader się nie wykonuje — strona wychodzi od razu.
+    description: `The "For you" recommendations are slow (800 ms) and personalised. \`defer: { fallback }\` makes the page result contain only a fallback, and the loader doesn't run — the page goes out right away.
 
-Treść section buduje \`page.section('forYou', ctx)\` w osobnym requeście; w Next to async komponent w \`<Suspense>\` — React dostreamowuje go, gdy będzie gotowy. Section odroczona jest też poza cache strony — dobre miejsce na data per użytkownik.`,
+The section's content is built by \`page.section('forYou', ctx)\` in a separate request; in Next it's an async component in \`<Suspense>\` — React streams it in when it's ready. A deferred section is also outside the page cache — a good place for per-user data.`,
     run: build(ui, withDeferred),
   },
   {
     slug: 'tutorial-queries-cache',
     title: '11. Queries and cache',
     level: 'ok',
-    description: `Hero i \`data\` strony potrzebują tych samych artykułów. \`ui.query({ key, fn, staleTime })\` pobiera je raz na key i współdzieli — między loaderami tego samego requestu i między requestami (do \`staleTime\`).
+    description: `The hero and the page's \`data\` need the same articles. \`ui.query({ key, fn, staleTime })\` fetches them once per key and shares them — between loaders of the same request and between requests (up to \`staleTime\`).
 
-\`cache: { key: ctx => ['tutorial-home', ctx.device] }\` cache'uje cały wynik strony per device (stale-while-revalidate). Key musi obejmować wszystko, od czego zależą section i data.
+\`cache: { key: ctx => ['tutorial-home', ctx.device] }\` caches the whole page result per device (stale-while-revalidate). The key must cover everything the sections and data depend on.
 
-Tryb debug omija cache strony (devtools pokazują świeży build), ale query dalej korzystają z cache — w *timing* widać, które to \`hit\`, a które \`miss\`.`,
+Debug mode bypasses the page cache (devtools show a fresh build), but queries still use their cache — *timing* shows which ones are \`hit\` and which are \`miss\`.`,
     run: build(ui, home),
   },
   {
@@ -402,13 +402,13 @@ Tryb debug omija cache strony (devtools pokazują świeży build), ale query dal
     title: '12. Rendering and devtools',
     level: 'ok',
     files: [{ title: 'registry (card)', file: 'ui/registries/radix-themes.tsx', region: 'card' }],
-    description: `Ostatni krok to front. \`ui.resolve(result)\` łączy layout z data w drzewo \`{ component, props, children, slots }\`, a \`<Render tree registry>\` zamienia je w React.
+    description: `The last step is the frontend. \`ui.resolve(result)\` combines layout and data into a tree of \`{ component, props, children, slots }\`, and \`<Render tree registry>\` turns it into React.
 
-**Registry** mapuje nazwy component na komponenty biblioteki — powyżej card w Radix Themes: dostaje props z contract (\`title\`, \`href\`, \`size\`) i sloty jako elementy React (\`badge\`, \`footer\`). \`satisfies Registry<Contract>\` pilnuje przy kompilacji, że registry ma wszystkie component.
+The **registry** maps component names to library components — above is the card in Radix Themes: it gets props from the contract (\`title\`, \`href\`, \`size\`) and slots as React elements (\`badge\`, \`footer\`). \`satisfies Registry<Contract>\` checks at compile time that the registry has every component.
 
-W trybie debug dochodzą \`trace\`, \`<Render debug>\`, \`<DevtoolsData>\` i \`<Devtools />\` — panel, którego używałeś w tym tutorialu. Gotowa strona z tego tutorialu to w praktyce strona główna tego przykładu (\`/radix\`, \`/shadcn\` — ta sama strona, dwie registry).
+In debug mode you add \`trace\`, \`<Render debug>\`, \`<DevtoolsData>\` and \`<Devtools />\` — the panel you've been using throughout this tutorial. The finished page from this tutorial is, in practice, this example's home page (\`/radix\`, \`/shadcn\` — the same page, two registries).
 
-Dalej: krok 13 — ćwiczenie z debugowania. Potem grupy *Layout*, *Data*, *Sections*… opisują każdą możliwość osobno, a *Errors* — co robić, gdy build rzuca wyjątek.`,
+Next: step 13 — a debugging exercise. After that, the *Layout*, *Data*, *Sections*… groups describe each feature separately, and *Errors* covers what to do when the build throws an exception.`,
     run: build(ui, finalPage),
   },
   {
@@ -416,64 +416,64 @@ Dalej: krok 13 — ćwiczenie z debugowania. Potem grupy *Layout*, *Data*, *Sect
     title: '13. Debugging',
     level: 'error',
     codeCollapsed: true,
-    description: `Dostajesz zgłoszenie od redakcji: „strona główna wygląda prawie dobrze, ale coś jest nie tak”. To ta sama strona co w tutorialu — z pięcioma pomyłkami, jakie zdarzają się w prawdziwym projekcie. Nic nie rzuca wyjątku, strona się renderuje — problemy widać dopiero, gdy się przyjrzysz.
+    description: `You get a report from the editors: "the home page looks almost right, but something is off". It's the same page as in the tutorial — with five mistakes of the kind that happen in a real project. Nothing throws an exception and the page renders — the problems only show when you look closely.
 
-Znajdź przyczyny **panelem devtools** (przycisk **dedal** w prawym dolnym rogu albo \`Alt+Shift+S\`), zanim zajrzysz do kodu — kod jest niżej, zwinięty. Każde zadanie to objaw, podpowiedź, gdzie szukać, i rozwiązanie do rozwinięcia.
+Find the causes with the **devtools panel** (the **dedal** button in the bottom-right corner, or \`Alt+Shift+S\`) before you look at the code — the code is below, collapsed. Each task is a symptom, a hint about where to look, and a solution you can expand.
 
-Dobra kolejność przy każdym zgłoszeniu: *sections* (czy są ostrzeżenia i błędy) → \`pick\` na podejrzany element → *tree* z wyszukiwaniem → *timing*, gdy chodzi o czas. Raport z \`copy report\` dołącz do zgłoszenia.`,
+A good order for every report: *sections* (are there warnings and errors) → \`pick\` on the suspicious element → *tree* with search → *timing*, when it's about time. Attach the report from \`copy report\` to the ticket.`,
     tasks: [
       {
-        symptom: 'Redakcja wyróżniła artykuł „Ostatni artykuł z mocka”, ale nie ma go na stronie — duża karta w „Najnowsze” pokazuje inny artykuł.',
-        hint: '*tree* → wpisz w pole wyszukiwania „Ostatni artykuł”. Potem *sections* → section `news`.',
-        solution: `Wyszukiwanie mówi: \`! not on the page: section news · #lead [0] …\` — artykuł dotarł do data, ale nie trafił do żadnego node. W *sections*: \`✗ #lead — 1 data item for 0 nodes\` i \`“#lead” matches nodes already filled by “card”\`.
+        symptom: 'The editors featured the article "Last mock article", but it isn\'t on the page — the big card in "Latest" shows a different article.',
+        hint: '*tree* → type "Last mock article" into the search field. Then *sections* → the `news` section.',
+        solution: `The search says: \`! not on the page: section news · #lead [0] …\` — the article made it into data but didn't reach any node. In *sections*: \`✗ #lead — 1 data item for 0 nodes\` and \`“#lead” matches nodes already filled by “card”\`.
 
-Przyczyna: binding \`card\` stoi przed \`#lead\`, więc zajmuje wszystkie card — także tę z aliasem \`lead\`. Node zajęty przez wcześniejszy binding jest pomijany przez kolejne.
+Cause: the \`card\` binding comes before \`#lead\`, so it takes all cards — including the one with the \`lead\` alias. A node taken by an earlier binding is skipped by the later ones.
 
-Poprawka — szczegółowe bindings przed ogólnymi. Wyróżniona card ma też sloty (\`badge\`, \`footer\`), więc dostaje własne data do nich — inaczej \`card > :slot(badge)\` dałby jej kategorię innego artykułu:
+Fix — specific bindings before general ones. The featured card also has slots (\`badge\`, \`footer\`), so it gets its own data for them — otherwise \`card > :slot(badge)\` would give it another article's category:
 
 \`\`\`ts
 news: {
   '#lead': [lead],
   '#lead > :slot(badge)': [lead.category],
   '#lead > :slot(footer)': [lead.author],
-  ...newsData(list.slice(1, 4)), // trzy pozostałe card
+  ...newsData(list.slice(1, 4)), // the three remaining cards
 },
 \`\`\``,
       },
       {
-        symptom: 'W section „Więcej” karty nie mają kategorii (badge są puste).',
-        hint: '*sections* → section `more` → bindings. Albo `pick` na pusty badge.',
-        solution: `*sections*: \`✗ card > :slot(badges) — 3 data items for 0 nodes\` i \`No node in this section matches “card > :slot(badges)” … Did you mean: card > :slot(badge)?\`. \`pick\` na badge pokazuje, że nie ma data.
+        symptom: 'In the "More" section the cards have no category (the badges are empty).',
+        hint: '*sections* → the `more` section → bindings. Or `pick` on an empty badge.',
+        solution: `*sections*: \`✗ card > :slot(badges) — 3 data items for 0 nodes\` and \`No node in this section matches “card > :slot(badges)” … Did you mean: card > :slot(badge)?\`. \`pick\` on a badge shows that it has no data.
 
-Przyczyna: literówka w nazwie slotu — w contract slot nazywa się \`badge\`. Selector, który nic nie trafia, nie rzuca wyjątku; data po prostu nie trafiają na stronę.
+Cause: a typo in the slot name — in the contract the slot is called \`badge\`. A selector that matches nothing doesn't throw; the data simply doesn't reach the page.
 
-Poprawka: \`'card > :slot(badge)'\`. Selector możesz sprawdzić przed zmianą kodu: wpisz go w pole *tree* — panel pokaże, w które node trafia.`,
+Fix: \`'card > :slot(badge)'\`. You can check a selector before changing the code: type it into the *tree* field — the panel will show which nodes it hits.`,
       },
       {
-        symptom: 'Brakuje section „Polecane”.',
-        hint: '*sections* → komunikaty strony na górze. Potem *timing*.',
-        solution: `*sections*: \`✗ recommendations failed — the loader threw "recommendations API: 503"; the section is skipped (optional: true)\`. W *timing* loader \`recommendations\` jest czerwony.
+        symptom: 'The "Recommended" section is missing.',
+        hint: '*sections* → the page messages at the top. Then *timing*.',
+        solution: `*sections*: \`✗ recommendations failed — the loader threw "recommendations API: 503"; the section is skipped (optional: true)\`. In *timing* the \`recommendations\` loader is red.
 
-Przyczyna: API rekomendacji nie działa. Section ma \`optional: true\`, więc zniknęła zamiast wywracać stronę — to zamierzone zachowanie, ale trzeba to zauważyć. Błąd trafia też do \`onSectionError\` strony — tam podepnij logi i alerty, żeby takie rzeczy nie umykały.`,
+Cause: the recommendations API is down. The section has \`optional: true\`, so it disappeared instead of taking the page down — that's the intended behaviour, but you need to notice it. The error also goes to the page's \`onSectionError\` — hook up logs and alerts there so things like this don't slip by.`,
       },
       {
-        symptom: 'W section „Promocje” są puste karty — bez tytułów i bez treści.',
-        hint: '*sections* → komunikaty strony; zwróć uwagę na `source` przy section `promotions`.',
-        solution: `*sections*: \`! promotion unknownData — data returned for a section that is not on this page … Did you mean: promotions?\`. Section \`promotions\` ma \`source: none\` — nie dostała żadnych data, więc renderuje sam layout.
+        symptom: 'The "Promotions" section has empty cards — no titles and no content.',
+        hint: '*sections* → the page messages; look at `source` next to the `promotions` section.',
+        solution: `*sections*: \`! promotion unknownData — data returned for a section that is not on this page … Did you mean: promotions?\`. The \`promotions\` section has \`source: none\` — it got no data at all, so it renders the layout only.
 
-Przyczyna: literówka w key section w \`data\` strony (\`promotion\` zamiast \`promotions\`). Data pod nieznanym key są pomijane.
+Cause: a typo in the section key in the page's \`data\` (\`promotion\` instead of \`promotions\`). Data under an unknown key is skipped.
 
-Poprawka: \`promotions: { card: list.slice(5, 8) }\`. Gdyby promocji naprawdę nie było, section z pustą listą zniknęłaby sama (\`onEmpty: 'remove'\`) — puste karty to znak, że data w ogóle nie dotarły.`,
+Fix: \`promotions: { card: list.slice(5, 8) }\`. If there really were no promotions, the section with an empty list would disappear by itself (\`onEmpty: 'remove'\`) — empty cards are a sign that the data never arrived at all.`,
       },
       {
-        symptom: 'Strona ładuje się wolno — ponad pół sekundy, choć API odpowiada w ~20 ms.',
-        hint: '*timing* → który loader jest `slowest`.',
-        solution: `*timing*: loader \`popular\` trwa ~600 ms i jest oznaczony \`slowest\` — data loading czeka na najwolniejszy loader, więc cała strona trwa tyle co on. Nie ma pod nim żadnego query — wynik nie jest cache'owany.
+        symptom: 'The page loads slowly — over half a second, even though the API responds in ~20 ms.',
+        hint: '*timing* → which loader is `slowest`.',
+        solution: `*timing*: the \`popular\` loader takes ~600 ms and is marked \`slowest\` — data loading waits for the slowest loader, so the whole page takes as long as it does. There's no query under it — the result isn't cached.
 
-Poprawki (do wyboru):
-- query w loaderze: \`const popular = ui.query({ key: () => ['popular'], fn: fetchPopular, staleTime: 60_000 })\` i \`await popular()\` — wolne wywołanie raz na minutę, a nie przy każdym requeście,
-- \`defer: { fallback }\` — strona wychodzi od razu, „Popularne” dochodzą streamingiem,
-- cache całej strony (\`page({ cache })\`) — na produkcji wolny build zdarza się tylko po wygaśnięciu wpisu.`,
+Fixes (pick one):
+- a query in the loader: \`const popular = ui.query({ key: () => ['popular'], fn: fetchPopular, staleTime: 60_000 })\` and \`await popular()\` — the slow call happens once a minute instead of on every request,
+- \`defer: { fallback }\` — the page goes out right away, and "Popular" arrives via streaming,
+- caching the whole page (\`page({ cache })\`) — in production a slow build only happens after the entry expires.`,
       },
     ],
     run: build(ui, debugging),

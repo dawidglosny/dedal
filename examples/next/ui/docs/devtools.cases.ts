@@ -13,7 +13,7 @@ const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 //   <DevtoolsData payload={inspect(result, resolved)} />
 //   <Devtools />
 const panel = ui.page<Ctx>({
-  sections: [section('news', cards(ui, 'Najnowsze', 3))],
+  sections: [section('news', cards(ui, 'Latest', 3))],
   data: async () => {
     const list = await articles(3)
     return { news: { card: list, 'card > :slot(badge)': list.map(article => article.category) } }
@@ -30,8 +30,8 @@ const timing = ui.page<Ctx>({
         return { hero: [(await articles(1))[0]] }
       },
     }),
-    section('news', cards(ui, 'Najnowsze', 3)),
-    section('related', cards(ui, 'Powiązane', 3), {
+    section('news', cards(ui, 'Latest', 3)),
+    section('related', cards(ui, 'Related', 3), {
       data: async () => {
         await wait(150) // the slowest loader — data loading waits for it
         return { card: (await articles(6)).slice(3) }
@@ -50,14 +50,14 @@ async function timingSequential(): Promise<CaseOutput> {
 
   const page = local.page<Ctx>({
     sections: [
-      local.section('sequential', cards(local, 'Po kolei (await, await)', 3), {
+      local.section('sequential', cards(local, 'Sequential (await, await)', 3), {
         data: async () => {
           const latest = await latestA() // the second query starts only after the first one ends
           const popular = await popularA()
           return { card: [...latest.slice(0, 2), popular[2]] }
         },
       }),
-      local.section('parallel', cards(local, 'Równolegle (Promise.all)', 3), {
+      local.section('parallel', cards(local, 'Parallel (Promise.all)', 3), {
         data: async () => {
           const [latest, popular] = await Promise.all([latestB(), popularB()]) // both start together
           return { card: [...latest.slice(0, 2), popular[2]] }
@@ -82,7 +82,7 @@ export const devtoolsCases: DocCase[] = [
     title: 'The devtools panel',
     level: 'ok',
     description:
-      'Każda strona tych docs ma włączony tryb debug — przycisk **dedal** w prawym dolnym rogu (albo `Alt+Shift+S`) otwiera panel:\n\n- *node* — `pick` i kliknij element strony: component, ID, section, sugerowany selector (`copy`), data i binding, który je przypisał, props z pochodzeniem\n- *tree* — drzewo section; pole wyszukiwania: selector, ID, key section albo tekst z data\n- *sections* — komunikaty strony i section, bindings (`X data items for Y nodes`), problemy z wyjaśnieniem\n- *timing* — czasy builda, loadery na osi czasu, query ze statusem cache\n- `copy report` — raport tekstowy (ten sam co „devtools report” niżej)\n\nTryb debug włącza aplikacja (query param, cookie) — payload zawiera data strony, więc na produkcji tylko świadomie.',
+      'Every page of these docs has debug mode on — the **dedal** button in the bottom-right corner (or `Alt+Shift+S`) opens the panel:\n\n- *node* — `pick` and click an element on the page: component, ID, section, a suggested selector (`copy`), the data and the binding that assigned it, props with their sources\n- *tree* — the section tree; the search field takes a selector, an ID, a section key or text from the data\n- *sections* — page and section messages, bindings (`X data items for Y nodes`), problems with explanations\n- *timing* — build times, loaders on a timeline, queries with their cache status\n- `copy report` — a text report (the same as the "devtools report" below)\n\nDebug mode is turned on by the app (a query param, a cookie) — the payload contains the page data, so in production only do it deliberately.',
     run: build(ui, panel),
   },
   {
@@ -90,7 +90,7 @@ export const devtoolsCases: DocCase[] = [
     title: 'Timing',
     level: 'ok',
     description:
-      'Zakładka *timing* (i sekcja „timing” w raporcie) mierzy build w trybie debug: z czego składa się czas (`layout` / `data loading` / `assign`), loadery na osi czasu builda i query pod loaderem, który je wywołał. Wszystkie liczby to ms od początku tego builda.\n\nLoadery startują razem i działają równolegle, więc data loading trwa tyle, co najwolniejszy (`slowest`), a nie tyle, co ich suma. Tu `related` (150 ms) wyznacza czas całej strony; `header` (40 ms) i `page data` (~20 ms) kończą się wcześniej i nic by nie dało ich przyspieszanie.\n\nSzczegóły — skąd biorą się liczby, co znaczą statusy query, czego pomiar nie obejmuje — na stronie grupy *Devtools*.',
+      'The *timing* tab (and the "timing" part of the report) measures the build in debug mode: what the time is made of (`layout` / `data loading` / `assign`), the loaders on the build timeline, and queries under the loader that called them. All numbers are ms from the start of this build.\n\nLoaders start together and run in parallel, so data loading takes as long as the slowest one (`slowest`), not as long as their sum. Here `related` (150 ms) sets the time of the whole page; `header` (40 ms) and `page data` (~20 ms) finish earlier, and speeding them up would gain nothing.\n\nDetails — where the numbers come from, what the query statuses mean, what the measurement doesn\'t cover — are on the *Devtools* group page.',
     run: build(ui, timing),
   },
   {
@@ -98,7 +98,7 @@ export const devtoolsCases: DocCase[] = [
     title: 'Timing: sequential vs parallel queries',
     level: 'ok',
     description:
-      'Dwa loadery pobierają po dwa niezależne źródła (każde ~100 ms: 80 ms opóźnienia + mock API). `sequential` robi to po kolei — `await`, potem `await` — więc drugie query startuje dopiero, gdy pierwsze się skończy, a loader trwa ~200 ms. `parallel` używa `Promise.all` — oba query startują razem, loader trwa ~100 ms.\n\nW *timing* widać to po kolumnie startu query (ms od początku builda): w `sequential` start drugiego ≈ koniec pierwszego, w `parallel` starty są równe. Data loading trwa tyle, co wolniejszy loader — tu `sequential`.',
+      'Two loaders each fetch two independent sources (each ~100 ms: an 80 ms delay + the mock API). `sequential` does it one after another — `await`, then `await` — so the second query starts only when the first one ends, and the loader takes ~200 ms. `parallel` uses `Promise.all` — both queries start together, and the loader takes ~100 ms.\n\nIn *timing* you can see it in the query start column (ms from the start of the build): in `sequential` the second one starts ≈ when the first ends; in `parallel` the starts are equal. Data loading takes as long as the slower loader — here `sequential`.',
     run: timingSequential,
   },
   {
@@ -106,7 +106,7 @@ export const devtoolsCases: DocCase[] = [
     title: 'Build without trace',
     level: 'ok',
     description:
-      'Bez `trace` wynik i raport są takie jak na produkcji: brak pochodzenia props, liczby items, unmatched bindings, section usuniętych przez data i czasów. Devtools mówią to wprost: `· built without trace — …; use build(ctx, { trace: true }) and resolve(result, { trace: true })`.\n\nTrace omija cache strony i kosztuje (`inspect()` to kilka ms i 150–250 KB payloadu na ~500 node) — tylko w trybie debug.',
+      'Without `trace` the result and the report are what production gets: no prop sources, item counts, unmatched bindings, sections removed because of data, or timings. Devtools say so directly: `· built without trace — …; use build(ctx, { trace: true }) and resolve(result, { trace: true })`.\n\nTrace bypasses the page cache and has a cost (`inspect()` takes a few ms and 150–250 KB of payload for ~500 nodes) — debug mode only.',
     run: noTrace,
   },
 ]

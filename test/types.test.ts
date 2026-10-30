@@ -7,8 +7,8 @@ import { createDedal, type BlockDefinition, type LayoutNode, type PropsOf, type 
 import type { TestComponents } from './fixtures'
 import { node, repeat, ui } from './fixtures'
 
-describe('typy', () => {
-  it('blok z zagnieżdżonymi siatkami', () => {
+describe('types', () => {
+  it('a block with nested grids', () => {
     const nestedGrid = node('grid', {
       props: { columns: 2, span: 6 },
       children: [
@@ -26,19 +26,19 @@ describe('typy', () => {
     expect(nestedGrid.children).toHaveLength(2)
   })
 
-  it('odrzuca nieznany komponent', () => {
+  it('rejects an unknown component', () => {
     // @ts-expect-error — not in the component map
     node('unknown-component')
   })
 
-  it('odrzuca nieznany prop i złą wartość', () => {
+  it('rejects an unknown prop and a wrong value', () => {
     // @ts-expect-error — card has no columns prop
     node('card', { props: { columns: 2 } })
     // @ts-expect-error — disallowed size value
     node('card', { props: { size: 'huge' } })
   })
 
-  it('typuje propsy w literałach BlockDefinition według component', () => {
+  it('types props in BlockDefinition literals by component', () => {
     const ok: BlockDefinition<TestComponents> = { component: 'card', props: { size: 'small' } }
     // @ts-expect-error — grid props on card
     const bad: BlockDefinition<TestComponents> = { component: 'card', props: { span: 2 } }
@@ -46,14 +46,14 @@ describe('typy', () => {
     expect([ok, bad]).toHaveLength(2)
   })
 
-  it('repeat zachowuje typ bloku', () => {
+  it('repeat keeps the block type', () => {
     const card = repeat(node('card'), 2)
     const size: 'small' | 'medium' | 'large' | undefined = card.props?.size
 
     expect(size).toBe('medium')
   })
 
-  it('LayoutNode nie ma repeat', () => {
+  it('LayoutNode has no repeat', () => {
     const layoutNode: LayoutNode<TestComponents> = { id: 's.0', component: 'card', props: {} }
     // @ts-expect-error — repeat is expanded when the layout is generated
     const withRepeat: LayoutNode<TestComponents> = { id: 's.0', component: 'card', props: {}, repeat: 2 }
@@ -62,8 +62,8 @@ describe('typy', () => {
   })
 })
 
-describe('typy slotów', () => {
-  it('sloty są typowane kontraktem', () => {
+describe('slot types', () => {
+  it('slots are typed by the contract', () => {
     node('profile', { slots: { cover: node('image') } })
     node('tabs', { slots: { content: [node('card'), node('heading')] } })
 
@@ -77,14 +77,14 @@ describe('typy slotów', () => {
     node('card', { slots: { cover: node('image') } })
   })
 
-  it('slotów nie da się przekazać przez props', () => {
+  it('slots cannot be passed via props', () => {
     // @ts-expect-error — cover is a slot, not a prop
     node('profile', { props: { cover: 'x' } })
 
     expect(node('profile', { props: { size: 'small' } }).props).toEqual({ size: 'small' })
   })
 
-  it('PropsOf i SlotName rozdzielają kontrakt', () => {
+  it('PropsOf and SlotName split the contract', () => {
     type Props = PropsOf<TestComponents, 'heading'>
     type Slots = SlotName<TestComponents, 'heading'>
 
@@ -99,7 +99,7 @@ describe('typy slotów', () => {
   })
 })
 
-describe('typy slotów obok sygnatury indeksu', () => {
+describe('slot types alongside an index signature', () => {
   // contract with open props (e.g. components outside our control) and an explicit slot
   type Open = {
     box: { [prop: string]: unknown; media?: Slot; items?: Slot[] }
@@ -107,7 +107,7 @@ describe('typy slotów obok sygnatury indeksu', () => {
   }
   const open = createDedal<Open>()
 
-  it('slot jest rozpoznany mimo sygnatury indeksu', () => {
+  it('a slot is recognized despite the index signature', () => {
     const block = open.node('box', {
       props: { anything: 1 },
       slots: { media: open.node('image'), items: [open.node('image'), open.node('image')] },
@@ -121,7 +121,7 @@ describe('typy slotów obok sygnatury indeksu', () => {
     expect([block, name, wrong, wrongShape]).toHaveLength(4)
   })
 
-  it('komponent bez slotów dalej nie przyjmuje slots', () => {
+  it('a component without slots still does not accept slots', () => {
     // @ts-expect-error — image has no slots
     const wrong = open.node('image', { slots: { media: open.node('image') } })
 
@@ -129,8 +129,8 @@ describe('typy slotów obok sygnatury indeksu', () => {
   })
 })
 
-describe('typy select()', () => {
-  it('zawęża typ, gdy selektor to nazwa komponentu', () => {
+describe('select() types', () => {
+  it('narrows the type when the selector is a component name', () => {
     const root = ui.layout(node('grid', { children: [node('card')] }), 's')
     const [card] = ui.select(root, 'card')
     const size: 'small' | 'medium' | 'large' | undefined = card.props.size

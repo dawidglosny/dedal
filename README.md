@@ -1,46 +1,46 @@
 # Dedal
 
-Silnik server-driven UI niezależny od frameworka i biblioteki komponentów. Template'y opisują strukturę, dane przypisywane są selektorami, a renderer (React, Astro, Vue, …) dostaje drzewo gotowe do wyrenderowania dowolną biblioteką komponentów (własny design system, MUI, Radix, …).
+A server-driven UI engine independent of framework and component library. Templates describe the structure, data is assigned with selectors, and the renderer (React, Astro, Vue, …) receives a tree ready to render with any component library (your own design system, MUI, Radix, …).
 
-Nazwa od Dedala, mitycznego architekta: serwer projektuje stronę, front ją buduje.
+Named after Daedalus (Dedal in Polish), the mythical architect: the server designs the page, the front end builds it.
 
-## Instalacja
+## Installation
 
 ```bash
-npm i github:dawidglosny/dedal#v0.6.0
+npm i github:dawidglosny/dedal#v0.6.1
 ```
 
-Aktualna wersja: **0.6.0**. Wymaga Node 20.9+; React 18+ tylko dla `dedal/react` (opcjonalny `peerDependency`). Paczka buduje się przy instalacji (`prepare`).
+Current version: **0.6.1**. Requires Node 20.9+; React 18+ only for `dedal/react` (optional `peerDependency`). The package builds on install (`prepare`).
 
-Wejścia: `dedal` (rdzeń), `dedal/react` (renderer), `dedal/devtools` (`inspect`, raport), `dedal/devtools/panel` (panel poza Reactem), `dedal/react/devtools` (komponent `<Devtools />`).
+Entry points: `dedal` (core), `dedal/react` (renderer), `dedal/devtools` (`inspect`, report), `dedal/devtools/panel` (panel outside React), `dedal/react/devtools` (the `<Devtools />` component).
 
-Nowy w server-driven UI? Zacznij od dokumentacji na przykładach w [`examples/next`](examples/next) (`/docs`): wprowadzenie do idei SDUI, tutorial krok po kroku i każda możliwość, ostrzeżenie i błąd jako osobna strona.
+New to server-driven UI? Start with the documentation by example in [`examples/next`](examples/next) (`/docs`): an introduction to the SDUI idea, a step-by-step tutorial, and every feature, warning and error as a separate page.
 
 ## Pipeline
 
 ```
 ctx ─► layout ─► load (IO) ─► assign ─► resolve ─► render
          │                       │          │
-     LayoutNode               DataMap  ResolvedNode     ← formaty JSON, granice, na których można postawić sieć
+     LayoutNode               DataMap  ResolvedNode     ← JSON formats, boundaries where a network can be placed
 ```
 
-Ta sama paczka obsługuje projekt fullstack (wszystko w jednym procesie) i układ backend → middleware → front (cięcie pipeline'u w dowolnym miejscu).
+The same package handles a fullstack project (everything in one process) and a backend → middleware → front end setup (cutting the pipeline at any point).
 
-## Twarde reguły
+## Hard rules
 
-1. **Formaty między etapami są czystym JSON-em** — żadnych funkcji, klas, `Symbol`, `Map`, `Date`, `undefined` jako znaczącej wartości. Pilnują tego testy round-trip `JSON.parse(JSON.stringify(x))`.
-2. **Wersjonowana koperta na drucie** — `{ dedal: 1, ... }`; nieznany komponent trafia do `fallback` renderera, zamiast wywracać stronę.
-3. **`page()` rozdziela `block` (czysty) od `data` (IO)** — layout da się zbudować bez danych (cache, osobny endpoint), loadery działają tylko tam, gdzie jest dostęp do danych.
-4. **`toProps` to czysty moduł przy kontrakcie, bez IO** — `resolve` może działać po każdej stronie sieci.
-5. **`ctx` jest serializowalny** — middleware może go przekazać dalej albo użyć w kluczu cache'a.
-6. **`build()` to tylko złożenie eksportowanych etapów** — `load`, `layout`, `assign`, `resolve` są dostępne osobno.
-7. **Rdzeń nie zna transportu ani frameworka** — zero zależności, ESM, działa w Node, na edge i w przeglądarce. Bindingi frameworków są w osobnych wejściach (`dedal/react`; `dedal/astro` w planach).
-8. **Funkcje są czyste** — nic nie mutuje wejścia, niezmienione poddrzewa są współdzielone.
-9. **Propsy przy nodzie, przed slotami i children** — `node(component, { props, slots, children })`.
+1. **Formats between stages are plain JSON** — no functions, classes, `Symbol`, `Map`, `Date`, or `undefined` as a meaningful value. Round-trip tests `JSON.parse(JSON.stringify(x))` enforce this.
+2. **Versioned envelope on the wire** — `{ dedal: 1, ... }`; an unknown component goes to the renderer's `fallback` instead of breaking the page.
+3. **`page()` separates `block` (pure) from `data` (IO)** — the layout can be built without data (cache, separate endpoint), loaders run only where data is accessible.
+4. **`toProps` is a pure module next to the contract, without IO** — `resolve` can run on either side of the network.
+5. **`ctx` is serializable** — middleware can pass it on or use it in a cache key.
+6. **`build()` is only a composition of the exported stages** — `load`, `layout`, `assign`, `resolve` are available separately.
+7. **The core knows neither the transport nor the framework** — zero dependencies, ESM, runs in Node, on the edge and in the browser. Framework bindings live in separate entry points (`dedal/react`; `dedal/astro` planned).
+8. **Functions are pure** — nothing mutates the input, unchanged subtrees are shared.
+9. **Props on the node, before slots and children** — `node(component, { props, slots, children })`.
 
-## Kontrakt komponentów
+## Component contract
 
-Jedno źródło prawdy: nazwa komponentu → propsy. Sloty (nody w propsach) oznacza się typem `Slot` / `Slot[]`:
+A single source of truth: component name → props. Slots (nodes in props) are marked with the `Slot` / `Slot[]` type:
 
 ```ts
 import type { Slot } from 'dedal'
@@ -53,9 +53,9 @@ type Contract = {
 }
 ```
 
-Kontrakt to wyłącznie typy — używa go serwer i każdy front. Rejestr frontu (`nazwa → komponent`) spełnia kontrakt przez `satisfies Registry<Contract>`.
+The contract is types only — used by the server and every front end. A front end's registry (`name → component`) satisfies the contract via `satisfies Registry<Contract>`.
 
-## API (stan obecny)
+## API (current state)
 
 ```ts
 const ui = createDedal<Contract>({ defaults: { card: { size: 'md' } } })
@@ -77,13 +77,13 @@ ui.remove(root, 'card:nth-child(n+5)')
 ui.select(root, '#featured card')
 
 const { layout, data, report } = ui.assign(root, {
-  '#hero': [hero],                                      // szczegółowe selektory przed ogólnymi
-  card: articles,                                       // dane po kolei do pasujących węzłów
-  'profile': { items: profiles, onShortage: 'keep' } // zasada dla pojedynczego selektora
+  '#hero': [hero],                                      // specific selectors before general ones
+  card: articles,                                       // data in order to the matching nodes
+  'profile': { items: profiles, onShortage: 'keep' } // policy for a single selector
 })
 ```
 
-### Strona (`page`, `section`)
+### Page (`page`, `section`)
 
 ```ts
 const categoryPage = ui.page<{ device: 'desktop' | 'mobile'; page: number }>({
@@ -108,69 +108,69 @@ const result = await categoryPage.build({ device: 'mobile', page: 1 })
 // { dedal: 1, sections: [{ key, layout }], data: { 'mainContent.0.0': ... }, report }
 ```
 
-- Klucz sekcji = prefiks ID jej węzłów (`mainContent.0.2`) i klucz jej danych — ID sekcji nie zależą od sekcji nad nią.
-- Sekcja: `layout` → `remove` → `patch` → `assign` (z `policies` sekcji nad zasadami instancji).
-- Etapy osobno: `page.layout(ctx)` (bez IO, do cache'owania), `page.load(ctx)`, `page.assign(sections, data, ctx)`; `build` je składa.
-- `report`: raport `assign` per sekcja, `unknownData` (dane bez sekcji), `removedSections`, `failedSections`, `emptySections`.
-- Sekcja pusta: sekcja, która dostała bindingi (z loadera sekcji albo z `data` strony), ale po przypisaniu żaden węzeł nie ma danych — `onEmpty: 'remove'` (domyślnie, znika) | `'keep'` | `'error'` | blok (stan pusty, np. „Brak wyników”). `required: 'card'` — pusta, gdy żaden węzeł pasujący do selektora nie dostał danych (np. nagłówek dostaje je zawsze). Nie podlegają: sekcje statyczne (bez danych) i sekcje, dla których loader albo `data` strony zwróciły `undefined` — zostają z samym layoutem (devtools ostrzegają).
-- Klucze sekcji muszą być unikalne na stronie, a ID węzłów — na całej stronie (dane to jedna mapa `ID → dane`); duplikat = wyjątek.
+- Section key = prefix of its node IDs (`mainContent.0.2`) and the key of its data — section IDs don't depend on the sections above.
+- Section: `layout` → `remove` → `patch` → `assign` (section `policies` over instance policies).
+- Stages separately: `page.layout(ctx)` (no IO, cacheable), `page.load(ctx)`, `page.assign(sections, data, ctx)`; `build` composes them.
+- `report`: the `assign` report per section, `unknownData` (data without a section), `removedSections`, `failedSections`, `emptySections`.
+- Empty section: a section that received bindings (from the section loader or the page's `data`), but after assignment no node has data — `onEmpty: 'remove'` (default, it disappears) | `'keep'` | `'error'` | a block (empty state, e.g. "No results"). `required: 'card'` — empty when no node matching the selector received data (e.g. the heading always gets it). Not subject to this: static sections (no data) and sections for which the loader or the page's `data` returned `undefined` — they stay with just the layout (devtools warn).
+- Section keys must be unique within the page, and node IDs across the whole page (data is a single `ID → data` map); a duplicate = exception.
 
-### Zapytania i loadery sekcji (`ui.query`, `section({ data })`)
+### Queries and section loaders (`ui.query`, `section({ data })`)
 
 ```ts
-// zapytanie: cache'owane źródło danych, wspólne dla stron i sekcji
+// query: a cached data source, shared by pages and sections
 const menuQuery = ui.query({
   key: ({ service }: { service: string }) => ['menu', service],
   fn: ({ service }) => api.menu(service),
   staleTime: 10 * 60_000,
 })
 
-// wspólna sekcja z własnym loaderem — dołączana do stron bez dopisywania danych w każdej
+// shared section with its own loader — added to pages without adding data in each one
 export const header = section('header', headerBlock, {
   data: async (ctx: Ctx) => ({ 'menu-item': (await menuQuery({ service: ctx.service })).items }),
 })
 
-// sekcja odroczona: w wyniku strony zaślepka, treść z page.section() w osobnym requeście (Suspense, server islands)
+// deferred section: a placeholder in the page result, content from page.section() in a separate request (Suspense, server islands)
 const forYou = section('forYou', recommendedBlock, {
   defer: { fallback: skeletonBlock },
-  optional: true,                       // błąd loadera usuwa sekcję (report.failedSections) zamiast wywracać stronę
+  optional: true,                       // a loader error removes the section (report.failedSections) instead of breaking the page
   data: async ctx => ({ card: await api.forUser(ctx.userId) }),
 })
 
 const home = ui.page<Ctx>({ sections: [header, main, forYou], data: async ctx => ({ main: { card: await api.news() } }) })
-await home.section('forYou', ctx)       // sama sekcja → resolve → <Render>
+await home.section('forYou', ctx)       // the section alone → resolve → <Render>
 ```
 
-- `page.load` uruchamia równolegle `data` strony i loadery sekcji — tylko dla sekcji obecnych w wariancie i nieusuniętych; dane sekcji z własnym loaderem zwrócone przez `data` strony = błąd.
-- `ui.query` jest opcjonalny — `data` strony i loadery sekcji to zwykłe funkcje `async`; można w nich wołać dowolne źródło (`fetch`, klient API, cache, który aplikacja już ma). `ui.query` dokłada cache serwerowy instancji: deduplikację równoległych wywołań, stale-while-revalidate (`staleTime` domyślnie 5 s, `maxAge` 5 min), `ui.invalidate(prefix)` wspólne z cache'em stron i magazyn do podmiany (np. Redis).
-- Wynik zapytania jest współdzielony między requestami i użytkownikami: dane zależne od użytkownika — użytkownik w kluczu albo bez `ui.query`.
-- Cache żyje tyle co instancja: twórz ją raz (na poziomie modułu), nie w każdym requeście.
-- Wyniki zapytań i stron z cache'u są zamrożone (tylko do odczytu): `[...items].sort()` zamiast `items.sort()`.
-- `<Render deferred={({ sectionKey, fallback }) => <Suspense fallback={fallback}>…</Suspense>}>` — streaming sekcji odroczonych w Next.
+- `page.load` runs the page's `data` and the section loaders in parallel — only for sections present in the variant and not removed; data for a section with its own loader returned by the page's `data` = error.
+- `ui.query` is optional — the page's `data` and section loaders are plain `async` functions; you can call any source in them (`fetch`, an API client, a cache the application already has). `ui.query` adds an instance-level server cache: deduplication of parallel calls, stale-while-revalidate (`staleTime` 5 s by default, `maxAge` 5 min), `ui.invalidate(prefix)` shared with the page cache, and a swappable store (e.g. Redis).
+- A query result is shared between requests and users: for user-dependent data, put the user in the key or don't use `ui.query`.
+- The cache lives as long as the instance: create it once (at module level), not in every request.
+- Query results and pages from the cache are frozen (read-only): `[...items].sort()` instead of `items.sort()`.
+- `<Render deferred={({ sectionKey, fallback }) => <Suspense fallback={fallback}>…</Suspense>}>` — streaming deferred sections in Next.
 
 ### Debug (`trace`, `dedal/devtools`)
 
 ```ts
 import { inspect } from 'dedal/devtools'
 
-const result = await home.build(ctx, { trace: true })   // omija cache strony
+const result = await home.build(ctx, { trace: true })   // bypasses the page cache
 const resolved = ui.resolve(result, { ctx, trace: true })
-const payload = inspect(result, resolved)               // JSON: sekcje, węzły, selektory, pochodzenie propsów
+const payload = inspect(result, resolved)               // JSON: sections, nodes, selectors, prop origin
 ```
 
-- `trace`: pochodzenie każdego propsa (`default`, `template`, `patch` z selektorem i sekcją, `data`) i `report.trace` (źródło danych sekcji, klucz cache'u).
-- `report.trace.timing`: czasy `layout` / `load` / `assign`, loadery (`page data` i section) i wywołania `ui.query` ze statusem cache (`hit` / `stale` / `miss` / `bypass` / `error`), przypisane do loadera. Przypisanie zapytań wymaga `AsyncLocalStorage` — globalnego w Next.js i środowiskach edge; gdzie indziej `createDedal({ AsyncLocalStorage })` z `node:async_hooks`.
-- `inspect()`: indeks węzłów z sugerowanym selektorem (najkrótszy trafiający tylko w ten węzeł), danymi i selektorem, który je przypisał, oraz problemami. Diagnoza rozjazdów: bindingi bez trafień (z podpowiedzią poprawionego selektora — także nazwy slotu, np. `:slot(badges)` → `:slot(badge)`), bindingi „zajęte” przez wcześniejszy selektor, selektory `patch` / `remove` bez efektu, dane bez miejsca, usunięte węzły i porzucone dane.
-- Funkcje do testów i logów: `reportText(payload)` (raport tekstowy), `pageMessages(payload)` (komunikaty `{ level, subject, text }`), `searchNodes(payload, query)` (wyszukiwanie po selektorze, ID, sekcji i danych).
-- Panel w przeglądarce: `<Render debug>` (znaczniki węzłów w DOM), `<DevtoolsData payload={payload} />` (payload na stronie; payloady dostreamowanych sekcji są łączone), `<Devtools />` z `dedal/react/devtools`. Panel (Shadow DOM) ma zakładki *node* (wskaż element: ID, selektor, dane, pochodzenie propsów), *tree* (wyszukiwanie: selektor, ID, sekcja, tekst w danych), *sections* (komunikaty i bindingi), *timing* (oś czasu loaderów i zapytań) oraz `copy report`; `Alt+Shift+S` otwiera / zamyka, `⇤` / `⇥` przenosi na drugą stronę, stan jest pamiętany w karcie. Poza Reactem: `mountDevtools()` z `dedal/devtools/panel`.
-- Tryb debug włącza aplikacja — payload ujawnia strukturę i dane strony. Przykład: `examples/next`, `?debug=1`.
+- `trace`: the origin of every prop (`default`, `template`, `patch` with selector and section, `data`) and `report.trace` (section data source, cache key).
+- `report.trace.timing`: `layout` / `load` / `assign` times, loaders (`page data` and section) and `ui.query` calls with cache status (`hit` / `stale` / `miss` / `bypass` / `error`), attributed to a loader. Attributing queries requires `AsyncLocalStorage` — global in Next.js and edge environments; elsewhere `createDedal({ AsyncLocalStorage })` from `node:async_hooks`.
+- `inspect()`: a node index with a suggested selector (the shortest one matching only that node), the data and the selector that assigned it, and issues. Mismatch diagnosis: bindings without matches (with a hint for the corrected selector — including slot names, e.g. `:slot(badges)` → `:slot(badge)`), bindings "taken" by an earlier selector, `patch` / `remove` selectors with no effect, data without a place, removed nodes and dropped data.
+- Functions for tests and logs: `reportText(payload)` (text report), `pageMessages(payload)` (`{ level, subject, text }` messages), `searchNodes(payload, query)` (search by selector, ID, section and data).
+- Browser panel: `<Render debug>` (node markers in the DOM), `<DevtoolsData payload={payload} />` (payload on the page; payloads of streamed sections are merged), `<Devtools />` from `dedal/react/devtools`. The panel (Shadow DOM) has the tabs *node* (pick an element: ID, selector, data, prop origin), *tree* (search: selector, ID, section, text in data), *sections* (messages and bindings), *timing* (timeline of loaders and queries) and `copy report`; `Alt+Shift+S` opens / closes, `⇤` / `⇥` moves it to the other side, the state is remembered in the tab. Outside React: `mountDevtools()` from `dedal/devtools/panel`.
+- Debug mode is enabled by the application — the payload reveals the page's structure and data. Example: `examples/next`, `?debug=1`.
 
-Przewodnik (włączanie, bezpieczne włączanie na produkcji, inne środowiska, panel, typowe problemy): strona *Devtools* w dokumentacji [`examples/next`](examples/next) (`/docs/devtools`).
+Guide (enabling, safely enabling in production, other environments, the panel, common problems): the *Devtools* page in the [`examples/next`](examples/next) documentation (`/docs/devtools`).
 
-### Renderowalne drzewo (`resolve`)
+### Renderable tree (`resolve`)
 
 ```ts
-// contract/to-props.ts — czysty moduł przy kontrakcie, importowany tam, gdzie działa resolve
+// contract/to-props.ts — a pure module next to the contract, imported wherever resolve runs
 export const toProps: ToProps<Contract> = {
   card: ({ props, data }: ToPropsInput<Contract, 'card', Article>) =>
     data ? { ...props, title: data.headline, href: data.url } : props,
@@ -185,101 +185,102 @@ const resolved = ui.resolve(await page.build(ctx), { ctx, trace: isDev })
 type ResolvedNode = { key; component; props; slots?; children?; trace? }
 ```
 
-- Propsy węzła: `toProps[component]({ props, data, node, ctx })`; bez mapowania — głębokie złączenie propsów layoutu z danymi (dane wygrywają). Mapowanie wywoływane jest także dla węzłów bez danych.
-- Wynik mapowania jest sprawdzany kontraktem; typ `data` można zawęzić w implementacji (`ToPropsInput<C, 'card', Article>`).
-- Problemy nie wywracają renderu: dane nie-obiektowe bez mapowania, wyjątek w mapowaniu, dane bez węzła (np. rozjazd cache layoutu z danymi) trafiają do `issues`, a węzeł dostaje propsy z layoutu. `onIssue: 'throw'` zamienia to na wyjątek.
-- `trace: true` — przy każdym węźle `trace: { prop: PropSource }`, gdzie `PropSource` to `{ from: 'default' | 'template' | 'patch' | 'layout' | 'data' }` (`patch` z `selector` i `section`; `layout`, gdy layout zbudowano bez `trace`).
-- Wejście jest sprawdzane pod kątem wersji koperty; `resolve` działa po każdej stronie sieci (wejście po `JSON.parse` daje ten sam wynik).
+- Node props: `toProps[component]({ props, data, node, ctx })`; without a mapping — a deep merge of layout props with data (data wins). The mapping is also called for nodes without data.
+- The mapping result is checked against the contract; the `data` type can be narrowed in the implementation (`ToPropsInput<C, 'card', Article>`).
+- Issues don't break rendering: non-object data without a mapping, an exception in a mapping, data without a node (e.g. a mismatch between the cached layout and the data) go to `issues`, and the node gets the props from the layout. `onIssue: 'throw'` turns this into an exception.
+- `trace: true` — on every node `trace: { prop: PropSource }`, where `PropSource` is `{ from: 'default' | 'template' | 'patch' | 'layout' | 'data' }` (`patch` with `selector` and `section`; `layout` when the layout was built without `trace`).
+- The input is checked for the envelope version; `resolve` runs on either side of the network (input after `JSON.parse` gives the same result).
 
-### Renderer React (`dedal/react`)
+### React renderer (`dedal/react`)
 
 ```tsx
 import { Render, type Registry } from 'dedal/react'
 
 export const registry = {
   card: ({ title, href }) => <a href={href}>{title}</a>,
-  hero: ({ title, media }) => <header>{media}<h1>{title}</h1></header>,   // slot jako prop (ReactNode)
-  tabs: ({ labels, content }) => ...,                                      // slot-lista jako ReactNode[]
+  hero: ({ title, media }) => <header>{media}<h1>{title}</h1></header>,   // slot as a prop (ReactNode)
+  tabs: ({ labels, content }) => ...,                                      // list slot as ReactNode[]
   // ...
-} satisfies Registry<Contract>   // brak komponentu albo złe propsy = błąd kompilacji
+} satisfies Registry<Contract>   // a missing component or wrong props = compile error
 
 <Render tree={resolved} registry={registry} fallback={Missing} />
 ```
 
-- Bez hooków i stanu — działa w React Server Components, przy SSR i na kliencie; komponenty z rejestru mogą być klienckie.
-- Sloty trafiają do propsów o nazwie slotu, dzieci layoutu do `children` (prop `children` z kontraktu zostaje, gdy węzeł nie ma dzieci).
-- Nieznany komponent → `fallback` (domyślnie nic).
-- React to opcjonalny `peerDependency`; rdzeń `dedal` go nie importuje.
+- No hooks and no state — works in React Server Components, with SSR and on the client; registry components can be client components.
+- Slots go to props named after the slot, layout children to `children` (the contract's `children` prop stays when the node has no children).
+- Unknown component → `fallback` (nothing by default).
+- React is an optional `peerDependency`; the `dedal` core doesn't import it.
 
-Przykład: [`examples/next`](examples/next) — ta sama strona na Radix Themes i shadcn/ui (jeden kontrakt, dwa rejestry), przełączanie `ctx`, tryb debug, endpoint JSON. Dokumentacja na przykładach: `/docs` w tym przykładzie — wprowadzenie do server-driven UI dla nowych osób w zespole, tutorial w 13 krokach (z ćwiczeniem z debugowania) i każda możliwość, ostrzeżenie i błąd jako osobna strona z opisem, kodem, wynikiem i raportem devtools.
+Example: [`examples/next`](examples/next) — the same page on Radix Themes and shadcn/ui (one contract, two registries), switching `ctx`, debug mode, a JSON endpoint. Documentation by example: `/docs` in this example — an introduction to server-driven UI for new team members, a 13-step tutorial (with a debugging exercise), and every feature, warning and error as a separate page with a description, code, result and devtools report.
 
-Przykład: [`examples/custom-ds`](examples/custom-ds) — strona na własnym design systemie, bez renderera: zapytania, sekcje wspólne z loaderami, warianty desktop / mobile, sloty (karuzela, CTA), bindingi per komponent, sekcja zależna od danych.
+Example: [`examples/custom-ds`](examples/custom-ds) — a page on a custom design system, without a renderer: queries, shared sections with loaders, desktop / mobile variants, slots (carousel, CTA), per-component bindings, a data-dependent section.
 
-### Cache stron (`page({ cache })`)
+### Page cache (`page({ cache })`)
 
 ```ts
-const ui = createDedal<Contract>({ toProps, cache: { staleTime: 5_000 } })   // opcjonalnie: magazyn i czasy
+const ui = createDedal<Contract>({ toProps, cache: { staleTime: 5_000 } })   // optional: store and timings
 
 const home = ui.page<Ctx>({ sections, data, cache: { key: ctx => ['home', ctx.device] } })
-await home.build(ctx)          // z cache'u
-await ui.invalidate(['home'])  // np. po publikacji
+await home.build(ctx)          // from the cache
+await ui.invalidate(['home'])  // e.g. after publishing
 ```
 
-- Instancja trzyma wspólny magazyn i czasy, strona podaje klucz — `key` (tablica; wszystko, od czego zależą sekcje i dane; `undefined` = bez cache'u), `staleTime` (domyślnie 5 s), `maxAge` (domyślnie 5 min), `invalidate(prefix)`.
-- Stale-while-revalidate: wpis od razu, odświeżanie w tle (`waitUntil` na edge); starszy niż `maxAge` — request czeka na `build`.
-- Równoległe requesty o ten sam klucz czekają na jeden `build`; błędy nie trafiają do cache'u.
-- Magazyn: domyślnie `memoryStore({ max })` (LRU, zamrożone kopie wpisów); Redis / Mongo / KV przez interfejs `Store`.
-- Strona bez `cache` nie jest cache'owana. Dane spersonalizowane: klucz musi obejmować użytkownika albo strona nie ma `cache`.
+- The instance holds the shared store and timings, the page provides the key — `key` (an array; everything the sections and data depend on; `undefined` = no cache), `staleTime` (5 s by default), `maxAge` (5 min by default), `invalidate(prefix)`.
+- Stale-while-revalidate: the entry is returned immediately, refreshed in the background (`waitUntil` on the edge); older than `maxAge` — the request waits for `build`.
+- Parallel requests for the same key wait for a single `build`; errors are not cached.
+- Store: `memoryStore({ max })` by default (LRU, frozen copies of entries); Redis / Mongo / KV via the `Store` interface.
+- A page without `cache` is not cached. Personalized data: the key must include the user or the page has no `cache`.
 
-Więcej (wdrożenia, magazyn, query, debug): strona *Cache & queries* w dokumentacji [`examples/next`](examples/next) (`/docs/cache`).
+More (deployments, store, query, debug): the *Cache & queries* page in the [`examples/next`](examples/next) documentation (`/docs/cache`).
 
-### Przypisanie danych (`assign`)
+### Data assignment (`assign`)
 
-- Elementy danych trafiają po kolei do węzłów pasujących do selektora, w kolejności drzewa.
-- Selektory przetwarzane są w kolejności wpisów; węzeł zajęty przez wcześniejszy selektor (nawet bez danych) jest pomijany przez kolejne.
-- `null` / `undefined` w danych = brak danych dla węzła.
-- `onShortage` — węzeł bez danych: `'remove'` (domyślnie) | `'keep'` | `'error'`.
-- `onSurplus` — dane bez węzła: `'ignore'` (domyślnie) | `'error'`.
-- Zasady (od najsłabszej): domyślne paczki → `createDedal({ assign })` → `policies` sekcji albo wywołanie `assign(..., policies)` → `{ items, onShortage }` dla selektora.
-- Usunięcie węzła usuwa jego poddrzewo; dane potomków trafiają do `report.dropped`.
-- Wynik (`layout`, `data`, `report`) jest czystym JSON-em; `data` to płaska mapa `ID → dane`.
+- Data items go in order to the nodes matching the selector, in tree order.
+- Selectors are processed in entry order; a node taken by an earlier selector (even without data) is skipped by later ones.
+- `null` / `undefined` in the data = no data for the node.
+- `onShortage` — a node without data: `'remove'` (default) | `'keep'` | `'error'`.
+- `onSurplus` — data without a node: `'ignore'` (default) | `'error'`.
+- Policies (weakest first): package defaults → `createDedal({ assign })` → section `policies` or the `assign(..., policies)` call → `{ items, onShortage }` for a selector.
+- Removing a node removes its subtree; the descendants' data goes to `report.dropped`.
+- The result (`layout`, `data`, `report`) is plain JSON; `data` is a flat `ID → data` map.
 
 ### ID
 
-Pozycyjne, nieprzezroczyste — służą tylko do kluczowania (dane, `key` w rendererze). Domyślnie:
+Positional, opaque — used only for keying (data, `key` in the renderer). By default:
 
-| węzeł | ID |
+| node | ID |
 |---|---|
-| korzeń | `news` |
-| dziecko | `news.0`, `news.0.2` |
-| slot pojedynczy | `news.0:media` |
-| slot-lista | `news.1:content.0` |
+| root | `news` |
+| child | `news.0`, `news.0.2` |
+| single slot | `news.0:media` |
+| list slot | `news.1:content.0` |
 
-Generator można podmienić opcją `id` (`createDedal({ id })`). Własny generator musi dawać ID unikalne na całej stronie — najprościej z prefiksem (kluczem sekcji), jak domyślny; duplikat w sekcji albo między sekcjami rzuca wyjątek.
+The generator can be replaced with the `id` option (`createDedal({ id })`). A custom generator must produce IDs unique across the whole page — the simplest way is with a prefix (the section key), like the default one; a duplicate within a section or between sections throws an exception.
 
-### Selektory (składnia CSS)
+### Selectors (CSS syntax)
 
-| Selektor | Znaczenie |
+| Selector | Meaning |
 |---|---|
-| `card`, `*` | komponent / dowolny |
+| `card`, `*` | component / any |
 | `#hero` | alias |
-| `[size]`, `[size=small]`, `[style.height="100%"]` | prop istnieje / ma wartość |
-| `:first-child`, `:last-child`, `:nth-child(an+b \| odd \| even)`, `:nth-last-child(...)` | pozycja wśród rodzeństwa (od 1), w slocie-liście — w obrębie slotu |
-| `:slot`, `:slot(media)` | węzeł w dowolnym / konkretnym slocie rodzica |
-| `:root` | korzeń drzewa (sekcji) |
-| `a b`, `a > b`, `a, b` | potomek (także przez sloty), dziecko lub zawartość slotu, lista |
+| `[size]`, `[size=small]`, `[style.height="100%"]` | prop exists / has a value |
+| `:first-child`, `:last-child`, `:nth-child(an+b \| odd \| even)`, `:nth-last-child(...)` | position among siblings (from 1); in a list slot — within the slot |
+| `:slot`, `:slot(media)` | node in any / a specific slot of the parent |
+| `:root` | root of the tree (section) |
+| `a b`, `a > b`, `a, b` | descendant (also through slots), child or slot content, list |
 
-Kolejność w drzewie: najpierw sloty (w kolejności kluczy), potem children. Przy kilku patchach na ten sam węzeł wygrywa późniejszy wpis; selektory dopasowywane są do drzewa wejściowego (jak CSS do DOM).
+Tree order: slots first (in key order), then children. With several patches on the same node, the later entry wins; selectors are matched against the input tree (like CSS against the DOM).
 
-## Stan
+## Status
 
-Wersja **0.6.0**. Ostatnie zmiany:
-- **0.6.0** — nowa nazwa: **Dedal** (wcześniej ssduie). Zmiany łamiące: paczka i importy `dedal`, `dedal/react`, `dedal/devtools`…; `createDedal`, `DedalOptions`, `Dedal`; koperta na drucie `{ dedal: 1, … }` (zamiast `ssduie`); znaczniki devtools `<dedal-node data-dedal-key>`, `data-dedal-devtools`, `#dedal-devtools`. API i zachowanie bez zmian.
-- **0.5.3** — `<Devtools />` bez propsa `open` przywraca stan panelu zapamiętany w karcie przeglądarki (wcześniej zawsze startował zamknięty); przewodnik po devtools przeniesiony do `/docs` (strona *Devtools*: włączanie w Next, bezpieczne włączanie, typowe problemy, koszty); kontrakty deweloperskie z `docs/` zastąpione przez [docs/ROADMAP.md](docs/ROADMAP.md).
-- **0.5.2** — devtools podpowiadają poprawną nazwę slotu dla bindingu bez trafień (`card > :slot(badges)` → `card > :slot(badge)`); dokumentacja `examples/next` (`/docs`) sprawdzona z kodem i rozbudowana dla osób nowych w server-driven UI.
-- **0.5.1** — ID węzłów unikalne między sekcjami (wyjątek przy duplikacie z własnego generatora); problemy węzłów (`resolve` issues) w komunikatach i raporcie devtools; czytelniejsze komunikaty `required` / `remove`.
-- **0.5.0** — devtools: zakładka *timing*, `copy report`, wyszukiwanie w drzewie (selektor, ID, sekcja, dane), zapamiętany stan panelu, `Alt+Shift+S`, przełączanie strony panelu.
+Version **0.6.1**. Recent changes:
+- **0.6.1** — README, `/docs`, examples and tests in English; English identifiers, URLs and data in the examples. No changes to the API or behavior.
+- **0.6.0** — new name: **Dedal** (formerly ssduie). Breaking changes: package and imports `dedal`, `dedal/react`, `dedal/devtools`…; `createDedal`, `DedalOptions`, `Dedal`; wire envelope `{ dedal: 1, … }` (instead of `ssduie`); devtools markers `<dedal-node data-dedal-key>`, `data-dedal-devtools`, `#dedal-devtools`. API and behavior unchanged.
+- **0.5.3** — `<Devtools />` without the `open` prop restores the panel state remembered in the browser tab (previously it always started closed); the devtools guide moved to `/docs` (the *Devtools* page: enabling in Next, safe enabling, common problems, costs); the developer contracts in `docs/` replaced by [docs/ROADMAP.md](docs/ROADMAP.md).
+- **0.5.2** — devtools suggest the correct slot name for a binding without matches (`card > :slot(badges)` → `card > :slot(badge)`); the `examples/next` documentation (`/docs`) checked against the code and expanded for people new to server-driven UI.
+- **0.5.1** — node IDs unique across sections (exception on a duplicate from a custom generator); node issues (`resolve` issues) in devtools messages and report; clearer `required` / `remove` messages.
+- **0.5.0** — devtools: *timing* tab, `copy report`, tree search (selector, ID, section, data), remembered panel state, `Alt+Shift+S`, switching the panel side.
 
-Gotowe: kontrakt i typy, `createDedal`, buildery, `layout()` ze slotami, selektory, `patch` / `remove` / `select` (z zawężaniem typu dla `select(root, 'card')`), `assign`, `page` / `section`, `resolve` / `resolveTree`, `dedal/react`, cache stron, zapytania, loadery sekcji, sekcje odroczone, `dedal/devtools` (inspect, panel), `examples/next`.
+Done: contract and types, `createDedal`, builders, `layout()` with slots, selectors, `patch` / `remove` / `select` (with type narrowing for `select(root, 'card')`), `assign`, `page` / `section`, `resolve` / `resolveTree`, `dedal/react`, page cache, queries, section loaders, deferred sections, `dedal/devtools` (inspect, panel), `examples/next`.
 
-Dalej: `dedal/astro`; `assign` — usuwanie pustych kontenerów (`prune`) i węzłów powiązanych (`removeWith`); cache — przykład adaptera Redis, śledzenie zależności stron od zapytań; devtools — diff buildów; wydajność — `layout()` i jedno przejście w `assign`. Szczegóły, otwarte pytania i zasady rozwoju: [docs/ROADMAP.md](docs/ROADMAP.md). Pomiary: `npm run bench`.
+Next: `dedal/astro`; `assign` — removing empty containers (`prune`) and related nodes (`removeWith`); cache — a Redis adapter example, tracking page dependencies on queries; devtools — build diff; performance — `layout()` and a single pass in `assign`. Details, open questions and development principles: [docs/ROADMAP.md](docs/ROADMAP.md). Measurements: `npm run bench`.

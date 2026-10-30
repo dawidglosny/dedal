@@ -11,8 +11,8 @@ type Ctx = { device: 'desktop' | 'mobile' }
 const ui = createDedal<Contract>({ defaults: { card: { size: 'md' }, grid: { gap: 'md' } } })
 const { node, repeat, section } = ui
 
-describe('pochodzenie propsów w layoucie', () => {
-  it('layout z trace odróżnia default od template', () => {
+describe('props source in the layout', () => {
+  it('layout with trace tells default from template', () => {
     const root = ui.layout(node('grid', { props: { columns: 2 }, children: [node('card', { props: { title: 'x' } })] }), 'n', {
       trace: true,
     })
@@ -21,13 +21,13 @@ describe('pochodzenie propsów w layoucie', () => {
     expect(root.children![0].trace).toEqual({ size: { from: 'default' }, title: { from: 'template' } })
   })
 
-  it('template nadpisujący wartość domyślną to template', () => {
+  it('a template overriding a default value counts as template', () => {
     const root = ui.layout(node('card', { props: { size: 'lg' } }), 'n', { trace: true })
 
     expect(root.trace).toEqual({ size: { from: 'template' } })
   })
 
-  it('patch z trace zapisuje selektor i sekcję; późniejszy patch wygrywa', () => {
+  it('patch with trace records the selector and section; a later patch wins', () => {
     const root = ui.layout(node('grid', { children: [repeat(node('card'), 2)] }), 'n', { trace: true })
     const patched = ui.patch(root, { card: { size: 'sm' }, 'card:first-child': { size: 'lg', style: { height: '1px' } } }, {
       trace: true,
@@ -41,7 +41,7 @@ describe('pochodzenie propsów w layoucie', () => {
     expect(patched.children![1].trace).toEqual({ size: { from: 'patch', selector: 'card', section: 'news' } })
   })
 
-  it('bez trace layout i patch nie dodają pola trace', () => {
+  it('without trace layout and patch add no trace field', () => {
     const root = ui.patch(ui.layout(node('grid', { children: [node('card')] }), 'n'), { card: { size: 'sm' } })
 
     expect(JSON.stringify(root)).not.toContain('trace')
@@ -58,7 +58,7 @@ describe('build(ctx, { trace })', () => {
         }),
         section('menu', node('card'), { data: async () => ({ card: [{ title: 'M' }] }) }),
         section('forYou', node('card'), { defer: { fallback: node('skeleton') }, data: async () => ({ card: [] }) }),
-        section('static', node('card', { props: { title: 'stały' } })),
+        section('static', node('card', { props: { title: 'fixed' } })),
       ],
       data: load,
       cache: { key: ctx => ['home', ctx.device] },
@@ -66,7 +66,7 @@ describe('build(ctx, { trace })', () => {
     return { home, load }
   }
 
-  it('pochodzenie propsów przechodzi do resolve: default, template, patch z sekcją, dane', async () => {
+  it('props source carries over to resolve: default, template, patch with section, data', async () => {
     const { home } = setup()
     const resolved = ui.resolve(await home.build({ device: 'desktop' }, { trace: true }), { trace: true })
     const [first, second] = resolved.sections[0].tree.children!
@@ -78,7 +78,7 @@ describe('build(ctx, { trace })', () => {
     expect(second.trace).toEqual({ size: { from: 'default' }, title: { from: 'data' } })
   })
 
-  it('report.trace: źródła danych sekcji i klucz cache’u', async () => {
+  it('report.trace: section data sources and the cache key', async () => {
     const { home } = setup()
     const { report } = await home.build({ device: 'mobile' }, { trace: true })
 
@@ -89,7 +89,7 @@ describe('build(ctx, { trace })', () => {
     })
   })
 
-  it('trace omija cache: nie czyta z niego i nie zapisuje', async () => {
+  it('trace bypasses the cache: neither reads from nor writes to it', async () => {
     const { home, load } = setup()
 
     await home.build({ device: 'desktop' })
@@ -102,14 +102,14 @@ describe('build(ctx, { trace })', () => {
     expect(JSON.stringify(normal)).not.toContain('"trace"')
   })
 
-  it('wynik z trace przechodzi przez JSON bez zmian', async () => {
+  it('a result with trace round-trips through JSON unchanged', async () => {
     const { home } = setup()
     const result = await home.build({ device: 'desktop' }, { trace: true })
 
     expect(JSON.parse(JSON.stringify(result))).toEqual(result)
   })
 
-  it('page.section z trace: źródło sekcji, bez klucza cache’u strony', async () => {
+  it('page.section with trace: section source, no page cache key', async () => {
     const { home } = setup()
     const { report } = await home.section('menu', { device: 'desktop' }, { trace: true })
 

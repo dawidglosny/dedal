@@ -10,7 +10,7 @@ const blocksRepeat = ui.page<Ctx>({
     section(
       'news',
       node('section', {
-        props: { title: 'Najnowsze' },
+        props: { title: 'Latest' },
         children: [node('grid', { props: { columns: 3 }, children: [repeat(node('card'), 3)] })],
       })
     ),
@@ -43,7 +43,7 @@ const slots = ui.page<Ctx>({
       hero: {
         hero: [featured],
         image: [featured],
-        'hero > :slot(actions)': [{ label: 'Czytaj' }, { label: 'Wszystkie' }],
+        'hero > :slot(actions)': [{ label: 'Read' }, { label: 'All' }],
       },
       news: {
         card: rest,
@@ -138,9 +138,9 @@ const remove = ui.page<Ctx>({
 // #region remove-root
 const removeRoot = ui.page<Ctx>({
   sections: [
-    section('news', cards(ui, 'Najnowsze', 3)),
+    section('news', cards(ui, 'Latest', 3)),
     // removing the root removes the whole section — e.g. a section hidden in some variant
-    section('promo', cards(ui, 'Promocje', 3), { remove: ':root' }),
+    section('promo', cards(ui, 'Promotions', 3), { remove: ':root' }),
   ],
   data: async () => ({ news: { card: await articles(3) } }),
 })
@@ -168,7 +168,7 @@ export const layoutCases: DocCase[] = [
     title: 'Blocks and repeat',
     level: 'ok',
     description:
-      'Layout to drzewo node: `node(component, { props, children, slots, alias })`. `repeat(node, n)` powiela node `n` razy — każda kopia dostaje własne ID (`news.0.0`, `news.0.1`…).\n\nBlok to zwykła wartość albo funkcja — można go parametryzować i składać z mniejszych bloków.',
+      'Layout is a tree of nodes: `node(component, { props, children, slots, alias })`. `repeat(node, n)` duplicates a node `n` times — each copy gets its own ID (`news.0.0`, `news.0.1`…).\n\nA block is a plain value or a function — you can parametrise it and compose it from smaller blocks.',
     run: build(ui, blocksRepeat),
   },
   {
@@ -176,7 +176,7 @@ export const layoutCases: DocCase[] = [
     title: 'Slots',
     level: 'ok',
     description:
-      'Slot to miejsce w komponencie na inny komponent (prop typu `Slot` w kontrakcie). Pojedynczy slot — jeden node (`media`), slot-lista — tablica node (`actions`).\n\nData do slotów przypisuje się selektorem `:slot(nazwa)`, np. `card > :slot(badge)`. Renderer przekazuje sloty jako propsy-elementy React.',
+      'A slot is a place in a component for another component (a prop of type `Slot` in the contract). A single slot — one node (`media`); a list slot — an array of nodes (`actions`).\n\nData is assigned to slots with the `:slot(name)` selector, e.g. `card > :slot(badge)`. The renderer passes slots as props holding React elements.',
     run: build(ui, slots),
   },
   {
@@ -184,7 +184,7 @@ export const layoutCases: DocCase[] = [
     title: 'Aliases',
     level: 'ok',
     description:
-      'Alias (`alias: "featured"`) nazywa node w bloku — selektor `#featured` trafia w niego niezależnie od pozycji. Przydaje się do wyróżnionych miejsc: data, patch.\n\nBinding szczegółowy (`#featured`) wpisuje się przed ogólnym (`card`) — węzeł zajęty przez wcześniejszy binding jest pomijany przez kolejne.',
+      'An alias (`alias: "featured"`) names a node in a block — the selector `#featured` hits it regardless of its position. Useful for featured spots: data, patch.\n\nA specific binding (`#featured`) goes before a general one (`card`) — a node taken by an earlier binding is skipped by the later ones.',
     run: build(ui, aliases),
   },
   {
@@ -192,7 +192,7 @@ export const layoutCases: DocCase[] = [
     title: 'Patch and selectors',
     level: 'ok',
     description:
-      '`patch` w section nakłada props na node trafione selektorami w składni CSS:\n\n- component: `card`; alias: `#featured`; korzeń section: `:root`\n- pozycja: `:first-child`, `:last-child`, `:nth-child(even)`, `:nth-child(3n+1)`\n- prop z layoutu: `[size=lg]`, `[size]`\n- dziecko i potomek: `grid > card`, `section card`; slot: `:slot(badge)`\n\nSelektory dopasowuje się do drzewa przed patchem — `[size=lg]` widzi `size` ustawiony w bloku, ale nie przez inny patch. W devtools przy propsie widać, który patch go ustawił (`← patch card:last-child`).',
+      '`patch` in a section applies props to the nodes matched by selectors in CSS syntax:\n\n- component: `card`; alias: `#featured`; section root: `:root`\n- position: `:first-child`, `:last-child`, `:nth-child(even)`, `:nth-child(3n+1)`\n- a prop from the layout: `[size=lg]`, `[size]`\n- child and descendant: `grid > card`, `section card`; slot: `:slot(badge)`\n\nSelectors are matched against the tree before patching — `[size=lg]` sees a `size` set in the block, but not one set by another patch. In devtools, next to a prop you can see which patch set it (`← patch card:last-child`).',
     run: build(ui, patchSelectors),
   },
   {
@@ -200,7 +200,7 @@ export const layoutCases: DocCase[] = [
     title: 'Patch that matches nothing',
     level: 'warning',
     description:
-      'Selector patcha, który nie trafia w żaden node (literówka, zmieniony blok), nie zmienia niczego — strona działa, ale patch nie ma efektu.\n\nDevtools (*sections*): `! patch “crad” matches no node in this section — it has no effect. Did you mean: card?` — podpowiedź to poprawiony selector, który trafia. Tak samo dla `remove`.',
+      'A patch selector that matches no node (a typo, a changed block) changes nothing — the page works, but the patch has no effect.\n\nDevtools (*sections*): `! patch “crad” matches no node in this section — it has no effect. Did you mean: card?` — the suggestion is a corrected selector that does match. The same goes for `remove`.',
     run: build(ui, patchNoMatch),
   },
   {
@@ -208,7 +208,7 @@ export const layoutCases: DocCase[] = [
     title: 'Remove',
     level: 'ok',
     description:
-      '`remove` w section usuwa node trafione selektorami (razem z poddrzewem, także ze slotów) — przed `patch` i przed przypisaniem data. Ten sam blok może dzięki temu mieć wariant kompaktowy.',
+      '`remove` in a section removes the nodes matched by selectors (together with their subtree, slots included) — before `patch` and before data is assigned. This lets the same block have a compact variant.',
     run: build(ui, remove),
   },
   {
@@ -216,7 +216,7 @@ export const layoutCases: DocCase[] = [
     title: 'Removing the section root',
     level: 'warning',
     description:
-      '`remove: ":root"` usuwa korzeń section, czyli całą section. Jej loader się nie wykonuje; data strony pod jej key trafiłyby do `unknownData`.\n\nDevtools (*sections*): `! promo removed — the section\'s remove option removed its root`; w raporcie `report.removedSections`.',
+      '`remove: ":root"` removes the section root, i.e. the whole section. Its loader doesn\'t run; page data under its key would end up in `unknownData`.\n\nDevtools (*sections*): `! promo removed — the section\'s remove option removed its root`; in the report: `report.removedSections`.',
     run: build(ui, removeRoot),
   },
   {
@@ -224,7 +224,7 @@ export const layoutCases: DocCase[] = [
     title: 'Variants (ctx)',
     level: 'ok',
     description:
-      '`sections` może być funkcją `ctx` — inne bloki, props albo zestaw section per wariant (tu `device: "mobile"`: 1 kolumna, 2 card). `ctx` powinien być serializowalny; jeśli strona ma `cache`, `cache.key(ctx)` musi uwzględnić to, od czego zależą warianty (tu `device`).',
+      '`sections` can be a function of `ctx` — different blocks, props or a set of sections per variant (here `device: "mobile"`: 1 column, 2 cards). `ctx` should be serializable; if the page has `cache`, `cache.key(ctx)` must include whatever the variants depend on (here `device`).',
     run: build(ui, variants, { device: 'mobile' }),
   },
 ]

@@ -13,7 +13,7 @@ const { badge: _badge, ...withoutBadge } = radixThemes
 const registryWithoutBadge: Partial<Registry<Contract>> = withoutBadge
 
 const registryMissing = ui.page<Ctx>({
-  sections: [section('news', cards(ui, 'Najnowsze', 3))],
+  sections: [section('news', cards(ui, 'Latest', 3))],
   data: async () => {
     const list = await articles(3)
     return { news: { card: list, 'card > :slot(badge)': list.map(article => article.category) } }
@@ -37,7 +37,7 @@ const dataNotObject = ui.page<Ctx>({
 // #region to-props-throws
 const toPropsThrows = ui.page<Ctx>({
   // toProps.list: ({ data }) => ({ items: data.map(…) }) — data must be an array of articles
-  sections: [section('shortcuts', node('section', { props: { title: 'Na skróty' }, children: [node('list', { props: { items: [] } })] }))],
+  sections: [section('shortcuts', node('section', { props: { title: 'Shortcuts' }, children: [node('list', { props: { items: [] } })] }))],
   data: async () => ({ shortcuts: { list: ['not a list'] } }),
 })
 // #endregion
@@ -52,7 +52,7 @@ const withBrokenToProps = docsUi({
 })
 
 const toPropsNonObject = withBrokenToProps.page<Ctx>({
-  sections: [withBrokenToProps.section('news', cards(withBrokenToProps, 'Najnowsze', 2))],
+  sections: [withBrokenToProps.section('news', cards(withBrokenToProps, 'Latest', 2))],
   data: async () => {
     const list = await articles(2)
     return { news: { card: list, 'card > :slot(badge)': list.map(article => article.category) } }
@@ -63,13 +63,13 @@ const toPropsNonObject = withBrokenToProps.page<Ctx>({
 // #region data-without-node
 async function dataWithoutNode(): Promise<CaseOutput> {
   const page = ui.page<Ctx>({
-    sections: [section('news', cards(ui, 'Najnowsze', 2))],
+    sections: [section('news', cards(ui, 'Latest', 2))],
     data: async () => ({ news: { card: await articles(2) } }),
   })
   return {
     ...(await build(ui, page)()),
     // data for a node that is not in the layout — e.g. a cached layout combined with fresh data
-    beforeResolve: result => ({ ...result, data: { ...result.data, 'news.0.7': { headline: 'Stary układ' } } }),
+    beforeResolve: result => ({ ...result, data: { ...result.data, 'news.0.7': { headline: 'Old layout' } } }),
   }
 }
 // #endregion
@@ -90,7 +90,7 @@ export const renderingCases: DocCase[] = [
     title: 'Component missing from the registry',
     level: 'error',
     description:
-      'Registry mapuje nazwy component z kontraktu na komponenty React. `satisfies Registry<Contract>` wyłapuje brak przy kompilacji; w runtime (np. starszy front, nowszy serwer) `<Render>` renderuje `fallback` albo nic.\n\nZ `<Render debug>` node bez component dostaje znacznik `data-dedal-missing`, a devtools: `✗ badge is not in the registry — 3 nodes rendered by the fallback (or nothing): …`; w *tree* `!`.',
+      'The registry maps component names from the contract to React components. `satisfies Registry<Contract>` catches a missing one at compile time; at runtime (e.g. an older frontend, a newer server) `<Render>` renders the `fallback` or nothing.\n\nWith `<Render debug>` a node without a component gets the `data-dedal-missing` marker, and devtools show: `✗ badge is not in the registry — 3 nodes rendered by the fallback (or nothing): …`; in *tree* a `!`.',
     registry: registryWithoutBadge,
     run: build(ui, registryMissing),
   },
@@ -99,7 +99,7 @@ export const renderingCases: DocCase[] = [
     title: 'Data that is not an object',
     level: 'error',
     description:
-      'Bez `toProps` data node są złączane z propsami — muszą być obiektem. Gdy przyjdzie string albo liczba, `resolve` zgłasza issue, a node dostaje props z layoutu (render się nie wywraca).\n\nDevtools: `!` w *tree*, w *node* — `data for "grid" is not an object (got string "two columns") — pass an object or add toProps for "grid"; the node keeps its layout props`.',
+      'Without `toProps` a node\'s data is merged with its props — so it must be an object. When a string or a number arrives, `resolve` reports an issue and the node gets the props from the layout (rendering doesn\'t fail).\n\nDevtools: `!` in *tree*, and in *node* — `data for "grid" is not an object (got string "two columns") — pass an object or add toProps for "grid"; the node keeps its layout props`.',
     run: build(ui, dataNotObject),
   },
   {
@@ -107,7 +107,7 @@ export const renderingCases: DocCase[] = [
     title: 'toProps that throws',
     level: 'error',
     description:
-      'Wyjątek w `toProps` (np. data w innym kształcie, niż mapowanie zakłada) jest łapany — node dostaje props z layoutu, a issue trafia do `resolved.issues`.\n\nDevtools: `toProps("list") threw: … — the node keeps its layout props`.',
+      'An exception in `toProps` (e.g. data in a different shape than the mapping expects) is caught — the node gets the props from the layout, and the issue goes to `resolved.issues`.\n\nDevtools: `toProps("list") threw: … — the node keeps its layout props`.',
     run: build(ui, toPropsThrows),
   },
   {
@@ -115,7 +115,7 @@ export const renderingCases: DocCase[] = [
     title: 'toProps returning a non-object',
     level: 'error',
     description:
-      '`toProps` musi zwrócić obiekt props. Inna wartość (tu string — mapowanie zwraca samo data zamiast `{ label }`) — issue, node dostaje props z layoutu.\n\nDevtools: `toProps("badge") must return an object, got string "Kategoria A" — the node keeps its layout props`.',
+      '`toProps` must return a props object. Any other value (here a string — the mapping returns the data itself instead of `{ label }`) is an issue, and the node gets the props from the layout.\n\nDevtools: `toProps("badge") must return an object, got string "Category A" — the node keeps its layout props`.',
     run: build(withBrokenToProps, toPropsNonObject),
   },
   {
@@ -123,7 +123,7 @@ export const renderingCases: DocCase[] = [
     title: 'Data without a node',
     level: 'error',
     description:
-      'Data przypisane do ID, którego nie ma w layoucie — zwykle layout i data są rozjechane (np. layout z cache, data świeże, a blok się zmienił). Data są pomijane.\n\nDevtools (issues strony): `✗ news.0.7 data for an ID that has no node in the layout — layout and data are out of sync …`.',
+      'Data assigned to an ID that isn\'t in the layout — usually layout and data are out of sync (e.g. the layout from the cache, fresh data, and the block has changed). The data is skipped.\n\nDevtools (page issues): `✗ news.0.7 data for an ID that has no node in the layout — layout and data are out of sync …`.',
     run: dataWithoutNode,
   },
   {
@@ -131,7 +131,7 @@ export const renderingCases: DocCase[] = [
     title: 'resolve with onIssue: throw',
     level: 'throws',
     description:
-      'Domyślnie problemy `resolve` trafiają do `issues`, a render trwa dalej (`onIssue: "collect"`). `onIssue: "throw"` zamienia pierwszy w wyjątek — np. w testach albo CI, żeby żaden issue nie przeszedł niezauważony.',
+      'By default `resolve` problems go to `issues` and rendering continues (`onIssue: "collect"`). `onIssue: "throw"` turns the first one into an exception — e.g. in tests or CI, so that no issue goes unnoticed.',
     run: onIssueThrow,
   },
 ]

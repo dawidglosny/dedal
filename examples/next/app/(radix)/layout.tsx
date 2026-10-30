@@ -7,7 +7,7 @@ export const metadata = { title: 'Dedal × Radix Themes' }
 /** Separate root layout: Radix Themes styles don't mix with Tailwind from the /shadcn route. */
 export default function RadixLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pl">
+    <html lang="en">
       <body style={{ margin: 0 }}>
         <Theme accentColor="indigo" grayColor="slate" radius="medium">
           {children}

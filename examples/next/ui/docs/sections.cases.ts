@@ -12,7 +12,7 @@ const header = section('header', node('hero'), {
 })
 
 const sectionLoader = ui.page<Ctx>({
-  sections: [header, section('news', cards(ui, 'Najnowsze', 3))],
+  sections: [header, section('news', cards(ui, 'Latest', 3))],
   // page data — for sections without their own loader; loaders run in parallel
   data: async () => ({ news: { card: await articles(3) } }),
 })
@@ -21,8 +21,8 @@ const sectionLoader = ui.page<Ctx>({
 // #region optional-failed
 const optionalFailed = ui.page<Ctx>({
   sections: [
-    section('news', cards(ui, 'Najnowsze', 3)),
-    section('recommendations', cards(ui, 'Rekomendacje', 3), {
+    section('news', cards(ui, 'Latest', 3)),
+    section('recommendations', cards(ui, 'Recommendations', 3), {
       optional: true, // a loader error removes this section instead of failing the page
       data: async () => {
         throw new Error('recommendations API: 503')
@@ -37,7 +37,7 @@ const optionalFailed = ui.page<Ctx>({
 
 // #region on-empty-remove
 const onEmptyRemove = ui.page<Ctx>({
-  sections: [section('news', cards(ui, 'Najnowsze', 3)), section('promotions', cards(ui, 'Promocje', 3))],
+  sections: [section('news', cards(ui, 'Latest', 3)), section('promotions', cards(ui, 'Promotions', 3))],
   // the source returned an empty list — default onEmpty: 'remove' removes the section
   data: async () => ({ news: { card: await articles(3) }, promotions: { card: [] } }),
 })
@@ -46,7 +46,7 @@ const onEmptyRemove = ui.page<Ctx>({
 // #region on-empty-keep
 const onEmptyKeep = ui.page<Ctx>({
   sections: [
-    section('promotions', cards(ui, 'Promocje', 3), {
+    section('promotions', cards(ui, 'Promotions', 3), {
       onEmpty: 'keep', // the section stays (here with onShortage: 'keep' — empty cards as placeholders)
       policies: { onShortage: 'keep' },
     }),
@@ -58,9 +58,9 @@ const onEmptyKeep = ui.page<Ctx>({
 // #region on-empty-block
 const onEmptyBlock = ui.page<Ctx>({
   sections: [
-    section('search', cards(ui, 'Wyniki wyszukiwania', 3), {
+    section('search', cards(ui, 'Search results', 3), {
       // an empty state instead of the section
-      onEmpty: node('section', { props: { title: 'Wyniki wyszukiwania', description: 'Brak wyników dla „Dedal”.' } }),
+      onEmpty: node('section', { props: { title: 'Search results', description: 'No results for "Dedal".' } }),
     }),
   ],
   data: async () => ({ search: { card: [] } }),
@@ -70,7 +70,7 @@ const onEmptyBlock = ui.page<Ctx>({
 // #region required
 const required = ui.page<Ctx>({
   sections: [
-    section('popular', node('section', { children: [node('hero'), cards(ui, 'Popularne', 3)] }), {
+    section('popular', node('section', { children: [node('hero'), cards(ui, 'Popular', 3)] }), {
       // the hero always gets data — the section counts as empty when no card got any
       required: 'card',
     }),
@@ -85,10 +85,10 @@ const required = ui.page<Ctx>({
 // #region defer
 const deferred = ui.page<Ctx>({
   sections: [
-    section('news', cards(ui, 'Najnowsze', 3)),
-    section('forYou', cards(ui, 'Dla Ciebie', 3), {
+    section('news', cards(ui, 'Latest', 3)),
+    section('forYou', cards(ui, 'For you', 3), {
       // the page result holds only the fallback; the section is built by page.section() in its own request
-      defer: { fallback: node('section', { props: { title: 'Dla Ciebie', description: 'Ładowanie rekomendacji…' } }) },
+      defer: { fallback: node('section', { props: { title: 'For you', description: 'Loading recommendations…' } }) },
       data: async () => {
         await wait(800) // a slow recommendations API
         return { card: (await articles(6)).slice(3) }
@@ -101,7 +101,7 @@ const deferred = ui.page<Ctx>({
 
 // #region unknown-data
 const unknownData = ui.page<Ctx>({
-  sections: [section('news', cards(ui, 'Najnowsze', 3))],
+  sections: [section('news', cards(ui, 'Latest', 3))],
   // typo in the section key: "newz"
   data: async () => ({ newz: { card: await articles(3) } }),
 })
@@ -110,7 +110,7 @@ const unknownData = ui.page<Ctx>({
 // #region loader-undefined
 const loaderUndefined = ui.page<Ctx>({
   sections: [
-    section('news', cards(ui, 'Najnowsze', 3), {
+    section('news', cards(ui, 'Latest', 3), {
       // the loader forgot `return` — TypeScript reports it; the cast simulates plain JS or an `any`-typed API
       data: (async () => {
         await articles(3)
@@ -126,7 +126,7 @@ export const sectionCases: DocCase[] = [
     title: 'Page data and section loaders',
     level: 'ok',
     description:
-      'Data przychodzą z `data` strony (`{ kluczSection: bindings }`) albo z loadera section (`section(key, block, { data })`, zwraca bindings tej section). Loader section pozwala dołączać wspólne section (header, footer) do wielu stron bez powtarzania ich data.\n\nWszystkie loadery i `data` strony działają równolegle. Devtools: `source: page` / `source: section` przy każdej section; czasy w *timing*.',
+      'Data comes from the page\'s `data` (`{ sectionKey: bindings }`) or from a section loader (`section(key, block, { data })`, which returns the bindings of that section). A section loader lets you add shared sections (header, footer) to many pages without repeating their data.\n\nAll loaders and the page\'s `data` run in parallel. Devtools: `source: page` / `source: section` next to every section; timings in *timing*.',
     run: build(ui, sectionLoader),
   },
   {
@@ -134,7 +134,7 @@ export const sectionCases: DocCase[] = [
     title: 'Optional section that failed',
     level: 'error',
     description:
-      'Błąd loadera zwykle przerywa build (zob. *Errors*). `optional: true` usuwa wtedy tylko tę section — reszta strony się buduje. Błąd trafia do `onSectionError` strony (logi, metryki).\n\nDevtools: `✗ recommendations failed — the loader threw "recommendations API: 503"; the section is skipped (optional: true)`; w *timing* loader na czerwono.',
+      'A loader error normally aborts the build (see *Errors*). With `optional: true` only this section is removed — the rest of the page gets built. The error goes to the page\'s `onSectionError` (logs, metrics).\n\nDevtools: `✗ recommendations failed — the loader threw "recommendations API: 503"; the section is skipped (optional: true)`; in *timing* the loader is red.',
     run: build(ui, optionalFailed),
   },
   {
@@ -142,7 +142,7 @@ export const sectionCases: DocCase[] = [
     title: 'Empty section (remove)',
     level: 'warning',
     description:
-      'Section, w której żaden node nie dostał data, jest pusta. Domyślne `onEmpty: "remove"` ją usuwa — np. promocje, gdy żadnych nie ma.\n\nDevtools: `! promotions removed — no node got data (onEmpty: \'remove\')`; `report.emptySections`, `report.removedSections`.',
+      'A section in which no node got data is empty. The default `onEmpty: "remove"` removes it — e.g. promotions, when there are none.\n\nDevtools: `! promotions removed — no node got data (onEmpty: \'remove\')`; `report.emptySections`, `report.removedSections`.',
     run: build(ui, onEmptyRemove),
   },
   {
@@ -150,7 +150,7 @@ export const sectionCases: DocCase[] = [
     title: 'Empty section (keep)',
     level: 'warning',
     description:
-      '`onEmpty: "keep"` zostawia pustą section — z samym layoutem. Tu razem z `onShortage: "keep"`, więc card zostają jako puste miejsca.\n\nDevtools: `! promotions empty — no node got data; kept as is (onEmpty: \'keep\')`.',
+      '`onEmpty: "keep"` keeps the empty section — with its layout only. Here it\'s combined with `onShortage: "keep"`, so the cards stay as empty places.\n\nDevtools: `! promotions empty — no node got data; kept as is (onEmpty: \'keep\')`.',
     run: build(ui, onEmptyKeep),
   },
   {
@@ -158,7 +158,7 @@ export const sectionCases: DocCase[] = [
     title: 'Empty section (block)',
     level: 'warning',
     description:
-      '`onEmpty` może być blokiem — stan pusty zamiast section, np. „Brak wyników”. `onEmpty: "error"` zamienia pustą section w wyjątek (zob. *Errors*).\n\nDevtools: `! search empty — no node got data; replaced by the onEmpty block`.',
+      '`onEmpty` can be a block — an empty state instead of the section, e.g. "No results". `onEmpty: "error"` turns an empty section into an exception (see *Errors*).\n\nDevtools: `! search empty — no node got data; replaced by the onEmpty block`.',
     run: build(ui, onEmptyBlock),
   },
   {
@@ -166,7 +166,7 @@ export const sectionCases: DocCase[] = [
     title: 'required',
     level: 'warning',
     description:
-      'Bez `required` section jest pusta, gdy żaden node nie dostał data. Gdy część node dostaje data zawsze (nagłówek, hero), a o sensie section decydują inne — `required: "card"` liczy tylko node pasujące do selectora.\n\nTu hero ma data, ale żadna card — section jest pusta i znika.',
+      'Without `required`, a section is empty when no node got data. When some nodes always get data (a heading, a hero) while others decide whether the section makes sense — `required: "card"` counts only the nodes matching the selector.\n\nHere the hero has data, but no card does — the section is empty and disappears.',
     run: build(ui, required),
   },
   {
@@ -174,7 +174,7 @@ export const sectionCases: DocCase[] = [
     title: 'Deferred section (streaming)',
     level: 'ok',
     description:
-      '`defer: { fallback }` — wynik strony zawiera tylko zaślepkę, loader się nie wykonuje. Treść buduje `page.section(key, ctx)` w osobnym requeście; w Next — async komponent w `<Suspense>`, dostreamowany, gdy wolne API odpowie (tu 800 ms).\n\nPoza cache strony — miejsce na data spersonalizowane. Devtools łączą payload strony i section; w *timing* section ma własny blok.',
+      '`defer: { fallback }` — the page result contains only a fallback, and the loader doesn\'t run. The content is built by `page.section(key, ctx)` in a separate request; in Next — an async component in `<Suspense>`, streamed in once the slow API responds (here 800 ms).\n\nOutside the page cache — the place for personalised data. Devtools combine the page and section payloads; in *timing* the section has its own block.',
     run: build(ui, deferred),
   },
   {
@@ -182,7 +182,7 @@ export const sectionCases: DocCase[] = [
     title: 'Data for a missing section',
     level: 'warning',
     description:
-      'Data pod key, którego nie ma wśród section strony (literówka, section z innego wariantu) — są pomijane, a section, która miała je dostać, nie dostaje nic i renderuje sam layout (bez `onEmpty` — traktowana jak statyczna).\n\nDevtools: `! newz unknownData — data returned for a section that is not on this page … Did you mean: news?`.',
+      'Data under a key that isn\'t among the page\'s sections (a typo, a section from another variant) is skipped, and the section that was supposed to get it gets nothing and renders its layout only (without `onEmpty` — it\'s treated as static).\n\nDevtools: `! newz unknownData — data returned for a section that is not on this page … Did you mean: news?`.',
     run: build(ui, unknownData),
   },
   {
@@ -190,7 +190,7 @@ export const sectionCases: DocCase[] = [
     title: 'Loader without return',
     level: 'warning',
     description:
-      'Loader (albo `data` strony dla tej section) zwrócił `undefined` — section pokazuje sam layout. W TypeScript zgłasza to kompilator; komunikat łapie przypadki z JS albo API typowanym jako `any`. Zwrócenie tablicy zamiast bindings to wyjątek (zob. *Errors*).\n\nDevtools: `! news no data — the section loader returned undefined for this section, so it shows its layout only`.',
+      'The loader (or the page\'s `data` for this section) returned `undefined` — the section shows its layout only. In TypeScript the compiler reports this; the message catches cases from plain JS or an API typed as `any`. Returning an array instead of bindings is an exception (see *Errors*).\n\nDevtools: `! news no data — the section loader returned undefined for this section, so it shows its layout only`.',
     run: build(ui, loaderUndefined),
   },
 ]

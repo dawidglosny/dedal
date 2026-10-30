@@ -116,11 +116,11 @@ function LiveHint({ text, throws }: { text?: string; throws: boolean }) {
   const color = throws ? '#862e9c' : '#1c7ed6'
   return (
     <div style={{ margin: '8px 0 4px', padding: '10px 14px', borderLeft: `4px solid ${color}`, borderRadius: 6, background: throws ? '#f8f0fc' : '#e7f5ff' }}>
-      <strong style={{ color }}>{throws ? 'Devtools' : 'Zobacz na żywo'}</strong>
+      <strong style={{ color }}>{throws ? 'Devtools' : 'See it live'}</strong>
       {!throws && (
         <span style={{ color: '#555' }}>
           {' '}
-          — otwórz panel: przycisk <strong>dedal</strong> w prawym dolnym rogu albo <code style={mono}>Alt+Shift+S</code>
+          — open the panel: the <strong>dedal</strong> button in the bottom-right corner, or <code style={mono}>Alt+Shift+S</code>
         </span>
       )}
       <div style={{ marginTop: 4 }}>
@@ -142,11 +142,11 @@ function Tasks({ tasks }: { tasks: NonNullable<DocCase['tasks']> }) {
               <Inline text={task.symptom} />
             </div>
             <div style={{ color: '#555', marginTop: 2 }}>
-              <span style={{ color: '#1c7ed6', fontWeight: 600 }}>Gdzie szukać: </span>
+              <span style={{ color: '#1c7ed6', fontWeight: 600 }}>Where to look: </span>
               <Inline text={task.hint} />
             </div>
             <details style={{ marginTop: 6 }}>
-              <summary style={{ cursor: 'pointer', color: '#2b8a3e', fontWeight: 600 }}>Rozwiązanie</summary>
+              <summary style={{ cursor: 'pointer', color: '#2b8a3e', fontWeight: 600 }}>Solution</summary>
               <div style={{ marginTop: 6, padding: '8px 12px', background: '#f4fce3', borderRadius: 6 }}>
                 <Prose text={task.solution} />
               </div>

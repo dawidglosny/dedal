@@ -29,7 +29,7 @@ const root = ui.layout(
   node('grid', {
     props: { columns: 3 },
     children: [
-      node('hero', { alias: 'top', slots: { media: node('image', { props: { alt: 'okładka' } }) } }),
+      node('hero', { alias: 'top', slots: { media: node('image', { props: { alt: 'cover' } }) } }),
       repeat(node('card'), 2),
     ],
   }),
@@ -37,7 +37,7 @@ const root = ui.layout(
 )
 
 describe('resolveTree', () => {
-  it('buduje drzewo: key = ID, sloty i dzieci rekurencyjnie, bez aliasów', () => {
+  it('builds the tree: key = ID, slots and children recursively, no aliases', () => {
     const { tree, issues } = ui.resolveTree(root, {
       'n.0': { title: 'Hero' },
       'n.0:media': { src: 'a.webp' },
@@ -53,7 +53,7 @@ describe('resolveTree', () => {
           key: 'n.0',
           component: 'hero',
           props: { title: 'Hero' },
-          slots: { media: { key: 'n.0:media', component: 'image', props: { alt: 'okładka', src: 'a.webp' } } },
+          slots: { media: { key: 'n.0:media', component: 'image', props: { alt: 'cover', src: 'a.webp' } } },
         },
         { key: 'n.1', component: 'card', props: { size: 'md' } },
         { key: 'n.2', component: 'card', props: { size: 'md' } },
@@ -61,7 +61,7 @@ describe('resolveTree', () => {
     })
   })
 
-  it('bez mapowania: dane łączone głęboko z propsami layoutu, dane wygrywają', () => {
+  it('without a mapping: data deep-merged with the layout props, data wins', () => {
     const plain = createDedal<Contract>()
     const cardRoot = plain.layout(plain.node('card', { props: { size: 'sm', meta: { author: 'A', date: '1' } } }), 'c')
 
@@ -71,14 +71,14 @@ describe('resolveTree', () => {
     })
   })
 
-  it('mapowanie zamienia dane na propsy kontraktu', () => {
-    const { tree } = ui.resolveTree(root, { 'n.1': { headline: 'Tytuł', url: '/a' } })
+  it('a mapping turns data into contract props', () => {
+    const { tree } = ui.resolveTree(root, { 'n.1': { headline: 'Title', url: '/a' } })
 
-    expect(tree.children![1].props).toEqual({ size: 'md', title: 'Tytuł', href: '/a' })
+    expect(tree.children![1].props).toEqual({ size: 'md', title: 'Title', href: '/a' })
     expect(tree.children![2].props).toEqual({ size: 'md' })
   })
 
-  it('mapowanie dostaje node i ctx, także bez danych', () => {
+  it('a mapping receives node and ctx, even without data', () => {
     const spy = vi.fn(({ props }: ToPropsInput<Contract, 'label'>) => props)
     const labelRoot = ui.layout(node('label'), 'l')
 
@@ -88,19 +88,19 @@ describe('resolveTree', () => {
     expect(ui.resolveTree(labelRoot, {}, { ctx: { device: 'mobile' } }).tree.props).toEqual({ text: 'M' })
   })
 
-  it('trace: pochodzenie każdego propsa', () => {
-    const { tree } = ui.resolveTree(root, { 'n.1': { headline: 'Tytuł', url: '/a' } }, { trace: true })
+  it('trace: the source of every prop', () => {
+    const { tree } = ui.resolveTree(root, { 'n.1': { headline: 'Title', url: '/a' } }, { trace: true })
 
     // layout without trace — source in the layout unknown
     expect(tree.trace).toEqual({ columns: { from: 'layout' } })
     expect(tree.children![1].trace).toEqual({ size: { from: 'layout' }, title: { from: 'data' }, href: { from: 'data' } })
   })
 
-  it('bez trace nie dodaje pola trace', () => {
+  it('without trace no trace field is added', () => {
     expect(ui.resolveTree(root).tree).not.toHaveProperty('trace')
   })
 
-  it('nie mutuje layoutu ani danych', () => {
+  it('does not mutate the layout or data', () => {
     const data = { 'n.0': { title: 'Hero' } }
     const snapshot = JSON.parse(JSON.stringify({ root, data }))
 
@@ -110,18 +110,18 @@ describe('resolveTree', () => {
   })
 })
 
-describe('resolveTree: problemy', () => {
+describe('resolveTree: issues', () => {
   const plain = createDedal<Contract>()
   const cardRoot = plain.layout(plain.node('card', { props: { size: 'sm' } }), 'c')
 
-  it('dane nie-obiektowe bez mapowania → issue, propsy z layoutu', () => {
-    const { tree, issues } = plain.resolveTree(cardRoot, { c: 'tekst' })
+  it('non-object data without a mapping → issue, props from the layout', () => {
+    const { tree, issues } = plain.resolveTree(cardRoot, { c: 'text' })
 
     expect(tree.props).toEqual({ size: 'sm' })
     expect(issues).toEqual([{ id: 'c', message: expect.stringContaining('add toProps') }])
   })
 
-  it('wyjątek w mapowaniu → issue, propsy z layoutu', () => {
+  it('an exception in a mapping → issue, props from the layout', () => {
     const { tree, issues } = resolveTree(cardRoot, {}, {
       toProps: {
         card: () => {
@@ -134,18 +134,18 @@ describe('resolveTree: problemy', () => {
     expect(issues[0].message).toContain('boom')
   })
 
-  it('mapowanie zwracające nie-obiekt → issue', () => {
+  it('a mapping returning a non-object → issue', () => {
     const { issues } = resolveTree(cardRoot, {}, { toProps: { card: () => null as never } })
 
     expect(issues[0].message).toContain('must return an object')
   })
 
-  it("onIssue: 'throw' przerywa", () => {
+  it("onIssue: 'throw' aborts", () => {
     expect(() => plain.resolveTree(cardRoot, { c: 1 }, { onIssue: 'throw' })).toThrow('resolve: c:')
   })
 })
 
-describe('resolve: strona', () => {
+describe('resolve: page', () => {
   const home = ui.page<Ctx>({
     sections: ({ device }) => [
       section('top', node('hero', { slots: { media: node('image') } })),
@@ -177,7 +177,7 @@ describe('resolve: strona', () => {
     expect(footer.props).toEqual({ text: 'M' })
   })
 
-  it('wynik przechodzi przez JSON (resolve po drugiej stronie sieci)', async () => {
+  it('the result goes through JSON (resolve on the other side of the network)', async () => {
     const ctx: Ctx = { device: 'desktop' }
     const wire = JSON.parse(JSON.stringify(await home.build(ctx)))
     const resolved = ui.resolve(wire, { ctx })
@@ -186,7 +186,7 @@ describe('resolve: strona', () => {
     expect(resolved).toEqual(ui.resolve(await home.build(ctx), { ctx }))
   })
 
-  it('zgłasza dane bez węzła (np. rozjazd cache layoutu z danymi)', async () => {
+  it('reports data without a node (e.g. a cached layout out of sync with the data)', async () => {
     const result = await home.build({ device: 'desktop' })
     const stale = { ...result, data: { ...result.data, 'news.0.7': { headline: 'X', url: '/x' } } }
 
@@ -195,15 +195,15 @@ describe('resolve: strona', () => {
     ])
   })
 
-  it('odrzuca nieznaną wersję formatu', () => {
+  it('rejects an unknown format version', () => {
     const future = { dedal: 2, sections: [], data: {}, report: {} } as unknown as PageResult<Contract>
 
     expect(() => resolve(future)).toThrow('unsupported format version 2')
   })
 })
 
-describe('typy toProps', () => {
-  it('wynik mapowania jest sprawdzany kontraktem', () => {
+describe('toProps types', () => {
+  it('the mapping result is checked against the contract', () => {
     const ok: ToProps<Contract> = { card: ({ props }) => ({ ...props, size: 'lg' }) }
     // @ts-expect-error — disallowed size value
     const badValue: ToProps<Contract> = { card: () => ({ size: 'huge' }) }

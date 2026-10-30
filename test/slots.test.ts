@@ -35,8 +35,8 @@ const build = () =>
 
 const ids = (selector: string) => ui.select(build(), selector).map(n => n.id)
 
-describe('sloty w layout()', () => {
-  it('nadaje ID zawartości slotów', () => {
+describe('slots in layout()', () => {
+  it('assigns IDs to slot contents', () => {
     const root = build()
     const [profileNode, tabs] = root.children!
 
@@ -54,13 +54,13 @@ describe('sloty w layout()', () => {
     ])
   })
 
-  it('obsługuje sloty w slotach', () => {
+  it('supports slots in slots', () => {
     const header = (build().children![1].slots!.content as { slots?: Record<string, { id: string }> }[])[0]
 
     expect(header.slots!.actions.id).toBe('p.1:content.0:actions')
   })
 
-  it('pomija sloty ustawione na undefined', () => {
+  it('skips slots set to undefined', () => {
     expect(layout(node('profile', { slots: { cover: undefined } }), 's')).toEqual({
       id: 's',
       component: 'profile',
@@ -68,13 +68,13 @@ describe('sloty w layout()', () => {
     })
   })
 
-  it('odrzuca repeat > 1 w slocie pojedynczym', () => {
+  it('rejects repeat > 1 in a single slot', () => {
     expect(() =>
       layout(node('profile', { slots: { cover: repeat(node('image'), 2) } }), 's')
     ).toThrow('slot "cover"')
   })
 
-  it('przekazuje pozycję w slocie do generatora ID', () => {
+  it('passes the slot position to the ID generator', () => {
     const paths: unknown[] = []
     layout(node('tabs', { slots: { content: [node('card')] } }), 's', {
       id: ctx => {
@@ -86,15 +86,15 @@ describe('sloty w layout()', () => {
     expect(paths).toEqual([[], [{ slot: 'content', index: 0 }]])
   })
 
-  it('wynik jest czystym JSON-em (round-trip bez strat)', () => {
+  it('the result is plain JSON (lossless round-trip)', () => {
     const root = build()
 
     expect(JSON.parse(JSON.stringify(root))).toEqual(root)
   })
 })
 
-describe('selektory a sloty', () => {
-  it('kolejność drzewa: sloty przed children', () => {
+describe('selectors and slots', () => {
+  it('tree order: slots before children', () => {
     expect(ids('*')).toEqual([
       'p',
       'p.0',
@@ -125,18 +125,18 @@ describe('selektory a sloty', () => {
     expect(ids(selector)).toEqual(expected)
   })
 
-  it('slot nie wpływa na pozycję children', () => {
+  it('a slot does not affect children positions', () => {
     // profile has a slot, but the only children element grid:nth-child(1) is still profile
     expect(ids('grid > :nth-child(1)')).toEqual(['p.0'])
   })
 
-  it.each([':slot(', ':slot()', ':slot(a b)'])('odrzuca "%s"', selector => {
+  it.each([':slot(', ':slot()', ':slot(a b)'])('rejects "%s"', selector => {
     expect(() => parseSelector(selector)).toThrow(SyntaxError)
   })
 })
 
-describe('patch / remove a sloty', () => {
-  it('patch trafia w zawartość slotów i nie rusza reszty', () => {
+describe('patch / remove and slots', () => {
+  it('patch hits slot contents and leaves the rest untouched', () => {
     const root = build()
     const result = ui.patch(root, { 'tabs > :slot(content)': { size: 'large' } })
     const content = result.children![1].slots!.content as { props: Record<string, unknown> }[]
@@ -146,7 +146,7 @@ describe('patch / remove a sloty', () => {
     expect(result.children![2]).toBe(root.children![2])
   })
 
-  it('remove usuwa element slotu-listy', () => {
+  it('remove deletes a slot list item', () => {
     const result = ui.remove(build(), 'tabs > :slot(content):nth-child(2)')!
 
     expect((result.children![1].slots!.content as { id: string }[]).map(n => n.id)).toEqual([
@@ -155,20 +155,20 @@ describe('patch / remove a sloty', () => {
     ])
   })
 
-  it('remove usuwa slot pojedynczy, a pusty slot znika', () => {
+  it('remove deletes a single slot, and the empty slot disappears', () => {
     const result = ui.remove(build(), ':slot(cover)')!
 
     expect(result.children![0]).toEqual({ id: 'p.0', component: 'profile', props: {} })
   })
 
-  it('remove usuwa cały slot-listę, gdy usunięto wszystkie elementy', () => {
+  it('remove drops the whole slot list when all its items were removed', () => {
     const result = ui.remove(build(), ':slot(content)')!
 
     expect(result.children![1].slots).toBeUndefined()
     expect(result.children![1].props).toEqual({ labels: ['A', 'B', 'C'] })
   })
 
-  it('nie mutuje wejścia', () => {
+  it('does not mutate the input', () => {
     const root = build()
     const snapshot = JSON.parse(JSON.stringify(root))
 

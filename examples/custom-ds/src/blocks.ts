@@ -50,7 +50,7 @@ const xlargeHeader = () =>
   })
 
 /** “Trending” on desktop: header + two columns of 10 tracks + an ad column. */
-export const trendujace = node('wrapper-container', {
+export const trending = node('wrapper-container', {
   props: songListContainerProps,
   children: [
     node('wrapper-layout', {
@@ -121,10 +121,10 @@ const adBanner = (containerProps: Record<string, unknown>, adProps: Record<strin
 
 const limited = { width: 'full-desktop-limited', className: 'ids-desktop-max-width-limited' }
 
-export const goraSrodekAd = adBanner({ ...limited, backgroundWhenScreening: 'transparent' }, { type: 'gora_srodek' }, 'adBanner')
-export const goraSrodekAdMob = adBanner({ backgroundWhenScreening: 'transparent' }, { type: 'gora_srodek', size: 'small' }, 'adBanner')
-export const dolSrodekAd = adBanner(limited, { type: 'dol_srodek' })
-export const dolSrodekAdMob = adBanner({}, { type: 'dol_srodek', size: 'small' })
+export const topCenterAd = adBanner({ ...limited, backgroundWhenScreening: 'transparent' }, { type: 'top_center' }, 'adBanner')
+export const topCenterAdMob = adBanner({ backgroundWhenScreening: 'transparent' }, { type: 'top_center', size: 'small' }, 'adBanner')
+export const bottomCenterAd = adBanner(limited, { type: 'bottom_center' })
+export const bottomCenterAdMob = adBanner({}, { type: 'bottom_center', size: 'small' })
 export const box300x250AdMob = adBanner({ width: 'auto' }, { type: 'box300x250', size: 'small' })
 
 // --- category carousel
@@ -172,7 +172,7 @@ export const categoriesCarousel = node('wrapper-container', {
 // --- news
 
 /** News on desktop: header + 2 large cards + 4 small ones. */
-export const aktualnosci = node('wrapper-container', {
+export const latestNews = node('wrapper-container', {
   props: {
     mode: 'inverted',
     backgroundVariant: 'full',
@@ -220,7 +220,7 @@ export const aktualnosci = node('wrapper-container', {
 })
 
 /** News on mobile: header + 6 cards in a single column. */
-export const aktualnosciMob = node('wrapper-container', {
+export const latestNewsMob = node('wrapper-container', {
   props: {
     mode: 'inverted',
     backgroundVariant: 'full',

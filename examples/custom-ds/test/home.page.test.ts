@@ -13,8 +13,8 @@ const build = async (device: Device, mock: MockOptions = {}) => {
 const sectionTree = (resolved: Awaited<ReturnType<typeof build>>['resolved'], key: string) =>
   resolved.sections.find(section => section.key === key)!.tree
 
-describe('strona na własnym design systemie', () => {
-  it.each(['desktop', 'mobile'] as const)('%s: wszystkie sekcje, bez problemów z resolve', async device => {
+describe('page on a custom design system', () => {
+  it.each(['desktop', 'mobile'] as const)('%s: all sections, no resolve issues', async device => {
     const { result, resolved } = await build(device)
 
     expect(resolved.issues).toEqual([])
@@ -22,32 +22,32 @@ describe('strona na własnym design systemie', () => {
     expect(result.sections.map(({ key }) => key)).toEqual([
       'header',
       'breadcrumbs',
-      'polecane',
-      'trendujace',
-      'goraSrodek',
-      'kategorie',
-      ...(device === 'mobile' ? ['srodekSliderAd'] : []),
-      'ostatnioDodane',
-      'aktualnosci',
+      'featured',
+      'trending',
+      'topCenter',
+      'categories',
+      ...(device === 'mobile' ? ['middleSliderAd'] : []),
+      'recentlyAdded',
+      'latestNews',
       'ctaSection',
-      'dolSrodek',
+      'bottomCenter',
       'homeJsonLd',
       'homeTracking',
       'footer',
     ])
   })
 
-  it('puste źródło usuwa sekcję zależną od danych', async () => {
+  it('an empty source removes the data-dependent section', async () => {
     const { result } = await build('desktop', { emptyFeatured: true })
 
-    expect(result.sections.map(({ key }) => key)).not.toContain('polecane')
-    expect(result.report.removedSections).toEqual(['polecane'])
-    expect(result.report.emptySections).toEqual(['polecane'])
+    expect(result.sections.map(({ key }) => key)).not.toContain('featured')
+    expect(result.report.removedSections).toEqual(['featured'])
+    expect(result.report.emptySections).toEqual(['featured'])
   })
 
-  it('przy brakach danych kafel i jego okładka zostają parą, divider znika razem z kaflem', async () => {
+  it('with missing data a tile and its cover stay paired, the divider disappears together with the tile', async () => {
     const { resolved } = await build('mobile', { recentSongs: 7 })
-    const group = sectionTree(resolved, 'ostatnioDodane').children![0].children![1]
+    const group = sectionTree(resolved, 'recentlyAdded').children![0].children![1]
     const tiles = group.children!.filter(node => node.component === 'tile-v2')
 
     expect(tiles).toHaveLength(7)
@@ -58,18 +58,18 @@ describe('strona na własnym design systemie', () => {
     expect(group.children!.map(node => node.component)).toEqual(Array(7).fill(['tile-v2', 'divider']).flat())
   })
 
-  it('karuzela: elementy przycięte do liczby kategorii, obrazki w slocie', async () => {
+  it('carousel: items trimmed to the number of categories, images in the slot', async () => {
     const { resolved } = await build('desktop')
-    const carousel = sectionTree(resolved, 'kategorie').children![0].children![1].children![0]
+    const carousel = sectionTree(resolved, 'categories').children![0].children![1].children![0]
     const items = carousel.slots!.items as { props: Record<string, unknown>; slots?: Record<string, { props: Record<string, unknown> }> }[]
 
     expect(items).toHaveLength(5)
-    expect(items[0].props.header).toBe('Polski rap')
+    expect(items[0].props.header).toBe('Polish rap')
     expect(items[0].slots!.secondaryComponent.props.imageId).toBe('A1')
     expect(carousel.props).toMatchObject({ autoRotate: false, step: 2, buttonVariant: 'ghost' })
   })
 
-  it('CTA: logo w slocie tylko na desktopie, obrazek obok dostaje swoje dane', async () => {
+  it('CTA: logo in the slot on desktop only, the image beside it gets its own data', async () => {
     const desktop = JSON.stringify(sectionTree((await build('desktop')).resolved, 'ctaSection'))
     const mobile = JSON.stringify(sectionTree((await build('mobile')).resolved, 'ctaSection'))
 
@@ -79,7 +79,7 @@ describe('strona na własnym design systemie', () => {
     expect(mobile).toContain('cta.webp')
   })
 
-  it('patche sekcji: :root i bezpośrednie dziecko korzenia', async () => {
+  it('section patches: :root and a direct child of the root', async () => {
     const cta = sectionTree((await build('mobile')).resolved, 'ctaSection')
     const outer = cta.children![0]
 
@@ -88,17 +88,17 @@ describe('strona na własnym design systemie', () => {
     expect(outer.children!.map(column => (column.props as Record<string, unknown>).colSpan)).toEqual([1, 1])
   })
 
-  it('karty: dane w propsie data, tracking obok, bez kategorii', async () => {
+  it('cards: data in the data prop, tracking alongside, no categories', async () => {
     const { resolved } = await build('desktop')
-    const card = JSON.parse(JSON.stringify(sectionTree(resolved, 'aktualnosci'))).children[0].children[1].children[0].children[0]
+    const card = JSON.parse(JSON.stringify(sectionTree(resolved, 'latestNews'))).children[0].children[1].children[0].children[0]
 
     expect(card.component).toBe('card')
-    expect(card.props.data.headline).toBe('Aktualność muzyczna 1')
+    expect(card.props.data.headline).toBe('Music news 1')
     expect(card.props.data).not.toHaveProperty('categories')
     expect(card.props.setupTracking.props.ec3).toBe('link_0')
   })
 
-  it('wspólne dane pobierane raz na stronę (zapytania)', async () => {
+  it('shared data fetched once per page (queries)', async () => {
     let calls = 0
     const api = createMockApi()
     const counted = { ...api, globals: (url: string) => (calls++, api.globals(url)) }
@@ -113,11 +113,11 @@ describe('strona na własnym design systemie', () => {
 
 describe('parseTrackTile', () => {
   it.each([
-    ['Lena Brzoza - Małe miasto', 'Lena Brzoza', 'Małe miasto'],
-    ['Duo-Kontra - Plac Zbawiciela', 'Duo-Kontra', 'Plac Zbawiciela'],
-    ['Ola Wiatr: Szampan | NOWOŚĆ', 'Ola Wiatr', 'Szampan'],
-    ['Pola Jesion – Arahja', 'Pola Jesion', 'Arahja'],
-    ['Instrumental bez wykonawcy', '', 'Instrumental bez wykonawcy'],
+    ['Lena Birch - Small Town', 'Lena Birch', 'Small Town'],
+    ['Duo-Contra - Saviour Square', 'Duo-Contra', 'Saviour Square'],
+    ['Ola Wind: Champagne | NEW', 'Ola Wind', 'Champagne'],
+    ['Pola Ash – Arahja', 'Pola Ash', 'Arahja'],
+    ['Instrumental without an artist', '', 'Instrumental without an artist'],
   ])('%s', (raw, artist, titleDisplay) => {
     expect(parseTrackTile(raw)).toEqual({ artist, titleDisplay })
   })

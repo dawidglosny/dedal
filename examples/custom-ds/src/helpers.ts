@@ -58,14 +58,14 @@ export function songTiles(items: Article[], title: string, limit: number, header
     images: sliced.map(() => {
       const preload = preloaded ? !preloaded.has(COVER_SRC) : false
       if (preload) preloaded!.add(COVER_SRC)
-      return { src: COVER_SRC, alt: 'Okładka albumu', ...(preload && { preload: true }) }
+      return { src: COVER_SRC, alt: 'Album cover', ...(preload && { preload: true }) }
     }),
   }
 }
 
 // --- category carousel
 
-const tracking = (title: string | undefined, event: 'view' | 'klik') => ({
+const tracking = (title: string | undefined, event: 'view' | 'click') => ({
   ec0: 'category_button',
   ec1: title?.replace(/\s/g, '_').toLowerCase(),
   ec2: event,
@@ -74,7 +74,7 @@ const tracking = (title: string | undefined, event: 'view' | 'klik') => ({
 /** Category carousel: props of items (special-content) and of their images separately — items are in the layout (slots). */
 export function categoriesCarousel(categories: Category[], device: Device) {
   return {
-    header: { children: 'Kategorie tematyczne', headerUrl: '/kategorie-tematyczne' },
+    header: { children: 'Topic categories', headerUrl: '/topic-categories' },
     carousel: { autoRotate: false },
     items: (categories ?? []).map(item => ({
       size: device === 'mobile' ? 'small' : 'medium',
@@ -84,13 +84,13 @@ export function categoriesCarousel(categories: Category[], device: Device) {
       inGrid: true,
       buttons: [
         {
-          children: 'Zobacz utwory',
+          children: 'See songs',
           variant: 'primary',
           asset: 'arrow-faced-right',
           iconPosition: 'trailing',
           href: item.url ? new URL(item.url).pathname : '/',
           type: 'link',
-          tracking: { view: tracking(item.title, 'view'), click: tracking(item.title, 'klik') },
+          tracking: { view: tracking(item.title, 'view'), click: tracking(item.title, 'click') },
         },
       ],
     })),
@@ -99,7 +99,7 @@ export function categoriesCarousel(categories: Category[], device: Device) {
       frameClass: 'C0',
       imageId: item.cover?.imageId || item.imageId,
       extension: 'webp',
-      alt: `Okładka ${item.title}`,
+      alt: `Cover: ${item.title}`,
       loading: 'lazy',
       aspectRatio: '16 / 9',
       style: { width: '100%', height: 'auto' },
@@ -113,15 +113,15 @@ export function categoriesCarousel(categories: Category[], device: Device) {
 export function news(articles: Article[]) {
   return {
     header: {
-      children: 'Aktualności',
+      children: 'News',
       setupTracking: { component: 'tracking-wrapper', props: { ec0: 'news_block', ec1: 'news', ec2: 'view' } },
     },
     cards: articles.map(({ categories: _categories, ...article }, index) => ({
       ...article,
-      url: `${article.url}#source=aktualnosci`,
+      url: `${article.url}#source=latestNews`,
       setupTracking: {
         component: 'tracking-wrapper-click-event',
-        props: { ec0: 'news_block', ec1: 'news', ec2: 'klik', ec3: `link_${index}`, ec4: article.url.split(',')?.[2] },
+        props: { ec0: 'news_block', ec1: 'news', ec2: 'click', ec3: `link_${index}`, ec4: article.url.split(',')?.[2] },
       },
     })),
   }

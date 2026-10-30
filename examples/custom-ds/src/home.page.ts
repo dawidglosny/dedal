@@ -121,7 +121,7 @@ export function createHomePage(api: ContentApi) {
             upperFooter: data.upperFooter,
             showBlockLinks: true,
             linkGroups: [],
-            description: 'Teksty piosenek polskich i zagranicznych wykonawców, tłumaczenia i teledyski — bazy systematycznie uaktualniane.',
+            description: 'Lyrics by Polish and international artists, translations and music videos — regularly updated.',
           },
         ],
       }
@@ -137,32 +137,32 @@ export function createHomePage(api: ContentApi) {
         header(device),
         breadcrumbs(device),
         // list sections: empty when no tile got data (the header always gets it) — removed by default (onEmpty)
-        section('polecane', desktop ? blocks.songList([2, 2, 2]) : blocks.songListMob(6), {
+        section('featured', desktop ? blocks.songList([2, 2, 2]) : blocks.songListMob(6), {
           required: 'tile-v2',
           patch: desktop ? { 'tile-v2': tileClamp } : { ':root': { backgroundVariant: 'full' }, 'tile-v2': tileClamp },
         }),
-        section('trendujace', desktop ? blocks.trendujace : blocks.songListMob(10), {
+        section('trending', desktop ? blocks.trending : blocks.songListMob(10), {
           required: 'tile-v2',
           patch: { 'tile-v2': tileClamp },
         }),
-        section('goraSrodek', desktop ? blocks.goraSrodekAd : blocks.goraSrodekAdMob, {
+        section('topCenter', desktop ? blocks.topCenterAd : blocks.topCenterAdMob, {
           ...(desktop && { patch: { ':root': { backgroundVariant: 'full' } } }),
         }),
-        section('kategorie', blocks.categoriesCarousel, { patch: categoriesPatch(device) }),
+        section('categories', blocks.categoriesCarousel, { patch: categoriesPatch(device) }),
         ...(desktop
           ? []
-          : [section('srodekSliderAd', blocks.box300x250AdMob, { patch: { ':root': { backgroundVariant: 'full', paddingHorizontal: true } } })]),
-        section('ostatnioDodane', desktop ? blocks.songList([5, 5, 5]) : blocks.songListMob(10), {
+          : [section('middleSliderAd', blocks.box300x250AdMob, { patch: { ':root': { backgroundVariant: 'full', paddingHorizontal: true } } })]),
+        section('recentlyAdded', desktop ? blocks.songList([5, 5, 5]) : blocks.songListMob(10), {
           required: 'tile-v2',
           patch: desktop ? { 'tile-v2': tileClamp } : { ':root': { backgroundVariant: 'full' }, 'tile-v2': tileClamp },
         }),
-        section('aktualnosci', desktop ? blocks.aktualnosci : blocks.aktualnosciMob),
+        section('latestNews', desktop ? blocks.latestNews : blocks.latestNewsMob),
         section('ctaSection', blocks.cta, {
           patch: ctaPatch(device),
           // logo in the CTA only on desktop
           ...(!desktop && { remove: 'special-content > :slot(secondaryComponent)' }),
         }),
-        section('dolSrodek', desktop ? blocks.dolSrodekAd : blocks.dolSrodekAdMob, {
+        section('bottomCenter', desktop ? blocks.bottomCenterAd : blocks.bottomCenterAdMob, {
           patch: desktop ? { ':root': { backgroundVariant: 'full' } } : { ad: { size: 'medium' } },
         }),
         section('homeJsonLd', blocks.homeJsonLd),
@@ -185,42 +185,42 @@ export function createHomePage(api: ContentApi) {
 
       // preload only the first cover on the page — order: featured, trending, recently added
       const preloaded = new Set<string>()
-      const featured = songTiles(featuredRaw, String(featuredRaw[0]?.sourceTitle || 'Polecane'), 6, undefined, preloaded)
-      const trending = songTiles(trendingRaw, 'Polecane teksty piosenek', mobile ? 10 : 20, '/trendujace', preloaded)
-      const recent = songTiles(recentRaw, 'Ostatnio dodane', mobile ? 10 : 15, '/teksty-piosenek', preloaded)
+      const featured = songTiles(featuredRaw, String(featuredRaw[0]?.sourceTitle || 'Featured'), 6, undefined, preloaded)
+      const trending = songTiles(trendingRaw, 'Featured song lyrics', mobile ? 10 : 20, '/trending', preloaded)
+      const recent = songTiles(recentRaw, 'Recently added', mobile ? 10 : 15, '/lyrics', preloaded)
       const carousel = categoriesCarousel(categories, ctx.device)
       const latest = news(newsRaw)
 
       return {
-        polecane: { 'block-header': [featured.header], 'tile-v2': featured.tiles, 'image-holder': featured.images },
-        trendujace: {
+        featured: { 'block-header': [featured.header], 'tile-v2': featured.tiles, 'image-holder': featured.images },
+        trending: {
           'block-header': [trending.header],
           'tile-v2': trending.tiles,
           'image-holder': trending.images,
           ...(!mobile && { ad: [{ type: 'box300x250', divider: 'none' }] }),
         },
-        kategorie: {
+        categories: {
           'block-header': [carousel.header],
           carousel: [carousel.carousel],
           // carousel items and their images — surplus slots (CATEGORY_SLOTS) disappear (onShortage: 'remove')
           'special-content': carousel.items,
           'special-content > :slot(secondaryComponent)': carousel.images,
         },
-        ostatnioDodane: {
+        recentlyAdded: {
           'block-header': [recent.header],
           'tile-v2': recent.tiles,
           'image-holder': recent.images,
           // mobile: a removed tile also takes the divider before it
           ...(mobile && { divider: relatedDividers(recent.tiles.length, 10) }),
         },
-        aktualnosci: { 'block-header': [latest.header], card: latest.cards },
+        latestNews: { 'block-header': [latest.header], card: latest.cards },
         ctaSection: {
           'special-content': [
             {
-              header: 'Bądź bliżej gwiazd',
-              text: 'Recenzje płyt, wywiady i energia koncertów — wszystko, co ważne w muzyce.',
+              header: 'Get closer to the stars',
+              text: 'Album reviews, interviews and live concert energy — everything that matters in music.',
               buttons: [
-                { children: 'Przejdź do serwisu', variant: 'primary', type: 'link', href: 'https://example.com/muzyka', asset: 'arrow-faced-right', iconPosition: 'trailing' },
+                { children: 'Go to the site', variant: 'primary', type: 'link', href: 'https://example.com/muzyka', asset: 'arrow-faced-right', iconPosition: 'trailing' },
               ],
             },
           ],
@@ -228,7 +228,7 @@ export function createHomePage(api: ContentApi) {
           ...(!mobile && {
             'special-content > :slot(secondaryComponent)': [{ key: 'image-holder', src: 'https://images.example.com/logo.webp', alt: 'Logo' }],
           }),
-          'image-holder': [{ src: 'https://images.example.com/cta.webp', alt: 'Bądź bliżej gwiazd', loading: 'lazy' }],
+          'image-holder': [{ src: 'https://images.example.com/cta.webp', alt: 'Get closer to the stars', loading: 'lazy' }],
         },
         homeJsonLd: { 'home-json-ld': [{ mainMenuItems: globals.header.mainMenu, meta, publisher: meta.publisher }] },
         homeTracking: { 'home-tracking': [{ site: meta.viewType?.toLowerCase() || 'frontpage', serviceId: meta.serviceId }] },

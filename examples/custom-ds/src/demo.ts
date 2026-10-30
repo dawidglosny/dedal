@@ -16,7 +16,7 @@ for (const device of ['desktop', 'mobile'] as Device[]) {
   const resolved = ui.resolve(result)
 
   console.log(`\n=== ${device} ===`)
-  for (const { key, tree } of resolved.sections) console.log(`  ${key.padEnd(16)} ${count(tree)} węzłów`)
-  console.log(`  issues: ${resolved.issues.length} · usunięte sekcje: ${result.report.removedSections.join(', ') || '—'}`)
+  for (const { key, tree } of resolved.sections) console.log(`  ${key.padEnd(16)} ${count(tree)} nodes`)
+  console.log(`  issues: ${resolved.issues.length} · removed sections: ${result.report.removedSections.join(', ') || '—'}`)
   console.log(`  JSON: ${(JSON.stringify(result).length / 1024).toFixed(1)} KB (PageResult)`)
 }

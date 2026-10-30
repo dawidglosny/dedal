@@ -1,48 +1,48 @@
-# Dedal × własny design system
+# Dedal × a custom design system
 
-Strona główna serwisu z tekstami piosenek zbudowana na Dedalu z komponentami własnego design systemu: prymitywy layoutu (`wrapper-container`, `wrapper-layout`, `wrapper-group`), kafle, karty, karuzela, reklamy. Przykład na poziomie silnika — bez renderera: buduje `PageResult` i `ResolvedPage` na mockach źródeł danych.
+The home page of a song lyrics site built with Dedal and the components of a custom design system: layout primitives (`wrapper-container`, `wrapper-layout`, `wrapper-group`), tiles, cards, a carousel, ads. An engine-level example — without a renderer: it builds `PageResult` and `ResolvedPage` on mocked data sources.
 
 ```bash
-npm run dedal   # build paczki → npm pack → instalacja z vendor/
-npm test         # testy strony
-npm run demo     # sekcje, liczba węzłów i rozmiar wyniku dla desktop i mobile
+npm run dedal   # build the package → npm pack → install from vendor/
+npm test         # page tests
+npm run demo     # sections, node count and result size for desktop and mobile
 ```
 
-## Struktura
+## Structure
 
-| Plik | Rola |
+| File | Role |
 |---|---|
-| `src/contract.ts` | kontrakt komponentów: otwarte propsy, sloty zadeklarowane jawnie obok (`carousel.items`, `special-content.secondaryComponent`) |
-| `src/ui.ts` | opcje instancji: domyślne propsy komponentów, `toProps.card` (dane karty w propsie `data`) |
-| `src/blocks.ts` | bloki: zwykłe stałe i funkcje (`node`, `repeat`, `clone`), osobne warianty desktop / mobile tam, gdzie różni się struktura |
-| `src/helpers.ts` | dane sekcji per komponent: kafle utworów (z parsowaniem „wykonawca – tytuł”), karuzela kategorii, aktualności |
-| `src/home.page.ts` | strona: zapytania, sekcje wspólne (nagłówek, okruszki, stopka), sekcje treści, patche, bindingi |
-| `src/api.ts`, `src/mocks.ts` | interfejs źródeł danych i mocki |
+| `src/contract.ts` | component contract: open props, slots declared explicitly alongside (`carousel.items`, `special-content.secondaryComponent`) |
+| `src/ui.ts` | instance options: default component props, `toProps.card` (card data in the `data` prop) |
+| `src/blocks.ts` | blocks: plain constants and functions (`node`, `repeat`, `clone`), separate desktop / mobile variants where the structure differs |
+| `src/helpers.ts` | per-component section data: song tiles (with "artist – title" parsing), category carousel, news |
+| `src/home.page.ts` | page: queries, shared sections (header, breadcrumbs, footer), content sections, patches, bindings |
+| `src/api.ts`, `src/mocks.ts` | data source interface and mocks |
 
-## Co pokazuje przykład
+## What the example shows
 
-**Zapytania i sekcje wspólne.** Meta strony, dane globalne, kategorie i listy artykułów to zapytania (`ui.query`). Nagłówek, okruszki i stopka są sekcjami z własnymi loaderami — korzystają z tych samych zapytań co `data` strony, więc dane globalne są pobierane raz na stronę (test „wspólne dane pobierane raz”). Strona tworzy własną instancję (`createHomePage(api)`): cache zapytań należy do źródła danych.
+**Queries and shared sections.** Page meta, global data, categories and article lists are queries (`ui.query`). The header, breadcrumbs and footer are sections with their own loaders — they use the same queries as the page's `data`, so global data is fetched once per page (the "shared data fetched once" test). The page creates its own instance (`createHomePage(api)`): the query cache belongs to the data source.
 
-**Warianty urządzeń.** `sections: ({ device }) => [...]` — inne bloki (lista w kolumnach vs jedna kolumna), inne patche, sekcja tylko na mobile (`srodekSliderAd`).
+**Device variants.** `sections: ({ device }) => [...]` — different blocks (a list in columns vs a single column), different patches, a mobile-only section (`middleSliderAd`).
 
-**Bindingi per komponent.** Dane sekcji to osobne listy dla nagłówka, kafli i okładek (`{ 'block-header': [...], 'tile-v2': [...], 'image-holder': [...] }`). Przy brakach danych kafel i jego okładka zostają parą, a nadmiarowe węzły znikają (`onShortage: 'remove'`).
+**Per-component bindings.** Section data is separate lists for the heading, tiles and covers (`{ 'block-header': [...], 'tile-v2': [...], 'image-holder': [...] }`). When data is short, a tile and its cover stay as a pair, and surplus nodes disappear (`onShortage: 'remove'`).
 
-**Sloty zamiast komponentów w danych.**
-- CTA: logo w slocie `secondaryComponent` bloku treści; na mobile sekcja usuwa slot (`remove: 'special-content > :slot(secondaryComponent)'`).
-- Karuzela kategorii: elementy w slocie-liście `items` — `repeat(special-content, 12)` przycinane do liczby kategorii; obrazki elementów w ich slotach (`'special-content > :slot(secondaryComponent)'`).
+**Slots instead of components in data.**
+- CTA: the logo in the content block's `secondaryComponent` slot; on mobile the section removes the slot (`remove: 'special-content > :slot(secondaryComponent)'`).
+- Category carousel: items in the `items` list slot — `repeat(special-content, 12)` trimmed to the number of categories; item images in their slots (`'special-content > :slot(secondaryComponent)'`).
 
-**Selektory w patchach.** `tile-v2` (wszystkie kafle sekcji), `:root` (korzeń sekcji), `:root > wrapper-layout` (bezpośrednie dziecko korzenia), `special-content`.
+**Selectors in patches.** `tile-v2` (all tiles in the section), `:root` (the section root), `:root > wrapper-layout` (a direct child of the root), `special-content`.
 
-**Kolejność bindingów.** W CTA szczegółowy selektor (logo w slocie) stoi przed ogólnym (`image-holder`) — wcześniejszy selektor zajmuje węzeł i późniejszy go pomija.
+**Binding order.** In the CTA the specific selector (the logo in the slot) comes before the general one (`image-holder`) — the earlier selector takes the node and the later one skips it.
 
-**Karty.** `toProps.card` przekazuje dane karty w propsie `data`, a tracking obok (`setupTracking`); pozostałe komponenty dostają dane rozłożone w propsach.
+**Cards.** `toProps.card` passes the card data in the `data` prop, with tracking alongside (`setupTracking`); the other components get the data spread into props.
 
-**Sekcje zależne od danych.** Listy utworów mają `required: 'tile-v2'`: sekcja jest pusta, gdy żaden kafel nie dostał danych (nagłówek dostaje je zawsze). Pusta sekcja domyślnie znika (`onEmpty: 'remove'`) — `polecane` przy pustym źródle (`report.removedSections`, `report.emptySections`).
+**Data-dependent sections.** Song lists have `required: 'tile-v2'`: the section is empty when no tile received data (the heading always gets it). An empty section disappears by default (`onEmpty: 'remove'`) — `featured` with an empty source (`report.removedSections`, `report.emptySections`).
 
-## Wzorce
+## Patterns
 
-| Potrzeba | Wzorzec |
+| Need | Pattern |
 |---|---|
-| Węzły powiązane (divider znika razem z kaflem obok) | osobny binding dla dividerów: `{}` — zostaje, `null` — brak danych, usuwany (`relatedDividers` w `home.page.ts`) |
+| Related nodes (a divider disappears together with the tile next to it) | a separate binding for dividers: `{}` — stays, `null` — no data, removed (`relatedDividers` in `home.page.ts`) |
 
-Wyniki zapytań są zamrożone (tylko do odczytu) — strona robi kopie, gdy coś zmienia (`metaFor`), i nie sortuje list w miejscu.
+Query results are frozen (read-only) — the page makes copies when it changes something (`metaFor`) and doesn't sort lists in place.

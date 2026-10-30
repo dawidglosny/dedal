@@ -1,78 +1,78 @@
 /**
  * Group pages of the docs: context for someone new — what a part of Dedal is for, how it works, why it is designed
- * this way, how to use it and what to watch out for. Polish prose, technical names in English.
+ * this way, how to use it and what to watch out for. English prose, technical names as used in the code.
  */
 export const intros = {
-  introduction: `Dedal to biblioteka do budowania stron w modelu **server-driven UI**. Jeśli to pojęcie jest dla Ciebie nowe, zacznij tutaj: ta strona wyjaśnia ideę, pokazuje na prawdziwym przykładzie, co dzieje się z data krok po kroku, i zbiera słownik pojęć używanych w całej dokumentacji.
+  introduction: `Dedal is a library for building pages with the **server-driven UI** model. If that term is new to you, start here: this page explains the idea, walks through a real example showing what happens to the data step by step, and collects a glossary of the terms used throughout the documentation.
 
-## Problem: układ strony zaszyty we froncie
+## The problem: page layout baked into the frontend
 
-W klasycznej aplikacji układ strony jest w kodzie frontu: komponent strony głównej importuje \`<Hero>\`, \`<NewsGrid>\`, \`<Promotions>\` i układa je w JSX. Serwer (API) dostarcza tylko data — listy artykułów, promocje, menu.
+In a classic application the page layout lives in the frontend code: the home page component imports \`<Hero>\`, \`<NewsGrid>\`, \`<Promotions>\` and arranges them in JSX. The server (API) only delivers data — lists of articles, promotions, menus.
 
-Każda zmiana układu — kolejność bloków, nowa section, inna liczba kart na mobile, wariant A/B, ukrycie promocji w jednym serwisie — to zmiana kodu frontu i jego wdrożenie. Gdy frontów jest kilka (web, aplikacja), tę samą zmianę robi się kilka razy.
+Every layout change — the order of blocks, a new section, a different number of cards on mobile, an A/B variant, hiding promotions on one site — is a change to the frontend code and a deployment of it. When there are several frontends (web, app), the same change is made several times.
 
-## Idea server-driven UI
+## The idea of server-driven UI
 
-Serwer wysyła nie tylko data, ale **opis ekranu**: drzewo „component \`grid\` z props \`{ columns: 2 }\`, w nim dwa \`card\` z takimi tytułami”. Front ma katalog komponentów (w Dedalu: **registry**) i renderuje to, co dostał. Nie wie, jaką stronę składa ani skąd wzięły się data.
+The server sends not only data but a **description of the screen**: a tree like "component \`grid\` with props \`{ columns: 2 }\`, containing two \`card\`s with these titles". The frontend has a catalog of components (in Dedal: the **registry**) and renders whatever it receives. It doesn't know which page it is assembling or where the data came from.
 
-Analogia: front ma klocki, serwer przysyła instrukcję, jak je złożyć. Nowa instrukcja (inny układ) nie wymaga nowych klocków. Nowy rodzaj klocka (nowy component) — już tak, i to jedyna zmiana, która dotyka frontu.
+An analogy: the frontend has the building blocks, the server sends the instructions for putting them together. New instructions (a different layout) need no new blocks. A new kind of block (a new component) does — and that is the only change that touches the frontend.
 
 \`\`\`
-klasycznie
-  front:   <Grid columns={2}><Card title={a.title} /> …</Grid>     ← układ w kodzie frontu
-  API:     [{ title: "Pierwszy" }, …]                               ← tylko data
+classic
+  frontend: <Grid columns={2}><Card title={a.title} /> …</Grid>   ← layout in the frontend code
+  API:      [{ title: "First" }, …]                                ← data only
 
 server-driven UI
-  serwer:  { component: "grid", props: { columns: 2 },
-             children: [{ component: "card", props: { title: "Pierwszy" } }, …] }
-  front:   registry { grid: Grid, card: Card } + <Render tree={…} /> ← generyczny renderer
+  server:   { component: "grid", props: { columns: 2 },
+              children: [{ component: "card", props: { title: "First" } }, …] }
+  frontend: registry { grid: Grid, card: Card } + <Render tree={…} /> ← generic renderer
 \`\`\`
 
-## Co dokładnie robi Dedal
+## What exactly Dedal does
 
-Dedal nie dostarcza komponentów ani klienta API — przynosisz własne (shadcn, Radix, własny design system; fetch, SDK, baza). Dostarcza to, co jest pomiędzy:
+Dedal ships neither components nor an API client — you bring your own (shadcn, Radix, your own design system; fetch, an SDK, a database). It provides what sits in between:
 
-- **opis układu w TypeScript** — bloki budowane funkcją \`node()\`, typowane contractem: literówka w nazwie component albo propsa to błąd kompilacji,
-- **łączenie układu z data** — data trafiają na miejsca w układzie przez selectory w składni CSS (\`card\`, \`#featured\`, \`card > :slot(badge)\`), a nie przez indeksy,
-- **jawne zasady na braki** — co zrobić, gdy artykułów jest mniej niż kart, gdy API nie odpowiada, gdy section jest pusta,
-- **cache** stron i źródeł data (stale-while-revalidate) oraz **streaming** wolnych section,
-- **renderer React** (\`<Render>\`) i **devtools** — panel, który pokazuje, skąd wziął się każdy prop i co poszło nie tak.
+- **layout described in TypeScript** — blocks built with the \`node()\` function, typed by the contract: a typo in a component or prop name is a compile error,
+- **connecting the layout with data** — data reaches its place in the layout through selectors in CSS syntax (\`card\`, \`#featured\`, \`card > :slot(badge)\`), not through indexes,
+- **explicit rules for missing data** — what to do when there are fewer articles than cards, when the API doesn't respond, when a section is empty,
+- **cache** for pages and data sources (stale-while-revalidate) and **streaming** of slow sections,
+- a **React renderer** (\`<Render>\`) and **devtools** — a panel that shows where every prop came from and what went wrong.
 
-## Kto za co odpowiada
+## Who is responsible for what
 
-Model ma dwie strony:
-- **serwer** definiuje strony (bloki, section, loadery data), buduje wynik (\`build\`) i łączy layout z data w props (\`resolve\`),
-- **front** ma registry i renderuje gotowe drzewo (\`<Render>\`).
+The model has two sides:
+- the **server** defines pages (blocks, sections, data loaders), builds the result (\`build\`) and combines layout with data into props (\`resolve\`),
+- the **frontend** has the registry and renders the finished tree (\`<Render>\`).
 
-Łączy je **contract** — typ TypeScript opisujący, jakie component istnieją i jakie mają props. To jedyna rzecz, którą obie strony muszą znać wspólnie.
+They are connected by the **contract** — a TypeScript type describing which components exist and what props they take. It is the only thing both sides have to share.
 
-W tym przykładzie (Next.js, App Router) obie strony żyją w jednej aplikacji: \`build\` i \`resolve\` działają w Server Component, a \`<Render>\` od razu renderuje wynik. Podział i tak obowiązuje: ta sama strona jest dostępna jako JSON (\`/api/home\`), więc mógłby ją renderować zupełnie inny front, np. aplikacja mobilna z własną registry.
+In this example (Next.js, App Router) both sides live in one application: \`build\` and \`resolve\` run in a Server Component, and \`<Render>\` renders the result right away. The split still holds: the same page is available as JSON (\`/api/home\`), so a completely different frontend could render it, e.g. a mobile app with its own registry.
 
-## Jak płyną data
+## How data flows
 
 \`\`\`
-contract (typ)       — jakie component istnieją i jakie mają props / sloty
+contract (type)      — which components exist and what props / slots they have
    │
-blocks               — node('card', { props, slots, children }) — struktura bez data i bez ID
+blocks               — node('card', { props, slots, children }) — structure without data and without IDs
    │
 page({ sections, data })
-   │  build(ctx)      layout (ID, remove, patch) → load (data strony, loadery section) → assign (bindings)
+   │  build(ctx)      layout (IDs, remove, patch) → load (page data, section loaders) → assign (bindings)
    ▼
-PageResult (JSON)    — layout (drzewo node z ID) i data (ID node → data) osobno + raport;
-   │                   można go cache'ować i wysłać przez sieć
-   │  resolve()       props z layoutu + data node → ostateczne props (toProps albo deep merge)
+PageResult (JSON)    — layout (tree of nodes with IDs) and data (node ID → data) kept separate + report;
+   │                   can be cached and sent over the network
+   │  resolve()       props from the layout + node data → final props (toProps or deep merge)
    ▼
-ResolvedPage (JSON)  — drzewo { key, component, props, slots, children }
+ResolvedPage (JSON)  — tree of { key, component, props, slots, children }
    │  <Render registry>
    ▼
-React                — registry zamienia nazwę component na komponent React
+React                — the registry turns a component name into a React component
 \`\`\`
 
-Każdy etap ma jedną odpowiedzialność. Layout nie zna data (da się go zbudować bez wywołań API), data nie znają layoutu (trafiają na miejsce przez selector), a front nie zna ani bloków, ani źródeł data — dostaje gotowe drzewo.
+Each stage has a single responsibility. The layout doesn't know the data (it can be built without any API calls), the data doesn't know the layout (it reaches its place through a selector), and the frontend knows neither the blocks nor the data sources — it gets a finished tree.
 
-## Przykład od początku do końca
+## End-to-end example
 
-Strona z jedną section: siatka z dwiema kartami, w każdej karcie slot na badge.
+A page with one section: a grid with two cards, each card with a slot for a badge.
 
 \`\`\`ts
 type Contract = {
@@ -84,7 +84,7 @@ type Contract = {
 const ui = createDedal<Contract>({
   defaults: { card: { size: 'md' } },
   toProps: {
-    // toProps jest wołane także dla node bez data (data: undefined) — stąd warunek
+    // toProps is also called for nodes without data (data: undefined) — hence the condition
     card: ({ props, data }: ToPropsInput<Contract, 'card', Article>) =>
       data ? { ...props, title: data.headline, href: \`/a/\${data.slug}\` } : props,
     badge: ({ props, data }: ToPropsInput<Contract, 'badge', string>) => (data ? { ...props, label: data } : props),
@@ -99,15 +99,15 @@ const home = ui.page({
     })),
   ],
   data: async () => ({
-    news: {                                        // key section
-      card: await api.latest(2),                   // [{ headline: 'Pierwszy', slug: 'pierwszy' }, …]
-      'card > :slot(badge)': ['Sport', 'Kraj'],     // badge w każdej card
+    news: {                                        // section key
+      card: await api.latest(2),                   // [{ headline: 'First', slug: 'first' }, …]
+      'card > :slot(badge)': ['Sport', 'World'],   // a badge in every card
     },
   }),
 })
 \`\`\`
 
-**Krok 1.** \`await home.build()\` zwraca \`PageResult\` — layout i data osobno (skrócone):
+**Step 1.** \`await home.build()\` returns a \`PageResult\` — layout and data separately (abridged):
 
 \`\`\`
 sections: [{ key: 'news', layout:
@@ -117,37 +117,37 @@ sections: [{ key: 'news', layout:
     { id: 'news.1', component: 'card', props: { size: 'md' },
       slots: { badge: { id: 'news.1:badge', component: 'badge', props: {} } } } ] } }]
 data: {
-  'news.0': { headline: 'Pierwszy', slug: 'pierwszy' },
-  'news.1': { headline: 'Drugi', slug: 'drugi' },
+  'news.0': { headline: 'First', slug: 'first' },
+  'news.1': { headline: 'Second', slug: 'second' },
   'news.0:badge': 'Sport',
-  'news.1:badge': 'Kraj',
+  'news.1:badge': 'World',
 }
-report: { … }   — co przypisano, co usunięto, czego zabrakło
+report: { … }   — what was assigned, what was removed, what was missing
 \`\`\`
 
-Każdy node dostał ID z pozycji (\`news.0\` — pierwsze dziecko korzenia section \`news\`, \`news.0:badge\` — jego slot \`badge\`), \`size: 'md'\` pochodzi z \`defaults\`, a data są przypisane do ID — jeszcze niepołączone z props.
+Every node got an ID from its position (\`news.0\` — the first child of the root of section \`news\`, \`news.0:badge\` — its \`badge\` slot), \`size: 'md'\` comes from \`defaults\`, and the data is assigned to IDs — not yet combined with props.
 
-**Krok 2.** \`ui.resolve(result)\` łączy jedno z drugim przez \`toProps\` i zwraca \`ResolvedPage\`:
+**Step 2.** \`ui.resolve(result)\` combines the two through \`toProps\` and returns a \`ResolvedPage\`:
 
 \`\`\`
 { key: 'news', component: 'grid', props: { columns: 2 }, children: [
-  { key: 'news.0', component: 'card', props: { size: 'md', title: 'Pierwszy', href: '/a/pierwszy' },
+  { key: 'news.0', component: 'card', props: { size: 'md', title: 'First', href: '/a/first' },
     slots: { badge: { key: 'news.0:badge', component: 'badge', props: { label: 'Sport' } } } },
   … ] }
 \`\`\`
 
-**Krok 3.** \`<Render tree={resolved} registry={{ grid: Grid, card: Card, badge: Badge }} />\` renderuje w praktyce to samo, co ten JSX:
+**Step 3.** \`<Render tree={resolved} registry={{ grid: Grid, card: Card, badge: Badge }} />\` renders, in practice, the same thing as this JSX:
 
 \`\`\`tsx
 <Grid columns={2}>
-  <Card size="md" title="Pierwszy" href="/a/pierwszy" badge={<Badge label="Sport" />} />
-  <Card size="md" title="Drugi" href="/a/drugi" badge={<Badge label="Kraj" />} />
+  <Card size="md" title="First" href="/a/first" badge={<Badge label="Sport" />} />
+  <Card size="md" title="Second" href="/a/second" badge={<Badge label="World" />} />
 </Grid>
 \`\`\`
 
-Children z layoutu trafiają do \`children\` komponentu, a sloty — do props o nazwie slotu, jako gotowe elementy React.
+Children from the layout go to the component's \`children\`, and slots go to the props named after the slot, as ready-made React elements.
 
-W aplikacji Next całość to kilka linii w Server Component:
+In a Next app the whole thing is a few lines in a Server Component:
 
 \`\`\`tsx
 export default async function Page() {
@@ -157,230 +157,230 @@ export default async function Page() {
 }
 \`\`\`
 
-## Słownik
+## Glossary
 
-- **server-driven UI (SDUI)** — model, w którym serwer decyduje o strukturze ekranu, a front tylko ją renderuje.
-- **contract** — typ TypeScript: nazwa component → jego props (\`card: { title: string; size?: 'sm' | 'md' | 'lg'; badge?: Slot }\`). Jedno źródło prawdy dla serwera i frontu.
-- **component** — nazwa z contractu (\`card\`, \`grid\`). To nie jest komponent React — komponent React przypisuje do tej nazwy registry.
-- **instancja** — wynik \`createDedal<Contract>(options)\`, tworzony raz na projekt; z niej bierzesz \`node\`, \`repeat\`, \`section\`, \`page\`, \`query\`, \`resolve\`.
-- **block** — drzewo zbudowane z \`node()\` / \`repeat()\`: sama struktura, bez data i bez ID. Zwykła wartość (albo funkcja zwracająca blok), którą można eksportować i używać w wielu stronach.
-- **node** — element drzewa: component, props, children, slots, opcjonalny alias. W layoucie dostaje ID.
-- **children i slot** — dwa sposoby zagnieżdżania. Children to zwykła zawartość (\`children\` w React). Slot to nazwane miejsce zadeklarowane w contract jako \`Slot\` (jeden node) albo \`Slot[]\` (lista) — trafia do propsa o tej nazwie.
-- **ID** — identyfikator node wyliczony z pozycji: \`news\` (korzeń section), \`news.0.1\` (dzieci), \`news.0:badge\` (slot), \`hero:actions.1\` (slot-lista). Po ID spotykają się layout i data.
-- **alias** — nazwa nadana node w bloku (\`alias: 'featured'\`), do której odwołuje się selector \`#featured\`.
-- **selector** — wyrażenie w składni CSS wybierające node (\`card\`, \`#featured\`, \`card:first-child\`, \`card > :slot(badge)\`). Ten sam matcher działa w patch, remove, bindings, \`required\` i devtools.
-- **section** — kawałek strony: unikalny key, block i zasady (patch, remove, loader, onEmpty…). Key jest prefiksem ID jej node i kluczem jej data.
-- **page** — lista section (stała albo zależna od ctx), skąd biorą data i opcjonalny cache.
-- **ctx** — kontekst requestu (np. \`{ device }\`); dostają go \`sections\`, loadery, \`cache.key\` i \`toProps\`.
-- **layout** — drzewo node section po rozwinięciu \`repeat\`, nadaniu ID, \`remove\` i \`patch\` — jeszcze bez data.
-- **loader** — funkcja async zwracająca data: \`data\` strony (dla wielu section) albo \`data\` section (tylko dla niej).
-- **binding** — wpis w data section: \`{ selector: items }\`. Selector wybiera node, items trafiają do nich po kolei.
-- **assign** — etap, w którym bindings są rozdzielane na node; tu działają zasady na braki (\`onShortage\`, \`onSurplus\`, \`onEmpty\`).
-- **PageResult** — wynik \`build\`: layout section, data (ID node → data) i raport. Czysty JSON.
-- **defaults** — domyślne props component, dokładane przez \`node()\` przy tworzeniu bloku.
-- **toProps** — mapowanie data (kształt API) na props component; czyste funkcje bez IO.
-- **resolve** — złączenie layoutu z data w ostateczne props; wynik to **ResolvedPage**.
-- **registry** — mapa component → komponent React po stronie frontu.
-- **query** — źródło data z cache instancji (\`ui.query\`), współdzielone przez loadery i requesty.
-- **deferred section** — section budowana osobnym requestem i dostreamowana później (\`defer\`).
-- **trace** — tryb debug: pochodzenie props, szczegółowy raport, czasy — dla devtools.
+- **server-driven UI (SDUI)** — a model in which the server decides the structure of the screen and the frontend only renders it.
+- **contract** — a TypeScript type: component name → its props (\`card: { title: string; size?: 'sm' | 'md' | 'lg'; badge?: Slot }\`). A single source of truth for the server and the frontend.
+- **component** — a name from the contract (\`card\`, \`grid\`). It is not a React component — the registry assigns a React component to that name.
+- **instance** — the result of \`createDedal<Contract>(options)\`, created once per project; you take \`node\`, \`repeat\`, \`section\`, \`page\`, \`query\`, \`resolve\` from it.
+- **block** — a tree built from \`node()\` / \`repeat()\`: pure structure, without data and without IDs. A plain value (or a function returning a block) that can be exported and used across many pages.
+- **node** — an element of the tree: component, props, children, slots, an optional alias. In the layout it gets an ID.
+- **children and slot** — two ways of nesting. Children are regular content (\`children\` in React). A slot is a named place declared in the contract as \`Slot\` (one node) or \`Slot[]\` (a list) — it goes to the prop with that name.
+- **ID** — a node identifier derived from its position: \`news\` (section root), \`news.0.1\` (children), \`news.0:badge\` (slot), \`hero:actions.1\` (list slot). Layout and data meet by ID.
+- **alias** — a name given to a node in a block (\`alias: 'featured'\`), referenced by the selector \`#featured\`.
+- **selector** — an expression in CSS syntax that selects nodes (\`card\`, \`#featured\`, \`card:first-child\`, \`card > :slot(badge)\`). The same matcher works in patch, remove, bindings, \`required\` and devtools.
+- **section** — a piece of the page: a unique key, a block and rules (patch, remove, loader, onEmpty…). The key is the prefix of its node IDs and the key of its data.
+- **page** — a list of sections (fixed or dependent on ctx), where they get their data from, and an optional cache.
+- **ctx** — the request context (e.g. \`{ device }\`); it is passed to \`sections\`, loaders, \`cache.key\` and \`toProps\`.
+- **layout** — the tree of a section's nodes after expanding \`repeat\`, assigning IDs, \`remove\` and \`patch\` — still without data.
+- **loader** — an async function returning data: the page's \`data\` (for many sections) or a section's \`data\` (for that section only).
+- **binding** — an entry in a section's data: \`{ selector: items }\`. The selector picks nodes, and the items go to them one by one.
+- **assign** — the stage in which bindings are distributed to nodes; this is where the rules for missing data apply (\`onShortage\`, \`onSurplus\`, \`onEmpty\`).
+- **PageResult** — the result of \`build\`: the sections' layout, data (node ID → data) and a report. Plain JSON.
+- **defaults** — default props of a component, added by \`node()\` when the block is created.
+- **toProps** — maps data (the API shape) to component props; pure functions without IO.
+- **resolve** — combines the layout with data into final props; the result is a **ResolvedPage**.
+- **registry** — a map of component → React component on the frontend side.
+- **query** — a data source with the instance's cache (\`ui.query\`), shared by loaders and requests.
+- **deferred section** — a section built in a separate request and streamed in later (\`defer\`).
+- **trace** — debug mode: props origin, a detailed report, timings — for devtools.
 
-## Typowe zadania
+## Common tasks
 
-- **Nowa strona albo section** — bloki z istniejących component, section z \`patch\` / \`remove\`, data przez bindings. Zacznij od *Tutorial*, potem *Layout*, *Data*, *Sections*.
-- **Nowy component** — (1) dopisz go do contract z jego props (sloty jako \`Slot\` / \`Slot[]\`), (2) dodaj implementację do każdej registry — \`satisfies Registry<Contract>\` nie skompiluje się bez niej, (3) w razie potrzeby \`defaults\` i \`toProps\` w opcjach instancji, (4) użyj go w bloku: \`node('nazwa', …)\`. Tylko ta zmiana wymaga wdrożenia frontu.
-- **Coś się nie wyświetla albo wyświetla źle** — panel devtools (*Devtools*) i opisy ostrzeżeń w *Data*, *Sections*, *Rendering*.
-- **Build rzuca wyjątek** — *Errors*: każdy komunikat z wyjaśnieniem.
+- **A new page or section** — blocks from existing components, a section with \`patch\` / \`remove\`, data through bindings. Start with *Tutorial*, then *Layout*, *Data*, *Sections*.
+- **A new component** — (1) add it to the contract with its props (slots as \`Slot\` / \`Slot[]\`), (2) add an implementation to every registry — \`satisfies Registry<Contract>\` won't compile without it, (3) if needed, \`defaults\` and \`toProps\` in the instance options, (4) use it in a block: \`node('name', …)\`. Only this change requires a frontend deployment.
+- **Something doesn't show up or shows up wrong** — the devtools panel (*Devtools*) and the warning descriptions in *Data*, *Sections*, *Rendering*.
+- **Build throws an exception** — *Errors*: every message with an explanation.
 
-## Jak czytać te docs
+## How to read these docs
 
-Każda strona przypadku pokazuje jedną rzecz: opis, kod (ten sam, który się wykonuje), wynik i raport devtools — albo wyjątek, gdy build się wywraca. Ramka „Zobacz na żywo” mówi, co otworzyć w panelu devtools (przycisk **dedal** w prawym dolnym rogu). Kropka przy przypadku w menu: zielona — działa, żółta — ostrzeżenie w devtools, czerwona — błąd w devtools, fioletowa — build rzuca wyjątek.
+Each case page shows one thing: a description, the code (the same code that runs), the result and the devtools report — or the exception, when the build fails. The "See it live" box tells you what to open in the devtools panel (the **dedal** button in the bottom right corner). The dot next to a case in the menu: green — works, yellow — warning in devtools, red — error in devtools, purple — build throws an exception.
 
-Kolejność: *Tutorial* (cała strona krok po kroku), potem *Layout*, *Data* i *Sections* — to codzienne narzędzia. *Cache & queries* i *Rendering* — gdy strona już działa. *Errors* i *Devtools* — gdy coś nie działa.`,
+Reading order: *Tutorial* (a whole page step by step), then *Layout*, *Data* and *Sections* — your everyday tools. *Cache & queries* and *Rendering* — once the page already works. *Errors* and *Devtools* — when something doesn't work.`,
 
-  tutorial: `W 12 krokach zbudujesz stronę główną serwisu z wiadomościami: hero, najnowsze artykuły, section „Więcej”, rekomendacje — z data z API, wariantami na mobile, cache i devtools. Każdy krok dokłada jedną rzecz i pokazuje wynik na żywo. Krok 13 to ćwiczenie: ta sama strona z pięcioma ukrytymi pomyłkami do znalezienia w panelu devtools.
+  tutorial: `In 12 steps you will build the home page of a news site: a hero, the latest articles, a "More" section, recommendations — with data from an API, mobile variants, cache and devtools. Each step adds one thing and shows the result live. Step 13 is an exercise: the same page with five hidden mistakes to find in the devtools panel.
 
-Jeśli nie znasz idei server-driven UI, przeczytaj najpierw *Introduction* — zwłaszcza „Przykład od początku do końca”.
+If you're not familiar with the idea of server-driven UI, read *Introduction* first — especially "End-to-end example".
 
-## Jak czytać
+## How to read it
 
-Każdy krok ma:
-- opis — co robimy i po co,
-- kod — prawdziwe pliki tego przykładu (contract, instancja, toProps, registry) i kod strony z tego kroku,
-- wynik — strona zbudowana z tego kodu,
-- „Zobacz na żywo” — co otworzyć w panelu devtools (przycisk **dedal** w prawym dolnym rogu albo \`Alt+Shift+S\`),
-- raport devtools — to samo w formie tekstu.
+Each step has:
+- a description — what we're doing and why,
+- the code — the real files of this example (contract, instance, toProps, registry) and the page code for this step,
+- the result — the page built from this code,
+- "See it live" — what to open in the devtools panel (the **dedal** button in the bottom right corner, or \`Alt+Shift+S\`),
+- the devtools report — the same thing as text.
 
-Kolejne kroki korzystają z bloków z poprzednich — warto iść po kolei (link „next” na dole strony).
+Later steps use blocks from earlier ones — it's worth going in order (the "next" link at the bottom of the page).
 
-## Jak to wygląda w projekcie
+## What it looks like in a project
 
-Pliki tego przykładu (\`examples/next\`):
+Files of this example (\`examples/next\`):
 
 \`\`\`
-ui/contract.ts           — contract: component i ich props (wspólny dla serwera i frontu) + typ Ctx
-ui/dedal.ts             — instancja: createDedal<Contract>({ defaults, toProps })
-ui/to-props.ts           — mapowania data z API → props component
-ui/home.page.ts          — bloki (node, repeat) i strona: section, data, query, cache
-ui/registries/*.tsx      — registry: component → komponenty React (shadcn, Radix Themes)
-ui/page-view.tsx         — build → resolve → <Render> (w trybie debug + devtools)
-app/(radix)/radix/…      — route'y Next, które renderują PageView z wybraną registry
+ui/contract.ts           — contract: components and their props (shared by server and frontend) + the Ctx type
+ui/dedal.ts             — instance: createDedal<Contract>({ defaults, toProps })
+ui/to-props.ts           — mappings of API data → component props
+ui/home.page.ts          — blocks (node, repeat) and the page: sections, data, query, cache
+ui/registries/*.tsx      — registries: component → React components (shadcn, Radix Themes)
+ui/page-view.tsx         — build → resolve → <Render> (in debug mode + devtools)
+app/(radix)/radix/…      — Next routes that render PageView with the chosen registry
 \`\`\`
 
-W większym projekcie bloki zwykle wydziela się do osobnych modułów (np. \`blocks.ts\`), a każdą stronę do własnego pliku.
+In a larger project blocks are usually extracted into separate modules (e.g. \`blocks.ts\`), and each page into its own file.
 
-Instalacja: \`npm i github:dawidglosny/dedal#v0.6.0\`. Potrzebujesz TypeScript i React (dla \`dedal/react\`, React 18+); serwer może być dowolny (Node 20.9+) — tu Next.js (App Router, Server Components).`,
+Installation: \`npm i github:dawidglosny/dedal#v0.6.1\`. You need TypeScript and React (for \`dedal/react\`, React 18+); the server can be anything (Node 20.9+) — here it's Next.js (App Router, Server Components).`,
 
-  layout: `Layout to struktura section: jakie component, w jakiej kolejności, w jakich slotach, z jakimi props — **bez data**. Opisuje się go blokami: \`node(component, { props, children, slots, alias })\`.
+  layout: `The layout is the structure of a section: which components, in what order, in which slots, with which props — **without data**. You describe it with blocks: \`node(component, { props, children, slots, alias })\`.
 
-## Po co osobny layout
+## Why a separate layout
 
-Layout nie zależy od data, więc:
-- da się go zbudować bez wywołań API (to sam CPU, ułamek milisekundy),
-- ten sam blok obsługuje różne data (3 artykuły czy 30 — repeat i zasady braków decydują, co zostaje),
-- zmiana układu (kolejność, warianty, A/B) to zmiana bloku na serwerze, nie wdrożenie frontu.
+The layout doesn't depend on data, so:
+- it can be built without API calls (pure CPU, a fraction of a millisecond),
+- the same block handles different data (3 articles or 30 — repeat and the missing-data rules decide what stays),
+- a layout change (order, variants, A/B) is a change to a block on the server, not a frontend deployment.
 
 ## Builders: node, repeat, clone
 
-Bierzesz je z instancji (\`ui.node\`, \`ui.repeat\`, \`ui.clone\`) — wtedy są typowane contractem i dokładają \`defaults\`.
+You take them from the instance (\`ui.node\`, \`ui.repeat\`, \`ui.clone\`) — that way they are typed by the contract and add \`defaults\`.
 
-- \`node(component, { props, children, slots, alias })\` — jeden node. \`defaults\` instancji są łączone z \`props\` (deep merge: zagnieżdżone obiekty się łączą, tablice i \`undefined\` zastępują wartość domyślną).
-- \`repeat(block, n)\` — ten sam blok \`n\` razy jako kolejne rodzeństwo; \`n\` to liczba całkowita \`>= 1\`. Każda kopia dostaje własne ID.
-- \`clone(n, a, b)\` — powtarza sekwencję bloków: \`clone(2, a, b)\` daje \`[a, b, a, b]\` (do rozwinięcia w \`children\`).
+- \`node(component, { props, children, slots, alias })\` — a single node. The instance \`defaults\` are merged with \`props\` (deep merge: nested objects are merged, arrays and \`undefined\` replace the default value).
+- \`repeat(block, n)\` — the same block \`n\` times as consecutive siblings; \`n\` is an integer \`>= 1\`. Each copy gets its own ID.
+- \`clone(n, a, b)\` — repeats a sequence of blocks: \`clone(2, a, b)\` gives \`[a, b, a, b]\` (to spread into \`children\`).
 
-Blok to zwykła wartość TypeScript — można go parametryzować funkcją (\`cards(title, count)\`), składać z mniejszych bloków, eksportować i używać w wielu stronach.
+A block is a plain TypeScript value — you can parameterize it with a function (\`cards(title, count)\`), compose it from smaller blocks, export it and use it across many pages.
 
-## Children i sloty
+## Children and slots
 
-- **children** — zwykła zawartość node (lista). W React trafia do \`children\` komponentu.
-- **sloty** — nazwane miejsca zadeklarowane w contract jako prop typu \`Slot\` (jeden node, np. \`media\` w hero) albo \`Slot[]\` (lista, np. \`actions\`). W React trafiają do propsa o nazwie slotu jako gotowy element (albo tablica elementów).
+- **children** — the regular content of a node (a list). In React it goes to the component's \`children\`.
+- **slots** — named places declared in the contract as a prop of type \`Slot\` (one node, e.g. \`media\` in the hero) or \`Slot[]\` (a list, e.g. \`actions\`). In React they go to the prop named after the slot as a ready-made element (or an array of elements).
 
-Sloty są częścią layoutu, nie data: serwer decyduje, co jest w slocie (badge, avatar, przyciski). Data do node w slotach przypisuje się jak do każdego innego node — selectorem \`:slot(nazwa)\`.
+Slots are part of the layout, not the data: the server decides what goes into a slot (a badge, an avatar, buttons). Data is assigned to nodes in slots like to any other node — with the selector \`:slot(name)\`.
 
-## ID node
+## Node IDs
 
-ID wynika z pozycji w layoucie (po rozwinięciu \`repeat\`):
-- korzeń section — key section: \`news\`,
-- dziecko — ID rodzica + \`.\` + indeks: \`news.0\`, \`news.0.2\`,
-- pojedynczy slot — ID rodzica + \`:\` + nazwa slotu: \`news.0:badge\`,
-- slot-lista — dodatkowo indeks w slocie: \`hero:actions.1\`.
+The ID follows from the position in the layout (after expanding \`repeat\`):
+- section root — the section key: \`news\`,
+- child — parent ID + \`.\` + index: \`news.0\`, \`news.0.2\`,
+- single slot — parent ID + \`:\` + slot name: \`news.0:badge\`,
+- list slot — additionally the index within the slot: \`hero:actions.1\`.
 
-Po ID spotykają się layout i data, także gdy przyszły z różnych miejsc (cache, sieć). Zmiana bloku zmienia ID — dlatego layout i data zawsze powinny pochodzić z tego samego \`build\`.
+Layout and data meet by ID, even when they came from different places (cache, network). Changing a block changes the IDs — that's why layout and data should always come from the same \`build\`.
 
-Własny generator ID (\`createDedal({ id })\`) jest możliwy, ale musi dawać ID unikalne na **całej stronie** — najprościej, gdy zaczyna się od \`prefix\` (key section), jak wbudowany.
+A custom ID generator (\`createDedal({ id })\`) is possible, but it must produce IDs unique across the **whole page** — the simplest way is to start with \`prefix\` (the section key), like the built-in one.
 
-## patch i remove
+## patch and remove
 
-Section może zmodyfikować blok bez jego kopiowania:
-- \`patch: { selector: props }\` — nakłada props na trafione node (deep merge; przy kilku patchach na ten sam prop wygrywa późniejszy wpis),
-- \`remove: selector\` (albo lista selectorów) — usuwa trafione node razem z poddrzewem, także ze slotów.
+A section can modify a block without copying it:
+- \`patch: { selector: props }\` — applies props to the matched nodes (deep merge; when several patches set the same prop, the later entry wins),
+- \`remove: selector\` (or a list of selectors) — removes the matched nodes together with their subtree, including from slots.
 
-Kolejność etapów: blok → \`remove\` → \`patch\` → przypisanie data. Selectory patcha widzą drzewo **przed** patchem (jak CSS widzi DOM) — patch zmieniający \`size\` nie wpływa na to, czy inny patch z \`[size=lg]\` trafi.
+Order of stages: block → \`remove\` → \`patch\` → data assignment. Patch selectors see the tree **before** patching (the way CSS sees the DOM) — a patch that changes \`size\` doesn't affect whether another patch with \`[size=lg]\` matches.
 
-## Selectory — ściąga
+## Selectors — cheat sheet
 
-Składnia CSS, dopasowywana do drzewa jednej section (\`:root\` to korzeń section):
-- \`card\` — component; \`*\` — dowolny node,
+CSS syntax, matched against the tree of a single section (\`:root\` is the section root):
+- \`card\` — component; \`*\` — any node,
 - \`#featured\` — alias,
-- \`[size]\` — prop istnieje; \`[size=lg]\` — prop ma wartość (porównanie jako string); \`[style.height="100%"]\` — zagnieżdżony prop, wartość w cudzysłowie,
-- \`:first-child\`, \`:last-child\`, \`:nth-child(2)\`, \`:nth-child(odd)\` / \`(even)\`, \`:nth-child(3n+1)\`, \`:nth-last-child(…)\` — pozycja liczona od 1, po rozwinięciu \`repeat\`; w slocie-liście — w obrębie slotu,
-- \`:slot\` — node w dowolnym slocie; \`:slot(badge)\` — w slocie \`badge\`,
-- \`:root\` — korzeń section,
-- \`a b\` — potomek (także przez sloty), \`a > b\` — bezpośrednie dziecko albo zawartość slotu, \`a, b\` — jeden z selectorów.
+- \`[size]\` — the prop exists; \`[size=lg]\` — the prop has a value (compared as a string); \`[style.height="100%"]\` — a nested prop, value in quotes,
+- \`:first-child\`, \`:last-child\`, \`:nth-child(2)\`, \`:nth-child(odd)\` / \`(even)\`, \`:nth-child(3n+1)\`, \`:nth-last-child(…)\` — position counted from 1, after expanding \`repeat\`; in a list slot — within the slot,
+- \`:slot\` — a node in any slot; \`:slot(badge)\` — in the \`badge\` slot,
+- \`:root\` — the section root,
+- \`a b\` — descendant (also through slots), \`a > b\` — direct child or slot content, \`a, b\` — one of the selectors.
 
-Inne konstrukcje CSS (klasy \`.x\`, \`:not()\`, \`:has()\`, \`+\`, \`~\`) nie są obsługiwane — dają błąd składni z pozycją. Ten sam matcher działa w patch, remove, bindings i devtools — czego nauczysz się raz, używasz wszędzie. Selector możesz sprawdzić w polu wyszukiwania zakładki *tree* w devtools, zanim wpiszesz go w kod.
+Other CSS constructs (classes \`.x\`, \`:not()\`, \`:has()\`, \`+\`, \`~\`) are not supported — they produce a syntax error with the position. The same matcher works in patch, remove, bindings and devtools — learn it once, use it everywhere. You can test a selector in the search field of the *tree* tab in devtools before you put it in your code.
 
-## Jak używać
+## How to use it
 
-- Zdefiniuj bloki dla powtarzalnych układów (lista card, hero, siatka).
-- W section użyj bloku i dopasuj go \`patch\` / \`remove\` zamiast kopiować blok z drobną zmianą.
-- Warianty (mobile / desktop, A/B) — \`sections: (ctx) => [...]\`: inne bloki albo inne patch per ctx.
-- Miejsca, do których trzeba się odwołać niezależnie od pozycji (wyróżniona card), nazwij aliasem.
+- Define blocks for recurring layouts (a list of cards, a hero, a grid).
+- In a section use the block and adjust it with \`patch\` / \`remove\` instead of copying the block with a small change.
+- Variants (mobile / desktop, A/B) — \`sections: (ctx) => [...]\`: different blocks or different patches per ctx.
+- Give an alias to places you need to refer to regardless of position (a featured card).
 
-## Na co uważać
+## What to watch out for
 
-- Selector, który nic nie trafia (literówka, zmieniony blok), nie zgłasza błędu — devtools pokazują go jako warning (z podpowiedzią, gdy da się poprawić selector).
-- \`remove: ':root'\` usuwa całą section — jej loader się nie wykonuje, a data strony pod jej key trafiają do \`unknownData\`.
-- Korzeń section to jeden node (nie można go powtórzyć \`repeat\`), a pojedynczy slot przyjmuje jeden node — kilka wymaga slotu-listy (\`Slot[]\`).`,
+- A selector that matches nothing (a typo, a changed block) doesn't raise an error — devtools show it as a warning (with a hint when the selector can be corrected).
+- \`remove: ':root'\` removes the whole section — its loader doesn't run, and page data under its key goes to \`unknownData\`.
+- A section root is a single node (it can't be repeated with \`repeat\`), and a single slot accepts one node — several require a list slot (\`Slot[]\`).`,
 
-  data: `Data trafiają do layoutu przez **bindings**: data section to obiekt \`{ selector: items }\`. Selector wybiera node w section, a kolejne items trafiają do kolejnych trafionych node — w kolejności drzewa.
+  data: `Data reaches the layout through **bindings**: a section's data is an object \`{ selector: items }\`. The selector picks nodes in the section, and consecutive items go to consecutive matched nodes — in tree order.
 
 \`\`\`ts
 data: async () => ({
-  news: {                                   // key section
-    card: articles,                         // binding: każda card dostaje kolejny artykuł
-    'card > :slot(badge)': categories,      // binding do slotów
+  news: {                                   // section key
+    card: articles,                         // binding: each card gets the next article
+    'card > :slot(badge)': categories,      // binding to slots
   },
 })
 \`\`\`
 
-## Dlaczego selectory, a nie jedna lista
+## Why selectors and not a single list
 
-Jedna płaska lista data na section (pierwszy element do pierwszego component, drugi do drugiego…) psuje się przy każdej zmianie bloku: dodanie nagłówka przesuwa wszystkie data o jeden. Bindings są adresowane — \`card\` dostaje artykuły, \`badge\` kategorie, niezależnie od kolejności w bloku. Data nigdy nie przechodzą między section — key section jest jawny.
+A single flat list of data per section (first element to the first component, second to the second…) breaks with every block change: adding a heading shifts all the data by one. Bindings are addressed — \`card\` gets the articles, \`badge\` the categories, regardless of their order in the block. Data never crosses between sections — the section key is explicit.
 
-## Jak dokładnie działa przypisanie
+## How assignment works exactly
 
-- **Kolejność drzewa**: node, potem jego sloty (w kolejności z bloku), potem children — rekurencyjnie. Pierwszy item trafia do pierwszego trafionego node w tej kolejności.
-- **Kolejność bindings ma znaczenie**: są przetwarzane w kolejności wpisów, a node zajęty przez wcześniejszy binding jest pomijany przez kolejne. Dlatego szczegółowe (\`#featured\`) wpisuje się przed ogólnymi (\`card\`).
-- **Kształt**: binding to tablica items albo \`{ items, onShortage, onSurplus }\` (własne zasady dla tego bindingu). Item może być czymkolwiek serializowalnym do JSON — obiekt, string, liczba; \`null\` / \`undefined\` = brak data dla tego node.
-- **Wynik** to mapa \`ID node → item\` w \`PageResult.data\`; z props łączy ją dopiero \`resolve\`.
+- **Tree order**: a node, then its slots (in the order from the block), then its children — recursively. The first item goes to the first matched node in that order.
+- **The order of bindings matters**: they are processed in entry order, and a node taken by an earlier binding is skipped by later ones. That's why specific ones (\`#featured\`) are written before general ones (\`card\`).
+- **Shape**: a binding is an array of items or \`{ items, onShortage, onSurplus }\` (custom rules for that binding). An item can be anything serializable to JSON — an object, a string, a number; \`null\` / \`undefined\` = no data for that node.
+- **The result** is a map \`node ID → item\` in \`PageResult.data\`; only \`resolve\` combines it with props.
 
-## Data a props
+## Data vs props
 
-Data mogą mieć kształt API (\`Article\`), a nie props component. **toProps** (opcja instancji) mapuje je per component na props contractu — czysty moduł, bez IO, działa na serwerze i na froncie. Dostaje \`{ props, data, node, ctx }\` i jest wołane dla każdego node danego component, **także bez data** (\`data: undefined\`). Bez toProps data (muszą być obiektem) są łączone z props wprost (deep merge, data wygrywają).
+Data can have the API's shape (\`Article\`) rather than the component's props. **toProps** (an instance option) maps it per component to the contract's props — a pure module, no IO, runs on the server and on the frontend. It receives \`{ props, data, node, ctx }\` and is called for every node of the given component, **including those without data** (\`data: undefined\`). Without toProps, data (it must be an object) is merged with props directly (deep merge, data wins).
 
-Pierwszeństwo props: \`defaults\` (dokładane przez \`node()\` przy tworzeniu bloku) → props z bloku → \`patch\` section → data. \`resolve\` przekazuje props z layoutu i data do \`toProps\` — jego wynik to ostateczne props (stąd \`...props\` w mapowaniu). Devtools przy każdym propsie pokazują źródło.
+Props precedence: \`defaults\` (added by \`node()\` when the block is created) → props from the block → section \`patch\` → data. \`resolve\` passes the props from the layout and the data to \`toProps\` — its result is the final props (hence \`...props\` in the mapping). Devtools show the source of every prop.
 
-## Gdy liczba się nie zgadza
+## When the counts don't match
 
-Data z API rzadko pasują idealnie do layoutu:
-- **mniej items niż node** — \`onShortage\`: \`'remove'\` (domyślnie — node bez data znika razem z poddrzewem), \`'keep'\` (zostaje z props z layoutu, np. placeholder), \`'error'\` (wyjątek),
-- **więcej items niż node** — \`onSurplus\`: \`'ignore'\` (domyślnie — nadmiar pominięty) albo \`'error'\`,
-- \`null\` / \`undefined\` w liście = brak data dla tego node (jak przy zbyt krótkiej liście).
+API data rarely fits the layout perfectly:
+- **fewer items than nodes** — \`onShortage\`: \`'remove'\` (default — a node without data disappears together with its subtree), \`'keep'\` (stays with the props from the layout, e.g. a placeholder), \`'error'\` (exception),
+- **more items than nodes** — \`onSurplus\`: \`'ignore'\` (default — the surplus is skipped) or \`'error'\`,
+- \`null\` / \`undefined\` in the list = no data for that node (as with a list that's too short).
 
-Zasady ustawia się na trzech poziomach — węższy wygrywa: instancja (\`createDedal({ assign: { onShortage, onSurplus } })\`), section (\`section(key, block, { policies })\`), jeden binding (\`{ items, onShortage }\`).
+The rules are set on three levels — the narrower one wins: instance (\`createDedal({ assign: { onShortage, onSurplus } })\`), section (\`section(key, block, { policies })\`), a single binding (\`{ items, onShortage }\`).
 
-## Jak używać
+## How to use it
 
-- Przygotuj data per component (lista artykułów dla \`card\`, kategorie dla \`badge\`), nie jedną listę dla całej section.
-- Bindings szczegółowe (\`#featured\`) wpisuj przed ogólnymi (\`card\`).
-- Zdecyduj, co przy brakach: znikające card (\`remove\`) czy stałe miejsca (\`keep\`).
+- Prepare data per component (a list of articles for \`card\`, categories for \`badge\`), not one list for the whole section.
+- Write specific bindings (\`#featured\`) before general ones (\`card\`).
+- Decide what happens on shortage: cards that disappear (\`remove\`) or fixed slots (\`keep\`).
 
-## Na co uważać
+## What to watch out for
 
-- Rozjazdy (binding bez trafień, zła kolejność, data, które przepadły) nie wywracają strony — devtools pokazują je w *sections* z wyjaśnieniem i listą data, które nie trafiły na stronę.
-- \`onShortage: 'remove'\` na kontenerze usuwa też jego dzieci — razem z data, które już dostały (*Dropped data*).`,
+- Mismatches (a binding with no matches, wrong order, data that got lost) don't break the page — devtools show them in *sections* with an explanation and a list of the data that didn't make it onto the page.
+- \`onShortage: 'remove'\` on a container also removes its children — together with the data they already received (*Dropped data*).`,
 
-  sections: `Section to kawałek strony: key, block i zasady. Strona (\`ui.page\`) to lista section plus to, skąd biorą data.
+  sections: `A section is a piece of the page: a key, a block and rules. A page (\`ui.page\`) is a list of sections plus where they get their data from.
 
 \`\`\`ts
 const home = ui.page<Ctx>({
-  sections: ctx => [header, ui.section('news', newsBlock, { patch: { … } })],  // albo stała tablica
-  data: async ctx => ({ news: { card: await api.latest() } }),               // data strony
-  cache: { key: ctx => ['home', ctx.device] },                               // opcjonalnie
-  onSectionError: (error, { section }) => log(section, error),               // opcjonalnie
+  sections: ctx => [header, ui.section('news', newsBlock, { patch: { … } })],  // or a fixed array
+  data: async ctx => ({ news: { card: await api.latest() } }),               // page data
+  cache: { key: ctx => ['home', ctx.device] },                               // optional
+  onSectionError: (error, { section }) => log(section, error),               // optional
 })
 \`\`\`
 
-Opcje section (\`ui.section(key, block, options)\`): \`remove\`, \`patch\` (zob. *Layout*), \`policies\` (zob. *Data*), \`data\`, \`optional\`, \`onEmpty\`, \`required\`, \`defer\` — opisane niżej. Key section musi być unikalny na stronie.
+Section options (\`ui.section(key, block, options)\`): \`remove\`, \`patch\` (see *Layout*), \`policies\` (see *Data*), \`data\`, \`optional\`, \`onEmpty\`, \`required\`, \`defer\` — described below. A section key must be unique within the page.
 
-## Skąd section bierze data
+## Where a section gets its data
 
-- **data strony** — \`page({ data: (ctx) => ({ news: {...}, hero: {...} }) })\` — jedno miejsce dla wielu section,
-- **loader section** — \`section(key, block, { data: (ctx) => bindings })\` — section ładuje swoje data sama; zwraca bindings tylko tej section (bez key section),
-- **bez data** — section statyczna: renderuje sam layout (np. nagłówek z tekstem w bloku).
+- **page data** — \`page({ data: (ctx) => ({ news: {...}, hero: {...} }) })\` — one place for many sections,
+- **section loader** — \`section(key, block, { data: (ctx) => bindings })\` — the section loads its own data; it returns the bindings of that section only (without the section key),
+- **no data** — a static section: renders the layout alone (e.g. a heading with text in the block).
 
-Loader section pozwala zrobić **section wspólne** (header, footer, menu): definiujesz je raz z loaderem i dołączasz do wielu stron bez powtarzania ich data w każdej. Wszystkie loadery i data strony działają **równolegle**. Loadery wykonują się tylko dla section obecnych na stronie (nie dla usuniętych przez \`remove: ':root'\` ani odroczonych).
+A section loader lets you build **shared sections** (header, footer, menu): you define them once with a loader and include them in many pages without repeating their data in each one. All loaders and the page data run **in parallel**. Loaders run only for sections present on the page (not for those removed with \`remove: ':root'\` or deferred).
 
-## Gdy coś pójdzie nie tak
+## When something goes wrong
 
-- **Błąd loadera** domyślnie przerywa build — strona bez kluczowej section nie powinna się wyrenderować po cichu. \`optional: true\` usuwa wtedy tylko tę section (np. rekomendacje), a błąd trafia do \`onSectionError\` strony (logi, metryki).
-- **Pusta section** — section dostała bindings (z loadera albo z data strony), ale po przypisaniu żaden node nie ma data. Decyduje \`onEmpty\`: \`'remove'\` (domyślnie), \`'keep'\`, blok (stan pusty, np. „Brak wyników”) albo \`'error'\`. \`required: 'card'\` liczy tylko node pasujące do selectora — gdy nagłówek dostaje data zawsze, a o sensie section decydują card.
-- **Section bez bindings** — gdy data strony nie mają jej key albo loader zwrócił \`undefined\`, section nie jest „pusta” w sensie \`onEmpty\`: zostaje z samym layoutem (devtools ostrzegają, gdy wyglądało to na pomyłkę).
+- **A loader error** aborts the build by default — a page missing a key section shouldn't render silently. \`optional: true\` removes only that section instead (e.g. recommendations), and the error goes to the page's \`onSectionError\` (logs, metrics).
+- **An empty section** — the section received bindings (from a loader or from page data), but after assignment no node has data. \`onEmpty\` decides: \`'remove'\` (default), \`'keep'\`, a block (an empty state, e.g. "No results") or \`'error'\`. \`required: 'card'\` counts only nodes matching the selector — for when the heading always gets data, and it's the cards that decide whether the section makes sense.
+- **A section without bindings** — when the page data has no entry under its key or the loader returned \`undefined\`, the section isn't "empty" in the \`onEmpty\` sense: it stays with just the layout (devtools warn when this looks like a mistake).
 
-## Section odroczone (streaming)
+## Deferred sections (streaming)
 
-\`defer: { fallback }\` — wynik strony zawiera tylko zaślepkę (\`fallback\`, z \`deferred: true\`), loader się nie wykonuje. Treść buduje \`page.section(key, ctx)\` w osobnym wywołaniu — zwraca \`PageResult\` z tą jedną section, więc \`resolve\` i \`<Render>\` działają bez zmian. W Next to async Server Component w \`<Suspense>\`: strona wychodzi od razu, a wolna section (rekomendacje, data spersonalizowane) dociera, gdy jest gotowa.
+\`defer: { fallback }\` — the page result contains only a placeholder (\`fallback\`, with \`deferred: true\`), and the loader doesn't run. The content is built by \`page.section(key, ctx)\` in a separate call — it returns a \`PageResult\` with that one section, so \`resolve\` and \`<Render>\` work unchanged. In Next it's an async Server Component inside \`<Suspense>\`: the page goes out immediately, and the slow section (recommendations, personalized data) arrives when it's ready.
 
 \`\`\`tsx
 async function Deferred({ sectionKey, ctx }: { sectionKey: string; ctx: Ctx }) {
@@ -399,105 +399,105 @@ async function Deferred({ sectionKey, ctx }: { sectionKey: string; ctx: Ctx }) {
 />
 \`\`\`
 
-Bez propsa \`deferred\` \`<Render>\` pokazuje sam fallback. Section odroczona jest poza cache strony (cache'owana jest tylko zaślepka) — dobre miejsce na data per użytkownik.
+Without the \`deferred\` prop, \`<Render>\` shows only the fallback. A deferred section is outside the page cache (only the placeholder is cached) — a good place for per-user data.
 
-## Etapy strony
+## Page stages
 
-\`page.build(ctx)\` to trzy etapy w jednym wywołaniu (plus cache). Są też dostępne osobno — gdy chcesz np. cache'ować layout niezależnie od data:
-- \`page.layout(ctx)\` — layout section, bez IO,
-- \`page.load(ctx)\` — data strony i loadery section (równolegle),
-- \`page.assign(sections, data, ctx)\` — przypisanie data, wynik to \`PageResult\`.
+\`page.build(ctx)\` is three stages in a single call (plus cache). They are also available separately — e.g. when you want to cache the layout independently of the data:
+- \`page.layout(ctx)\` — the sections' layout, no IO,
+- \`page.load(ctx)\` — page data and section loaders (in parallel),
+- \`page.assign(sections, data, ctx)\` — data assignment, the result is a \`PageResult\`.
 
-## Dlaczego tak
+## Why it works this way
 
-Każda decyzja „co, gdy brakuje” jest jawna i ma domyślną wartość, która nie wywraca strony tam, gdzie to bezpieczne (puste promocje znikają), a wywraca tam, gdzie cisza byłaby błędem (błąd loadera bez \`optional\`). Wszystko, co zostało usunięte albo pominięte, jest w raporcie (\`report.removedSections\`, \`failedSections\`, \`emptySections\`, \`unknownData\`) i w devtools.
+Every "what if something's missing" decision is explicit and has a default that doesn't break the page where that's safe (empty promotions disappear) and does break it where silence would be a bug (a loader error without \`optional\`). Everything that was removed or skipped is in the report (\`report.removedSections\`, \`failedSections\`, \`emptySections\`, \`unknownData\`) and in devtools.
 
-## Jak używać
+## How to use it
 
-- Section wspólne (header, footer) — z własnym loaderem, eksportowane i dołączane do stron.
-- Section „miłe do mania” — \`optional: true\`; section, bez których strona nie ma sensu — \`onEmpty: 'error'\`.
-- Wolne albo spersonalizowane — \`defer\`.
+- Shared sections (header, footer) — with their own loader, exported and included in pages.
+- "Nice to have" sections — \`optional: true\`; sections without which the page makes no sense — \`onEmpty: 'error'\`.
+- Slow or personalized ones — \`defer\`.
 
-## Na co uważać
+## What to watch out for
 
-- Data strony pod key section z własnym loaderem albo section odroczonej to wyjątek (nie wiadomo, które wygrywa).
-- Data pod key, którego nie ma na stronie (literówka, section z innego wariantu), są pomijane — devtools: \`unknownData\` z podpowiedzią.`,
+- Page data under the key of a section that has its own loader, or of a deferred section, is an exception (it's unclear which one should win).
+- Data under a key that isn't on the page (a typo, a section from another variant) is skipped — devtools: \`unknownData\` with a hint.`,
 
-  cache: `Dwa poziomy cache: **strony** (cały wynik \`build\`) i **query** (pojedyncze źródła data). Oba żyją w instancji i działają w trybie stale-while-revalidate.
+  cache: `Two levels of cache: **page** (the whole \`build\` result) and **query** (individual data sources). Both live in the instance and work in stale-while-revalidate mode.
 
-## Cache strony
+## Page cache
 
-\`page({ cache: { key: ctx => ['home', ctx.device] } })\` zapisuje wynik \`build\` pod key. Key to tablica wartości JSON obejmująca wszystko, od czego zależą section i data — tu \`device\`. Key \`undefined\` = ten ctx nie jest cache'owany (np. zalogowany użytkownik). Bez opcji \`cache\` strona nie jest cache'owana wcale.
+\`page({ cache: { key: ctx => ['home', ctx.device] } })\` stores the \`build\` result under a key. The key is an array of JSON values covering everything the sections and data depend on — here \`device\`. A key of \`undefined\` = this ctx isn't cached (e.g. a logged-in user). Without the \`cache\` option the page isn't cached at all.
 
-Stale-while-revalidate (wiek wpisu):
-- do \`staleTime\` (domyślnie 5 s) — wynik z cache (\`hit\`),
-- do \`maxAge\` (domyślnie 5 min) — stary wynik od razu, odświeżenie w tle (\`stale\`),
-- starszy albo brak wpisu — build i czekanie na wynik (\`miss\`),
-- równoległe requesty o ten sam key czekają na jeden build (bez lawiny wywołań API),
-- błędy nie są cache'owane; gdy odświeżenie w tle się nie uda, zostaje poprzedni wpis.
+Stale-while-revalidate (entry age):
+- up to \`staleTime\` (default 5 s) — result from cache (\`hit\`),
+- up to \`maxAge\` (default 5 min) — the old result immediately, refreshed in the background (\`stale\`),
+- older, or no entry — build and wait for the result (\`miss\`),
+- concurrent requests for the same key wait for a single build (no stampede of API calls),
+- errors aren't cached; when a background refresh fails, the previous entry stays.
 
-Czasy ustawia się dla instancji (\`createDedal({ cache: { staleTime, maxAge } })\`) i nadpisuje per strona (\`cache: { key, staleTime, maxAge }\`) albo query. Musi być \`0 <= staleTime <= maxAge\`.
+Timings are set for the instance (\`createDedal({ cache: { staleTime, maxAge } })\`) and overridden per page (\`cache: { key, staleTime, maxAge }\`) or per query. It must hold that \`0 <= staleTime <= maxAge\`.
 
 ## Query
 
 \`\`\`ts
 const articlesQuery = ui.query({
-  key: (count: number) => ['articles', count],   // key musi obejmować wszystkie parametry fn
+  key: (count: number) => ['articles', count],   // the key must cover all parameters of fn
   fn: (count: number) => api.latest(count),
   staleTime: 60_000,
 })
 
-const list = await articlesQuery(8)               // w loaderze strony albo section
+const list = await articlesQuery(8)               // in a page or section loader
 \`\`\`
 
-Query to źródło data cache'owane w instancji, wspólne dla stron, section i requestów — np. menu pobierane raz dla wszystkich stron. Key \`undefined\` = to wywołanie bez cache (\`bypass\`). Wynik z cache jest zamrożony i współdzielony między requestami — tylko do odczytu: \`[...items].sort()\`, nie \`items.sort()\`. Wynik musi być JSON-em (zewnętrzny magazyn go serializuje — \`Date\` czy \`Map\` nie przetrwają).
+A query is a data source cached in the instance, shared by pages, sections and requests — e.g. a menu fetched once for all pages. A key of \`undefined\` = this call skips the cache (\`bypass\`). A result from cache is frozen and shared between requests — read-only: \`[...items].sort()\`, not \`items.sort()\`. The result must be JSON (an external store serializes it — a \`Date\` or a \`Map\` won't survive).
 
-Query jest opcjonalne — loader to zwykła funkcja async, można w niej wołać dowolne źródło (fetch, klient API, cache, który aplikacja już ma).
+Query is optional — a loader is a plain async function, and you can call any source in it (fetch, an API client, a cache the application already has).
 
-## Dlaczego w instancji
+## Why in the instance
 
-Cache żyje tyle co instancja: twórz ją raz (na poziomie modułu), nie w każdym requeście. Strony i query mają osobne przestrzenie key (\`['menu']\` strony i \`['menu']\` query to różne wpisy), ale wspólne między stronami — key strony zaczynaj od jej nazwy.
+The cache lives as long as the instance: create it once (at module level), not in every request. Pages and queries have separate key spaces (a page's \`['menu']\` and a query's \`['menu']\` are different entries), but they are shared between pages — start a page's key with its name.
 
-\`ui.invalidate(prefix)\` usuwa wpisy stron i query, których key zaczyna się od \`prefix\` (\`[]\` — wszystkie), np. po publikacji w CMS: \`ui.invalidate(['articles'])\`.
+\`ui.invalidate(prefix)\` removes page and query entries whose key starts with \`prefix\` (\`[]\` — all of them), e.g. after publishing in a CMS: \`ui.invalidate(['articles'])\`.
 
-## Magazyn i opcje instancji
+## Store and instance options
 
 \`createDedal({ cache: { … } })\`:
-- \`store\` — magazyn wpisów; domyślnie \`memoryStore()\` (pamięć procesu, LRU, 500 wpisów). Dla wielu instancji serwera — własny adapter (Redis, KV) z metodami \`get\`, \`set\`, \`delete\`; opcjonalnie \`deletePrefix\` (bez niego \`invalidate\` usuwa tylko wpis o dokładnie takim key) i \`lock\` (jedno odświeżenie naraz w całym klastrze),
-- \`waitUntil\` — na edge / serverless przekazuje odświeżenie w tle środowisku (np. \`waitUntil\` z \`@vercel/functions\`), żeby nie zostało przerwane po odpowiedzi,
-- \`onEvent\` — zdarzenia cache (\`{ key, status, ms }\`) do logów i metryk.
+- \`store\` — the entry store; by default \`memoryStore()\` (process memory, LRU, 500 entries). For multiple server instances — your own adapter (Redis, KV) with \`get\`, \`set\`, \`delete\` methods; optionally \`deletePrefix\` (without it \`invalidate\` removes only the entry with exactly that key) and \`lock\` (one refresh at a time across the whole cluster),
+- \`waitUntil\` — on edge / serverless hands the background refresh to the environment (e.g. \`waitUntil\` from \`@vercel/functions\`) so it isn't cut off after the response,
+- \`onEvent\` — cache events (\`{ key, status, ms }\`) for logs and metrics.
 
-## Debug a cache
+## Debug and cache
 
-Tryb debug (\`trace\`) **omija cache strony** — ani nie czyta, ani nie zapisuje; devtools zawsze pokazują świeży build. Cache query działa dalej; zakładka *timing* pokazuje status każdego query: \`miss\`, \`hit\`, \`stale\`, \`bypass\`, \`error\` (wymaga \`AsyncLocalStorage\` — w Next jest globalny).
+Debug mode (\`trace\`) **bypasses the page cache** — it neither reads nor writes; devtools always show a fresh build. The query cache keeps working; the *timing* tab shows the status of each query: \`miss\`, \`hit\`, \`stale\`, \`bypass\`, \`error\` (requires \`AsyncLocalStorage\` — in Next it's global).
 
-## Na co uważać
+## What to watch out for
 
-- Data zależne od użytkownika: użytkownik w key albo key \`undefined\` — inaczej jeden użytkownik zobaczy stronę drugiego. Lepiej: część spersonalizowaną jako section odroczona (poza cache strony).
-- Key query bez któregoś parametru \`fn\` zwróci wynik dla innych parametrów.
-- Wyniki z cache są zamrożone — mutacja rzuca wyjątek.`,
+- User-dependent data: put the user in the key or use an \`undefined\` key — otherwise one user will see another user's page. Better: make the personalized part a deferred section (outside the page cache).
+- A query key that omits one of the \`fn\` parameters will return a result for different parameters.
+- Results from cache are frozen — mutating them throws an exception.`,
 
-  rendering: `Rendering to dwa kroki: \`resolve\` (złączenie layoutu z data w props) i \`<Render>\` (props → komponenty React przez registry).
+  rendering: `Rendering is two steps: \`resolve\` (combining the layout with data into props) and \`<Render>\` (props → React components through the registry).
 
 ## resolve
 
-\`ui.resolve(result, { ctx })\` zamienia \`PageResult\` (layout i data osobno) w \`ResolvedPage\` — drzewo \`{ key, component, props, slots, children }\` z ostatecznymi props. Dla każdego node: gdy component ma \`toProps\`, jego wynik to ostateczne props (dostaje props z layoutu — już z \`defaults\` — data node i \`ctx\`); bez \`toProps\` data (obiekt) są łączone z props (deep merge).
+\`ui.resolve(result, { ctx })\` turns a \`PageResult\` (layout and data separately) into a \`ResolvedPage\` — a tree of \`{ key, component, props, slots, children }\` with final props. For each node: when the component has \`toProps\`, its result is the final props (it receives the props from the layout — already with \`defaults\` — the node's data and \`ctx\`); without \`toProps\`, data (an object) is merged with props (deep merge).
 
-\`resolve\` to czysta funkcja — może działać na serwerze (jak w tym przykładzie) albo na froncie, gdy front dostaje \`PageResult\` przez API. Sprawdza wersję formatu (\`dedal: 1\`) i odrzuca nieznaną.
+\`resolve\` is a pure function — it can run on the server (as in this example) or on the frontend, when the frontend receives a \`PageResult\` through an API. It checks the format version (\`dedal: 1\`) and rejects unknown ones.
 
 ## Registry
 
-Registry mapuje nazwy component z contractu na komponenty React:
+The registry maps component names from the contract to React components:
 
 \`\`\`tsx
 const registry = { card: Card, grid: Grid, … } satisfies Registry<Contract>
 <Render tree={resolved} registry={registry} fallback={Missing} />
 \`\`\`
 
-Komponent w registry dostaje (\`RenderProps<Contract, 'card'>\`):
-- props z contractu (bez slotów),
-- każdy slot jako prop o jego nazwie: \`ReactNode\` dla \`Slot\`, \`ReactNode[]\` dla \`Slot[]\`,
-- children z layoutu jako \`children\`.
+A component in the registry receives (\`RenderProps<Contract, 'card'>\`):
+- the props from the contract (without slots),
+- each slot as a prop named after it: \`ReactNode\` for \`Slot\`, \`ReactNode[]\` for \`Slot[]\`,
+- children from the layout as \`children\`.
 
 \`\`\`tsx
 card: ({ title, href, size = 'md', badge, footer }) => (
@@ -509,68 +509,68 @@ card: ({ title, href, size = 'md', badge, footer }) => (
 )
 \`\`\`
 
-\`satisfies Registry<Contract>\` sprawdza przy kompilacji, że są wszystkie component i props się zgadzają. Registry to adapter: contract opisuje, czego potrzebuje strona, a registry tłumaczy to na API konkretnej biblioteki (badge \`variant: 'secondary'\` → \`variant="soft"\` w Radix Themes) — zmiana biblioteki to zmiana registry, nie serwera.
+\`satisfies Registry<Contract>\` checks at compile time that all components are present and the props match. The registry is an adapter: the contract describes what the page needs, and the registry translates it to the API of a specific library (badge \`variant: 'secondary'\` → \`variant="soft"\` in Radix Themes) — switching libraries is a change to the registry, not to the server.
 
-\`<Render>\` nie używa hooków ani stanu — działa w React Server Components, w SSR i na kliencie; komponenty w registry mogą być komponentami klienckimi (\`'use client'\`). Opcje: \`fallback\` (komponent dla component spoza registry, dostaje \`{ component, nodeKey }\`), \`deferred\` (render section odroczonej, zob. *Sections*), \`debug\` (znaczniki dla devtools).
+\`<Render>\` uses no hooks or state — it works in React Server Components, in SSR and on the client; components in the registry can be client components (\`'use client'\`). Options: \`fallback\` (a component for components missing from the registry, receives \`{ component, nodeKey }\`), \`deferred\` (rendering a deferred section, see *Sections*), \`debug\` (markers for devtools).
 
-## Problemy, które nie wywracają strony
+## Problems that don't break the page
 
-\`resolve\` nie rzuca przy złych data — zbiera **issues** (\`resolved.issues\`: \`{ id, message }\`), a node dostaje props z layoutu:
-- data nie-obiekt bez toProps,
-- wyjątek w toProps albo toProps zwracające nie-obiekt,
-- data dla ID, którego nie ma w layoucie (layout i data z różnych buildów).
+\`resolve\` doesn't throw on bad data — it collects **issues** (\`resolved.issues\`: \`{ id, message }\`), and the node gets the props from the layout:
+- non-object data without toProps,
+- an exception in toProps, or toProps returning a non-object,
+- data for an ID that isn't in the layout (layout and data from different builds).
 
-Brak component w registry renderuje \`fallback\` (albo nic). Dlaczego tak: jeden zły artykuł nie powinien zabrać całej strony. Gdzie wolisz twardy błąd (testy, CI) — \`resolve(result, { onIssue: 'throw' })\`.
+A component missing from the registry renders \`fallback\` (or nothing). Why: one bad article shouldn't take down the whole page. Where you'd rather have a hard error (tests, CI) — \`resolve(result, { onIssue: 'throw' })\`.
 
-## Na co uważać
+## What to watch out for
 
-- Issues są widoczne w \`resolved.issues\` i devtools (\`!\` w *tree*, komunikaty w *sections*) — warto je logować na produkcji.
-- Front starszy niż serwer: component, którego nie ma w registry, renderuje \`fallback\` — nowe component wdrażaj najpierw na froncie, potem używaj w blokach.`,
+- Issues are visible in \`resolved.issues\` and in devtools (\`!\` in *tree*, messages in *sections*) — it's worth logging them in production.
+- A frontend older than the server: a component that isn't in the registry renders \`fallback\` — deploy new components to the frontend first, then use them in blocks.`,
 
-  errors: `Część problemów przerywa build albo \`resolve\` wyjątkiem — to błędy programisty (zły blok, zła składnia, sprzeczna konfiguracja) albo sytuacje, które sam oznaczyłeś jako niedopuszczalne (\`onShortage: 'error'\`, \`onEmpty: 'error'\`, loader bez \`optional\`).
+  errors: `Some problems abort the build or \`resolve\` with an exception — these are programmer errors (a bad block, bad syntax, conflicting configuration) or situations you yourself marked as unacceptable (\`onShortage: 'error'\`, \`onEmpty: 'error'\`, a loader without \`optional\`).
 
-## Dlaczego wyjątki
+## Why exceptions
 
-Ciche obejście takich błędów ukryłoby je do produkcji. Wyjątek przy pierwszym buildzie (lokalnie, w testach) wskazuje problem od razu.
+Silently working around such errors would hide them until production. An exception on the first build (locally, in tests) points to the problem right away.
 
-## Jak czytać komunikaty
+## How to read the messages
 
-Każdy komunikat mówi:
-- **gdzie** — section (\`section "news": …\`), binding, selector z pozycją,
-- **co przyszło** — np. \`got array (3 items)\`, \`got 0\`,
-- **co zrobić** — np. \`wrap it in a container\`, \`remove "news" from page data or drop the section's loader\`.
+Every message says:
+- **where** — the section (\`section "news": …\`), the binding, the selector with the position,
+- **what came in** — e.g. \`got array (3 items)\`, \`got 0\`,
+- **what to do** — e.g. \`wrap it in a container\`, \`remove "news" from page data or drop the section's loader\`.
 
-Błąd loadera zachowuje oryginalny błąd w \`cause\`.
+A loader error keeps the original error in \`cause\`.
 
-## Gdy strona się nie buduje
+## When the page doesn't build
 
-Devtools nie pokażą nic — nie ma payloadu, bo nie ma strony. Zostaje komunikat wyjątku (w logu serwera, w overlay Next). Strony w tej grupie łapią wyjątek i pokazują jego treść.
+Devtools won't show anything — there's no payload because there's no page. What's left is the exception message (in the server log, in the Next overlay). The pages in this group catch the exception and display its message.
 
-## Wyjątek a warning
+## Exception vs warning
 
-Braki, nadmiar i puste section domyślnie nie wywracają strony (**warning** w devtools). Złe data (issues \`resolve\`) i binding bez trafień to **błąd** (✗) w devtools, ale strona się renderuje. Wyjątkiem stają się dopiero po ustawieniu \`'error'\` (\`onShortage\`, \`onSurplus\`, \`onEmpty\`) albo \`onIssue: 'throw'\` w \`resolve\`. Zły kształt data (lista zamiast bindings, binding nie-lista) i to, co zależy od kodu (składnia, struktura bloków, konfiguracja), jest wyjątkiem zawsze.`,
+Shortage, surplus and empty sections don't break the page by default (a **warning** in devtools). Bad data (\`resolve\` issues) and a binding with no matches are an **error** (✗) in devtools, but the page renders. They only become exceptions once you set \`'error'\` (\`onShortage\`, \`onSurplus\`, \`onEmpty\`) or \`onIssue: 'throw'\` in \`resolve\`. A wrong data shape (a list instead of bindings, a binding that isn't a list) and anything that depends on the code (syntax, block structure, configuration) is always an exception.`,
 
-  devtools: `Devtools pokazują, co Dedal zrobił z konkretną stroną: skąd każdy prop, które data trafiły gdzie, co przepadło i dlaczego, ile trwał build i które query poszły do API. Ta strona opisuje, skąd biorą się te informacje i jak je czytać — zakładka po zakładce.
+  devtools: `Devtools show what Dedal did with a specific page: where every prop came from, which data went where, what got lost and why, how long the build took and which queries went to the API. This page describes where that information comes from and how to read it — tab by tab.
 
-## Skąd panel ma dane
+## Where the panel gets its data
 
 \`\`\`
-page.build(ctx, { trace: true })   build w trybie debug: zapisuje pochodzenie props, raport bindings, czasy
-        │                          (omija cache strony — zawsze świeży build)
-ui.resolve(result, { trace: true }) złączenie layout + data, z pochodzeniem każdego propsa
+page.build(ctx, { trace: true })   build in debug mode: records props origin, bindings report, timings
+        │                          (bypasses the page cache — always a fresh build)
+ui.resolve(result, { trace: true }) combines layout + data, with the origin of every prop
         │
-inspect(result, resolved)          payload devtools — czysty JSON: section, node, komunikaty, czasy
+inspect(result, resolved)          devtools payload — plain JSON: sections, nodes, messages, timings
         │
-<DevtoolsData payload />           payload osadzony na stronie w <script type="application/json">
-<Render debug />                   każdy node owinięty w <dedal-node data-dedal-key="…"> (do "pick")
-<Devtools />                       panel (Shadow DOM): czyta skrypty z payloadem, także dostreamowane później
+<DevtoolsData payload />           payload embedded in the page in <script type="application/json">
+<Render debug />                   every node wrapped in <dedal-node data-dedal-key="…"> (for "pick")
+<Devtools />                       panel (Shadow DOM): reads the payload scripts, including ones streamed in later
 \`\`\`
 
-Panel nie pyta serwera o nic — wszystko jest w payloadzie z chwili renderu. Section odroczona (streaming) przychodzi z własnym payloadem; panel łączy je w jeden widok.
+The panel doesn't ask the server for anything — everything is in the payload from the moment of rendering. A deferred section (streaming) arrives with its own payload; the panel merges them into a single view.
 
-## Jak włączyć (Next, React Server Components)
+## How to enable it (Next, React Server Components)
 
-Cztery elementy w trybie debug: build i resolve z \`trace\`, znaczniki w DOM, payload na stronie i panel. Uproszczona wersja \`ui/page-view.tsx\` z tego przykładu (tu \`isDebug()\` to po prostu \`?debug=1\`):
+Four pieces in debug mode: build and resolve with \`trace\`, markers in the DOM, the payload on the page, and the panel. A simplified version of \`ui/page-view.tsx\` from this example (here \`isDebug()\` simply means \`?debug=1\`):
 
 \`\`\`tsx
 import { Suspense } from 'react'
@@ -579,8 +579,8 @@ import { DevtoolsData, Render } from 'dedal/react'
 import { Devtools } from 'dedal/react/devtools'
 
 export async function PageView({ ctx, registry }: { ctx: Ctx; registry: Registry<Contract> }) {
-  const debug = await isDebug()                                 // zob. „Bezpieczne włączanie”
-  const result = await home.build(ctx, { trace: debug })        // 1. pochodzenie props, raport, czasy; omija cache strony
+  const debug = await isDebug()                                 // see "Enabling it safely"
+  const result = await home.build(ctx, { trace: debug })        // 1. props origin, report, timings; bypasses the page cache
   const resolved = ui.resolve(result, { ctx, trace: debug })
 
   return (
@@ -588,20 +588,20 @@ export async function PageView({ ctx, registry }: { ctx: Ctx; registry: Registry
       <Render
         tree={resolved}
         registry={registry}
-        debug={debug}                                           // 2. znaczniki node w DOM (do „pick”)
+        debug={debug}                                           // 2. node markers in the DOM (for "pick")
         deferred={({ sectionKey, fallback }) => (
           <Suspense fallback={fallback}>
             <DeferredSection sectionKey={sectionKey} ctx={ctx} registry={registry} debug={debug} />
           </Suspense>
         )}
       />
-      {debug && <DevtoolsData payload={inspect(result, resolved)} />}   {/* 3. payload dla panelu */}
+      {debug && <DevtoolsData payload={inspect(result, resolved)} />}   {/* 3. payload for the panel */}
       {debug && <Devtools />}                                            {/* 4. panel */}
     </>
   )
 }
 
-// section odroczona dokłada własny payload — panel łączy go z payloadem strony
+// a deferred section adds its own payload — the panel merges it with the page payload
 async function DeferredSection({ sectionKey, ctx, registry, debug }: { sectionKey: string; ctx: Ctx; registry: Registry<Contract>; debug: boolean }) {
   const result = await home.section(sectionKey, ctx, { trace: debug })
   const resolved = ui.resolve(result, { ctx, trace: debug })
@@ -614,15 +614,15 @@ async function DeferredSection({ sectionKey, ctx, registry, debug }: { sectionKe
 }
 \`\`\`
 
-- \`inspect\` (\`dedal/devtools\`) — czysta funkcja: payload (JSON) z indeksem node, selectorami, data, komunikatami i czasami.
-- \`<DevtoolsData>\` (\`dedal/react\`) — osadza payload jako \`<script type="application/json" data-dedal-devtools>\`, z escapowaniem (data z \`</script>\` nie zamkną skryptu).
-- \`<Devtools />\` (\`dedal/react/devtools\`) — komponent kliencki; kod panelu ładuje się dynamicznie dopiero po zamontowaniu. Bez propsa \`open\` panel jest otwarty albo zamknięty tak, jak zostawiono go w tej karcie przeglądarki; \`open\` / \`open={false}\` wymusza stan.
+- \`inspect\` (\`dedal/devtools\`) — a pure function: a payload (JSON) with an index of nodes, selectors, data, messages and timings.
+- \`<DevtoolsData>\` (\`dedal/react\`) — embeds the payload as \`<script type="application/json" data-dedal-devtools>\`, with escaping (data containing \`</script>\` won't close the script).
+- \`<Devtools />\` (\`dedal/react/devtools\`) — a client component; the panel code is loaded dynamically only after mounting. Without the \`open\` prop the panel is open or closed the way it was left in this browser tab; \`open\` / \`open={false}\` forces the state.
 
-## Bezpieczne włączanie
+## Enabling it safely
 
-Tryb debug **ujawnia strukturę i data strony** (wszystkie props, data node, key cache) i omija cache strony — każdy request w debug to pełny build z wywołaniami API. Dlatego włącza go aplikacja, świadomie:
-- poza produkcją — zawsze albo przełącznikiem (ten przykład: \`?debug=1\`),
-- na produkcji — tylko dla zaufanych osób, np. cookie z sekretem ustawiane przez chroniony endpoint. Sam query param na produkcji to zaproszenie dla każdego.
+Debug mode **exposes the structure and data of the page** (all props, node data, cache keys) and bypasses the page cache — every request in debug is a full build with API calls. That's why the application turns it on, deliberately:
+- outside production — always, or with a switch (this example: \`?debug=1\`),
+- in production — only for trusted people, e.g. a cookie with a secret set by a protected endpoint. A query param alone in production is an invitation to everyone.
 
 \`\`\`ts
 import { cookies } from 'next/headers'
@@ -634,39 +634,39 @@ export async function isDebug() {
 }
 \`\`\`
 
-Bez trybu debug nic się nie zmienia: wynik \`build\` / \`resolve\` jest taki sam jak bez devtools, DOM nie ma znaczników, a kod panelu nie jest ładowany.
+Without debug mode nothing changes: the \`build\` / \`resolve\` result is the same as without devtools, the DOM has no markers, and the panel code isn't loaded.
 
-## Inne środowiska
+## Other environments
 
-- **React bez RSC (SPA, SSR)** — te same komponenty: \`<Render debug>\`, \`<DevtoolsData>\`, \`<Devtools />\`. \`inspect()\` działa też w przeglądarce.
-- **Backend → front (API z JSON-em)** — backend robi \`build(ctx, { trace: true })\` tylko dla zaufanych żądań; front wywołuje u siebie \`resolve\` i \`inspect()\` (czyste funkcje) i renderuje jak wyżej.
-- **Bez Reacta** — \`mountDevtools()\` z \`dedal/devtools/panel\` po załadowaniu strony; payload osadź jako \`<script type="application/json" data-dedal-devtools>\`, zamieniając \`<\` na \`\\u003c\`. Bez znaczników node w DOM panel pokazuje *tree*, *sections* i *timing*, ale nie podświetla elementów, a \`pick\` nic nie znajdzie.
+- **React without RSC (SPA, SSR)** — the same components: \`<Render debug>\`, \`<DevtoolsData>\`, \`<Devtools />\`. \`inspect()\` also works in the browser.
+- **Backend → frontend (an API with JSON)** — the backend does \`build(ctx, { trace: true })\` only for trusted requests; the frontend calls \`resolve\` and \`inspect()\` (pure functions) on its side and renders as above.
+- **Without React** — \`mountDevtools()\` from \`dedal/devtools/panel\` after the page loads; embed the payload as \`<script type="application/json" data-dedal-devtools>\`, replacing \`<\` with \`\\u003c\`. Without node markers in the DOM the panel shows *tree*, *sections* and *timing*, but doesn't highlight elements, and \`pick\` won't find anything.
 
-## node — jeden element strony
+## node — a single element of the page
 
-\`pick\` i kliknij element strony (albo wybierz node w *tree*):
-- **component, ID, section, slot** — ID wynika z pozycji w bloku (\`news.0.1\`, \`hero:actions.0\`),
-- **selector** — najkrótszy selector trafiający tylko w ten node (do patch i bindings), z \`copy\`; \`not unique\`, gdy nie da się wskazać go jednoznacznie,
-- **data** — surowe data node (kształt z API) i binding, który je przypisał (\`assigned by card\`),
-- **issues** — problemy \`resolve\` (data nie-obiekt, błąd toProps) i brak component w registry,
-- **props** — ostateczne props z pochodzeniem: \`← default\` (defaults instancji), \`← template\` (blok), \`← patch <selector>\` (który patch; przy kilku pasujących wygrywa późniejszy), \`← data\` (z data przez toProps albo deep merge), \`← layout\` (z layoutu, bez szczegółów — strona zbudowana bez \`trace\`),
-- **parent / children** — nawigacja po drzewie (najechanie podświetla, kliknięcie przechodzi).
+\`pick\` and click an element on the page (or select a node in *tree*):
+- **component, ID, section, slot** — the ID follows from the position in the block (\`news.0.1\`, \`hero:actions.0\`),
+- **selector** — the shortest selector that matches only this node (for patch and bindings), with \`copy\`; \`not unique\` when it can't be pointed to unambiguously,
+- **data** — the node's raw data (the API shape) and the binding that assigned it (\`assigned by card\`),
+- **issues** — \`resolve\` problems (non-object data, a toProps error) and a component missing from the registry,
+- **props** — final props with their origin: \`← default\` (instance defaults), \`← template\` (block), \`← patch <selector>\` (which patch; when several match, the later one wins), \`← data\` (from data through toProps or deep merge), \`← layout\` (from the layout, without details — the page was built without \`trace\`),
+- **parent / children** — navigating the tree (hovering highlights, clicking navigates).
 
-Pochodzenie dotyczy props najwyższego poziomu: patch \`{ style: { height } }\` oznacza źródło propsa \`style\`. Prop równy wartości domyślnej jest oznaczany jako \`default\`, nawet gdy blok ustawił tę samą wartość — wynik jest wtedy identyczny. Sugerowany selector jest liczony na stronie po \`assign\` — gdy \`assign\` usunął rodzeństwo (np. card bez data), pozycja \`:nth-child\` w bloku może być inna. \`pick\` anuluje \`Esc\`.
+Origin applies to top-level props: a patch \`{ style: { height } }\` marks the source of the \`style\` prop. A prop equal to the default value is marked as \`default\` even when the block set the same value — the result is identical then. The suggested selector is computed on the page after \`assign\` — when \`assign\` removed siblings (e.g. a card without data), the \`:nth-child\` position in the block may differ. \`Esc\` cancels \`pick\`.
 
-## tree — cała strona
+## tree — the whole page
 
-Wszystkie section i node w kolejności drzewa. \`●\` — node ma data, \`!\` — issues albo brak w registry. Section usunięte przez data są pokazane z layoutem sprzed \`assign\` („removed — no data; layout before assign”) — widać, na co czekały.
+All sections and nodes in tree order. \`●\` — the node has data, \`!\` — issues or missing from the registry. Sections removed because of data are shown with their layout from before \`assign\` ("removed — no data; layout before assign") — you can see what they were waiting for.
 
-Pole wyszukiwania szuka na trzy sposoby naraz: **selector** (ten sam matcher co patch / bindings — sprawdzisz selector, zanim wpiszesz go w kod), **tekst w ID, key section i aliasie** (\`news\`, \`news.0.1\`, \`#featured\`) i **tekst w data** (fragment tytułu, id, URL — od 2 znaków). Data, które nie trafiły na stronę, a zawierają tekst, są wypisane jako „not on the page” (z section, bindingiem i indeksem). Selectory atrybutów (\`[size=lg]\`) widzą props z layoutu, nie z data. „only matches” zostawia tylko trafienia i ich przodków.
+The search field searches in three ways at once: **selector** (the same matcher as patch / bindings — you can test a selector before you put it in your code), **text in the ID, section key and alias** (\`news\`, \`news.0.1\`, \`#featured\`) and **text in the data** (a fragment of a title, an id, a URL — from 2 characters). Data that didn't make it onto the page but contains the text is listed as "not on the page" (with the section, binding and index). Attribute selectors (\`[size=lg]\`) see the props from the layout, not from the data. "only matches" keeps only the matches and their ancestors.
 
-## sections — co poszło nie tak
+## sections — what went wrong
 
-Na górze komunikaty strony, jedna linia na problem: \`✗\` błąd, \`!\` ostrzeżenie, \`·\` informacja. Niżej każda section: skąd ma data (\`source: page / section / deferred / none\`), jej bindings w postaci „X data items for Y nodes” i pod spodem — co z tego wynikło i co zrobić. Najechanie na binding podświetla na stronie node, do których trafiły jego data; kliknięcie otwiera *tree* z jego selectorem.
+At the top, page messages, one line per problem: \`✗\` error, \`!\` warning, \`·\` info. Below, each section: where it gets its data from (\`source: page / section / deferred / none\`), its bindings in the form "X data items for Y nodes" and underneath — what came of it and what to do. Hovering over a binding highlights the nodes on the page that received its data; clicking opens *tree* with its selector.
 
-## timing — skąd biorą się liczby
+## timing — where the numbers come from
 
-Build w trybie debug mierzy czas zegarem \`performance.now()\` w kilku punktach. Wszystkie czasy w *timing* są w milisekundach **od początku tego builda** (zaokrąglone do 0,1 ms).
+A build in debug mode measures time with the \`performance.now()\` clock at several points. All times in *timing* are in milliseconds **from the start of that build** (rounded to 0.1 ms).
 
 \`\`\`
 0 ms                                                               total
@@ -677,75 +677,75 @@ Build w trybie debug mierzy czas zegarem \`performance.now()\` w kilku punktach.
                          query miss ███████  query hit ▏
 \`\`\`
 
-**Etapy** (pierwszy pasek i legenda):
-- **layout** — wywołanie \`sections(ctx)\`, zamiana bloków na node (rozwinięcie \`repeat\`, ID), \`remove\` i \`patch\` wszystkich section. Sam CPU, bez IO — zwykle ułamek milisekundy. (\`defaults\` są już w blokach — dokłada je \`node()\` przy ich tworzeniu.)
-- **data loading** — od końca layoutu do chwili, gdy skończyły się **wszystkie** loadery (\`data\` strony i loadery section). Loadery działają równolegle, więc ten etap trwa mniej więcej tyle, co najwolniejszy z nich — nie tyle, co ich suma.
-- **assign** — rozdzielenie data na node (bindings), \`onShortage\`, \`onEmpty\`. Znowu sam CPU.
-- **total** — suma trzech etapów, czyli czas \`build\`.
+**Stages** (the first bar and the legend):
+- **layout** — calling \`sections(ctx)\`, turning blocks into nodes (expanding \`repeat\`, IDs), \`remove\` and \`patch\` for all sections. Pure CPU, no IO — usually a fraction of a millisecond. (\`defaults\` are already in the blocks — \`node()\` adds them when the blocks are created.)
+- **data loading** — from the end of the layout until **all** loaders have finished (the page's \`data\` and section loaders). Loaders run in parallel, so this stage takes roughly as long as the slowest of them — not as long as their sum.
+- **assign** — distributing data to nodes (bindings), \`onShortage\`, \`onEmpty\`. Pure CPU again.
+- **total** — the sum of the three stages, i.e. the \`build\` time.
 
-**Loadery** (paski na osi czasu): każdy loader jest mierzony osobno — od wywołania do zakończenia (albo błędu). Pasek zaczyna się w miejscu startu loadera i ma długość jego czasu. Wszystkie startują w tym samym momencie (zaraz po layoucie), dlatego paski zaczynają się równo. \`page data\` to funkcja \`data\` strony; pozostałe nazwy to key section z loaderem. \`slowest\` — loader, na który czeka cały build; czerwony — loader rzucił wyjątek.
+**Loaders** (bars on the timeline): each loader is measured separately — from the call to completion (or error). The bar starts where the loader started and its length is the loader's duration. They all start at the same moment (right after the layout), which is why the bars start evenly. \`page data\` is the page's \`data\` function; the other names are the keys of sections with a loader. \`slowest\` — the loader the whole build is waiting on; red — the loader threw an exception.
 
-**Query** (pod loaderem): każde wywołanie \`ui.query\` w czasie builda z trybem debug zapisuje swój key, status cache, start i czas trwania. Skąd wiadomo, który loader je wywołał? Dedal uruchamia każdy loader w kontekście asynchronicznym (\`AsyncLocalStorage\`) z jego nazwą, a query odczytuje ten kontekst — nawet po \`await\`. Dzięki temu dwa równoległe requesty, które korzystają z tej samej instancji i tego samego cache, nie mieszają swoich query. W Next \`AsyncLocalStorage\` jest globalny; gdzie indziej przekaż \`createDedal({ AsyncLocalStorage })\` z \`node:async_hooks\` — bez niego *timing* pokazuje tylko etapy i loadery.
+**Queries** (under a loader): every \`ui.query\` call during a build in debug mode records its key, cache status, start and duration. How do we know which loader called it? Dedal runs each loader in an async context (\`AsyncLocalStorage\`) carrying its name, and the query reads that context — even after an \`await\`. Thanks to this, two concurrent requests that use the same instance and the same cache don't mix up their queries. In Next \`AsyncLocalStorage\` is global; elsewhere pass \`createDedal({ AsyncLocalStorage })\` from \`node:async_hooks\` — without it *timing* shows only the stages and loaders.
 
-Co znaczy status i czas query:
-- \`miss\` — pobrane: brak w cache albo wpis wygasł (\`maxAge\`); czas ≈ czas wywołania \`fn\` (API),
-- \`hit\` — z cache, świeże (\`staleTime\` nie minął); czas ≈ 0,
-- \`stale\` — z cache, ale po \`staleTime\`: stary wynik od razu (czas ≈ 0), a odświeżenie biegnie w tle — **poza pomiarem**, następny request dostanie świeży,
-- \`bypass\` — query bez key: pobierane zawsze, bez cache,
-- \`error\` — \`fn\` rzuciło.
+What a query's status and time mean:
+- \`miss\` — fetched: not in the cache, or the entry expired (\`maxAge\`); time ≈ the duration of the \`fn\` call (API),
+- \`hit\` — from cache, fresh (\`staleTime\` hasn't passed); time ≈ 0,
+- \`stale\` — from cache, but past \`staleTime\`: the old result immediately (time ≈ 0), while the refresh runs in the background — **outside the measurement**, the next request will get the fresh one,
+- \`bypass\` — a query without a key: always fetched, no cache,
+- \`error\` — \`fn\` threw.
 
-Dwa równoczesne wywołania z tym samym key to jeden fetch (deduplikacja): oba mają status \`miss\`, a drugie trwa tyle, ile czekało na pierwsze.
+Two simultaneous calls with the same key are a single fetch (deduplication): both have the status \`miss\`, and the second one lasts as long as it waited for the first.
 
-## Czego w timing nie ma
+## What timing doesn't include
 
-- \`resolve\`, render React, wysyłki HTML do przeglądarki, narzutu Next — mierzony jest tylko \`build\`,
-- odświeżeń \`stale\` w tle,
-- **cache strony** — build z trace go omija, więc *timing* pokazuje zawsze pełny build. Na produkcji strona z cache (\`hit\`) nie wykonuje loaderów wcale.
+- \`resolve\`, React rendering, sending the HTML to the browser, Next overhead — only \`build\` is measured,
+- \`stale\` refreshes in the background,
+- **the page cache** — a build with trace bypasses it, so *timing* always shows a full build. In production a page from cache (\`hit\`) doesn't run loaders at all.
 
-Dlatego liczby w debug są „najgorszym przypadkiem dla strony” i „prawdziwym stanem cache query”. Do tego: tryb \`npm run dev\` jest wolniejszy niż produkcyjny build, a pierwszy request po starcie serwera — wolniejszy niż kolejne (puste cache query, rozgrzewanie JIT).
+That's why the numbers in debug are "the worst case for the page" and "the real state of the query cache". On top of that: \`npm run dev\` mode is slower than a production build, and the first request after the server starts is slower than the following ones (empty query cache, JIT warm-up).
 
-## Jak czytać timing
+## How to read timing
 
-- **Strona wolna** → który loader ma \`slowest\`; to on wyznacza data loading. Przyspieszenie pozostałych nic nie da.
-- **Loader długi, a pod nim brak query** → wolne źródło spoza \`ui.query\` (bezpośredni fetch, baza) — rozważ \`ui.query\` ze \`staleTime\`, \`defer\` albo cache strony.
-- **To samo query \`miss\` przy każdym odświeżeniu** → \`staleTime: 0\`, key zmienia się co request (np. zawiera czas) albo query bez key (\`bypass\`).
-- **Query w jednym loaderze startują jedno po drugim** (start drugiego ≈ koniec pierwszego) → kolejne \`await\` w loaderze; jeśli są niezależne, użyj \`Promise.all\`.
-- **Loader czerwony** → *sections* pokaże treść błędu.
+- **The page is slow** → which loader has \`slowest\`; it determines data loading. Speeding up the others won't help.
+- **A long loader with no queries under it** → a slow source outside \`ui.query\` (a direct fetch, a database) — consider \`ui.query\` with \`staleTime\`, \`defer\` or the page cache.
+- **The same query is a \`miss\` on every refresh** → \`staleTime: 0\`, the key changes on every request (e.g. it contains a time), or the query has no key (\`bypass\`).
+- **Queries in one loader start one after another** (the second starts ≈ when the first ends) → sequential \`await\`s in the loader; if they're independent, use \`Promise.all\`.
+- **A red loader** → *sections* will show the error message.
 
-## Typowe problemy
+## Common problems
 
-**Panel jest pusty.** \`No devtools payload on this page\` — strona nie osadziła payloadu: w trybie debug wyrenderuj \`<DevtoolsData payload={inspect(result, resolved)} />\`. \`built without trace — …\` — payload jest, ale build szedł bez \`trace\`: brakuje liczby items, pochodzenia props, bindings bez trafień i section usuniętych przez data (zob. przypadek *Build without trace*).
+**The panel is empty.** \`No devtools payload on this page\` — the page didn't embed the payload: in debug mode render \`<DevtoolsData payload={inspect(result, resolved)} />\`. \`built without trace — …\` — the payload is there, but the build ran without \`trace\`: missing are item counts, props origin, bindings with no matches and sections removed because of data (see the *Build without trace* case).
 
-**Component się nie renderuje.** \`✗ card is not in the registry — …\` — registry nie ma component; node renderuje \`fallback\` z \`<Render>\` albo nic. Wymaga \`<Render debug>\` (znacznik \`data-dedal-missing\`).
+**A component doesn't render.** \`✗ card is not in the registry — …\` — the registry doesn't have the component; the node renders the \`fallback\` from \`<Render>\` or nothing. Requires \`<Render debug>\` (the \`data-dedal-missing\` marker).
 
-**Patch się nie aplikuje.** *sections* → \`! patch “crad” matches no node in this section — it has no effect. Did you mean: card?\` (dla \`remove\`: \`… nothing is removed.\`). Selector trafia, ale prop ma inną wartość — w *node* sprawdź pochodzenie: późniejszy patch albo data mogły go nadpisać.
+**A patch doesn't apply.** *sections* → \`! patch “crad” matches no node in this section — it has no effect. Did you mean: card?\` (for \`remove\`: \`… nothing is removed.\`). If the selector matches but the prop has a different value — check the origin in *node*: a later patch or the data may have overridden it.
 
-**Card nie dostała data albo zniknęła.** *sections* → bindings section: \`! card — 2 data items for 4 nodes\` (\`(1 null)\` — część items to \`null\`; bez trace: \`2 of 4 nodes filled\`), a pod spodem skutek: \`2 nodes removed — …\` albo \`2 nodes left empty (onShortage: 'keep')\`, a przy nadmiarze \`3 data items not shown — no node left for them:\` z listą.
+**A card got no data or disappeared.** *sections* → the section's bindings: \`! card — 2 data items for 4 nodes\` (\`(1 null)\` — some items are \`null\`; without trace: \`2 of 4 nodes filled\`), and underneath the effect: \`2 nodes removed — …\` or \`2 nodes left empty (onShortage: 'keep')\`, and for a surplus \`3 data items not shown — no node left for them:\` with a list.
 
-**Data nie trafiły na stronę, choć section je dostała.** \`✗ crad — 3 data items for 0 nodes\` z \`No node in this section matches “crad” … Did you mean: card?\` (literówka, także w nazwie slotu) albo \`“#featured” matches nodes already filled by “card” … Move “#featured” before “card”\` (zła kolejność bindings). \`news.2.0 had data, but their parent news.2 was removed\` — data przepadły razem z usuniętym rodzicem.
+**Data didn't make it onto the page even though the section received it.** \`✗ crad — 3 data items for 0 nodes\` with \`No node in this section matches “crad” … Did you mean: card?\` (a typo, also in a slot name) or \`“#featured” matches nodes already filled by “card” … Move “#featured” before “card”\` (wrong order of bindings). \`news.2.0 had data, but their parent news.2 was removed\` — the data was lost together with the removed parent.
 
-**Gdzie wylądował ten artykuł?** *tree* → wpisz fragment tytułu, id albo URL. Node, których data go zawierają, są wyróżnione w drzewie i na stronie; jeśli artykuł nie trafił na stronę — \`! not on the page: section … · card [4] …\`.
+**Where did this article end up?** *tree* → type a fragment of the title, the id or the URL. Nodes whose data contains it are highlighted in the tree and on the page; if the article didn't make it onto the page — \`! not on the page: section … · card [4] …\`.
 
-**Section nie ma na stronie.** Komunikaty strony w *sections* podają przyczynę: \`failed\` (loader \`optional\` section rzucił — z treścią błędu), \`removed\` (pusta przy \`onEmpty: 'remove'\`, korzeń bez data albo \`remove\` w definicji section), \`empty\` (\`kept\` / \`replaced by the onEmpty block\`), \`unknownData\` (data pod key, którego nie ma na stronie — z podpowiedzią).
+**A section isn't on the page.** The page messages in *sections* give the reason: \`failed\` (the loader of an \`optional\` section threw — with the error message), \`removed\` (empty with \`onEmpty: 'remove'\`, a root without data, or \`remove\` in the section definition), \`empty\` (\`kept\` / \`replaced by the onEmpty block\`), \`unknownData\` (data under a key that isn't on the page — with a hint).
 
-**Na stronie są stare data.** *sections* → \`cache key\`. Tryb debug omija cache strony, więc pokazuje świeży build — jeśli w debug data są aktualne, a bez niego nie, to stary wpis cache (\`staleTime\`, \`ui.invalidate()\`).
+**The page shows stale data.** *sections* → \`cache key\`. Debug mode bypasses the page cache, so it shows a fresh build — if the data is up to date in debug but not without it, it's a stale cache entry (\`staleTime\`, \`ui.invalidate()\`).
 
-## Pozostałe
+## Other features
 
-- \`copy report\` — raport tekstowy (URL, komunikaty, section z problemami, czasy) do zgłoszenia błędu — to samo, co „devtools report” na stronach tych docs,
-- \`Alt+Shift+S\` otwiera i zamyka panel; \`⇤\` / \`⇥\` przenosi go na drugą stronę ekranu; panel pamięta otwarcie, zakładkę i stronę w obrębie karty przeglądarki (\`sessionStorage\`), także po przeładowaniu.
+- \`copy report\` — a text report (URL, messages, sections with problems, timings) for a bug report — the same as the "devtools report" on the pages of these docs,
+- \`Alt+Shift+S\` opens and closes the panel; \`⇤\` / \`⇥\` moves it to the other side of the screen; the panel remembers whether it was open, the tab and the side within the browser tab (\`sessionStorage\`), even after a reload.
 
-## Ograniczenia i koszty (tylko w trybie debug)
+## Limitations and costs (debug mode only)
 
-- **Znaczniki zmieniają DOM** — \`<Render debug>\` owija każdy node w \`<dedal-node style="display: contents">\`: selectory CSS zależne od struktury (\`.grid > .card\`, \`:first-child\`) mogą działać inaczej, a tam, gdzie HTML wymaga konkretnych dzieci (\`<table>\`, \`<ul>\`, \`<select>\`), struktura się psuje.
-- **Debug omija cache strony** — każdy request to pełny build z wywołaniami API.
-- **Koszt \`inspect()\` i rozmiar payloadu** — rzędu kilku ms i 150–250 KB na ~500 node, kilkadziesiąt ms i 1–2 MB na ~4000 node; rozmiar zależy głównie od ilości data.
-- **Zrzut, nie stan na żywo** — panel pokazuje stronę z chwili renderu na serwerze; zmian po stronie klienta (stan komponentów) nie widzi.
-- **Tylko odczyt** — panel nie zmienia layoutu ani data.
+- **Markers change the DOM** — \`<Render debug>\` wraps every node in \`<dedal-node style="display: contents">\`: CSS selectors that depend on structure (\`.grid > .card\`, \`:first-child\`) may behave differently, and where HTML requires specific children (\`<table>\`, \`<ul>\`, \`<select>\`), the structure breaks.
+- **Debug bypasses the page cache** — every request is a full build with API calls.
+- **The cost of \`inspect()\` and the payload size** — on the order of a few ms and 150–250 KB for ~500 nodes, a few dozen ms and 1–2 MB for ~4000 nodes; the size depends mainly on the amount of data.
+- **A snapshot, not live state** — the panel shows the page as of the server render; it doesn't see client-side changes (component state).
+- **Read-only** — the panel doesn't change the layout or the data.
 
-## Programistycznie
+## Programmatically
 
-Te same funkcje są w \`dedal/devtools\` — działają w Node, w testach i w logach:
+The same functions are in \`dedal/devtools\` — they work in Node, in tests and in logs:
 
 \`\`\`ts
 import { inspect, mergePayloads, pageMessages, reportText, searchNodes, selectNodes } from 'dedal/devtools'
@@ -753,16 +753,16 @@ import { inspect, mergePayloads, pageMessages, reportText, searchNodes, selectNo
 const result = await home.build(ctx, { trace: true })
 const payload = inspect(result, ui.resolve(result, { ctx, trace: true }))
 
-payload.nodes['news.0'].selector             // sugerowany selector
+payload.nodes['news.0'].selector             // suggested selector
 payload.nodes['news.0'].props.size           // { value: 'lg', source: { from: 'patch', selector: '…', section: 'news' } }
 payload.sections[0].diagnosis                // unmatched, layout, removed, dropped
-selectNodes(payload, 'grid > card')          // ID pasujących node — ten sam matcher co patch / bindings
-searchNodes(payload, 'tytuł')                // wyszukiwanie z *tree*: { bySelector, byText, byData, lost }
-pageMessages(payload)                        // komunikaty strony: { level, subject, text, suggestions? }
-reportText(payload, { title })               // raport tekstowy (to samo co „copy report”)
-payload.page.timings                         // czasy: [{ scope, total, layout, load, assign, loaders, queries? }]
-mergePayloads([pagePayload, sectionPayload]) // payload strony + section odroczonej
+selectNodes(payload, 'grid > card')          // IDs of matching nodes — the same matcher as patch / bindings
+searchNodes(payload, 'title')                // the *tree* search: { bySelector, byText, byData, lost }
+pageMessages(payload)                        // page messages: { level, subject, text, suggestions? }
+reportText(payload, { title })               // text report (the same as "copy report")
+payload.page.timings                         // timings: [{ scope, total, layout, load, assign, loaders, queries? }]
+mergePayloads([pagePayload, sectionPayload]) // page payload + a deferred section
 \`\`\`
 
-Przykłady testów: „żaden binding nie gubi data” — \`expect(pageMessages(payload).filter(m => m.level === 'error')).toEqual([])\`; „patch wyróżnionej card trafia dokładnie w jeden node” — \`expect(selectNodes(payload, 'grid > card:first-child')).toHaveLength(1)\`.`,
+Example tests: "no binding loses data" — \`expect(pageMessages(payload).filter(m => m.level === 'error')).toEqual([])\`; "the featured card patch matches exactly one node" — \`expect(selectNodes(payload, 'grid > card:first-child')).toHaveLength(1)\`.`,
 } as const

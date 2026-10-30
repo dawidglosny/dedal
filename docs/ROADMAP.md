@@ -1,75 +1,75 @@
-# Roadmap — otwarte plany i zasady rozwoju
+# Roadmap — open plans and development principles
 
-Rzeczy niezrobione, otwarte pytania i zasady, których trzymamy się przy dalszych pracach. Dokumentacja użytkownika (jak używać paczki) jest w [`examples/next`](../examples/next) (`/docs`) i w [README](../README.md). Wcześniejsze kontrakty (cache, devtools, wydajność) są zrealizowane — ich pełna treść, z pomiarami i uzasadnieniem decyzji, jest w historii gita (`docs/CACHE.md`, `docs/DEVTOOLS.md`, `docs/PERFORMANCE.md`, do wersji 0.5.2).
+Things not yet done, open questions and the principles we follow in further work. User documentation (how to use the package) is in [`examples/next`](../examples/next) (`/docs`) and in the [README](../README.md). The earlier contracts (cache, devtools, performance) have been implemented — their full text, with measurements and the reasoning behind decisions, is in the git history (`docs/CACHE.md`, `docs/DEVTOOLS.md`, `docs/PERFORMANCE.md`, up to version 0.5.2).
 
-## Zasady przy dalszym rozwoju
+## Principles for further development
 
-Uzupełniają „Twarde reguły” z README.
+They complement the "Hard rules" in the README.
 
 **Cache**
-- Cache włącza strona (`page({ cache: { key } })`), nie paczka. Bez automatycznego cache z key zgadniętym z `ctx` — grozi wyciekiem data między użytkownikami.
-- Key jest jawny i musi obejmować wszystko, od czego zależą `sections(ctx)` i `data(ctx)`.
-- Rdzeń nie zna magazynu — tylko interfejs `Store`; Redis, Mongo, KV to adaptery po stronie aplikacji albo osobne paczki.
-- Cache nie zmienia kształtu wyniku; błędy nie trafiają do cache; wpisy współdzielone są zamrożone; pamięć procesu ma limit (LRU).
+- Caching is enabled by the page (`page({ cache: { key } })`), not by the package. No automatic cache with a key guessed from `ctx` — that risks leaking data between users.
+- The key is explicit and must include everything `sections(ctx)` and `data(ctx)` depend on.
+- The core doesn't know the store — only the `Store` interface; Redis, Mongo, KV are adapters on the application side or separate packages.
+- The cache doesn't change the shape of the result; errors are not cached; shared entries are frozen; process memory has a limit (LRU).
 
 **Devtools**
-- Zero kosztu w produkcji: rdzeń i `dedal/react` nie importują devtools; bez trybu debug wynik i DOM są identyczne.
-- Payload to czysty JSON (działa w układzie backend → front); część czysta (`dedal/devtools`) nie zależy od DOM ani frameworka.
-- Devtools nie zmieniają wyniku i nie wymagają współpracy registry (żadnych `data-*` ani refów w komponentach).
-- Build z `trace` omija cache strony; tryb debug włącza aplikacja; panel tylko czyta.
+- Zero cost in production: the core and `dedal/react` don't import devtools; without debug mode the result and the DOM are identical.
+- The payload is plain JSON (works in a backend → front end setup); the pure part (`dedal/devtools`) doesn't depend on the DOM or a framework.
+- Devtools don't change the result and don't require cooperation from the registry (no `data-*` or refs in components).
+- A build with `trace` bypasses the page cache; debug mode is enabled by the application; the panel is read-only.
 
-**Wydajność**
-- Optymalizacje nie zmieniają semantyki (kolejność drzewa i przypisań, ID, współdzielenie poddrzew) ani formatów na drucie.
-- Żaden globalny stan paczki nie rośnie bez limitu z liczbą requestów.
-- Każdą zmianę weryfikujemy pomiarem przed / po: `npm run bench` (scenariusz w `bench/bench.mjs`). Punkt odniesienia z 0.5.x: strona 530 node — build + resolve ~0,8 ms; 3620 node — ~6,5 ms.
+**Performance**
+- Optimizations don't change semantics (tree and assignment order, IDs, subtree sharing) or the wire formats.
+- No global package state grows without bound with the number of requests.
+- Every change is verified by a before / after measurement: `npm run bench` (scenario in `bench/bench.mjs`). Baseline from 0.5.x: a page of 530 nodes — build + resolve ~0.8 ms; 3620 nodes — ~6.5 ms.
 
-## Otwarte
+## Open
 
-### `assign`: puste kontenery (`prune`) i node powiązane (`removeWith`)
+### `assign`: empty containers (`prune`) and related nodes (`removeWith`)
 
-Status: propozycja, niezaimplementowane.
+Status: proposal, not implemented.
 
-**Problem.** `onShortage: 'remove'` usuwa tylko node bez data (z poddrzewem). Zostają:
-- **puste kontenery** — rodzic, który stracił wszystkie dzieci (grid, grupa, kolumna), zostawia na stronie odstęp, tło albo nagłówek bez treści,
-- **node powiązane** — node, który ma sens tylko obok innego (divider przed kaflem, etykieta nad card), zostaje, gdy jego „partner” zniknie.
+**Problem.** `onShortage: 'remove'` removes only nodes without data (with their subtree). What remains:
+- **empty containers** — a parent that lost all its children (grid, group, column) leaves a gap, a background or a heading without content on the page,
+- **related nodes** — a node that only makes sense next to another one (a divider before a tile, a label above a card) stays when its "partner" disappears.
 
-Obejścia dziś: `null` w data dla kontenera / node powiązanego (wymaga liczenia w loaderze, ile node zostanie) albo podział na osobne section (wtedy działa `onEmpty`).
+Workarounds today: `null` in the data for the container / related node (requires counting in the loader how many nodes will remain) or splitting into separate sections (then `onEmpty` works).
 
-**`prune`** — po usunięciu node przez `onShortage` usuwa w górę drzewa przodków, którzy zostali bez dzieci i bez slotów i pasują do selectora; powtarzane, dopóki coś się usuwa.
+**`prune`** — after nodes are removed by `onShortage`, removes ancestors up the tree that were left without children and without slots and match the selector; repeated as long as something gets removed.
 
 ```ts
-ui.page({ sections, data, assign: { prune: 'grid, wrapper-group' } })   // dla strony
-{ card: { items: articles, prune: 'grid' } }                            // dla bindingu
+ui.page({ sections, data, assign: { prune: 'grid, wrapper-group' } })   // for the page
+{ card: { items: articles, prune: 'grid' } }                            // for a binding
 ```
 
-- usuwane są tylko node, które **straciły** dzieci w tym `assign` (kontener pusty od początku zostaje),
-- node z data nie jest usuwany, nawet gdy jest pusty,
-- usunięcie korzenia section działa jak `onEmpty: 'remove'` (`report.removedSections`),
-- `report.sections[key].pruned: string[]` — osobno od `removed`, widoczne w devtools,
-- bez `prune` zachowanie się nie zmienia.
+- only nodes that **lost** children in this `assign` are removed (a container empty from the start stays),
+- a node with data is not removed, even when it is empty,
+- removing a section's root works like `onEmpty: 'remove'` (`report.removedSections`),
+- `report.sections[key].pruned: string[]` — separate from `removed`, visible in devtools,
+- without `prune` the behavior doesn't change.
 
-**`removeWith`** — binding wskazuje, co znika razem z node usuniętym przez `onShortage`:
+**`removeWith`** — a binding specifies what disappears together with a node removed by `onShortage`:
 
 ```ts
 { tile: { items: songs, removeWith: { before: 'divider' } } }
 ```
 
-- `before` / `after` — sąsiad w tym samym rodzicu (po rozwinięciu `repeat`) pasujący do selectora,
-- `parent` — najbliższy przodek pasujący do selectora (np. `{ parent: 'wrapper-layout' }`),
-- usunięte node trafiają do `report.sections[key].removed`; w trybie debug z informacją, przez który node.
+- `before` / `after` — a sibling in the same parent (after expanding `repeat`) matching the selector,
+- `parent` — the nearest ancestor matching the selector (e.g. `{ parent: 'wrapper-layout' }`),
+- removed nodes go to `report.sections[key].removed`; in debug mode with information on which node caused it.
 
-**Kolejność w `assign`:** przypisanie i `onShortage` → `removeWith` → usunięcie → `prune` → `onEmpty`.
+**Order in `assign`:** assignment and `onShortage` → `removeWith` → removal → `prune` → `onEmpty`.
 
-**Pytania:**
-- Czy `prune` ma mieć wartość domyślną, czy zawsze jawny selector? Jawny jest bezpieczniejszy — mówi, które component są „tylko opakowaniem”.
-- `prune` w contract (flaga „kontener” per component w opcjach instancji) zamiast w każdej stronie?
-- Czy node ze slotami, ale bez dzieci (card z pustym slotem) jest pusty? Propozycja: nie — sloty to treść component.
+**Questions:**
+- Should `prune` have a default value, or always an explicit selector? Explicit is safer — it says which components are "just a wrapper".
+- `prune` in the contract (a per-component "container" flag in the instance options) instead of on every page?
+- Is a node with slots but no children (a card with an empty slot) empty? Proposal: no — slots are the component's content.
 
 ### `dedal/astro`
 
-Status: ustalenia przed implementacją. Renderer jak `dedal/react`: `ResolvedPage` → komponenty z registry; domyślnie HTML bez JavaScriptu, interaktywne tylko wyspy.
+Status: decisions before implementation. A renderer like `dedal/react`: `ResolvedPage` → components from the registry; HTML without JavaScript by default, only islands are interactive.
 
-**Wyspy klienckie (`client:*`).** Dynamiczne tagi w Astro (komponent w zmiennej) nie obsługują dyrektyw hydracji, więc renderer nie może napisać `<C client:visible />`. Wniosek: hydrację deklaruje registry — interaktywny component jest w registry wrapperem `.astro` ze statyczną dyrektywą:
+**Client islands (`client:*`).** Dynamic tags in Astro (a component in a variable) don't support hydration directives, so the renderer can't write `<C client:visible />`. Conclusion: hydration is declared by the registry — an interactive component is an `.astro` wrapper in the registry with a static directive:
 
 ```astro
 ---
@@ -79,34 +79,34 @@ import Tabs from '../components/Tabs'
 <Tabs client:visible {...Astro.props}><slot name="content" slot="content" /></Tabs>
 ```
 
-- props Dedala są JSON-em, więc pasują do wysp bez zmian,
-- sloty Dedala → nazwane sloty Astro (zawartość slotu jako statyczny HTML; zagnieżdżone wyspy działają),
-- później: hydracja sterowana z serwera (np. prop node `hydrate: 'visible' | 'load'`) — wrapper z gałęziami, każda ze statyczną dyrektywą.
+- Dedal's props are JSON, so they fit islands as they are,
+- Dedal's slots → named Astro slots (slot content as static HTML; nested islands work),
+- later: server-driven hydration (e.g. a node prop `hydrate: 'visible' | 'load'`) — a wrapper with branches, each with a static directive.
 
-**Wyspy serwerowe (`server:defer`).** Section z `deferred: true` → wrapper z `server:defer`, który w swoim requeście robi `page.section(key, ctx)` + `resolve` + render; fallback jako `slot="fallback"`. Props wyspy = `ctx` + key section — Astro szyfruje je w URL (GET, cache'owalny); powyżej 2048 bajtów przechodzi na POST, którego przeglądarka nie cache'uje, więc `ctx` ma być mały. Wymaga adaptera (renderowanie na żądanie).
+**Server islands (`server:defer`).** A section with `deferred: true` → a wrapper with `server:defer` that, in its own request, does `page.section(key, ctx)` + `resolve` + render; the fallback as `slot="fallback"`. Island props = `ctx` + the section key — Astro encrypts them in the URL (GET, cacheable); above 2048 bytes it switches to POST, which the browser doesn't cache, so `ctx` should be small. Requires an adapter (on-demand rendering).
 
-**Pytania:**
-- Czy renderer sam owija section odroczone w `server:defer`, czy robi to aplikacja?
-- Jak registry deklaruje wyspy w typach (`Registry<Contract>` z wrapperami `.astro`)?
-- Jak przekazać instancję strony do wyspy serwerowej (import modułu strony po key?)?
-- Panel devtools w Astro (ten sam payload i `mountDevtools()`; znaczniki node bez `<Render debug>`).
+**Questions:**
+- Does the renderer itself wrap deferred sections in `server:defer`, or does the application do it?
+- How does the registry declare islands in types (`Registry<Contract>` with `.astro` wrappers)?
+- How to pass the page instance to the server island (import the page module by key?)?
+- The devtools panel in Astro (the same payload and `mountDevtools()`; node markers without `<Render debug>`).
 
-### Cache i query
+### Cache and query
 
-- **Przykład adaptera zewnętrznego** (np. Redis) w dokumentacji albo `examples`, w tym `deletePrefix` i `lock`.
-- **Ostrzeżenie o za wąskim key** w trybie deweloperskim (np. ten sam key, a różny wynik dla różnych `ctx`). Otwarte: jak włączać tryb deweloperski — wspólnie z devtools.
-- **Śledzenie zależności** — wpis strony zapamiętuje key query użytych przy budowie; `ui.invalidate(['menu'])` unieważnia też zależne strony. Wymaga metadanych wpisu w `Store`.
-- **Prefetch / rozgrzewanie** — np. `menuQuery.prefetch(params)` przy starcie serwera.
-- Poza zakresem: nagłówki cache HTTP, cache `ResolvedPage`, cache samego layoutu w procesie, gotowe adaptery w tej paczce.
+- **External adapter example** (e.g. Redis) in the documentation or `examples`, including `deletePrefix` and `lock`.
+- **Warning about a too-narrow key** in development mode (e.g. the same key but a different result for different `ctx`). Open: how to enable development mode — together with devtools.
+- **Dependency tracking** — a page entry remembers the keys of queries used during the build; `ui.invalidate(['menu'])` also invalidates dependent pages. Requires entry metadata in `Store`.
+- **Prefetch / warm-up** — e.g. `menuQuery.prefetch(params)` at server start.
+- Out of scope: HTTP cache headers, caching `ResolvedPage`, in-process caching of the layout alone, ready-made adapters in this package.
 
 ### Devtools
 
-- **Diff buildów** — porównanie dwóch payloadów (np. przed / po zmianie bloku albo dla dwóch `ctx`).
-- Ewentualnie rozszerzenie przeglądarki na tym samym payloadzie.
-- Poza zakresem: edycja layoutu / data z panelu.
+- **Build diff** — comparing two payloads (e.g. before / after a block change or for two `ctx`).
+- Possibly a browser extension on the same payload.
+- Out of scope: editing the layout / data from the panel.
 
-### Wydajność
+### Performance
 
-- **Ścieżka w `layout()`** — kopiowanie tablicy ścieżki (`[...path, segment]`) dla `IdContext` każdego node to największy pojedynczy koszt etapu layout.
-- **Jedno przejście dla wszystkich selectorów w `assign`** (dziś: jedno na binding), z zachowaniem zasady, że wcześniejszy binding zajmuje node pierwszy. Dziś ~1,5 ms na 3620 node — wracamy, jeśli pomiar na prawdziwych stronach pokaże to jako istotny koszt.
-- Świadomie bez zmian (wracamy przy realnym problemie): dodatkowe przejście w `resolve` (`collectKeys`), `JSON.stringify` w `trace`, selector potomka bez memoizacji (realne bloki < 0,1 ms), rozmiar JSON przy bardzo dużych stronach (dobrze się kompresuje).
+- **Path in `layout()`** — copying the path array (`[...path, segment]`) for every node's `IdContext` is the single largest cost of the layout stage.
+- **A single pass for all selectors in `assign`** (today: one per binding), preserving the rule that an earlier binding takes a node first. Today ~1.5 ms for 3620 nodes — we'll come back to it if measurements on real pages show it as a significant cost.
+- Deliberately unchanged (we'll come back on a real problem): the extra pass in `resolve` (`collectKeys`), `JSON.stringify` in `trace`, the descendant selector without memoization (real blocks < 0.1 ms), JSON size for very large pages (compresses well).

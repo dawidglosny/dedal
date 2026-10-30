@@ -533,7 +533,7 @@ export type DevtoolsMessage = {
   level: 'error' | 'warning' | 'info'
   subject?: string
   text: string
-  /** Section keys (`unknownData`) — rendered as „Did you mean: …?”. */
+  /** Section keys (`unknownData`) — rendered as “Did you mean: …?”. */
   suggestions?: string[]
 }
 

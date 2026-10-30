@@ -18,8 +18,8 @@ function setupCache(options: CacheOptions = {}) {
   return { cache, run, events, tick: (ms: number) => (time += ms), fetch: (key: unknown[] = ['k']) => cache.fetch(key, run) }
 }
 
-describe('createCache: cykl życia wpisu', () => {
-  it('domyślnie: świeży przez 5 s, potem stary wpis + odświeżanie w tle do 5 min', async () => {
+describe('createCache: entry lifecycle', () => {
+  it('by default: fresh for 5 s, then a stale entry + background refresh up to 5 min', async () => {
     const { fetch, run, events, tick } = setupCache()
 
     expect(await fetch()).toBe('v1')
@@ -34,7 +34,7 @@ describe('createCache: cykl życia wpisu', () => {
     expect(statuses(events)).toEqual(['miss', 'hit', 'stale', 'hit'])
   })
 
-  it('po maxAge czeka na nowy wynik', async () => {
+  it('after maxAge waits for a new result', async () => {
     const { fetch, events, tick } = setupCache()
 
     await fetch()
@@ -44,7 +44,7 @@ describe('createCache: cykl życia wpisu', () => {
     expect(statuses(events)).toEqual(['miss', 'miss'])
   })
 
-  it('czasy z wywołania nadpisują domyślne', async () => {
+  it('per-call times override the defaults', async () => {
     const { cache, run, events, tick } = setupCache()
 
     await cache.fetch(['k'], run, { staleTime: 0 })
@@ -54,7 +54,7 @@ describe('createCache: cykl życia wpisu', () => {
     expect(statuses(events)).toEqual(['miss', 'stale'])
   })
 
-  it('staleTime dłuższy niż domyślny maxAge podnosi maxAge', async () => {
+  it('a staleTime longer than the default maxAge raises maxAge', async () => {
     const { cache, run, events, tick } = setupCache()
 
     await cache.fetch(['k'], run, { staleTime: 10 * 60_000 })
@@ -64,7 +64,7 @@ describe('createCache: cykl życia wpisu', () => {
     expect(statuses(events)).toEqual(['miss', 'hit'])
   })
 
-  it('klucze się nie mieszają', async () => {
+  it('keys do not mix', async () => {
     const { fetch } = setupCache()
 
     expect(await fetch(['a'])).toBe('v1')
@@ -72,7 +72,7 @@ describe('createCache: cykl życia wpisu', () => {
     expect(await fetch(['a'])).toBe('v1')
   })
 
-  it('klucz undefined = bez cache’u', async () => {
+  it('undefined key = no cache', async () => {
     const { cache, run, events } = setupCache()
 
     await cache.fetch(undefined, run)
@@ -82,13 +82,13 @@ describe('createCache: cykl życia wpisu', () => {
     expect(statuses(events)).toEqual(['bypass', 'bypass'])
   })
 
-  it('odrzuca maxAge mniejsze niż staleTime', () => {
+  it('rejects maxAge smaller than staleTime', () => {
     expect(() => createCache({ staleTime: 2000, maxAge: 1000 })).toThrow(RangeError)
   })
 })
 
-describe('createCache: deduplikacja i błędy', () => {
-  it('równoległe wywołania o ten sam klucz czekają na jeden wynik', async () => {
+describe('createCache: deduplication and errors', () => {
+  it('concurrent calls for the same key wait for a single result', async () => {
     const { fetch, run } = setupCache()
 
     const results = await Promise.all(Array.from({ length: 10 }, () => fetch()))
@@ -97,20 +97,20 @@ describe('createCache: deduplikacja i błędy', () => {
     expect(new Set(results)).toEqual(new Set(['v1']))
   })
 
-  it('błąd nie trafia do cache’u — kolejne wywołanie liczy od nowa', async () => {
+  it('an error is not cached — the next call computes again', async () => {
     const { fetch, run, events } = setupCache()
-    run.mockRejectedValueOnce(new Error('API leży'))
+    run.mockRejectedValueOnce(new Error('API down'))
 
-    await expect(fetch()).rejects.toThrow('API leży')
+    await expect(fetch()).rejects.toThrow('API down')
     expect(await fetch()).toBe('v1')
     expect(statuses(events)).toEqual(['error', 'miss'])
   })
 
-  it('błąd odświeżania w tle zostawia poprzedni wpis', async () => {
+  it('a background refresh error keeps the previous entry', async () => {
     const { fetch, run, events, tick } = setupCache({ staleTime: 0 })
 
     await fetch()
-    run.mockRejectedValueOnce(new Error('API leży'))
+    run.mockRejectedValueOnce(new Error('API down'))
     tick(1)
     expect(await fetch()).toBe('v1')
     await flush()
@@ -120,7 +120,7 @@ describe('createCache: deduplikacja i błędy', () => {
     expect(statuses(events)).toEqual(['miss', 'stale', 'error', 'stale'])
   })
 
-  it('waitUntil dostaje odświeżanie w tle', async () => {
+  it('waitUntil receives the background refresh', async () => {
     const waitUntil = vi.fn()
     const { fetch } = setupCache({ staleTime: 0, waitUntil })
 
@@ -131,7 +131,7 @@ describe('createCache: deduplikacja i błędy', () => {
     expect(waitUntil.mock.calls[0][0]).toBeInstanceOf(Promise)
   })
 
-  it('awaria magazynu nie wywraca wywołania', async () => {
+  it('a store failure does not break the call', async () => {
     const broken: Store = {
       get: () => Promise.reject(new Error('redis')),
       set: () => Promise.reject(new Error('redis')),
@@ -143,7 +143,7 @@ describe('createCache: deduplikacja i błędy', () => {
     expect(statuses(events)).toEqual(['error', 'error', 'miss'])
   })
 
-  it('lock zajęty przez inną instancję: stary wpis bez odświeżenia, brak wpisu i tak liczy', async () => {
+  it('lock held by another instance: stale entry without a refresh; a missing entry is computed anyway', async () => {
     const store: Store = { ...memoryStore(), lock: vi.fn(async () => null) }
     const { fetch, run } = setupCache({ store, staleTime: 0 })
 
@@ -156,7 +156,7 @@ describe('createCache: deduplikacja i błędy', () => {
 })
 
 describe('createCache: invalidate', () => {
-  it('usuwa wpisy prefiksem', async () => {
+  it('removes entries by prefix', async () => {
     const { cache, run, fetch } = setupCache()
 
     await fetch(['home', 'desktop'])
@@ -170,7 +170,7 @@ describe('createCache: invalidate', () => {
     expect(run).toHaveBeenCalledTimes(5)
   })
 
-  it('prefiks nie łapie podobnych kluczy', async () => {
+  it('a prefix does not catch similar keys', async () => {
     const store = memoryStore()
     const { cache, fetch } = setupCache({ store })
 
@@ -182,7 +182,7 @@ describe('createCache: invalidate', () => {
     expect(store.get(hashKey(['a', 10]))).toBeDefined()
   })
 
-  it('wynik liczony w trakcie invalidate nie trafia do magazynu', async () => {
+  it('a result computed during invalidate does not reach the store', async () => {
     const cache = createCache()
     let release!: () => void
     const gate = new Promise<void>(resolve => (release = resolve))
@@ -216,7 +216,7 @@ describe('page({ cache })', () => {
     return { ui, home, load, title }
   }
 
-  it('cache’uje build według klucza', async () => {
+  it('caches build by key', async () => {
     const { title, load } = setupPage()
 
     expect(await title('desktop')).toBe('desktop v1')
@@ -225,7 +225,7 @@ describe('page({ cache })', () => {
     expect(load).toHaveBeenCalledTimes(2)
   })
 
-  it('strona bez opcji cache nie jest cache’owana', async () => {
+  it('a page without the cache option is not cached', async () => {
     const { title, load } = setupPage({ cache: false })
 
     await title()
@@ -234,7 +234,7 @@ describe('page({ cache })', () => {
     expect(load).toHaveBeenCalledTimes(2)
   })
 
-  it('wynik z cache’u jest taki sam jak bez cache’u, zamrożony i przechodzi przez resolve', async () => {
+  it('a cached result equals the uncached one, is frozen and goes through resolve', async () => {
     const withCache = setupPage()
     const without = setupPage({ cache: false })
 
@@ -246,7 +246,7 @@ describe('page({ cache })', () => {
     expect(withCache.ui.resolve(cachedResult).issues).toEqual([])
   })
 
-  it('ui.invalidate działa dla stron instancji', async () => {
+  it('ui.invalidate works for the instance pages', async () => {
     const { ui, title, load } = setupPage()
 
     await title()
@@ -255,7 +255,7 @@ describe('page({ cache })', () => {
     expect(load).toHaveBeenCalledTimes(2)
   })
 
-  it('page() poza instancją dostaje własny cache', async () => {
+  it('page() outside an instance gets its own cache', async () => {
     const load = vi.fn(async () => ({ a: { card: [{ title: 'x' }] } }))
     const standalone = page<Contract, void>({
       sections: [section<Contract>('a', { component: 'card' })],
@@ -271,7 +271,7 @@ describe('page({ cache })', () => {
 })
 
 describe('memoryStore', () => {
-  it('zamraża kopię wpisu, obiekty aplikacji zostają nietknięte', () => {
+  it('freezes a copy of the entry, application objects stay untouched', () => {
     const store = memoryStore()
     const value = { data: { card: { title: 'a' } } }
 
@@ -284,7 +284,7 @@ describe('memoryStore', () => {
     }).toThrow(TypeError)
   })
 
-  it('wypiera najdawniej używane wpisy po przekroczeniu limitu', () => {
+  it('evicts the least recently used entries once over the limit', () => {
     const store = memoryStore({ max: 2 })
     const set = (key: string) => store.set(key, { value: key, storedAt: 0 }, { ttl: 1000 })
 
@@ -300,11 +300,11 @@ describe('memoryStore', () => {
 })
 
 describe('hashKey', () => {
-  it('kolejność kluczy obiektu nie ma znaczenia', () => {
+  it('object key order does not matter', () => {
     expect(hashKey(['home', { device: 'mobile', page: 2 }])).toBe(hashKey(['home', { page: 2, device: 'mobile' }]))
   })
 
-  it('kolejność elementów tablicy ma znaczenie', () => {
+  it('array item order matters', () => {
     expect(hashKey(['a', 'b'])).not.toBe(hashKey(['b', 'a']))
   })
 })

@@ -27,7 +27,7 @@ function render(element: ReturnType<typeof createElement>) {
 }
 
 describe('<Devtools>', () => {
-  it('nic nie renderuje w drzewie React; panel montuje się po załadowaniu kodu panelu', async () => {
+  it('renders nothing in the React tree; the panel mounts once the panel code has loaded', async () => {
     render(createElement(Devtools))
 
     expect(document.body.querySelector('div')!.innerHTML).toBe('')
@@ -35,7 +35,7 @@ describe('<Devtools>', () => {
     expect(panel()!.hidden).toBe(true)
   })
 
-  it('open: panel otwarty od razu', async () => {
+  it('open: the panel is open right away', async () => {
     render(createElement(Devtools, { open: true }))
 
     await vi.waitFor(() => expect(panel()?.hidden).toBe(false))
@@ -56,7 +56,7 @@ describe('<Devtools>', () => {
     expect(panel()!.hidden).toBe(true)
   })
 
-  it('odmontowanie komponentu usuwa panel', async () => {
+  it('unmounting the component removes the panel', async () => {
     render(createElement(Devtools))
     await vi.waitFor(() => expect(host()).not.toBeNull())
 
@@ -66,7 +66,7 @@ describe('<Devtools>', () => {
     expect(host()).toBeNull()
   })
 
-  it('zmiana open montuje panel ponownie z nową opcją', async () => {
+  it('changing open remounts the panel with the new option', async () => {
     render(createElement(Devtools))
     await vi.waitFor(() => expect(panel()?.hidden).toBe(true))
 
@@ -75,7 +75,7 @@ describe('<Devtools>', () => {
     expect(document.querySelectorAll('#dedal-devtools')).toHaveLength(1)
   })
 
-  it('odmontowanie przed załadowaniem kodu panelu — panel nie pojawia się później', async () => {
+  it('unmounting before the panel code has loaded — the panel does not appear later', async () => {
     render(createElement(Devtools))
     act(() => root!.unmount())
     root = undefined

@@ -2,7 +2,7 @@ import type { ToProps, ToPropsInput } from 'dedal'
 import type { Article, Author } from '@/content/articles'
 import type { Contract } from './contract'
 
-const href = (article: Article) => `/artykul/${article.slug}`
+const href = (article: Article) => `/article/${article.slug}`
 
 /**
  * Mappings from data (API shape) to contract props. A pure module without IO — `resolve` can run on the server

@@ -47,7 +47,7 @@ afterEach(() => {
 })
 
 describe('mountDevtools', () => {
-  it('montuje panel w Shadow DOM; ponowne wywołanie nie dubluje', async () => {
+  it('mounts the panel in Shadow DOM; a repeated call does not duplicate it', async () => {
     await renderPage()
     dispose = mountDevtools()
 
@@ -56,7 +56,7 @@ describe('mountDevtools', () => {
     expect(shadow().querySelector('.toggle')!.textContent).toBe('dedal')
   })
 
-  it('wskazanie elementu strony pokazuje węzeł: selektor, pochodzenie propsów, dane', async () => {
+  it('picking a page element shows the node: selector, props source, data', async () => {
     await renderPage()
     dispose = mountDevtools({ open: true })
 
@@ -70,7 +70,7 @@ describe('mountDevtools', () => {
     expect(text()).toContain('assigned by card')
   })
 
-  it('dane strony trafiają do panelu jako tekst, nie HTML', async () => {
+  it('page data reaches the panel as text, not HTML', async () => {
     await renderPage()
     dispose = mountDevtools({ open: true })
 
@@ -81,7 +81,7 @@ describe('mountDevtools', () => {
     expect(shadow().querySelector('img')).toBeNull()
   })
 
-  it('drzewo pokazuje sekcje i węzły', async () => {
+  it('the tree shows sections and nodes', async () => {
     await renderPage()
     dispose = mountDevtools({ open: true })
 
@@ -109,7 +109,7 @@ describe('mountDevtools', () => {
     expect(shadow().querySelector('.err')!.textContent).toContain('Selector "card >"')
   })
 
-  it('dostreamowany payload (sekcja odroczona) trafia do panelu', async () => {
+  it('a payload streamed in later (deferred section) reaches the panel', async () => {
     await renderPage()
     dispose = mountDevtools({ open: true })
     button('tree').click()
@@ -124,7 +124,7 @@ describe('mountDevtools', () => {
     expect(text()).toContain('section forYou')
   })
 
-  it('odmontowanie usuwa panel', async () => {
+  it('unmounting removes the panel', async () => {
     await renderPage()
     dispose = mountDevtools()
     dispose()
@@ -160,9 +160,9 @@ const richPage = rich.page({
   ],
   data: () => ({
     // 3 data items for 2 cards (surplus), data of the card in the slot is not an object (node problem)
-    news: { 'grid > card': [{ title: 'A' }, { title: 'B' }, { title: 'C' }], 'media > :slot(cover)': ['tekst'] },
+    news: { 'grid > card': [{ title: 'A' }, { title: 'B' }, { title: 'C' }], 'media > :slot(cover)': ['plain text'] },
     quiet: { card: [] },
-    ghost: { card: [{ title: 'bez sekcji' }] },
+    ghost: { card: [{ title: 'no section' }] },
   }),
 })
 
@@ -206,8 +206,8 @@ const tick = () => new Promise(resolve => setTimeout(resolve, 0))
 const withLayout = () =>
   vi.spyOn(Range.prototype, 'getBoundingClientRect').mockReturnValue({ left: 10, top: 40, width: 100, height: 20 } as DOMRect)
 
-describe('panel: przełącznik', () => {
-  it('domyślnie zamknięty: przycisk otwiera i zamyka panel', async () => {
+describe('panel: toggle', () => {
+  it('closed by default: the button opens and closes the panel', async () => {
     await renderPage()
     dispose = mountDevtools()
     const panel = shadow().querySelector('.panel') as HTMLElement
@@ -223,9 +223,9 @@ describe('panel: przełącznik', () => {
     expect(panel.hidden).toBe(true)
   })
 
-  it('niepoprawny JSON w payloadzie jest pomijany', async () => {
+  it('invalid JSON in a payload is skipped', async () => {
     await renderPage()
-    appendPayload('{ to nie json')
+    appendPayload('{ not json')
     dispose = mountDevtools({ open: true })
 
     button('tree').click()
@@ -233,8 +233,8 @@ describe('panel: przełącznik', () => {
   })
 })
 
-describe('panel: wskazywanie', () => {
-  it('Esc przerywa wskazywanie i przywraca podświetlenie zaznaczonego węzła', async () => {
+describe('panel: picking', () => {
+  it('Esc cancels picking and restores the highlight of the selected node', async () => {
     await renderPage()
     withLayout()
     dispose = mountDevtools({ open: true })
@@ -247,7 +247,7 @@ describe('panel: wskazywanie', () => {
     expect(shadow().querySelectorAll('.box')).toHaveLength(0)
   })
 
-  it('ruch myszy przy wskazywaniu podświetla węzeł z etykietą; poza węzłem — czyści', async () => {
+  it('mouse movement while picking highlights the node with a label; outside a node — clears it', async () => {
     await renderPage()
     withLayout()
     dispose = mountDevtools({ open: true })
@@ -261,7 +261,7 @@ describe('panel: wskazywanie', () => {
     expect(shadow().querySelectorAll('.box')).toHaveLength(0)
   })
 
-  it('kliknięcie poza węzłem kończy wskazywanie bez zaznaczenia; kliknięcia bez wskazywania nie są przechwytywane', async () => {
+  it('a click outside a node ends picking without selecting; clicks are not intercepted when not picking', async () => {
     await renderPage()
     dispose = mountDevtools({ open: true })
 
@@ -277,7 +277,7 @@ describe('panel: wskazywanie', () => {
     expect(normal.defaultPrevented).toBe(false)
   })
 
-  it('zdarzenia z samego panelu nie są traktowane jak wskazanie strony', async () => {
+  it('events from the panel itself are not treated as picking on the page', async () => {
     await renderPage()
     dispose = mountDevtools({ open: true })
 
@@ -289,8 +289,8 @@ describe('panel: wskazywanie', () => {
   })
 })
 
-describe('panel: węzeł i drzewo', () => {
-  it('drzewo: alias, slot, znacznik danych i problemów; kliknięcie wiersza zaznacza węzeł', async () => {
+describe('panel: node and tree', () => {
+  it('tree: alias, slot, data and issue markers; clicking a row selects the node', async () => {
     await renderRichPage()
     dispose = mountDevtools({ open: true })
 
@@ -307,7 +307,7 @@ describe('panel: węzeł i drzewo', () => {
     expect(row('card news.0').className).toBe('row active')
   })
 
-  it('widok węzła: problemy, nawigacja do rodzica i dzieci', async () => {
+  it('node view: issues, navigation to parent and children', async () => {
     await renderRichPage()
     dispose = mountDevtools({ open: true })
 
@@ -327,7 +327,7 @@ describe('panel: węzeł i drzewo', () => {
     expect(text()).toContain('card news.0')
   })
 
-  it('najechanie na link podświetla węzeł; przewijanie odświeża podświetlenie', async () => {
+  it('hovering a link highlights the node; scrolling refreshes the highlight', async () => {
     await renderRichPage()
     const rect = withLayout()
     dispose = mountDevtools({ open: true })
@@ -341,7 +341,7 @@ describe('panel: węzeł i drzewo', () => {
     expect((shadow().querySelector('.box') as HTMLElement).style.top).toBe('5px')
   })
 
-  it('węzeł bez pudełka (zerowy prostokąt) nie dostaje obrysu', async () => {
+  it('a node without a box (zero rect) gets no outline', async () => {
     await renderRichPage()
     dispose = mountDevtools({ open: true })
 
@@ -350,7 +350,7 @@ describe('panel: węzeł i drzewo', () => {
     expect(shadow().querySelectorAll('.box')).toHaveLength(0)
   })
 
-  it('„kopiuj” zapisuje selektor węzła do schowka', async () => {
+  it('“copy” writes the node selector to the clipboard', async () => {
     await renderPage()
     const writeText = vi.fn(async () => {})
     vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText } })
@@ -365,8 +365,8 @@ describe('panel: węzeł i drzewo', () => {
   })
 })
 
-describe('panel: sekcje', () => {
-  it('stan strony: cache, sekcje nieudane, usunięte, puste, dane bez sekcji, problemy strony', async () => {
+describe('panel: sections', () => {
+  it('page state: cache, failed / removed / empty sections, data without a section, page issues', async () => {
     await renderRichPage()
     appendPayload(
       JSON.stringify({
@@ -387,7 +387,7 @@ describe('panel: sekcje', () => {
     expect(text()).toContain('✗ x.9 data for an ID that has no node in the layout')
   })
 
-  it('bindingi sekcji: przypisane / trafione, nadmiar; kliknięcie otwiera selektor z tym zapytaniem', async () => {
+  it('section bindings: assigned / matched, surplus; a click opens the selector with that query', async () => {
     await renderRichPage()
     withLayout()
     dispose = mountDevtools({ open: true })
@@ -406,7 +406,7 @@ describe('panel: sekcje', () => {
     expect(text()).toContain('2 node')
   })
 
-  it('sekcja z kluczem cache\'u i bez danych w bindingu', async () => {
+  it('a section with a cache key and a binding without data', async () => {
     const cached = rich.page({
       cache: { key: () => ['home'] },
       sections: [rich.section('list', rich.node('grid', { children: [rich.repeat(rich.node('card'), 2)] }))],
@@ -424,7 +424,7 @@ describe('panel: sekcje', () => {
 })
 
 describe('panel: tree filter', () => {
-  it('puste zapytanie czyści wyniki i podświetlenie', async () => {
+  it('an empty query clears the results and the highlight', async () => {
     await renderPage()
     withLayout()
     dispose = mountDevtools({ open: true })
@@ -459,9 +459,9 @@ describe('panel: tree filter', () => {
   })
 })
 
-describe('panel: pochodzenie propsów', () => {
-  it('propsy z domyślnych i z bloku mają etykietę źródła', async () => {
-    const withDefaults = createDedal<Contract>({ defaults: { card: { title: 'domyślny' } } })
+describe('panel: props source', () => {
+  it('props from defaults and from the block have a source label', async () => {
+    const withDefaults = createDedal<Contract>({ defaults: { card: { title: 'default title' } } })
     const page = withDefaults.page({ sections: [withDefaults.section('s', withDefaults.node('grid', { children: [withDefaults.node('card')] }))] })
     const result = await page.build(undefined, { trace: true })
     const resolved = withDefaults.resolve(result, { trace: true })
@@ -473,11 +473,11 @@ describe('panel: pochodzenie propsów', () => {
     button('pick').click()
     document.querySelector('a')!.click()
 
-    expect(text()).toContain('title: "domyślny" ← default')
+    expect(text()).toContain('title: "default title" ← default')
   })
 })
 
-describe('panel: rozjazdy danych', () => {
+describe('panel: data mismatches', () => {
   async function renderMismatch() {
     const page = ui.page({
       sections: [
@@ -487,7 +487,7 @@ describe('panel: rozjazdy danych', () => {
       data: () => ({
         news: {
           '#more': [null],
-          card: [{ title: 'A' }, { title: 'B' }, { title: 'C' }, { title: 'zgubiony' }],
+          card: [{ title: 'A' }, { title: 'B' }, { title: 'C' }, { title: 'lost' }],
           crad: [{ title: 'X' }],
         },
         promo: { crads: [{ title: 'P' }] },
@@ -500,7 +500,7 @@ describe('panel: rozjazdy danych', () => {
     )
   }
 
-  it('binding bez trafień: na czerwono, liczba utraconych danych, podpowiedź otwiera selektor', async () => {
+  it('a binding with no matches: in red, the lost data count, the hint opens the selector', async () => {
     await renderMismatch()
     dispose = mountDevtools({ open: true })
     button('sections').click()
@@ -515,19 +515,19 @@ describe('panel: rozjazdy danych', () => {
     expect((shadow().querySelector('input') as HTMLInputElement).value).toBe('card')
   })
 
-  it('utracone dane z indeksem i skrótem; usunięte węzły i odrzucone dane z przyczyną', async () => {
+  it('lost data with index and preview; removed nodes and dropped data with a reason', async () => {
     await renderMismatch()
     dispose = mountDevtools({ open: true })
     button('sections').click()
 
     expect(text()).toContain('1 data item not shown — no node left for it:')
-    expect(text()).toContain('[3] {"title":"zgubiony"}')
+    expect(text()).toContain('[3] {"title":"lost"}')
     expect(text()).not.toContain('[2] {')
     expect(text()).toContain("1 node removed — nothing to fill it with (onShortage: 'remove'): news.2")
     expect(text()).toContain('news.2.0 had data, but their parent news.2 was removed (nothing to fill it with) — the data is not shown.')
   })
 
-  it('sekcja usunięta przez dane: w sekcjach i w drzewie, z layoutem sprzed przypisania', async () => {
+  it('a section removed by data: in sections and in the tree, with the layout before assignment', async () => {
     await renderMismatch()
     dispose = mountDevtools({ open: true })
 
@@ -542,8 +542,8 @@ describe('panel: rozjazdy danych', () => {
   })
 })
 
-describe('panel: liczby w komunikatach', () => {
-  it('suma unused ze wszystkich bindingów bez dopasowania', async () => {
+describe('panel: counts in messages', () => {
+  it('sum of unused across all bindings without matches', async () => {
     const page = ui.page({
       sections: [section('a', node('grid', { children: [node('card')] }))],
       data: () => ({ a: { card: [{ title: 'ok' }], crad: Array.from({ length: 5 }, (_, i) => ({ title: String(i) })), cadr: [{ title: 'x' }, { title: 'y' }] } }),
@@ -765,7 +765,7 @@ describe('panel: data search in the tree', () => {
   it('a node found by its data shows the matching field; data not on the page is listed', async () => {
     const page = ui.page({
       sections: [section('news', node('grid', { children: [node('card')] }))],
-      data: () => ({ news: { card: [{ title: 'Krótki tytuł' }, { title: 'Zgubiony' }] } }),
+      data: () => ({ news: { card: [{ title: 'Short title' }, { title: 'Lost' }] } }),
     })
     const result = await page.build(undefined, { trace: true })
     const resolved = ui.resolve(result, { trace: true })
@@ -776,14 +776,14 @@ describe('panel: data search in the tree', () => {
     button('tree').click()
     const input = shadow().querySelector('input')!
 
-    input.value = 'krótki'
+    input.value = 'short'
     input.dispatchEvent(new Event('input'))
-    expect(text()).toContain('1 node with “krótki” in their data — highlighted on the page')
-    expect(shadow().querySelector('.row.match')!.textContent).toContain('title: “Krótki tytuł”')
+    expect(text()).toContain('1 node with “short” in their data — highlighted on the page')
+    expect(shadow().querySelector('.row.match')!.textContent).toContain('title: “Short title”')
 
-    input.value = 'zgubiony'
+    input.value = 'lost'
     input.dispatchEvent(new Event('input'))
     expect(text()).toContain('Found only in data that is not on the page (1).')
-    expect(text()).toContain('! not on the page: section news · card [1] {"title":"Zgubiony"}')
+    expect(text()).toContain('! not on the page: section news · card [1] {"title":"Lost"}')
   })
 })
