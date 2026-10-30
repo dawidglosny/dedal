@@ -6,7 +6,7 @@ import { Header } from '@/components/header'
 
 export const metadata: Metadata = {
   title: { default: 'Dedal — server-driven UI for TypeScript', template: '%s — Dedal' },
-  description: 'Let editors, designers and experiments change page layouts without a frontend release — a server-driven UI engine for TypeScript.',
+  description: 'Structure, data and components — kept apart, joined at the last moment. A server-driven UI engine for TypeScript.',
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {

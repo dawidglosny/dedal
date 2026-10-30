@@ -35,7 +35,7 @@ const registry = { grid: Grid, card: Card, badge: Badge } satisfies Registry<Con
 <Render tree={page} registry={registry} />`
 
 const features = [
-  ['The layout is data', 'Templates are plain JSON — store them, version them, generate them from a design tool. Changing a page doesn’t change code.'],
+  ['Structure is data', 'Templates are plain JSON — store them, version them, generate them from a design tool. Rearranging a screen doesn’t change code.'],
   ['One typed contract', 'A TypeScript type of components and props, shared by the server and every frontend. Registries are checked at compile time.'],
   ['Data placed by selectors', '`card`, `#featured`, `card > :slot(badge)` — CSS syntax instead of indexes. Adding a heading doesn’t shift the data.'],
   ['Explicit rules for missing data', 'Fewer items than places, a failing API, an empty section: safe defaults, a strict mode, and a report of everything dropped.'],
@@ -53,13 +53,13 @@ export default function Home() {
       <section className="hero">
         <div className="hero-badge">v{VERSION} · TypeScript · zero dependencies</div>
         <h1>
-          Change page layouts
+          Structure, data and components.
           <br />
-          <span>without a frontend release.</span>
+          <span>Kept apart, joined at the last moment.</span>
         </h1>
         <p className="hero-lead">
-          Dedal is a server-driven UI engine for TypeScript. Page layouts are templates stored on the server as data, so editors, designers and experiments can
-          rearrange pages — Dedal fills them with content from your APIs, and the frontend renders them with the components it already has.
+          Dedal is a server-driven UI engine for TypeScript. The structure of a screen is a JSON template, data is attached to it by CSS-like selectors, and the
+          frontend renders the result with its own components — so each of the three can change on its own schedule, by different people.
         </p>
         <div className="hero-actions">
           <Link href="/docs/" className="button button-primary">
@@ -79,10 +79,10 @@ export default function Home() {
 
       <section className="flow">
         {[
-          ['Template', 'JSON from a design tool, an editor or code'],
-          ['+ Data', 'your APIs, placed by CSS-like selectors'],
-          ['Page (JSON)', 'cached, sent over the network'],
-          ['Render', 'name → your components'],
+          ['Structure', 'a JSON template — in code, in a database, from a design tool'],
+          ['+ Data', 'from your APIs, attached by CSS-like selectors'],
+          ['Screen description', 'plain JSON — cached, sent over the network'],
+          ['Components', 'the frontend’s registry: name → component'],
         ].map(([title, text], i) => (
           <div key={title} className="flow-step">
             <div className="flow-number">{i + 1}</div>
@@ -116,19 +116,21 @@ export default function Home() {
       <section className="landing-section fit">
         <div>
           <h2>Who it is for</h2>
-          <p className="fit-lead">Products where layouts change more often than components — and the people changing them don’t ship code.</p>
+          <p className="fit-lead">Any UI whose structure changes on a different schedule, by different people, or comes from a different system than its components.</p>
           <ul>
-            <li>Media and content sites — editors rearrange the home page every day.</li>
-            <li>Many sites on one design system — templates designed in a design tool, served to every site.</li>
-            <li>E-commerce and marketing — landing pages, campaigns, A/B tests of the layout.</li>
-            <li>Mobile apps — a layout change without a store release.</li>
+            <li>Mobile apps — a new screen layout without a store release.</li>
+            <li>Content sites and landing pages — sections rearranged every day.</li>
+            <li>Dashboards — which widgets, in what order, per role or customer.</li>
+            <li>Onboarding and flows — steps tuned by product, not by code.</li>
+            <li>Stores — campaign pages, A/B tests of the page structure.</li>
+            <li>One design system, many products — templates designed once, served to all.</li>
           </ul>
         </div>
         <div>
           <h2>When it doesn’t</h2>
           <ul>
-            <li>Application UI — forms, state and interactions rather than content blocks.</li>
-            <li>A layout owned by developers that rarely changes — plain components are simpler.</li>
+            <li>Application UI — forms, state and interactions rather than blocks from a known set.</li>
+            <li>A structure owned by developers that rarely changes — plain components are simpler.</li>
             <li>Sharing a component library across frameworks — that’s what Web Components are for. Dedal composes pages from the components you have; it doesn’t distribute them.</li>
           </ul>
         </div>

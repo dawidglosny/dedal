@@ -1,29 +1,41 @@
 # Dedal
 
-**Let editors, designers and experiments change page layouts — without a frontend release.**
+**Structure, data and components — kept apart, joined at the last moment.**
 
-Dedal is a TypeScript engine for **server-driven UI**. A page's layout — which components, in what order, with which settings — is a template stored on the server as plain JSON. Dedal fills it with data from your APIs and sends the finished page to the frontend, which only maps component names to the components it already has. Rearranging a page becomes a data change, not a code change.
+Dedal is a TypeScript engine for **server-driven UI**. In a typical component tree three different things are tangled together in one place:
+
+| | What it is | Who changes it, and when |
+|---|---|---|
+| **Structure** | which blocks, in what order, what goes inside what | designers, editors, experiments, other systems |
+| **Data** | what's in the blocks | your APIs, databases, the user |
+| **Components** | what a "card" or a "button" looks like | the UI team, a component library |
+
+Dedal keeps them apart. Structure is a template — plain JSON. Data is attached to it by CSS-like selectors, the way CSS attaches styles to HTML. The result is a JSON description of the screen, which the frontend renders with its own registry of components. Each of the three can change on its own schedule, by different people: new structure with the same data, the same data in a new structure, the same description rendered by a different set of components.
 
 Named after Daedalus (Dedal in Polish), the mythical architect: the server designs the page, the frontend builds it.
 
 ```
-design tool / editor ─► template (JSON) ─► server: + data ─► page (JSON) ─► frontend: name → component
-                                             Dedal
+structure (template, JSON) ─┐
+                            ├─► Dedal ─► screen description (JSON) ─► registry ─► components
+data (your APIs) ───────────┘
 ```
 
 ## Who is it for
 
-The question isn't how big the company is or how many frameworks it uses. It's **how often page layouts change, and who changes them**. Dedal is for products where the layout changes more often than the components, and the people changing it don't ship code:
+Not a kind of company or industry, but a property of the UI: **its structure changes on a different schedule, by different people, or comes from a different system than its components**. When that's true, keeping the structure in component code means a code change and a release for every rearrangement.
 
-- **Media and content sites** — editors rearrange the home page every day, add special sections, build themed editions.
-- **Many sites on one design system** — templates designed in a design tool, exported, stored on the server and served to every site. This is the setup Dedal was born from: nobody writes a home page layout in JSX; it is data.
-- **E-commerce and marketing** — landing pages, seasonal campaigns, A/B tests of the layout, run by marketers rather than developers.
-- **Mobile apps** — the most common home of server-driven UI: a layout change in a native app means a store release and waiting for users to update. Dedal's output is plain JSON, so a native app can render it with its own registry (Dedal ships a React renderer; a native one is up to the app).
+That property shows up in many places:
+- **mobile apps** — a new screen layout without a store release and waiting for users to update,
+- **content sites and landing pages** — editors and marketers rearrange sections every day,
+- **dashboards** — which widgets, in what order, per role or per customer,
+- **onboarding and flows** — the steps and their order tuned by product, not by code,
+- **stores** — campaign pages, category layouts, A/B tests of the page structure,
+- **one design system, many products** — templates designed once (even exported from a design tool) and served to all of them.
 
 It's probably not worth it when:
-- the UI is mostly forms, state and interactions (a dashboard, an editor, a checkout) rather than content assembled from blocks,
-- developers own the layout and it rarely changes — plain components in your framework are simpler,
-- your problem is **sharing a component library** across apps or frameworks — that's what Web Components or a multi-framework build of your library are for. Dedal doesn't distribute components; it composes pages from the ones you already have.
+- the UI is mostly forms, state and interactions (an editor, a checkout) rather than blocks assembled from a known set,
+- developers own the structure and it rarely changes — plain components are simpler,
+- your problem is **sharing a component library** across apps or frameworks — that's what Web Components or a multi-framework build of your library are for. Dedal doesn't distribute components; it composes screens from the ones you already have.
 
 ## A quick look
 
@@ -71,11 +83,11 @@ const registry = { grid: Grid, card: Card, badge: Badge } satisfies Registry<Con
 <Render tree={page} registry={registry} />
 ```
 
-Change the template in storage and the page follows — no frontend release (with a page cache: after `ui.invalidate()` or once the entry goes stale). Templates loaded from storage aren't checked by TypeScript, so validate them when you load them — see [Templates as JSON](docs/API.md#templates-as-json).
+Change the structure in storage and the page follows — no frontend release (with a page cache: after `ui.invalidate()` or once the entry goes stale). Templates loaded from storage aren't checked by TypeScript, so validate them when you load them — see [Templates as JSON](docs/API.md#templates-as-json).
 
 ## What you get
 
-- **The layout is data.** Templates are plain JSON — store them, version them, generate them from a design tool. Changing a page doesn't change code.
+- **Structure is data.** Templates are plain JSON — store them, version them, generate them from a design tool. Changing a page doesn't change code.
 - **One contract, typed end to end.** A TypeScript type lists components and their props. Templates written in code (`ui.node()`) and registries are checked against it at compile time.
 - **Data finds its place by selectors.** `card`, `#featured`, `card > :slot(badge)`, `card:nth-child(odd)` — CSS syntax you already know, instead of fragile indexes. Adding a heading to a template doesn't shift the data.
 - **Explicit rules for missing data.** Fewer articles than cards, an API that fails, an empty section — each case has a default that keeps the page alive and an option to make it strict. Nothing disappears silently: everything is in the report.
