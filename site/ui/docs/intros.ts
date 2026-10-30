@@ -57,7 +57,7 @@ Not a kind of company or industry, but a property of the UI: **its structure cha
 
 ## When it doesn't
 
-- **Application UI** — forms, state, interactions (a dashboard, an editor, a checkout). Dedal assembles pages from content blocks; it doesn't manage state.
+- **Application UI** — forms, state, interactions (an editor, a checkout). Dedal assembles screens from blocks of a known set; it doesn't manage state.
 - **A structure owned by developers that rarely changes** — plain components in your framework are simpler. Dedal adds a contract and a registry; they pay off when non-developers or other systems change pages.
 - **Sharing a component library** across apps or frameworks — that's what Web Components or a multi-framework build of your library are for. Dedal doesn't distribute components; it composes pages from the ones you already have.
 

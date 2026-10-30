@@ -22,7 +22,7 @@ structure (template, JSON) ─┐
 data (your APIs) ───────────┘
 ```
 
-## Who is it for
+## Who it is for
 
 Not a kind of company or industry, but a property of the UI: **its structure changes on a different schedule, by different people, or comes from a different system than its components**. When that's true, keeping the structure in component code means a code change and a release for every rearrangement.
 
@@ -90,11 +90,11 @@ Change the structure in storage and the page follows — no frontend release (wi
 ## What you get
 
 - **Structure is data.** Templates are plain JSON — store them, version them, generate them from a design tool. Changing a page doesn't change code.
-- **One contract, typed end to end.** A TypeScript type lists components and their props. Templates written in code (`ui.node()`) and registries are checked against it at compile time.
-- **Data finds its place by selectors.** `card`, `#featured`, `card > :slot(badge)`, `card:nth-child(odd)` — CSS syntax you already know, instead of fragile indexes. Adding a heading to a template doesn't shift the data.
+- **One typed contract.** A TypeScript type lists components and their props. Templates written in code (`ui.node()`) and registries are checked against it at compile time.
+- **Data placed by selectors.** `card`, `#featured`, `card > :slot(badge)`, `card:nth-child(odd)` — CSS syntax you already know, instead of fragile indexes. Adding a heading to a template doesn't shift the data.
 - **Explicit rules for missing data.** Fewer articles than cards, an API that fails, an empty section — each case has a default that keeps the page alive and an option to make it strict. Nothing disappears silently: everything is in the report.
 - **Variants without copies.** `patch` and `remove` adjust a template per device, site or A/B variant — one template, many versions.
-- **Built-in performance tools.** Page and data-source cache (stale-while-revalidate, no request stampedes, invalidation by prefix), loaders running in parallel, streaming of slow sections. A 530-node page builds and resolves in under 1 ms.
+- **Speed.** Page and data-source cache (stale-while-revalidate, no request stampedes, invalidation by prefix), loaders running in parallel, streaming of slow sections. A 530-node page builds and resolves in under 1 ms.
 - **Devtools.** A browser panel that shows, for any element on the page, where each prop came from (default, template, patch, data), which selector assigned the data, what got dropped and why, and how long each loader and query took.
 - **A bonus: no lock-in.** Because the page is plain JSON, the registry is the only place that knows your components — switching component libraries doesn't touch the pages, and the zero-dependency core works with any renderer (React included; [Web Components](examples/web-components) in a few lines).
 

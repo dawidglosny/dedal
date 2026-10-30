@@ -19,4 +19,5 @@ Deployment: `.github/workflows/pages.yml` builds and publishes the site on every
 | `ui/docs/live.ts` | "See it live" hints — what to look for in the devtools panel |
 | `ui/docs/doc-view.tsx`, `ui/docs/run.ts` | page layout; running a case: debug build, `resolve`, devtools payload and report |
 | `ui/contract.ts`, `ui/dedal.ts`, `ui/to-props.ts`, `ui/registries/radix-themes.tsx` | the contract, instance and registry the cases use — the same as in `examples/next` |
+| `ui/dashboard/*`, `ui/docs/dashboard.cases.ts` | the second domain: a dashboard with its own contract, instance and widget registry |
 | `app/page.tsx`, `components/*` | the landing page, header, search, code blocks |

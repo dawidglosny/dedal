@@ -41,7 +41,7 @@ const features = [
   ['Data placed by selectors', '`card`, `#featured`, `card > :slot(badge)` — CSS syntax instead of indexes. Adding a heading doesn’t shift the data.'],
   ['Explicit rules for missing data', 'Fewer items than places, a failing API, an empty section: safe defaults, a strict mode, and a report of everything dropped.'],
   ['Variants without copies', '`patch` and `remove` adapt one template per device, site or experiment.'],
-  ['Fast', 'Page and data cache with stale-while-revalidate, parallel loaders, streaming. A 530-node page builds in under a millisecond.'],
+  ['Speed', 'Page and data cache with stale-while-revalidate, parallel loaders, streaming. A 530-node page builds in under a millisecond.'],
   ['Devtools', 'Click any element and see where each prop came from, which selector placed the data and what went missing.'],
   ['A bonus: no lock-in', 'The page is plain JSON and only the registry knows your components — switch libraries without touching pages.'],
 ]
