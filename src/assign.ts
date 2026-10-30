@@ -9,6 +9,7 @@ export type ShortagePolicy = 'remove' | 'keep' | 'error'
 /** What to do with data that ran out of nodes. */
 export type SurplusPolicy = 'ignore' | 'error'
 
+/** What happens when the data doesn't match the nodes: `onShortage` (a node without data) and `onSurplus` (data without a node). */
 export type AssignPolicies = {
   /** Defaults to `'remove'`. */
   onShortage?: ShortagePolicy
@@ -25,6 +26,7 @@ export type Bindings = Record<string, Binding>
 /** Data by node ID. */
 export type DataMap = Record<string, unknown>
 
+/** One binding in the `assign` report: its selector, how many nodes it matched and how many items it placed. */
 export type BindingReport = {
   selector: string
   /**
@@ -50,6 +52,7 @@ export type BindingReport = {
   onShortage: ShortagePolicy
 }
 
+/** What `assign` did in a section: a report per binding, the nodes removed and the data dropped with them. */
 export type AssignReport = {
   bindings: BindingReport[]
   /** Nodes removed by `onShortage: 'remove'` (without their descendants). */
@@ -58,6 +61,7 @@ export type AssignReport = {
   dropped: string[]
 }
 
+/** The result of `assign`: the layout after removals, the data by node ID, and the report. */
 export type AssignResult<C> = {
   /** Layout after removing nodes without data; `null` when the root was removed. */
   layout: LayoutNode<C> | null

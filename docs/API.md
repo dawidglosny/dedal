@@ -1,6 +1,6 @@
 # API reference
 
-The complete reference of the package: formats, rules and every option. For an introduction, start with the [README](../README.md); for a guided tour with live examples, the [documentation site](https://dawidglosny.github.io/dedal/).
+The complete reference of the package: formats, rules and every option. Every exported function and type, generated from the source: the [type reference](https://dawidglosny.github.io/dedal/types/). For an introduction, start with the [README](../README.md); for a guided tour with live examples, the [documentation site](https://dawidglosny.github.io/dedal/).
 
 ## Pipeline
 

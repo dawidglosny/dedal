@@ -20,6 +20,7 @@ type Attribute = { path: string[]; value?: string }
 /** Slot requirement: a specific name or `null` = any slot. */
 type SlotRequirement = string | null
 
+/** A parsed compound selector: component, aliases, attributes, positions and slots of one node (`card#lead[size=lg]:first-child`). */
 export type CompoundSelector = {
   component?: string
   aliases: string[]
@@ -38,6 +39,7 @@ export type ComplexSelector = {
   combinators: Combinator[]
 }
 
+/** A parsed selector list (`a, b`) — what `parseSelector()` returns. */
 export type SelectorList = ComplexSelector[]
 
 /** Node as seen by the matcher: only what is needed for matching. */

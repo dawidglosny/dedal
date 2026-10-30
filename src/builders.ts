@@ -9,6 +9,7 @@ export type BuildersOptions<C> = {
   defaults?: ComponentDefaults<C>
 }
 
+/** The template builders — `node`, `repeat`, `clone` — typed by the contract. */
 export type Builders<C> = {
   /**
    * Creates a component block. Default props from `defaults` are deep-merged with `options.props`

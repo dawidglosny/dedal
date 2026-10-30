@@ -17,7 +17,7 @@ export function Header() {
           <Link href="/docs/">Docs</Link>
           <Link href="/docs/quick-start/">Quick start</Link>
           <Link href="/docs/tutorial/">Tutorial</Link>
-          <a href={`${GITHUB}/blob/main/docs/API.md`}>API</a>
+          <Link href="/docs/api/">API</Link>
         </nav>
         <Search />
         <a className="header-github" href={GITHUB} aria-label="GitHub">

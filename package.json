@@ -2,7 +2,7 @@
   "name": "dedal",
   "version": "0.6.5",
   "private": true,
-  "description": "Dedal — a server-driven UI engine independent of framework and component library",
+  "description": "Dedal \u2014 a server-driven UI engine independent of framework and component library",
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -37,7 +37,8 @@
     "prepare": "npm run build",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "bench": "npm run build && node --expose-gc bench/bench.mjs"
+    "bench": "npm run build && node --expose-gc bench/bench.mjs",
+    "docs:types": "typedoc"
   },
   "peerDependencies": {
     "react": ">=18"
@@ -57,6 +58,7 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tsup": "^8.5.1",
+    "typedoc": "^0.28.20",
     "typescript": "^5.9.3",
     "vitest": "^5.0.5"
   }

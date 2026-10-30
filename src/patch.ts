@@ -6,6 +6,7 @@ import type { LayoutNode, PropSource, Selected } from './types'
 /** Selector → props to apply. Entry order matters: the later one wins. */
 export type PropsPatch = Record<string, Record<string, unknown>>
 
+/** Options of `patch()`: `trace` and the section key recorded in the prop origin. */
 export type PatchOptions = {
   /** Records in `node.trace` which selector set a prop — debug mode. */
   trace?: boolean

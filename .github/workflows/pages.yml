@@ -25,6 +25,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      - name: Type reference from the JSDoc (into site/public/types)
+        run: npm run docs:types
       - name: Install the site with the package built from this commit
         working-directory: site
         run: npm run dedal

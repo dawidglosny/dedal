@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { cacheCases } from './cache.cases'
 import { dashboardCases } from './dashboard.cases'
 import { dataCases } from './data.cases'
@@ -12,6 +14,9 @@ import { tutorialCases } from './tutorial.cases'
 import type { DocCase, DocGroup } from './types'
 
 /** Documentation groups in menu order; `file` — the group file whose `#region`s are shown as code. */
+/** The API reference is `docs/API.md` in the repository — one source for GitHub and the site (its `# ` title dropped). */
+const apiReference = readFileSync(join(process.cwd(), '../docs/API.md'), 'utf8').replace(/^# .*\n+/, '')
+
 export const groups: DocGroup[] = [
   {
     slug: 'why',
@@ -157,6 +162,15 @@ export const groups: DocGroup[] = [
     file: 'devtools.cases.ts',
     cases: devtoolsCases,
   },
+  {
+    slug: 'api',
+    title: 'API reference',
+    description: 'Formats, design rules and every option of the package.',
+    intro: apiReference,
+    source: 'docs/API.md',
+    file: '',
+    cases: [],
+  },
 ]
 
 /** Parts of the menu: groups in the order of a reader's needs — first steps, learning, features, when something's wrong. */
@@ -166,6 +180,7 @@ export const parts: { title: string; groups: string[] }[] = [
   { title: 'Guides', groups: ['templates-in-storage', 'templates-from-figma', 'adopting', 'clients-without-react', 'testing'] },
   { title: 'Features', groups: ['layout', 'data', 'sections', 'cache', 'rendering'] },
   { title: 'Troubleshooting', groups: ['errors', 'devtools'] },
+  { title: 'Reference', groups: ['api'] },
 ]
 
 export const allCases = groups.flatMap(group => group.cases.map(docCase => ({ group, docCase })))

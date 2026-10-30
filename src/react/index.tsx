@@ -16,6 +16,7 @@ export type Registry<C> = { [N in ComponentName<C>]: ComponentType<RenderProps<C
 /** Component rendered in place of a component missing from the registry (e.g. older frontend, newer server). */
 export type FallbackProps = { component: string; nodeKey: string }
 
+/** The options of the React renderer: the registry, a `fallback` for components missing from it, and `debug` markers for devtools. */
 export type RenderOptions<C> = {
   registry: Registry<C> | Partial<Registry<C>>
   /** Renders nothing by default. */
@@ -83,6 +84,7 @@ export function DevtoolsData({ payload }: { payload: unknown }): ReactElement {
 /** Deferred section: key and the rendered fallback. */
 export type DeferredSectionProps = { sectionKey: string; fallback: ReactNode }
 
+/** Props of `<Render>`: the tree to render (a page or a single tree), the renderer options and how to render deferred sections. */
 export type RenderComponentProps<C> = RenderOptions<C> & {
   /** Result of `resolve()` (a page) or a single tree from `resolveTree()`. */
   tree: ResolvedPage<C> | ResolvedNode<C>

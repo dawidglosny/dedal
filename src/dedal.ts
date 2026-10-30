@@ -17,6 +17,7 @@ import {
 } from './resolve'
 import type { BlockDefinition, ComponentDefaults, LayoutNode, Selected } from './types'
 
+/** Options of `createDedal()`: default props, `toProps` mappings, the ID generator, assignment policies and the cache. */
 export type DedalOptions<C> = {
   /** Default component props, merged with the props passed to `node()`. */
   defaults?: ComponentDefaults<C>
@@ -106,4 +107,5 @@ export function createDedal<C extends object>(options: DedalOptions<C> = {}) {
   }
 }
 
+/** A Dedal instance — what `createDedal<Contract>()` returns: builders, `page`, `section`, `query`, `resolve`, `invalidate`. */
 export type Dedal<C extends object> = ReturnType<typeof createDedal<C>>

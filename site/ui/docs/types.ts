@@ -46,6 +46,8 @@ export type DocGroup = {
   description: string
   /** The group page: context, how it works, why so, how to use — Polish prose; `## ` headings, ``` code blocks, `- ` lists. */
   intro: string
+  /** The file the page text comes from, relative to the repository root — for "Edit this page" (default: the intros file). */
+  source?: string
   /** The group file whose `#region`s are shown as code (empty for groups without cases). */
   file: string
   cases: DocCase[]

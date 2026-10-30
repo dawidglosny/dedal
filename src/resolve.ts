@@ -40,12 +40,14 @@ export type ResolvedNode<C, N extends ComponentName<C> = ComponentName<C>> = N e
 
 export type { PropSource }
 
+/** A problem `resolve` worked around without breaking the page — bad data, an exception in `toProps`, data without a node. */
 export type ResolveIssue = {
   /** Node ID or data key. */
   id: string
   message: string
 }
 
+/** Options of `resolve()`: `toProps`, the `ctx` passed to it, `trace` and `onIssue` (`collect` or `throw`). */
 export type ResolveOptions<C> = {
   toProps?: ToProps<C>
   /** Context passed to `toProps` (e.g. platform). */
@@ -56,11 +58,13 @@ export type ResolveOptions<C> = {
   onIssue?: 'collect' | 'throw'
 }
 
+/** The result of `resolveTree()` — a single resolved tree with its issues. */
 export type ResolvedTree<C> = {
   tree: ResolvedNode<C>
   issues: ResolveIssue[]
 }
 
+/** The result of `resolve()` — what a renderer gets: sections with their trees of final props, and the issues `resolve` worked around. Plain JSON. */
 export type ResolvedPage<C> = {
   dedal: typeof WIRE_VERSION
   /** `deferred: true` — fallback of a deferred section; the section itself comes from `page.section()` in a separate request. */

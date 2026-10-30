@@ -1,0 +1,32 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "Dedal",
+  "entryPoints": [
+    "src/index.ts",
+    "src/react/index.tsx",
+    "src/devtools/index.ts",
+    "src/devtools/panel.ts",
+    "src/react/devtools.ts"
+  ],
+  "out": "site/public/types",
+  "tsconfig": "tsconfig.json",
+  "readme": "none",
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "githubPages": false,
+  "hideGenerator": true,
+  "navigationLinks": {
+    "Docs": "https://dawidglosny.github.io/dedal/",
+    "GitHub": "https://github.com/dawidglosny/dedal"
+  },
+  "intentionallyNotExported": [
+    "BlockFields",
+    "IsSlot",
+    "KnownKeys",
+    "Combinator",
+    "Attribute",
+    "Nth",
+    "SlotRequirement",
+    "AsyncContext"
+  ]
+}

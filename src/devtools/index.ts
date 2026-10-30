@@ -14,6 +14,7 @@ export const DEVTOOLS_VERSION = 1
 /** Node prop: value after `resolve` and its origin (when `build` / `resolve` ran with `trace`). */
 export type InspectedProp = { value: unknown; source?: PropSource }
 
+/** A node in the devtools payload: where it is, what it got — data, props and their origin — and the selector that finds it. */
 export type InspectedNode = {
   id: string
   component: string
@@ -42,6 +43,7 @@ export type InspectedNode = {
   unique: boolean
 }
 
+/** A section in the devtools payload: its root, data source, bindings and what went wrong in it. */
 export type InspectedSection = {
   key: string
   /** Section root ID. */

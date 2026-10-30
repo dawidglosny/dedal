@@ -11,6 +11,7 @@ import type { BlockDefinition, ComponentDefaults, LayoutNode } from './types'
 /** Wire format version. */
 export const WIRE_VERSION = 1
 
+/** Options of `ui.section()`: `remove`, `patch`, assignment `policies`, its own `data` loader, `optional`, `onEmpty`, `required` and `defer`. */
 export type SectionOptions<C = any, Ctx = any> = {
   /** Selectors removed from the section layout (before `patch`). */
   remove?: string | string[]
@@ -54,6 +55,7 @@ export type SectionDefinition<C, Ctx = any> = SectionOptions<C, Ctx> & {
 /** Page data: section key → `assign()` bindings; `null` = the loader of an optional section failed (section removed). */
 export type PageData = Record<string, Bindings | null>
 
+/** What `ui.page()` takes: the sections (fixed or per `ctx`), the page data loader, the cache and the error hook. */
 export type PageDefinition<C, Ctx> = {
   /** Sections in render order; a function of `ctx` when they depend on context (platform, page, A/B…). */
   // NoInfer: `Ctx` comes from the page definition (or the function parameter), not from the section loaders' type
@@ -103,6 +105,7 @@ export type PageTrace<C = unknown> = {
 /** A `remove` / `patch` selector of a section and the number of nodes it matched. */
 export type LayoutSelectorReport = { kind: 'remove' | 'patch'; selector: string; matched: number }
 
+/** The report of a build: `assign` per section, data without a section, removed, failed and empty sections, and — with `trace` — details for devtools. */
 export type PageReport<C = unknown> = {
   /** `assign()` report per section (only sections that got data). */
   sections: Record<string, AssignReport>
@@ -126,6 +129,7 @@ export type PageResult<C> = {
   report: PageReport<C>
 }
 
+/** Instance-level options a page is created with (passed by `createDedal`, not set per page). */
 export type PageOptions = {
   id?: IdGenerator
   /** Default component props — in debug mode they distinguish `default` from `template`. */
@@ -146,6 +150,7 @@ export type BuildOptions = {
   trace?: boolean
 }
 
+/** A page — what `ui.page()` returns: `build`, its stages (`layout`, `load`, `assign`) and `section` for deferred sections. */
 export type Page<C, Ctx> = {
   /** Stage 1: section layout without data (pure, cacheable). Deferred sections as placeholders. */
   layout(ctx: Ctx, options?: BuildOptions): { sections: SectionLayout<C>[]; removedSections: string[] }

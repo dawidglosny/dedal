@@ -29,12 +29,27 @@ export const slugify = (text: string) =>
 
 const docHref = (slug: string) => `/docs/${slug}/`
 
-/** Inline text: `code`, **bold** and *emphasis* (tab names). */
+const SITE = 'https://dawidglosny.github.io/dedal'
+
+/** A link target: the docs site itself → an internal link; a path relative to `docs/` in the repository → GitHub. */
+function LinkTo({ href, children }: { href: string; children: ReactNode }) {
+  // the type reference is static files from TypeDoc, outside the app's routes — a plain link
+  if (href.startsWith(`${SITE}/types/`)) return <a href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}${href.slice(SITE.length)}`}>{children}</a>
+  if (href.startsWith(SITE)) return <Link href={href.slice(SITE.length) || '/'}>{children}</Link>
+  if (href.startsWith('#') || /^[a-z]+:/.test(href)) return <a href={href}>{children}</a>
+  return <a href={new URL(href, `${GITHUB}/blob/main/docs/`).href}>{children}</a>
+}
+
+/** Inline text: `code`, **bold**, *emphasis* (tab names) and [links](url). */
 function Inline({ text }: { text: string }) {
   return (
     <>
-      {text.split(/(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/).map((part, i) =>
-        part.startsWith('`') ? (
+      {text.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\]\([^)\s]+\)|\*[^*]+\*)/).map((part, i) =>
+        part.startsWith('[') && /^\[[^\]]+\]\([^)\s]+\)$/.test(part) ? (
+          <LinkTo key={i} href={part.slice(part.indexOf('](') + 2, -1)}>
+            <Inline text={part.slice(1, part.indexOf(']('))} />
+          </LinkTo>
+        ) : part.startsWith('`') ? (
           <code key={i}>{part.slice(1, -1)}</code>
         ) : part.startsWith('**') ? (
           <strong key={i}>
@@ -52,7 +67,15 @@ function Inline({ text }: { text: string }) {
   )
 }
 
-type ProsePart = { kind: 'p' | 'h2' | 'ul' | 'pre'; lines: string[]; lang?: string }
+type ProsePart = { kind: 'p' | 'h2' | 'h3' | 'ul' | 'pre' | 'table'; lines: string[]; lang?: string }
+
+/** Table cells: split on `|`, except an escaped `\\|` (e.g. inside a selector). */
+const cells = (row: string) =>
+  row
+    .trim()
+    .replace(/^\||\|$/g, '')
+    .split(/(?<!\\)\|/)
+    .map(cell => cell.trim().replace(/\\\|/g, '|'))
 
 function parseProse(text: string): ProsePart[] {
   const parts: ProsePart[] = []
@@ -74,9 +97,15 @@ function parseProse(text: string): ProsePart[] {
       current = undefined
       continue
     }
-    if (line.startsWith('## ')) {
-      parts.push({ kind: 'h2', lines: [line.slice(3)] })
+    if (line.startsWith('## ') || line.startsWith('### ')) {
+      const kind = line.startsWith('## ') ? 'h2' : 'h3'
+      parts.push({ kind, lines: [line.slice(kind === 'h2' ? 3 : 4)] })
       current = undefined
+      continue
+    }
+    if (line.startsWith('|')) {
+      if (current?.kind !== 'table') parts.push((current = { kind: 'table', lines: [] }))
+      if (!/^\|[\s:|-]+\|$/.test(line.trim())) current.lines.push(line) // skip the |---| row
       continue
     }
     const kind = line.startsWith('- ') ? 'ul' : 'p'
@@ -86,11 +115,11 @@ function parseProse(text: string): ProsePart[] {
   return parts
 }
 
-/** `## ` headings of a prose text — for the table of contents. */
+/** `## ` and `### ` headings of a prose text — for the table of contents. */
 export const proseHeadings = (text: string) =>
   parseProse(text)
-    .filter(part => part.kind === 'h2')
-    .map(part => ({ id: slugify(part.lines[0]), title: part.lines[0] }))
+    .filter(part => part.kind === 'h2' || part.kind === 'h3')
+    .map(part => ({ id: slugify(part.lines[0]), title: part.lines[0], level: part.kind === 'h3' ? 3 : 2 }))
 
 /** Prose: paragraphs (empty line), `## ` headings, `- ` lists, ``` code blocks. */
 function Prose({ text }: { text: string }) {
@@ -103,6 +132,35 @@ function Prose({ text }: { text: string }) {
           <h2 key={i} id={slugify(part.lines[0])}>
             <Inline text={part.lines[0]} />
           </h2>
+        ) : part.kind === 'h3' ? (
+          <h3 key={i} id={slugify(part.lines[0])}>
+            <Inline text={part.lines[0]} />
+          </h3>
+        ) : part.kind === 'table' ? (
+          <div key={i} className="table">
+            <table>
+              <thead>
+                <tr>
+                  {cells(part.lines[0]).map((cell, j) => (
+                    <th key={j}>
+                      <Inline text={cell} />
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {part.lines.slice(1).map(row => (
+                  <tr key={row}>
+                    {cells(row).map((cell, j) => (
+                      <td key={j}>
+                        <Inline text={cell} />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : part.kind === 'ul' ? (
           <ul key={i}>
             {part.lines.map(line => (
@@ -165,13 +223,13 @@ function Sidebar({ current }: { current: string }) {
   )
 }
 
-function Toc({ items }: { items: { id: string; title: string }[] }) {
+function Toc({ items }: { items: { id: string; title: string; level?: number }[] }) {
   if (items.length < 2) return <aside className="toc" />
   return (
     <aside className="toc">
       <div className="toc-title">On this page</div>
       {items.map(item => (
-        <a key={item.id} href={`#${item.id}`}>
+        <a key={item.id} href={`#${item.id}`} className={item.level === 3 ? 'toc-sub' : undefined}>
           <Inline text={item.title} />
         </a>
       ))}
@@ -179,7 +237,7 @@ function Toc({ items }: { items: { id: string; title: string }[] }) {
   )
 }
 
-function Shell({ current, toc, children }: { current: string; toc: { id: string; title: string }[]; children: ReactNode }) {
+function Shell({ current, toc, children }: { current: string; toc: { id: string; title: string; level?: number }[]; children: ReactNode }) {
   return (
     <div className="docs">
       <Sidebar current={current} />
@@ -391,7 +449,7 @@ export function GroupView({ group }: { group: DocGroup }) {
       )}
 
       <Pager href={`/docs/${group.slug}`} />
-      <a className="edit" href={editLink('ui/docs/intros.ts')}>
+      <a className="edit" href={group.source ? `${GITHUB}/blob/main/${group.source}` : editLink('ui/docs/intros.ts')}>
         Edit this page on GitHub
       </a>
     </Shell>

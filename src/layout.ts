@@ -12,8 +12,10 @@ export type IdContext = {
   alias?: string
 }
 
+/** A custom node ID generator. IDs must be unique across the page — start them with the section key, like the default one. */
 export type IdGenerator = (ctx: IdContext) => string
 
+/** Options of `layout()`: the ID generator, `trace` and the defaults used to tell `default` from `template` props. */
 export type LayoutOptions = {
   /** ID generator. Default: `news`, `news.0.2`, `news.0:media`, `news.1:content.0`. */
   id?: IdGenerator

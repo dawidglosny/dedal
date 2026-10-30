@@ -25,6 +25,7 @@ export type Store = {
 /** `hit` — fresh entry; `stale` — old entry + background refresh; `miss` — waiting for `build`; `bypass` — no cache. */
 export type CacheStatus = 'hit' | 'stale' | 'miss' | 'bypass' | 'error'
 
+/** A cache event passed to `onEvent`: the key, the status (`hit`, `stale`, `miss`, `bypass`, `error`) and the time it took. */
 export type CacheEvent = {
   /** Result of `hashKey()`; empty for `bypass`. */
   key: string
