@@ -745,7 +745,7 @@ Point the page's loaders at fixtures — pass the API client in (\`createHomePag
 You need only these to follow the rest of this page (the full glossary is at the end):
 - **contract** — a TypeScript type: which components exist and what props they take. The server and the frontend share it.
 - **block** — a piece of layout: \`node('card', { props })\`, or the same thing as plain JSON. Structure only, no data.
-- **section** — a block placed on a page under a key (\`news\`), together with the rules for its data.
+- **section** — one part of the page (a header, a news list) with its own template and its own data; it has a key, like \`news\`.
 - **binding** — "this data goes to these nodes": \`{ card: articles }\`. The key is a selector in CSS syntax.
 - **registry** — on the frontend: component name → your component.
 
@@ -758,28 +758,6 @@ The model has two sides:
 They are connected by the **contract** — a TypeScript type describing which components exist and what props they take. It is the only thing both sides have to share.
 
 In \`examples/next\` (Next.js, App Router) both sides live in one application: \`build\` and \`resolve\` run in a Server Component, and \`<Render>\` renders the result right away. The split still holds: the same page is available as JSON (\`/api/home\`), so a completely different frontend could render it, e.g. a mobile app with its own registry.
-
-## How data flows
-
-\`\`\`
-contract (type)      — which components exist and what props / slots they have
-   │
-blocks               — node('card', { props, slots, children }) — structure without data and without IDs
-   │
-page({ sections, data })
-   │  build(ctx)      layout (IDs, remove, patch) → load (page data, section loaders) → assign (bindings)
-   ▼
-PageResult (JSON)    — layout (tree of nodes with IDs) and data (node ID → data) kept separate + report;
-   │                   can be cached and sent over the network
-   │  resolve()       props from the layout + node data → final props (toProps or deep merge)
-   ▼
-ResolvedPage (JSON)  — tree of { key, component, props, slots, children }
-   │  <Render registry>
-   ▼
-React                — the registry turns a component name into a React component
-\`\`\`
-
-Each stage has a single responsibility. The layout doesn't know the data (it can be built without any API calls), the data doesn't know the layout (it reaches its place through a selector), and the frontend knows neither the blocks nor the data sources — it gets a finished tree.
 
 ## End-to-end example
 
@@ -867,6 +845,30 @@ export default async function Page() {
   return <Render tree={resolved} registry={registry} />
 }
 \`\`\`
+
+## How data flows
+
+The example above, as stages: the **contract** says which components exist; **blocks** describe the structure; a **page** loads the data and puts both together (\`build\`); \`resolve\` turns that into final props; the **registry** renders them. In detail:
+
+\`\`\`
+contract (type)      — which components exist and what props / slots they have
+   │
+blocks               — node('card', { props, slots, children }) — structure without data and without IDs
+   │
+page({ sections, data })
+   │  build(ctx)      layout (IDs, remove, patch) → load (page data, section loaders) → assign (bindings)
+   ▼
+PageResult (JSON)    — layout (tree of nodes with IDs) and data (node ID → data) kept separate + report;
+   │                   can be cached and sent over the network
+   │  resolve()       props from the layout + node data → final props (toProps or deep merge)
+   ▼
+ResolvedPage (JSON)  — tree of { key, component, props, slots, children }
+   │  <Render registry>
+   ▼
+React                — the registry turns a component name into a React component
+\`\`\`
+
+Each stage has a single responsibility. The layout doesn't know the data (it can be built without any API calls), the data doesn't know the layout (it reaches its place through a selector), and the frontend knows neither the blocks nor the data sources — it gets a finished tree.
 
 ## Glossary
 
@@ -1105,7 +1107,8 @@ A single flat list of data per section (first element to the first component, se
 
 ## How assignment works exactly
 
-- **Tree order**: a node, then its slots (in the order from the block), then its children — recursively. The first item goes to the first matched node in that order.
+- **In short:** items fill the matching nodes top to bottom, in the order they appear on the page.
+- **Tree order**, exactly: a node, then its slots (in the order from the block), then its children — recursively. The first item goes to the first matched node in that order.
 - **The order of bindings matters**: they are processed in entry order, and a node taken by an earlier binding is skipped by later ones. That's why specific ones (\`#featured\`) are written before general ones (\`card\`).
 - **Shape**: a binding is an array of items or \`{ items, onShortage, onSurplus }\` (custom rules for that binding). An item can be anything serializable to JSON — an object, a string, a number; \`null\` / \`undefined\` = no data for that node.
 - **The result** is a map \`node ID → item\` in \`PageResult.data\`; only \`resolve\` combines it with props.
@@ -1166,6 +1169,8 @@ A section loader lets you build **shared sections** (header, footer, menu): you 
 - **A section without bindings** — when the page data has no entry under its key or the loader returned \`undefined\`, the section isn't "empty" in the \`onEmpty\` sense: it stays with just the layout (devtools warn when this looks like a mistake).
 
 ## Deferred sections (streaming)
+
+A slow section doesn't have to hold up the page: it can arrive later, and until then the page shows a placeholder.
 
 \`defer: { fallback }\` — the page result contains only a placeholder (\`fallback\`, with \`deferred: true\`), and the loader doesn't run. The content is built by \`page.section(key, ctx)\` in a separate call — it returns a \`PageResult\` with that one section, so \`resolve\` and \`<Render>\` work unchanged. In Next it's an async Server Component inside \`<Suspense>\`: the page goes out immediately, and the slow section (recommendations, personalized data) arrives when it's ready.
 
@@ -1277,7 +1282,7 @@ The cache lives as long as the instance: create it once (at module level), not i
 
 ## Debug and cache
 
-Debug mode (\`trace\`) **bypasses the page cache** — it neither reads nor writes; devtools always show a fresh build. The query cache keeps working; the *timing* tab shows the status of each query: \`miss\`, \`hit\`, \`stale\`, \`bypass\`, \`error\` (requires \`AsyncLocalStorage\` — in Next it's global).
+Debug mode (\`trace\`) **bypasses the page cache** — it neither reads nor writes; devtools always show a fresh build. The query cache keeps working; the *timing* tab shows the status of each query: \`miss\`, \`hit\`, \`stale\`, \`bypass\`, \`error\` (query timings need \`AsyncLocalStorage\` — available in Node, Next.js and edge runtimes; elsewhere pass it to \`createDedal({ AsyncLocalStorage })\`).
 
 ## What to watch out for
 

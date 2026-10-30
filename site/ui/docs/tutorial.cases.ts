@@ -260,14 +260,14 @@ The frontend doesn't know it is rendering a home page or where the articles came
     title: '2. Contract and registry',
     level: 'ok',
     files: [
-      { title: 'contract', file: 'ui/contract.ts' },
+      { title: 'contract (the part this tutorial starts with)', file: 'ui/contract.ts', region: 'tutorial' },
       { title: 'registry (card)', file: 'ui/registries/radix-themes.tsx', region: 'card' },
     ],
     description: `The two halves agree on one thing: the **contract** — a TypeScript type listing which components a page can use and what props they take. It is the only code the server and the frontend share.
 
 - \`card: { title: string; href: string; size?: 'sm' | 'md' | 'lg'; badge?: Slot }\` — the card's props; \`Slot\` is a place for another component (a badge, an avatar),
 - the values are neutral (\`sm | md | lg\`), not taken from a specific library — each frontend translates them its own way,
-- \`Ctx\` — the request context (here \`device\`) that pages can depend on.
+- the full contract of these docs has more components (a hero, a grid, an avatar, tabs…) — the same idea, more names; \`ui/contract.ts\` in the repository.
 
 The **registry** is the frontend's half: component name → its component. Above is the card in Radix Themes — it gets the contract's props and its slots as ready React elements. \`satisfies Registry<Contract>\` makes a missing component or a wrong prop a compile error. A different frontend (shadcn/ui, Web Components, a mobile app) has a different registry for the same contract.
 
@@ -310,7 +310,7 @@ Three things to get right when templates come from outside the code:
 - **Create the page per request** from the current template. Creating a page is cheap; the cache lives in the instance, not in the page object.
 - **Put the template version in the cache key** (\`['latest', template.version, device]\`) — a new version is served on the next request, without waiting for the cached page to go stale.
 
-One difference from code: \`defaults\` from the instance options are added by \`node()\`, so a JSON template carries its props itself (\`"size": "md"\`).
+One difference from code: JSON templates don't get component \`defaults\` — \`node()\` adds them, and a JSON template doesn't go through \`node()\`. Write the props out (\`"size": "md"\`).
 
 This is the core of server-driven UI: editors and designers change pages, developers change components.`,
     run: async () => build(ui, await latestPage())(),

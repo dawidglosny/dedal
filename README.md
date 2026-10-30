@@ -68,7 +68,7 @@ const home = ui.page({
     const articles = await api.latest(6)
     return { news: {
       card: articles.map(a => ({ title: a.headline, href: a.url })),   // each card gets the next article
-      'card > :slot(badge)': articles.map(a => ({ label: a.category })), // CSS-like selectors, not indexes
+      'card > :slot(badge)': articles.map(a => ({ label: a.category })), // the badge inside each card gets the next category
     } }
   },
 })

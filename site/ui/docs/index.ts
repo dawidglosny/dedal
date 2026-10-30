@@ -51,20 +51,20 @@ export const groups: DocGroup[] = [
     cases: tutorialCases,
   },
   {
-    slug: 'production',
-    title: 'Going to production',
-    description: 'Shared sections with their own loaders, streaming of slow sections, queries and page cache.',
-    intro: intros.production,
-    file: 'production.cases.ts',
-    cases: productionCases,
-  },
-  {
     slug: 'dashboard',
     title: 'Another domain: a dashboard',
     description: 'The same engine on a different contract: widgets per role, layouts saved per customer, a failing data source.',
     intro: intros.dashboard,
     file: 'dashboard.cases.ts',
     cases: dashboardCases,
+  },
+  {
+    slug: 'production',
+    title: 'Going to production',
+    description: 'Shared sections with their own loaders, streaming of slow sections, queries and page cache.',
+    intro: intros.production,
+    file: 'production.cases.ts',
+    cases: productionCases,
   },
   {
     slug: 'templates-in-storage',
@@ -192,7 +192,7 @@ export const groups: DocGroup[] = [
 /** Parts of the menu: groups in the order of a reader's needs — first steps, learning, features, when something's wrong. */
 export const parts: { title: string; groups: string[] }[] = [
   { title: 'Get started', groups: ['why', 'quick-start', 'introduction'] },
-  { title: 'Learn', groups: ['tutorial', 'production', 'dashboard'] },
+  { title: 'Learn', groups: ['tutorial', 'dashboard', 'production'] },
   { title: 'Guides', groups: ['templates-in-storage', 'templates-from-figma', 'adopting', 'clients-without-react', 'testing'] },
   { title: 'Features', groups: ['layout', 'data', 'sections', 'cache', 'rendering'] },
   { title: 'Troubleshooting', groups: ['errors', 'devtools'] },

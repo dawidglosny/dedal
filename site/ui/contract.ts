@@ -9,10 +9,11 @@ import type { Slot } from 'dedal'
  */
 export type Contract = {
   container: { size?: 'sm' | 'md' | 'lg' }
-  section: { title?: string; description?: string }
   grid: { columns?: 1 | 2 | 3 | 4; gap?: 'sm' | 'md' | 'lg' }
   flex: { direction?: 'row' | 'column'; gap?: 'sm' | 'md' | 'lg'; align?: 'start' | 'center' | 'end' }
   hero: { title: string; description?: string; href?: string; media?: Slot; actions?: Slot[] }
+  // #region tutorial
+  section: { title?: string; description?: string }
   card: {
     title: string
     href: string
@@ -23,6 +24,7 @@ export type Contract = {
     footer?: Slot
   }
   badge: { label: string; variant?: 'default' | 'secondary' | 'outline' }
+  // #endregion
   avatar: { name: string; src?: string }
   button: { label: string; href?: string; variant?: 'default' | 'secondary' | 'outline' | 'ghost' }
   image: { src: string; alt?: string; ratio?: '16:9' | '4:3' | '1:1' }

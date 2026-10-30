@@ -3,6 +3,7 @@
 ## Unreleased
 
 Documentation:
+- clarity: *Introduction* shows the example before the data-flow diagram and defines a section in plain words; *Data*, *Sections* and *Cache* start the dense parts with a plain sentence; *Tutorial* step 2 shows only the three components it starts with; *Another domain: a dashboard* comes right after the tutorial,
 - README: *Size and speed* — bundle sizes of the entry points, benchmark timings, the number of tests,
 - *Limitations* — what Dedal doesn't do, or doesn't do yet — and *Glossary* as pages of their own, in the *Reference* part of the menu,
 - `CONTRIBUTING.md`: setup, where things are, the docs site and the examples, what a pull request needs,
