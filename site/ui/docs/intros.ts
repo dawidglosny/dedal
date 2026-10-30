@@ -738,7 +738,7 @@ Point the page's loaders at fixtures — pass the API client in (\`createHomePag
 
 \`reportText(inspect(result, resolved))\` is plain text and stable — a good snapshot. It changes when the structure, the bindings or the data placement change, and the diff says what changed.`,
 
-  introduction: `This page shows how Dedal works: who does what, how data flows from a template to the screen, and a small example followed step by step. At the end — a glossary of the terms used throughout the documentation. Why Dedal exists and when to use it: *Why Dedal*.
+  introduction: `This page shows how Dedal works: who does what, how data flows from a template to the screen, and a small example followed step by step. The full glossary is on its own page — *Glossary*. Why Dedal exists and when to use it: *Why Dedal*.
 
 ## Five words to start with
 
@@ -870,31 +870,7 @@ export default async function Page() {
 
 ## Glossary
 
-- **server-driven UI (SDUI)** — a model in which the server decides the structure of the screen and the frontend only renders it.
-- **contract** — a TypeScript type: component name → its props (\`card: { title: string; size?: 'sm' | 'md' | 'lg'; badge?: Slot }\`). A single source of truth for the server and the frontend.
-- **component** — a name from the contract (\`card\`, \`grid\`). It is not a React component — the registry assigns a React component to that name.
-- **instance** — the result of \`createDedal<Contract>(options)\`, created once per project; you take \`node\`, \`repeat\`, \`section\`, \`page\`, \`query\`, \`resolve\` from it.
-- **block** — a tree built from \`node()\` / \`repeat()\` or written as plain JSON: pure structure, without data and without IDs. A plain value (or a function returning a block) that can be exported and used across many pages.
-- **node** — an element of the tree: component, props, children, slots, an optional alias. In the layout it gets an ID.
-- **children and slot** — two ways of nesting. Children are regular content (\`children\` in React). A slot is a named place declared in the contract as \`Slot\` (one node) or \`Slot[]\` (a list) — it goes to the prop with that name.
-- **ID** — a node identifier derived from its position: \`news\` (section root), \`news.0.1\` (children), \`news.0:badge\` (slot), \`hero:actions.1\` (list slot). Layout and data meet by ID.
-- **alias** — a name given to a node in a block (\`alias: 'featured'\`), referenced by the selector \`#featured\`.
-- **selector** — an expression in CSS syntax that selects nodes (\`card\`, \`#featured\`, \`card:first-child\`, \`card > :slot(badge)\`). The same matcher works in patch, remove, bindings, \`required\` and devtools.
-- **section** — a piece of the page: a unique key, a block and rules (patch, remove, loader, onEmpty…). The key is the prefix of its node IDs and the key of its data.
-- **page** — a list of sections (fixed or dependent on ctx), where they get their data from, and an optional cache.
-- **ctx** — the request context (e.g. \`{ device }\`); it is passed to \`sections\`, loaders, \`cache.key\` and \`toProps\`.
-- **layout** — the tree of a section's nodes after expanding \`repeat\`, assigning IDs, \`remove\` and \`patch\` — still without data.
-- **loader** — an async function returning data: the page's \`data\` (for many sections) or a section's \`data\` (for that section only).
-- **binding** — an entry in a section's data: \`{ selector: items }\`. The selector picks nodes, and the items go to them one by one.
-- **assign** — the stage in which bindings are distributed to nodes; this is where the rules for missing data apply (\`onShortage\`, \`onSurplus\`, \`onEmpty\`).
-- **PageResult** — the result of \`build\`: the sections' layout, data (node ID → data) and a report. Plain JSON.
-- **defaults** — default props of a component, added by \`node()\` when the block is created.
-- **toProps** — maps data (the API shape) to component props; pure functions without IO.
-- **resolve** — combines the layout with data into final props; the result is a **ResolvedPage**.
-- **registry** — a map of component → React component on the frontend side.
-- **query** — a data source with the instance's cache (\`ui.query\`), shared by loaders and requests.
-- **deferred section** — a section built in a separate request and streamed in later (\`defer\`).
-- **trace** — debug mode: props origin, a detailed report, timings — for devtools.
+The terms used throughout these docs, from *contract* to *trace*, are collected on their own page: *Glossary*.
 
 ## Common tasks
 
@@ -971,6 +947,70 @@ The three parts map one to one:
 What changes between the domains is only the contract and the registry. Templates, selectors, \`patch\` and \`remove\`, stored layouts with validation and versioned cache keys, the rules for missing data and devtools work the same way.
 
 The same reasoning applies to other screens assembled from a known set of blocks: mobile app screens, onboarding flows, store pages, settings pages.`,
+
+  glossary: `Every term used in these docs, in one place. The five to start with — contract, block, section, binding, registry — are explained with an example in *Introduction*.
+
+- **server-driven UI (SDUI)** — a model in which the server decides the structure of the screen and the frontend only renders it.
+- **contract** — a TypeScript type: component name → its props (\`card: { title: string; size?: 'sm' | 'md' | 'lg'; badge?: Slot }\`). A single source of truth for the server and the frontend.
+- **component** — a name from the contract (\`card\`, \`grid\`). It is not a React component — the registry assigns a React component to that name.
+- **instance** — the result of \`createDedal<Contract>(options)\`, created once per project; you take \`node\`, \`repeat\`, \`section\`, \`page\`, \`query\`, \`resolve\` from it.
+- **block** — a tree built from \`node()\` / \`repeat()\` or written as plain JSON: pure structure, without data and without IDs. A plain value (or a function returning a block) that can be exported and used across many pages.
+- **node** — an element of the tree: component, props, children, slots, an optional alias. In the layout it gets an ID.
+- **children and slot** — two ways of nesting. Children are regular content (\`children\` in React). A slot is a named place declared in the contract as \`Slot\` (one node) or \`Slot[]\` (a list) — it goes to the prop with that name.
+- **ID** — a node identifier derived from its position: \`news\` (section root), \`news.0.1\` (children), \`news.0:badge\` (slot), \`hero:actions.1\` (list slot). Layout and data meet by ID.
+- **alias** — a name given to a node in a block (\`alias: 'featured'\`), referenced by the selector \`#featured\`.
+- **selector** — an expression in CSS syntax that selects nodes (\`card\`, \`#featured\`, \`card:first-child\`, \`card > :slot(badge)\`). The same matcher works in patch, remove, bindings, \`required\` and devtools.
+- **section** — a piece of the page: a unique key, a block and rules (patch, remove, loader, onEmpty…). The key is the prefix of its node IDs and the key of its data.
+- **page** — a list of sections (fixed or dependent on ctx), where they get their data from, and an optional cache.
+- **ctx** — the request context (e.g. \`{ device }\`); it is passed to \`sections\`, loaders, \`cache.key\` and \`toProps\`.
+- **layout** — the tree of a section's nodes after expanding \`repeat\`, assigning IDs, \`remove\` and \`patch\` — still without data.
+- **loader** — an async function returning data: the page's \`data\` (for many sections) or a section's \`data\` (for that section only).
+- **binding** — an entry in a section's data: \`{ selector: items }\`. The selector picks nodes, and the items go to them one by one.
+- **assign** — the stage in which bindings are distributed to nodes; this is where the rules for missing data apply (\`onShortage\`, \`onSurplus\`, \`onEmpty\`).
+- **PageResult** — the result of \`build\`: the sections' layout, data (node ID → data) and a report. Plain JSON.
+- **defaults** — default props of a component, added by \`node()\` when the block is created.
+- **toProps** — maps data (the API shape) to component props; pure functions without IO.
+- **resolve** — combines the layout with data into final props; the result is a **ResolvedPage**.
+- **registry** — a map of component → React component on the frontend side.
+- **query** — a data source with the instance's cache (\`ui.query\`), shared by loaders and requests.
+- **deferred section** — a section built in a separate request and streamed in later (\`defer\`).
+- **trace** — debug mode: props origin, a detailed report, timings — for devtools.`,
+
+  limitations: `What Dedal doesn't do — or doesn't do yet. Knowing this before you start saves a surprise later. Planned work is in the roadmap (\`docs/ROADMAP.md\` in the repository).
+
+## Scope
+
+- **No state, no behaviour in templates.** Props are JSON: a template can't carry a function or an event handler. Interactive parts — tabs, forms, a cart — are registry components with their own logic; the template only places them and passes data. Dedal is for screens assembled from blocks, not for application UI (*Why Dedal*).
+- **No editor.** Templates come from code, a database, a CMS or Figma (*Guides*); Dedal has no visual editor and no Figma plugin.
+- **React is the only renderer shipped.** \`dedal/react\` works with Server Components, SSR and on the client. Any other client renders the JSON with its own small renderer (*A client without React*); \`dedal/astro\` is planned.
+- **The server side is JavaScript.** The engine runs in Node 20.9+, edge runtimes and the browser. A backend in another language needs a JS layer that builds the pages, or serves only the data to one.
+
+## Templates
+
+- **No built-in runtime validation.** The contract is types only; templates from outside the code must be validated by the app (*Templates in a database or CMS* has a validator). An unknown component in an unvalidated template renders the registry's \`fallback\`.
+- **JSON templates don't get \`defaults\`.** \`node()\` adds them; a template parsed from JSON carries its props itself.
+- **\`sections\` is synchronous.** A template from async storage is loaded first, and the page is created per request (*Templates in a database or CMS*).
+- **Selectors are a subset of CSS.** Components, aliases, attributes, \`:first-child\` / \`:last-child\` / \`:nth-child\` / \`:nth-last-child\`, \`:slot\`, \`:root\`, descendant, child and lists. No classes, \`:not()\`, \`:has()\`, \`+\` or \`~\` (*Layout*).
+
+## Data
+
+- **Empty containers stay.** \`onShortage: 'remove'\` removes the nodes without data, not a parent left empty — a grid with no cards still renders. Workarounds: put the container in a section of its own, where \`required\` and \`onEmpty\` remove the whole section (*Sections*), or bind the container too and give it \`null\` when it should go.
+- **A node gets one data item.** Bindings place items one per node, in tree order; data that has to be split between nodes is prepared in the loader (per component).
+
+## Cache
+
+- **In-memory by default.** The store is per process. Several server instances need a shared store (Redis, KV) — an adapter you write against the \`Store\` interface (*Cache & queries*).
+- **No dependency tracking.** Invalidating a query doesn't invalidate the pages built from it; invalidate both by prefix.
+
+## Devtools
+
+- **Debug mode exposes data.** The payload contains the page's structure and data — enable it only for trusted requests (*Devtools*, "Enabling it safely").
+- **Markers change the DOM in debug mode.** \`<Render debug>\` wraps nodes in \`<dedal-node style="display: contents">\` — CSS that depends on direct children may behave differently while debugging.
+
+## The package
+
+- **Before 1.0.** The API may still change between minor versions; every change is in the changelog.
+- **Installed from GitHub tags.** \`npm i github:dawidglosny/dedal#v…\`, built on install; not on the npm registry yet.`,
 
   layout: `**In short:** the layout is the skeleton of a section — "a heading, then a grid of six cards, each with a badge" — with no articles in it yet. Write it once, fill it with any data, adjust it per page or device without copying it.
 

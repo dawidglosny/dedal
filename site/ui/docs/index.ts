@@ -163,6 +163,22 @@ export const groups: DocGroup[] = [
     cases: devtoolsCases,
   },
   {
+    slug: 'glossary',
+    title: 'Glossary',
+    description: 'Every term used in these docs, in one place.',
+    intro: intros.glossary,
+    file: '',
+    cases: [],
+  },
+  {
+    slug: 'limitations',
+    title: 'Limitations',
+    description: 'What Dedal doesn\'t do — or doesn\'t do yet.',
+    intro: intros.limitations,
+    file: '',
+    cases: [],
+  },
+  {
     slug: 'api',
     title: 'API reference',
     description: 'Formats, design rules and every option of the package.',
@@ -180,7 +196,7 @@ export const parts: { title: string; groups: string[] }[] = [
   { title: 'Guides', groups: ['templates-in-storage', 'templates-from-figma', 'adopting', 'clients-without-react', 'testing'] },
   { title: 'Features', groups: ['layout', 'data', 'sections', 'cache', 'rendering'] },
   { title: 'Troubleshooting', groups: ['errors', 'devtools'] },
-  { title: 'Reference', groups: ['api'] },
+  { title: 'Reference', groups: ['api', 'glossary', 'limitations'] },
 ]
 
 export const allCases = groups.flatMap(group => group.cases.map(docCase => ({ group, docCase })))

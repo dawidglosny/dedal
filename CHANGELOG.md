@@ -3,6 +3,8 @@
 ## Unreleased
 
 Documentation:
+- *Limitations* — what Dedal doesn't do, or doesn't do yet — and *Glossary* as pages of their own, in the *Reference* part of the menu,
+- `CONTRIBUTING.md`: setup, where things are, the docs site and the examples, what a pull request needs,
 - the API reference on the docs site (from `docs/API.md` — one source), with a *Reference* part in the menu; the docs pages render tables, `###` headings and links,
 - a type reference generated from the JSDoc (TypeDoc, `npm run docs:types`) at `/types/`; the 26 exported types that had no description got one,
 - a new *Guides* part: *Templates in a database or CMS* (the stored shape, validation, caching through `ui.query`, the version in the cache key, drafts and preview, publishing, CI) and *Templates from Figma* (a naming convention and a converter over the Figma REST API); the code in both was run as written,
