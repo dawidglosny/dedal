@@ -4,6 +4,7 @@ import { devtoolsCases } from './devtools.cases'
 import { errorCases } from './errors.cases'
 import { intros } from './intros'
 import { layoutCases } from './layout.cases'
+import { productionCases } from './production.cases'
 import { renderingCases } from './rendering.cases'
 import { sectionCases } from './sections.cases'
 import { tutorialCases } from './tutorial.cases'
@@ -30,10 +31,18 @@ export const groups: DocGroup[] = [
   {
     slug: 'tutorial',
     title: 'Tutorial',
-    description: 'Step by step: a site\'s home page, from contract to devtools.',
+    description: 'Seven steps: a home page from the contract to a template edited without a release, then a debugging exercise.',
     intro: intros.tutorial,
     file: 'tutorial.cases.ts',
     cases: tutorialCases,
+  },
+  {
+    slug: 'production',
+    title: 'Going to production',
+    description: 'Shared sections with their own loaders, streaming of slow sections, queries and page cache.',
+    intro: intros.production,
+    file: 'production.cases.ts',
+    cases: productionCases,
   },
   {
     slug: 'layout',

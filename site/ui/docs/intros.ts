@@ -242,11 +242,20 @@ export default async function Page() {
 
 Each case page shows one thing: a description, the code (the same code that runs), the result and the devtools report — or the exception, when the build fails. The "See it live" box tells you what to open in the devtools panel (the **dedal** button in the bottom right corner). The dot next to a case in the menu: green — works, yellow — warning in devtools, red — error in devtools, purple — build throws an exception.
 
-Reading order: *Why Dedal* if you haven't yet, *Tutorial* (a whole page step by step), then *Layout*, *Data* and *Sections* — your everyday tools. *Cache & queries* and *Rendering* — once the page already works. *Errors* and *Devtools* — when something doesn't work.`,
+Reading order: *Why Dedal* if you haven't yet, *Tutorial* (a whole page step by step) and *Going to production*, then *Layout*, *Data* and *Sections* — your everyday tools. *Cache & queries* and *Rendering* — once the page already works. *Errors* and *Devtools* — when something doesn't work.`,
 
-  tutorial: `In 12 steps you will build the home page of a news site: a hero, the latest articles, a "More" section, recommendations — with data from an API, mobile variants, cache and devtools. Each step adds one thing and shows the result live. Step 13 is an exercise: the same page with five hidden mistakes to find in the devtools panel.
+  tutorial: `In seven steps you will build the home page of a news site — and then change its layout without touching the code. Each step adds one thing and shows the result live; step 8 is an exercise: the same page with five hidden mistakes to find in the devtools panel.
 
-If you're not familiar with the idea of server-driven UI, read *Introduction* first — especially "End-to-end example".
+- **1. Where we are going** — the finished page and the JSON that describes it.
+- **2. Contract and registry** — the two halves and the one thing they share.
+- **3. A block and its data** — layout without texts, data placed by selectors.
+- **4. The template as data** — the template moves out of the code; the editors change it, the page follows. This is the step that shows why server-driven UI exists.
+- **5. Slots and toProps** — components inside components; API data → props.
+- **6. Variants** — mobile and desktop from one template set, \`patch\` and \`remove\`.
+- **7. When data is missing** — empty sections, failing APIs, too few articles.
+- **8. Debugging** — an exercise with the devtools panel.
+
+Shared sections, streaming and cache — the things you add before production — are in *Going to production*, after the tutorial. If the idea of server-driven UI is new to you, read *Why Dedal* and *Introduction* first.
 
 ## How to read it
 
@@ -277,7 +286,17 @@ In a larger project blocks are usually extracted into separate modules (e.g. \`b
 
 Installation: \`npm i github:dawidglosny/dedal#v0.6.2\`. You need TypeScript and React (for \`dedal/react\`, React 18+); the server can be anything (Node 20.9+) — here it's Next.js (App Router, Server Components).`,
 
-  layout: `The layout is the structure of a section: which components, in what order, in which slots, with which props — **without data**. You describe it with blocks: \`node(component, { props, children, slots, alias })\`.
+  production: `The tutorial covers the model. This group covers what you add before production: data shared between pages, slow sections, and not calling your APIs on every request.
+
+- **Shared sections** — a section with its own loader (a header, a menu, a featured article) is defined once and added to any page; its loader runs in parallel with the page's.
+- **Deferred sections** — slow or personalised sections go out later, streamed in, so they don't hold up the page.
+- **Queries and page cache** — a data source fetched once and shared by loaders and requests; the whole page result cached per key, refreshed in the background.
+
+The details of each are in the groups that follow: *Sections* (loaders, \`optional\`, \`defer\`) and *Cache & queries* (keys, statuses, store, invalidation).`,
+
+  layout: `**In short:** the layout is the skeleton of a section — "a heading, then a grid of six cards, each with a badge" — with no articles in it yet. Write it once, fill it with any data, adjust it per page or device without copying it.
+
+The layout is the structure of a section: which components, in what order, in which slots, with which props — **without data**. You describe it with blocks: \`node(component, { props, children, slots, alias })\`.
 
 ## Why a separate layout
 
@@ -349,7 +368,9 @@ Other CSS constructs (classes \`.x\`, \`:not()\`, \`:has()\`, \`+\`, \`~\`) are 
 - \`remove: ':root'\` removes the whole section — its loader doesn't run, and page data under its key goes to \`unknownData\`.
 - A section root is a single node (it can't be repeated with \`repeat\`), and a single slot accepts one node — several require a list slot (\`Slot[]\`).`,
 
-  data: `Data reaches the layout through **bindings**: a section's data is an object \`{ selector: items }\`. The selector picks nodes in the section, and consecutive items go to consecutive matched nodes — in tree order.
+  data: `**In short:** you have a list of articles and a template with cards; this is how the articles land in the cards. You say *which* nodes get the data (\`card\`, \`#featured\`) instead of counting positions, so the template can change without breaking the data.
+
+Data reaches the layout through **bindings**: a section's data is an object \`{ selector: items }\`. The selector picks nodes in the section, and consecutive items go to consecutive matched nodes — in tree order.
 
 \`\`\`ts
 data: async () => ({
@@ -397,7 +418,9 @@ The rules are set on three levels — the narrower one wins: instance (\`createD
 - Mismatches (a binding with no matches, wrong order, data that got lost) don't break the page — devtools show them in *sections* with an explanation and a list of the data that didn't make it onto the page.
 - \`onShortage: 'remove'\` on a container also removes its children — together with the data they already received (*Dropped data*).`,
 
-  sections: `A section is a piece of the page: a key, a block and rules. A page (\`ui.page\`) is a list of sections plus where they get their data from.
+  sections: `**In short:** a page is a stack of sections — a header, a hero, the latest news, recommendations. Each section has its own template and its own rules: where its data comes from, and what to do when that data is missing or slow.
+
+A section is a piece of the page: a key, a block and rules. A page (\`ui.page\`) is a list of sections plus where they get their data from.
 
 \`\`\`ts
 const home = ui.page<Ctx>({
@@ -469,7 +492,9 @@ Every "what if something's missing" decision is explicit and has a default that 
 - Page data under the key of a section that has its own loader, or of a deferred section, is an exception (it's unclear which one should win).
 - Data under a key that isn't on the page (a typo, a section from another variant) is skipped — devtools: \`unknownData\` with a hint.`,
 
-  cache: `Two levels of cache: **page** (the whole \`build\` result) and **query** (individual data sources). Both live in the instance and work in stale-while-revalidate mode.
+  cache: `**In short:** don't build the same page or call the same API on every request. Dedal can keep whole pages and individual data sources in memory, serve them instantly and refresh them in the background.
+
+Two levels of cache: **page** (the whole \`build\` result) and **query** (individual data sources). Both live in the instance and work in stale-while-revalidate mode.
 
 ## Page cache
 
@@ -523,7 +548,9 @@ Debug mode (\`trace\`) **bypasses the page cache** — it neither reads nor writ
 - A query key that omits one of the \`fn\` parameters will return a result for different parameters.
 - Results from cache are frozen — mutating them throws an exception.`,
 
-  rendering: `Rendering is two steps: \`resolve\` (combining the layout with data into props) and \`<Render>\` (props → React components through the registry).
+  rendering: `**In short:** the last mile — turning the page description into real components on the screen. The server produces a tree of component names and props; the frontend's registry decides which component each name means.
+
+Rendering is two steps: \`resolve\` (combining the layout with data into props) and \`<Render>\` (props → React components through the registry).
 
 ## resolve
 
@@ -573,7 +600,9 @@ A component missing from the registry renders \`fallback\` (or nothing). Why: on
 - Issues are visible in \`resolved.issues\` and in devtools (\`!\` in *tree*, messages in *sections*) — it's worth logging them in production.
 - A frontend older than the server: a component that isn't in the registry renders \`fallback\` — deploy new components to the frontend first, then use them in blocks.`,
 
-  errors: `Some problems abort the build or \`resolve\` with an exception — these are programmer errors (a bad block, bad syntax, conflicting configuration) or situations you yourself marked as unacceptable (\`onShortage: 'error'\`, \`onEmpty: 'error'\`, a loader without \`optional\`).
+  errors: `**In short:** most problems don't break the page — they show up as warnings in devtools. The ones on this page do: they stop the build with an exception, because carrying on would hide a bug. Each message says where, what and how to fix it.
+
+Some problems abort the build or \`resolve\` with an exception — these are programmer errors (a bad block, bad syntax, conflicting configuration) or situations you yourself marked as unacceptable (\`onShortage: 'error'\`, \`onEmpty: 'error'\`, a loader without \`optional\`).
 
 ## Why exceptions
 
@@ -596,7 +625,9 @@ Devtools won't show anything — there's no payload because there's no page. Wha
 
 Shortage, surplus and empty sections don't break the page by default (a **warning** in devtools). Bad data (\`resolve\` issues) and a binding with no matches are an **error** (✗) in devtools, but the page renders. They only become exceptions once you set \`'error'\` (\`onShortage\`, \`onSurplus\`, \`onEmpty\`) or \`onIssue: 'throw'\` in \`resolve\`. A wrong data shape (a list instead of bindings, a binding that isn't a list) and anything that depends on the code (syntax, block structure, configuration) is always an exception.`,
 
-  devtools: `Devtools show what Dedal did with a specific page: where every prop came from, which data went where, what got lost and why, how long the build took and which queries went to the API. This page describes where that information comes from and how to read it — tab by tab.
+  devtools: `**In short:** a panel in the browser that answers "why does this element look like this?" — click anything on the page and see where each prop came from, which data went where, what got lost, and what was slow.
+
+Devtools show what Dedal did with a specific page: where every prop came from, which data went where, what got lost and why, how long the build took and which queries went to the API. This page describes where that information comes from and how to read it — tab by tab.
 
 ## Where the panel gets its data
 

@@ -4,32 +4,30 @@
  */
 export const live: Record<string, string> = {
   // tutorial
+  'tutorial-goal':
+    '`pick` on any card — *node* shows its ID (`news.0.0`), its data (an article from the API) and where every prop came from. *tree* is the whole page as the frontend receives it.',
   'tutorial-contract':
     'Click `pick` and point at the "Welcome to Dedal" heading — *node* shows the `section` component, the ID `welcome` and the props `title`, `description` with the source `← template` (from the block).',
-  'tutorial-first-block':
-    '*tree* → section `news`: `section` → `grid` → three `card`s with the IDs `news.0.0`, `news.0.1`, `news.0.2`. `pick` on a card → props `title ← template`, `size ← default`.',
   'tutorial-data':
-    '*sections* → `✓ card — 3 data items for 3 nodes`. `pick` on a card → *node* → **data** (the article from the API) and `assigned by card`.',
-  'tutorial-to-props':
-    '`pick` on a card → *node*: **data** has `headline`, `slug`, `cover` (the API shape), and **props** has `title ← data`, `href ← data`, `image ← data`, `size ← default`. That\'s the work of toProps and defaults.',
+    '*tree* → section `news`: `section` → `grid` → three `card`s with the IDs `news.0.0`, `news.0.1`, `news.0.2`. *sections* → `✓ card — 3 data items for 3 nodes`. `pick` on a card → **data** (the article) and `assigned by card`.',
+  'tutorial-template-as-data':
+    '`pick` on the heading → `title: "Today" ← template` — it came from the stored JSON. *tree* → four cards in a two-column grid; *sections* → `✓ card — 4 data items for 4 nodes`, and `cache key` with the template version.',
   'tutorial-slots':
-    '*tree* → in every card, the nodes `badge :slot(badge)` and `avatar :slot(footer)`, marked with ● (they have data). *sections* → three bindings: `card`, `card > :slot(badge)`, `card > :slot(footer)`.',
-  'tutorial-shared-section':
-    '*sections* → `source: section` next to `hero`, `source: page` next to `news`. *timing* → `hero` and `page data` start together (in parallel).',
+    '*tree* → in every card, the nodes `badge :slot(badge)` and `avatar :slot(footer)`, marked with ● (they have data). `pick` on a card → **data** has `headline`, `slug` (the API shape), **props** has `title ← data`, `href ← data`, `size ← default` — the work of toProps and defaults.',
   'tutorial-variants':
-    '*tree* → the `news` section has one column and two cards (that\'s the `mobile` variant). `pick` on the grid → `columns: 1 ← template`.',
-  'tutorial-patch-remove':
-    '`pick` on the first card in "Latest" → `size: "lg" ← patch card:first-child`. *tree* → the cards in the `more` section have no `footer` slot (removed by `remove`).',
+    '*tree* → one column in "Latest", two in "More" — that\'s the `mobile` variant. `pick` on a card in "More" → `size: "sm" ← patch card`; its `footer` slot is gone (`remove`).',
   'tutorial-missing-data':
     '*sections* → `✗ recommendations failed — the loader threw "recommendations API: 503"` and `! promotions removed — no node got data`. *timing* → the `recommendations` loader in red.',
-  'tutorial-defer':
-    'Reload the page: "For you" is a fallback at first, and the content arrives after ~800 ms. *timing* → a separate block `section forYou (streamed separately)`.',
-  'tutorial-queries-cache':
-    '*timing* → under `hero` and `page data`, the query `["tutorial","articles",8]`. On the first visit (after the server starts) both are `miss`, but there\'s only one fetch — the second loader waits for the same one (deduplication). Reload the page: both are `hit`. *sections* → `cache key: ["page","tutorial-home","desktop"]`.',
   'tutorial-debugging':
     'This step is an exercise — the panel is your main tool. Start with *sections*: at the top you\'ll see a summary of the page\'s problems, and the details next to each section. Each task below hints where to look.',
-  'tutorial-render':
-    'The whole panel: `pick` on any element, *tree* with search (type an article title), *sections*, *timing* and `copy report` — these are the tools you use every day when working with Dedal pages.',
+
+  // going to production
+  'production-shared-section':
+    '*sections* → `source: section` next to `hero`, `source: page` next to `news`. *timing* → `hero` and `page data` start together (in parallel).',
+  'production-defer':
+    '*timing* → a separate block `section forYou (streamed separately)` with its ~800 ms loader — it isn\'t part of the page\'s build time.',
+  'production-queries-cache':
+    '*timing* → under `hero` and `page data`, the query `["production","articles",8]` — one fetch, shared: the second loader waits for the same call (deduplication). *sections* → `cache key: ["page","production-home","desktop"]`.',
 
   // layout
   'blocks-repeat':
@@ -75,7 +73,7 @@ export const live: Record<string, string> = {
   required:
     '*sections* → `! popular removed — none of the required nodes got data` — even though the hero got data. *tree* → the section "removed — no data; layout before assign" with the hero and cards.',
   defer:
-    'Reload the page: "For you" is a fallback at first, and the content arrives after ~800 ms. *timing* → a separate block `section forYou (streamed separately)`; *tree* → the `forYou` section once it arrives.',
+    '*timing* → a separate block `section forYou (streamed separately)`; *tree* → the `forYou` section. This site is static, so the section was built ahead of time — in a running app (`examples/next`) the fallback shows first and the content arrives after ~800 ms.',
   'unknown-data':
     '*sections* → `! newz unknownData — … Did you mean: news?`. The `news` section got nothing — in *tree*, cards without ●, `source: none`.',
   'loader-undefined': '*sections* → `! news no data — the section loader returned undefined for this section, so it shows its layout only`.',

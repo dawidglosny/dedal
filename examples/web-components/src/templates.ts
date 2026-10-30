@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readFile, stat } from 'node:fs/promises'
 import type { BlockDefinition } from 'dedal'
 import { components, type Contract } from './contract'
 
@@ -15,9 +15,13 @@ function validate(block: unknown, path: string): asserts block is BlockDefinitio
   children?.forEach((child, i) => validate(child, `${path}.${i}`))
 }
 
-/** Templates stored as JSON: `{ section key: block }`. */
-export function loadTemplates(file: URL): Record<string, BlockDefinition<Contract>> {
-  const templates = JSON.parse(readFileSync(file, 'utf8')) as Record<string, unknown>
+/**
+ * Templates stored as JSON: `{ section key: block }`, read on every call — edit the file and the next request uses it.
+ * `version` (the file's modification time) goes into the page cache key, so a new version isn't held back by the cache.
+ */
+export async function loadTemplates(file: URL): Promise<{ version: number; templates: Record<string, BlockDefinition<Contract>> }> {
+  const [source, { mtimeMs }] = await Promise.all([readFile(file, 'utf8'), stat(file)])
+  const templates = JSON.parse(source) as Record<string, unknown>
   for (const [key, block] of Object.entries(templates)) validate(block, key)
-  return templates as Record<string, BlockDefinition<Contract>>
+  return { version: mtimeMs, templates: templates as Record<string, BlockDefinition<Contract>> }
 }

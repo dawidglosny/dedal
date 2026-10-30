@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import type { Ctx } from './contract'
-import { home } from './home.page'
+import { homePage } from './home.page'
 import { ui } from './ui'
 
 const files: Record<string, [file: string, type: string]> = {
@@ -17,8 +17,14 @@ createServer(async (request, response) => {
   // the page as JSON: any frontend with a registry for this contract can render it
   if (url.pathname === '/api/home') {
     const ctx: Ctx = { device: url.searchParams.get('device') === 'mobile' ? 'mobile' : 'desktop' }
-    const resolved = ui.resolve(await home.build(ctx), { ctx })
-    response.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify(resolved))
+    try {
+      const resolved = ui.resolve(await (await homePage()).build(ctx), { ctx })
+      response.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify(resolved))
+    } catch (error) {
+      // e.g. an invalid template: the message says which node and why
+      console.error(error)
+      response.writeHead(500, { 'content-type': 'text/plain' }).end(String(error instanceof Error ? error.message : error))
+    }
     return
   }
 

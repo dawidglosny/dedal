@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+Documentation only, no changes to the API or behavior:
+- the tutorial rebuilt around the core idea: 7 steps plus a debugging exercise — the finished page and its JSON first, contract and registry together, and a new step *The template as data* (a stored, validated JSON template changed without touching the code); shared sections, streaming and cache moved to a new group, *Going to production*,
+- `examples/web-components`: templates read on every request, with the template version in the page cache key — edit `templates/home.json` and reload; an invalid template returns an error instead of crashing the server,
+- every docs group page starts with a plain-language summary ("In short"),
+- docs hints that assumed a running server (reloading to see streaming) updated for the static site.
+
 ## 0.6.2
 
 Documentation only, no changes to the API or behavior:

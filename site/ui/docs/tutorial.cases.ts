@@ -1,10 +1,19 @@
+import type { BlockDefinition } from 'dedal'
 import type { Article } from '@/content/articles'
-import type { Ctx } from '../contract'
+import type { Contract, Ctx } from '../contract'
 import { articles, build, ui } from './shared'
 import type { DocCase } from './types'
 
 const { node, repeat, section } = ui
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+// #region tutorial-goal
+// the whole loop in three lines — the next steps build `tutorialHome` (step 6) piece by piece
+//
+// server:    const result = await tutorialHome.build({ device: 'desktop' })   // template + data
+//            const page = ui.resolve(result)                                    // plain JSON — what the frontend receives
+// frontend:  <Render tree={page} registry={radixThemes} />                     // component name → React component
+// #endregion
 
 // #region tutorial-contract
 // a page with one static section — layout only, no data yet
@@ -16,28 +25,16 @@ const welcome = ui.page<Ctx>({
     ),
   ],
 })
-// #endregion
 
-// #region tutorial-first-block
-// a block: a section with a grid of three cards — a plain value, reusable in any page
-const staticNews = node('section', {
-  props: { title: 'Latest' },
-  children: [
-    node('grid', {
-      props: { columns: 3 },
-      // repeat: one card definition, three nodes (each with its own ID)
-      children: [repeat(node('card', { props: { title: 'Article title', href: '#' } }), 3)],
-    }),
-  ],
-})
-
-const firstBlock = ui.page<Ctx>({ sections: [section('news', staticNews)] })
+// server:   const page = ui.resolve(await welcome.build(ctx), { ctx })
+// frontend: <Render tree={page} registry={radixThemes} />   ← the registry: see "registry (card)" above
 // #endregion
 
 // #region tutorial-data
-// the same block without fixed texts — data will fill the cards
+// a block: a section with a grid of three cards — no texts, data will fill the cards
 const latest = node('section', {
   props: { title: 'Latest' },
+  // repeat: one card definition, three nodes (each with its own ID)
   children: [node('grid', { props: { columns: 3 }, children: [repeat(node('card'), 3)] })],
 })
 
@@ -48,15 +45,61 @@ const withData = ui.page<Ctx>({
 })
 // #endregion
 
-// #region tutorial-to-props
-// the page from the previous step — nothing changes here:
-// cards get `title`, `href`, `description`, `image` from toProps (ui/to-props.ts) and `size: "md"` from defaults (ui/dedal.ts)
-const toPropsStep = withData
+// #region tutorial-template-as-data
+// a template store — in a real project a database, a CMS or a design-tool export; here JSON in memory.
+// The editors saved version 2 of "latest": a new heading, two columns, four cards.
+const storage = new Map<string, string>([
+  [
+    'latest',
+    `{
+      "version": 2,
+      "block": {
+        "component": "section",
+        "props": { "title": "Today" },
+        "children": [
+          { "component": "grid", "props": { "columns": 2 }, "children": [
+            { "component": "card", "repeat": 4, "props": { "size": "md" } }
+          ] }
+        ]
+      }
+    }`,
+  ],
+])
+
+// the contract is types only — a template from outside the code is checked at runtime
+const components = {
+  container: 1, section: 1, grid: 1, flex: 1, hero: 1, card: 1, badge: 1, avatar: 1,
+  button: 1, image: 1, tabs: 1, list: 1, separator: 1,
+} satisfies Record<keyof Contract, 1>
+
+function validate(block: unknown, path: string): asserts block is BlockDefinition<Contract> {
+  const { component, slots, children } = (block ?? {}) as { component?: string; slots?: Record<string, unknown>; children?: unknown[] }
+  if (!component || !(component in components)) throw new Error(`template ${path}: unknown component ${JSON.stringify(component)}`)
+  for (const [name, content] of Object.entries(slots ?? {})) [content].flat().forEach((child, i) => validate(child, `${path}:${name}.${i}`))
+  children?.forEach((child, i) => validate(child, `${path}.${i}`))
+}
+
+async function loadTemplate(name: string) {
+  const { version, block } = JSON.parse(storage.get(name)!) as { version: number; block: unknown }
+  validate(block, name)
+  return { version, block }
+}
+
+// the page is created per request from the current template; its version goes into the cache key,
+// so a new version is served right away instead of waiting for the old entry to go stale
+async function latestPage() {
+  const template = await loadTemplate('latest')
+  return ui.page<Ctx>({
+    sections: [section('news', template.block)],
+    data: async () => ({ news: { card: await articles(4) } }),
+    cache: { key: ctx => ['latest', template.version, ctx.device] },
+  })
+}
 // #endregion
 
 // #region tutorial-slots
 // a parametrised block: title, number of cards, columns; every card has two slots — badge and footer
-const cards = (title: string, count: number, columns: 1 | 2 | 3 | 4 = 3) =>
+export const cards = (title: string, count: number, columns: 1 | 2 | 3 | 4 = 3) =>
   node('section', {
     props: { title },
     children: [
@@ -68,7 +111,7 @@ const cards = (title: string, count: number, columns: 1 | 2 | 3 | 4 = 3) =>
   })
 
 // data per component: articles for cards, categories for badges, authors for footers
-const newsData = (list: Article[]) => ({
+export const newsData = (list: Article[]) => ({
   card: list,
   'card > :slot(badge)': list.map(article => article.category),
   'card > :slot(footer)': list.map(article => article.author),
@@ -80,41 +123,19 @@ const withSlots = ui.page<Ctx>({
 })
 // #endregion
 
-// #region tutorial-shared-section
-// a shared section with its own loader — define once, add to any page
-const hero = section('hero', node('hero', { slots: { media: node('image'), actions: [node('button')] } }), {
-  data: async () => {
-    const [featured] = await articles(1)
-    return {
-      hero: [featured],
-      image: [featured],
-      'hero > :slot(actions)': [{ label: 'Read', href: `/article/${featured.slug}` }],
-    }
-  },
-})
-
-const withHero = ui.page<Ctx>({
-  sections: [hero, section('news', cards('Latest', 3))],
-  // page data covers the other sections; both loaders run in parallel
-  data: async () => ({ news: newsData((await articles(4)).slice(1)) }),
-})
-// #endregion
-
 // #region tutorial-variants
-const withVariants = ui.page<Ctx>({
-  // sections depend on ctx: on mobile one column and two cards
-  sections: ({ device }) => [
-    hero,
-    section('news', device === 'mobile' ? cards('Latest', 2, 1) : cards('Latest', 3)),
-  ],
-  data: async ({ device }) => ({ news: newsData((await articles(device === 'mobile' ? 3 : 4)).slice(1)) }),
-})
-// #endregion
+export const heroBlock = node('hero', { slots: { media: node('image'), actions: [node('button')] } })
 
-// #region tutorial-patch-remove
-const withPatches = ui.page<Ctx>({
+export const heroData = (featured: Article) => ({
+  hero: [featured],
+  image: [featured],
+  'hero > :slot(actions)': [{ label: 'Read', href: `/article/${featured.slug}` }],
+})
+
+const tutorialHome = ui.page<Ctx>({
+  // sections depend on ctx — one template set, a version per device
   sections: ({ device }) => [
-    hero,
+    section('hero', heroBlock),
     section(
       'news',
       cards('Latest', 3, device === 'mobile' ? 1 : 3),
@@ -129,7 +150,11 @@ const withPatches = ui.page<Ctx>({
   ],
   data: async () => {
     const list = await articles(8)
-    return { news: newsData(list.slice(1, 4)), more: { card: list.slice(4), 'card > :slot(badge)': list.slice(4).map(article => article.category) } }
+    return {
+      hero: heroData(list[0]),
+      news: newsData(list.slice(1, 4)),
+      more: { card: list.slice(4), 'card > :slot(badge)': list.slice(4).map(article => article.category) },
+    }
   },
 })
 // #endregion
@@ -137,7 +162,7 @@ const withPatches = ui.page<Ctx>({
 // #region tutorial-missing-data
 const withMissingData = ui.page<Ctx>({
   sections: ({ device }) => [
-    hero,
+    section('hero', heroBlock),
     section('news', cards('Latest', 3, device === 'mobile' ? 1 : 3)),
     // no active promotions → the section disappears (default onEmpty: 'remove')
     section('promotions', cards('Promotions', 3)),
@@ -148,68 +173,12 @@ const withMissingData = ui.page<Ctx>({
       },
     }),
   ],
-  data: async () => ({ news: newsData((await articles(4)).slice(1)), promotions: { card: [] } }),
+  data: async () => {
+    const list = await articles(4)
+    return { hero: heroData(list[0]), news: newsData(list.slice(1)), promotions: { card: [] } }
+  },
   onSectionError: (error, { section }) => console.warn(`[tutorial] ${section}:`, (error as Error).message),
 })
-// #endregion
-
-// #region tutorial-defer
-const withDeferred = ui.page<Ctx>({
-  sections: ({ device }) => [
-    hero,
-    section('news', cards('Latest', 3, device === 'mobile' ? 1 : 3)),
-    // slow, personalised recommendations: the page goes out right away with a fallback, the section is streamed later
-    section('forYou', cards('For you', 3), {
-      defer: { fallback: node('section', { props: { title: 'For you', description: 'Loading recommendations…' } }) },
-      data: async () => {
-        await wait(800)
-        return newsData((await articles(7)).slice(4))
-      },
-    }),
-  ],
-  data: async () => ({ news: newsData((await articles(4)).slice(1)) }),
-})
-// #endregion
-
-// #region tutorial-queries-cache
-// a query: articles fetched once per key and shared by every loader (and every request, for staleTime)
-const latestArticles = ui.query({ key: (count: number) => ['tutorial', 'articles', count], fn: articles, staleTime: 60_000 })
-
-const heroFromQuery = section('hero', node('hero', { slots: { media: node('image'), actions: [node('button')] } }), {
-  data: async () => {
-    const [featured] = await latestArticles(8) // the same query as the page data below — fetched once
-    return { hero: [featured], image: [featured], 'hero > :slot(actions)': [{ label: 'Read', href: `/article/${featured.slug}` }] }
-  },
-})
-
-const home = ui.page<Ctx>({
-  sections: ({ device }) => [
-    heroFromQuery,
-    section('news', cards('Latest', 3, device === 'mobile' ? 1 : 3), device === 'desktop' ? { patch: { 'card:first-child': { size: 'lg' } } } : {}),
-    section('more', cards('More', 4, device === 'mobile' ? 2 : 4), { remove: 'card > :slot(footer)', patch: { card: { size: 'sm' } } }),
-  ],
-  data: async () => {
-    const list = await latestArticles(8)
-    return { news: newsData(list.slice(1, 4)), more: { card: list.slice(4), 'card > :slot(badge)': list.slice(4).map(article => article.category) } }
-  },
-  // the whole page result cached per device (stale-while-revalidate; debug builds bypass it)
-  cache: { key: ctx => ['tutorial-home', ctx.device] },
-})
-// #endregion
-
-// #region tutorial-render
-// server (React Server Component):
-//   const result = await home.build(ctx)                   // layout + data (PageResult, JSON)
-//   const resolved = ui.resolve(result, { ctx })            // final props (ResolvedPage, JSON)
-//   return <Render tree={resolved} registry={radixThemes} />
-//
-// debug mode (the app decides when — e.g. ?debug=1 for the team):
-//   const result = await home.build(ctx, { trace: true })
-//   const resolved = ui.resolve(result, { ctx, trace: true })
-//   <Render tree={resolved} registry={radixThemes} debug />
-//   <DevtoolsData payload={inspect(result, resolved)} />
-//   <Devtools />
-const finalPage = home
 // #endregion
 
 // #region tutorial-debugging
@@ -218,7 +187,7 @@ const latestTwelve = ui.query({ key: () => ['tutorial', 'articles', 12], fn: () 
 
 const debugging = ui.page<Ctx>({
   sections: ({ device }) => [
-    heroFromQuery,
+    section('hero', heroBlock, { data: async () => heroData((await latestTwelve())[0]) }),
     section(
       'news',
       node('section', {
@@ -263,160 +232,138 @@ const debugging = ui.page<Ctx>({
 
 export const tutorialCases: DocCase[] = [
   {
-    slug: 'tutorial-contract',
-    title: '1. Contract',
+    slug: 'tutorial-goal',
+    title: '1. Where we are going',
     level: 'ok',
-    files: [{ title: 'contract', file: 'ui/contract.ts' }],
-    description: `We start with the **contract** — a type that describes which components a page can have and what props they take. It is the only thing the server and the frontend must both know.
+    description: `By the end of this tutorial you will have the home page below: a featured article, the latest news, a compact "More" section — and a version for mobile. More importantly, you will **change its layout without touching the code** (step 4).
 
-- \`card: { title: string; href: string; size?: 'sm' | 'md' | 'lg'; badge?: Slot }\` — the card's props; \`Slot\` is a place for another component (badge, avatar),
-- the values are neutral (\`sm | md | lg\`), not taken from a specific library — each registry (shadcn, Radix, your own DS) translates them in its own way,
-- \`Ctx\` — the request context (here \`device\`) that sections and data can depend on.
+Look at the page as two halves:
+- the **server** keeps the templates and loads the data, puts them together and sends the frontend a plain JSON description of the page,
+- the **frontend** has a catalog of components (the **registry**) and renders whatever description it gets.
 
-Below is the first page: one section with one \`section\` node and its props. No data yet — just layout.`,
+This is the JSON the frontend receives for the "Latest" section (abridged):
+
+\`\`\`json
+{ "key": "news", "component": "section", "props": { "title": "Latest" }, "children": [
+  { "key": "news.0", "component": "grid", "props": { "columns": 3 }, "children": [
+    { "key": "news.0.0", "component": "card",
+      "props": { "title": "…", "href": "/article/…", "size": "lg" },
+      "slots": { "badge": { "component": "badge", "props": { "label": "World" } }, … } },
+    …
+\`\`\`
+
+The frontend doesn't know it is rendering a home page or where the articles came from. Change this JSON on the server — a different heading, two columns, another section — and the page changes; the frontend stays as it is.`,
+    run: async () => build(ui, tutorialHome)(),
+  },
+  {
+    slug: 'tutorial-contract',
+    title: '2. Contract and registry',
+    level: 'ok',
+    files: [
+      { title: 'contract', file: 'ui/contract.ts' },
+      { title: 'registry (card)', file: 'ui/registries/radix-themes.tsx', region: 'card' },
+    ],
+    description: `The two halves agree on one thing: the **contract** — a TypeScript type listing which components a page can use and what props they take. It is the only code the server and the frontend share.
+
+- \`card: { title: string; href: string; size?: 'sm' | 'md' | 'lg'; badge?: Slot }\` — the card's props; \`Slot\` is a place for another component (a badge, an avatar),
+- the values are neutral (\`sm | md | lg\`), not taken from a specific library — each frontend translates them its own way,
+- \`Ctx\` — the request context (here \`device\`) that pages can depend on.
+
+The **registry** is the frontend's half: component name → its component. Above is the card in Radix Themes — it gets the contract's props and its slots as ready React elements. \`satisfies Registry<Contract>\` makes a missing component or a wrong prop a compile error. A different frontend (shadcn/ui, Web Components, a mobile app) has a different registry for the same contract.
+
+Below, the smallest page: one section with one node. The server builds it, \`resolve\` turns it into the JSON from step 1, and \`<Render>\` draws it with the registry.`,
     run: build(ui, welcome),
   },
   {
-    slug: 'tutorial-first-block',
-    title: '2. Instance and the first block',
+    slug: 'tutorial-data',
+    title: '3. A block and its data',
     level: 'ok',
     files: [{ title: 'instance', file: 'ui/dedal.ts' }],
-    description: `The **instance** (\`createDedal<Contract>(options)\`) is the entry point: it gives you \`node\`, \`repeat\`, \`section\`, \`page\`, \`query\`, \`resolve\`. You create it once per project (in a module), with default component props and data mappings (more on those in step 4).
+    description: `The **instance** (\`createDedal<Contract>(options)\`, above) is created once per project and gives you \`node\`, \`repeat\`, \`section\`, \`page\`, \`resolve\`.
 
-A **block** is a tree of nodes: \`node(component, { props, children, slots })\`. \`repeat(node, 3)\` duplicates a node — here one card definition becomes three. A block is a plain value: you can export it, parametrise it and use it in many pages. It doesn't even have to be code — \`node()\` only builds an object like \`{ component: 'card', props: { … } }\`, so a template can just as well be JSON stored in a database or exported from a design tool (\`examples/web-components\` loads one from a file).
+A **block** is a piece of layout: \`node(component, { props, children, slots })\`. \`repeat(node, 3)\` turns one card definition into three cards. The block has no texts — data fills them.
 
-Every node gets an ID from its position (\`news.0.0\`, \`news.0.1\`…) — this is how layout meets data.
+Data comes from the page's \`data\`, a plain async function where you call your API. Its shape is \`{ sectionKey: { selector: items } }\`, and each entry is a **binding**: the selector \`card\` picks the cards in the \`news\` section, and consecutive articles go to consecutive cards.
 
-For now the cards have a hard-coded \`title\` — in the next step data will replace it.`,
-    run: build(ui, firstBlock),
-  },
-  {
-    slug: 'tutorial-data',
-    title: '3. Page data and bindings',
-    level: 'ok',
-    description: `The block no longer has texts — data comes from the page's \`data\`. The shape: \`{ sectionKey: { selector: items } }\`. Each entry is a **binding**: the selector \`card\` picks nodes in the \`news\` section, and consecutive articles go to consecutive cards.
-
-Why a selector and not just a list? Because the block can change (a heading gets added, a second grid) — the \`card\` binding still hits the cards, wherever they are.
-
-\`data\` is a plain async function — in it you call an API, a database, anything. Here it's the mock \`articles(3)\`.`,
+Why a selector, and not just a list in order? Because the template will change — a heading gets added, a second grid appears — and \`card\` still hits the cards, wherever they are. That matters a lot in the next step, where someone else edits the template.`,
     run: build(ui, withData),
   },
   {
-    slug: 'tutorial-to-props',
-    title: '4. toProps and defaults',
+    slug: 'tutorial-template-as-data',
+    title: '4. The template as data',
     level: 'ok',
-    files: [
-      { title: 'toProps', file: 'ui/to-props.ts' },
-      { title: 'instance options', file: 'ui/dedal.ts' },
-    ],
-    description: `An article from the API has the fields \`headline\`, \`slug\`, \`cover\` — while the card in the contract wants \`title\`, \`href\`, \`image\`. **toProps** translates between them: a per-component function \`({ props, data }) => props\`.
+    description: `So far the template was TypeScript code: changing it means a code change and a release. Now the same kind of block lives **outside the code** — in a database, a CMS, or as an export from a design tool. \`node()\` only builds an object like \`{ component: 'card', props: { … } }\`, so a template can be plain JSON.
 
-- it gets the props from the layout and the node's data; its result is the final props — that's why it spreads \`...props\`,
-- it is also called for nodes without data (\`data: undefined\`) — hence the \`data ? … : props\` condition,
-- it's a pure module without IO: it works on the server and on the frontend.
+Here the editors saved version 2 of the "latest" template — a new heading, two columns, four cards:
 
-**defaults** (\`card: { size: 'md' }\`) are default component props — \`node()\` adds them when the block is created. Precedence: \`defaults\` → props from the layout → data.
+\`\`\`
+version 1 (step 3)                          version 2 (stored)
+"title": "Latest"                     →     "title": "Today"
+"columns": 3                          →     "columns": 2
+"card" × 3                            →     "card" × 4
+\`\`\`
 
-The page is the same as in step 3 — the only thing that changes is understanding where the cards get \`title\` and \`size\` from.`,
-    run: build(ui, toPropsStep),
+The page below is built from version 2 — **the page code didn't change**, and neither did the data loader: the \`card\` binding finds the cards no matter how many there are or where they sit.
+
+Three things to get right when templates come from outside the code:
+- **Validate them.** The contract is types only, so a stored template isn't checked by the compiler. \`validate()\` checks component names when the template is loaded — a typo fails loudly, instead of rendering the registry's fallback.
+- **Create the page per request** from the current template. Creating a page is cheap; the cache lives in the instance, not in the page object.
+- **Put the template version in the cache key** (\`['latest', template.version, device]\`) — a new version is served on the next request, without waiting for the cached page to go stale.
+
+One difference from code: \`defaults\` from the instance options are added by \`node()\`, so a JSON template carries its props itself (\`"size": "md"\`).
+
+This is the core of server-driven UI: editors and designers change pages, developers change components.`,
+    run: async () => build(ui, await latestPage())(),
   },
   {
     slug: 'tutorial-slots',
-    title: '5. Slots',
+    title: '5. Slots and toProps',
     level: 'ok',
-    description: `In the contract, a card has two **slots**: \`badge\` and \`footer\`. In the block we fill them with nodes (\`badge\`, \`avatar\`) — the server decides what goes into a slot.
+    files: [{ title: 'toProps', file: 'ui/to-props.ts' }],
+    description: `In the contract a card has two **slots**, \`badge\` and \`footer\` — places for other components. The template decides what goes into them (here a \`badge\` and an \`avatar\`), and data reaches them with the \`:slot(name)\` selector: \`card > :slot(badge)\` is the badge in every card. Data is prepared **per component**: articles for cards, categories for badges, authors for avatars — \`newsData(list)\` assembles the bindings.
 
-Data is assigned to slots with the \`:slot(name)\` selector: \`card > :slot(badge)\` is the badge in every card. Data is prepared **per component**: articles for cards, categories for badges, authors for avatars — the \`newsData(list)\` helper assembles them into bindings.
+An article from the API has \`headline\`, \`slug\`, \`cover\`, while the card wants \`title\`, \`href\`, \`image\`. **toProps** (above) translates, per component:
+- it gets the props from the template and the node's data; its result is the final props — hence \`...props\`,
+- it is also called for nodes without data (\`data: undefined\`) — hence the \`data ? … : props\` condition,
+- it has no IO, so it can run on the server or on the frontend.
 
-The block is now a function \`cards(title, count, columns)\` — we'll use it for several sections.`,
+The block is now a function \`cards(title, count, columns)\` — the next step uses it for two sections.`,
     run: build(ui, withSlots),
   },
   {
-    slug: 'tutorial-shared-section',
-    title: '6. A shared section with a loader',
-    level: 'ok',
-    description: `The hero (a featured article) should appear on many pages. Instead of repeating its data in every page's \`data\`, the section gets **its own loader**: \`section(key, block, { data })\` — it returns bindings for that section only.
-
-You define such a section once (export it from a module) and add it to any page — that's how you do a header, footer or menu. The section loader and the page's \`data\` run **in parallel**.
-
-Page data must not return anything under the key of a section that has a loader — that's an error (it would be unclear which one wins).`,
-    run: build(ui, withHero),
-  },
-  {
     slug: 'tutorial-variants',
-    title: '7. Variants (ctx)',
+    title: '6. Variants: ctx, patch and remove',
     level: 'ok',
-    description: `\`sections\` can be a function of \`ctx\`. Here, on \`mobile\`, the \`news\` section has one column and two cards; \`data\` also gets \`ctx\` and fetches as many articles as needed.
+    description: `One page, several versions. \`sections\` can be a function of \`ctx\`: on \`mobile\` the grids have fewer columns. This step is rendered with \`device: "mobile"\` — compare it with step 1, which is the same page on desktop.
 
-The same mechanism handles A/B tests, language versions, different layouts per site — variants are plain code on the server, and the frontend knows nothing about them.
+When a section needs a block that's "almost the same", it adjusts it instead of copying it:
+- \`patch: { 'card:first-child': { size: 'lg' } }\` — the first card is featured (desktop only),
+- \`remove: 'card > :slot(footer)'\` + \`patch: { card: { size: 'sm' } }\` — "More" is the same \`cards\` block in a compact version.
 
-This step is rendered with \`device: "mobile"\`.`,
-    run: build(ui, withVariants, { device: 'mobile' }),
-  },
-  {
-    slug: 'tutorial-patch-remove',
-    title: '8. patch and remove',
-    level: 'ok',
-    description: `You often need a block that's "almost the same". Instead of copying it, the section modifies the block:
-
-- \`patch: { 'card:first-child': { size: 'lg' } }\` — the first card is featured (on desktop only),
-- \`remove: 'card > :slot(footer)'\` + \`patch: { card: { size: 'sm' } }\` — the "More" section is the same \`cards\` block in a compact version.
-
-Selectors use CSS syntax (\`:first-child\`, \`>\`, \`:slot()\`, \`#alias\`, \`[size=lg]\`) — the same matcher works in patch, remove, bindings and devtools.`,
-    run: build(ui, withPatches),
+Selectors use CSS syntax (\`:first-child\`, \`>\`, \`:slot()\`, \`#alias\`, \`[size=lg]\`) — the same in patch, remove, bindings and devtools. The same mechanism serves A/B tests, language versions and per-site layouts — and the frontend knows nothing about any of them.`,
+    run: build(ui, tutorialHome, { device: 'mobile' }),
   },
   {
     slug: 'tutorial-missing-data',
-    title: '9. When data is missing',
+    title: '7. When data is missing',
     level: 'error',
-    description: `A real API is sometimes empty or down. Dedal makes you decide explicitly what happens then:
+    description: `A real API is sometimes empty or down — and with templates edited by other people, the number of places rarely matches the number of articles. Dedal makes you decide explicitly what happens:
 
 - **promotions** — the source returns an empty list; a section in which no node got data disappears by default (\`onEmpty: 'remove'\`),
-- **recommended** — the API throws an error; \`optional: true\` removes only this section, and the error goes to \`onSectionError\` (logs). Without \`optional\` the whole build would fail.
+- **recommendations** — the API throws; \`optional: true\` removes only this section, and the error goes to \`onSectionError\` (logs). Without \`optional\` the whole build would fail,
+- fewer articles than cards — the extra cards disappear (\`onShortage: 'remove'\`); more articles than cards — the surplus is skipped.
 
-The page renders, and devtools tell you what disappeared and why — this is the first step in which the panel shows an error and a warning.`,
+The page renders, and devtools tell you what disappeared and why — the first step where the panel shows an error and a warning.
+
+That's the whole model. What's left before production — shared sections with their own loaders, streaming of slow sections, cache — is in *Going to production*. First, an exercise.`,
     run: build(ui, withMissingData),
   },
   {
-    slug: 'tutorial-defer',
-    title: '10. A deferred section (streaming)',
-    level: 'ok',
-    description: `The "For you" recommendations are slow (800 ms) and personalised. \`defer: { fallback }\` makes the page result contain only a fallback, and the loader doesn't run — the page goes out right away.
-
-The section's content is built by \`page.section('forYou', ctx)\` in a separate request; in Next it's an async component in \`<Suspense>\` — React streams it in when it's ready. A deferred section is also outside the page cache — a good place for per-user data.`,
-    run: build(ui, withDeferred),
-  },
-  {
-    slug: 'tutorial-queries-cache',
-    title: '11. Queries and cache',
-    level: 'ok',
-    description: `The hero and the page's \`data\` need the same articles. \`ui.query({ key, fn, staleTime })\` fetches them once per key and shares them — between loaders of the same request and between requests (up to \`staleTime\`).
-
-\`cache: { key: ctx => ['tutorial-home', ctx.device] }\` caches the whole page result per device (stale-while-revalidate). The key must cover everything the sections and data depend on.
-
-Debug mode bypasses the page cache (devtools show a fresh build), but queries still use their cache — *timing* shows which ones are \`hit\` and which are \`miss\`.`,
-    run: build(ui, home),
-  },
-  {
-    slug: 'tutorial-render',
-    title: '12. Rendering and devtools',
-    level: 'ok',
-    files: [{ title: 'registry (card)', file: 'ui/registries/radix-themes.tsx', region: 'card' }],
-    description: `The last step is the frontend. \`ui.resolve(result)\` combines layout and data into a tree of \`{ component, props, children, slots }\`, and \`<Render tree registry>\` turns it into React.
-
-The **registry** maps component names to library components — above is the card in Radix Themes: it gets props from the contract (\`title\`, \`href\`, \`size\`) and slots as React elements (\`badge\`, \`footer\`). \`satisfies Registry<Contract>\` checks at compile time that the registry has every component.
-
-In debug mode you add \`trace\`, \`<Render debug>\`, \`<DevtoolsData>\` and \`<Devtools />\` — the panel you've been using throughout this tutorial. The finished page from this tutorial is, in practice, the home page of \`examples/next\` (\`/radix\`, \`/shadcn\` — the same page, two registries).
-
-Next: step 13 — a debugging exercise. After that, the *Layout*, *Data*, *Sections*… groups describe each feature separately, and *Errors* covers what to do when the build throws an exception.`,
-    run: build(ui, finalPage),
-  },
-  {
     slug: 'tutorial-debugging',
-    title: '13. Debugging',
+    title: '8. Debugging',
     level: 'error',
     codeCollapsed: true,
-    description: `You get a report from the editors: "the home page looks almost right, but something is off". It's the same page as in the tutorial — with five mistakes of the kind that happen in a real project. Nothing throws an exception and the page renders — the problems only show when you look closely.
+    description: `You get a report from the editors: "the home page looks almost right, but something is off". It's the tutorial's page, grown a bit — with five mistakes of the kind that happen in a real project. Nothing throws an exception and the page renders — the problems only show when you look closely.
 
 Find the causes with the **devtools panel** (the **dedal** button in the bottom-right corner, or \`Alt+Shift+S\`) before you look at the code — the code is below, collapsed. Each task is a symptom, a hint about where to look, and a solution you can expand.
 
@@ -473,7 +420,9 @@ Fix: \`promotions: { card: list.slice(5, 8) }\`. If there really were no promoti
 Fixes (pick one):
 - a query in the loader: \`const popular = ui.query({ key: () => ['popular'], fn: fetchPopular, staleTime: 60_000 })\` and \`await popular()\` — the slow call happens once a minute instead of on every request,
 - \`defer: { fallback }\` — the page goes out right away, and "Popular" arrives via streaming,
-- caching the whole page (\`page({ cache })\`) — in production a slow build only happens after the entry expires.`,
+- caching the whole page (\`page({ cache })\`) — in production a slow build only happens after the entry expires.
+
+All three are described in *Going to production*.`,
       },
     ],
     run: build(ui, debugging),

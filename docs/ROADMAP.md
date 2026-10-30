@@ -72,6 +72,7 @@ Status: proposal, not implemented.
 Blocks are plain JSON, so templates can live outside the code (a database, a design-tool export) — see `examples/web-components`. Two gaps today:
 - **`defaults` are not applied** — `node()` adds them when a block is created in code; a block parsed from JSON never goes through `node()`. Proposal: apply `defaults` in `layout()` (props from the block win), so both paths behave the same; `trace` already reports `default` as a source there.
 - **No runtime validation** — the contract is types only, so an unknown component or a wrong slot name in a stored template is found only at render time (`fallback`). Proposal: an optional `createDedal({ components })` list (or a validator function) checked when a section is created, with an error pointing to the path in the template.
+- **`sections` is synchronous** — a template loaded from async storage (a database) can't be read inside `sections(ctx)`. Today: load it first and create the page per request (`examples/web-components/src/home.page.ts`, *Tutorial* step 4), with the template version in the cache key. Proposal: allow `sections: async (ctx) => [...]` — `layout` would become async, which touches `page.layout()` and the cache path.
 
 ### `dedal/astro`
 
