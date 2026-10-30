@@ -71,7 +71,7 @@ const registry = { grid: Grid, card: Card, badge: Badge } satisfies Registry<Con
 <Render tree={page} registry={registry} />
 ```
 
-Change the template in storage and the page follows — no frontend release (with a page cache: after `ui.invalidate()` or once the entry goes stale).
+Change the template in storage and the page follows — no frontend release (with a page cache: after `ui.invalidate()` or once the entry goes stale). Templates loaded from storage aren't checked by TypeScript, so validate them when you load them — see [Templates as JSON](docs/API.md#templates-as-json).
 
 ## What you get
 
