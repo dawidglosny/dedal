@@ -46,6 +46,33 @@ const features = [
   ['A bonus: no lock-in', 'The page is plain JSON and only the registry knows your components — switch libraries without touching pages.'],
 ]
 
+const before = `// the structure lives in component code:
+// every rearrangement is a code change and a release
+<Grid columns={3}>
+  <Card title={a.title} badge={<Badge label={a.category} />} />
+  <Card title={b.title} badge={<Badge label={b.category} />} />
+  <Card title={c.title} badge={<Badge label={c.category} />} />
+</Grid>`
+
+const after = `{ "component": "grid", "props": { "columns": 3 },
+  "children": [
+    { "component": "card", "repeat": 3,
+      "slots": { "badge": { "component": "badge" } } }
+  ] }`
+
+const axes = [
+  ['Structure', 'Which blocks, in what order, what goes inside what.', 'Designers, editors, experiments, other systems'],
+  ['Data', 'What’s in the blocks.', 'Your APIs, databases, the user'],
+  ['Components', 'What a “card” or a “button” looks like and does.', 'The UI team, a component library'],
+]
+
+const compare = [
+  ['React Server Components', 'Where React runs — on the server, with less JavaScript.', 'Complementary: a Server Component can render a Dedal page. RSC doesn’t say where the structure comes from.'],
+  ['Web Components', 'Sharing components across apps and frameworks.', 'A different problem: Dedal doesn’t ship components. Custom elements can be its registry.'],
+  ['Headless CMS, page builders', 'Editing content, sometimes layouts, in a UI.', 'A source of templates and data. Dedal is the typed engine in between; it has no editor.'],
+  ['Hand-made JSON + a switch', 'The same idea, done ad hoc.', 'What Dedal replaces — data binding, missing-data rules, cache and devtools included.'],
+]
+
 const inline = (text: string) => text.split(/(`[^`]+`)/).map((part, i) => (part.startsWith('`') ? <code key={i}>{part.slice(1, -1)}</code> : part))
 
 export default function Home() {
@@ -60,8 +87,8 @@ export default function Home() {
           <span>Kept apart, joined at the last moment.</span>
         </h1>
         <p className="hero-lead">
-          Dedal is a server-driven UI engine for TypeScript. The structure of a screen is a JSON template, data is attached to it by CSS-like selectors, and the
-          frontend renders the result with its own components — so each of the three can change on its own schedule, by different people.
+          A server-driven UI engine for TypeScript. The structure of a screen lives as data, so it can change{' '}
+          <strong>without a code change or a release</strong> — while your components and your APIs stay exactly as they are.
         </p>
         <div className="hero-actions">
           <Link href="/docs/" className="button button-primary">
@@ -79,7 +106,44 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="flow">
+      <section className="landing-section">
+        <h2>Three things that usually live in one place</h2>
+        <p className="landing-lead">
+          A screen built from components mixes three things that change at different times, for different reasons, by different people. When the structure lives in
+          component code, every rearrangement waits for a developer and a release.
+        </p>
+        <div className="axes">
+          {axes.map(([title, what, who]) => (
+            <div key={title} className="axis-card">
+              <h3>{title}</h3>
+              <p>{what}</p>
+              <div className="axis-who">Changed by: {who}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="landing-section">
+        <h2>Before and after</h2>
+        <div className="versus">
+          <div>
+            <div className="versus-label">Without Dedal — structure in code</div>
+            <Code code={before} lang="tsx" />
+          </div>
+          <div>
+            <div className="versus-label versus-after">With Dedal — structure as data</div>
+            <Code code={after} lang="json" />
+            <p className="versus-note">
+              Stored, versioned, edited without a release. Data reaches the cards by a selector (<code>card</code>), and your own <code>&lt;Card&gt;</code> renders
+              them.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="landing-section">
+        <h2>How it works</h2>
+      <div className="flow">
         {[
           ['Structure', 'a JSON template — in code, in a database, from a design tool'],
           ['+ Data', 'from your APIs, attached by CSS-like selectors'],
@@ -92,27 +156,7 @@ export default function Home() {
             <div className="flow-text">{text}</div>
           </div>
         ))}
-      </section>
-
-      <section className="landing-section">
-        <h2>A quick look</h2>
-        <div className="quick">
-          <Code code={contract} title="contract.ts" />
-          <Code code={server} title="server" />
-          <Code code={frontend} lang="tsx" title="frontend (React)" />
-        </div>
-      </section>
-
-      <section className="landing-section">
-        <h2>What you get</h2>
-        <div className="features">
-          {features.map(([title, text]) => (
-            <div key={title} className="feature">
-              <h3>{title}</h3>
-              <p>{inline(text)}</p>
-            </div>
-          ))}
-        </div>
+      </div>
       </section>
 
       <section className="landing-section fit">
@@ -137,6 +181,45 @@ export default function Home() {
           </ul>
         </div>
       </section>
+
+      <section className="landing-section">
+        <h2>How it compares</h2>
+        <p className="landing-lead">
+          Dedal decides <strong>what</strong> is on the screen; your framework and components decide <strong>how</strong> it looks and behaves.
+        </p>
+        <div className="features compare">
+          {compare.map(([title, solves, relation]) => (
+            <div key={title} className="feature">
+              <h3>{title}</h3>
+              <p className="compare-solves">{solves}</p>
+              <p>{relation}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="landing-section">
+        <h2>A quick look</h2>
+        <div className="quick">
+          <Code code={contract} title="contract.ts" />
+          <Code code={server} title="server" />
+          <Code code={frontend} lang="tsx" title="frontend (React)" />
+        </div>
+      </section>
+
+      <section className="landing-section">
+        <h2>What you get</h2>
+        <div className="features">
+          {features.map(([title, text]) => (
+            <div key={title} className="feature">
+              <h3>{title}</h3>
+              <p>{inline(text)}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+
 
       <section className="landing-cta">
         <h2>Learn by example</h2>

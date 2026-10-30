@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+Documentation only:
+- the docs site's landing page explains Dedal at a glance: the benefit in the first lines, the three parts (structure, data, components) and who changes each, a before/after example, and how Dedal compares with React Server Components, Web Components, CMSs and hand-made JSON.
+
 ## 0.6.4
 
 Devtools:

@@ -873,6 +873,83 @@ a {
   text-align: center;
 }
 
+.landing-lead {
+  max-width: 760px;
+  margin: -8px 0 24px;
+  color: var(--text-soft);
+  font-size: 16px;
+}
+
+.hero-lead strong {
+  color: var(--text);
+}
+
+.axes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.axis-card {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-soft);
+}
+
+.axis-card h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.axis-card p {
+  margin: 0 0 12px;
+  color: var(--text-soft);
+}
+
+.axis-who {
+  color: var(--orange);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.versus {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.versus-label {
+  margin-bottom: 8px;
+  color: var(--text-faint);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.versus-after {
+  color: var(--accent);
+}
+
+.versus-note {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 14px;
+}
+
+.versus-note code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+
+.compare-solves {
+  margin-bottom: 8px !important;
+  color: var(--text) !important;
+  font-weight: 500;
+}
+
 /* responsive */
 
 @media (max-width: 1200px) {
@@ -911,7 +988,9 @@ a {
   .flow,
   .features,
   .quick,
-  .fit {
+  .fit,
+  .axes,
+  .versus {
     grid-template-columns: 1fr;
   }
 }
