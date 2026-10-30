@@ -1,0 +1,26 @@
+{
+  "name": "dedal-site",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dedal": "rm -rf vendor && mkdir vendor && npm pack ../ --pack-destination vendor && mv vendor/dedal-*.tgz vendor/dedal.tgz && npm install ./vendor/dedal.tgz",
+    "dev": "next dev",
+    "build": "next build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@radix-ui/themes": "^3.3.0",
+    "dedal": "file:vendor/dedal.tgz",
+    "next": "^16.4.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "shiki": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^5.9.3"
+  }
+}

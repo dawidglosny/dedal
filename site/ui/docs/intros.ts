@@ -53,7 +53,7 @@ Note that in a single full-stack app (like this Next.js example) a template writ
 
 Dedal decides **what** is on the page. Your framework and components decide **how** it looks and behaves.
 
-- **React Server Components** — about **where** React runs (the server, less JavaScript in the browser). Complementary: Dedal builds the page, a Server Component renders it — that's what this example does. RSC says nothing about where the layout comes from.
+- **React Server Components** — about **where** React runs (the server, less JavaScript in the browser). Complementary: Dedal builds the page, a Server Component renders it — that's what these docs and \`examples/next\` do. RSC says nothing about where the layout comes from.
 - **Web Components** — about a **component** that works in any framework. Complementary: custom elements can be the registry, and Dedal slots map onto native \`<slot>\`s (\`examples/web-components\`).
 - **Headless CMS, page builders** — editing content, sometimes layouts, in a UI. They can be the source of templates and data; Dedal is the typed engine in between and has no editor of its own.
 - **Hand-made JSON and a \`switch\` over components** — the same idea done ad hoc. This is what Dedal replaces.
@@ -90,7 +90,7 @@ The model has two sides:
 
 They are connected by the **contract** — a TypeScript type describing which components exist and what props they take. It is the only thing both sides have to share.
 
-In this example (Next.js, App Router) both sides live in one application: \`build\` and \`resolve\` run in a Server Component, and \`<Render>\` renders the result right away. The split still holds: the same page is available as JSON (\`/api/home\`), so a completely different frontend could render it, e.g. a mobile app with its own registry.
+In \`examples/next\` (Next.js, App Router) both sides live in one application: \`build\` and \`resolve\` run in a Server Component, and \`<Render>\` renders the result right away. The split still holds: the same page is available as JSON (\`/api/home\`), so a completely different frontend could render it, e.g. a mobile app with its own registry.
 
 ## How data flows
 
@@ -250,7 +250,7 @@ If you're not familiar with the idea of server-driven UI, read *Introduction* fi
 
 Each step has:
 - a description — what we're doing and why,
-- the code — the real files of this example (contract, instance, toProps, registry) and the page code for this step,
+- the code — the real files behind these docs (contract, instance, toProps, registry — the same as in \`examples/next\`) and the page code for this step,
 - the result — the page built from this code,
 - "See it live" — what to open in the devtools panel (the **dedal** button in the bottom right corner, or \`Alt+Shift+S\`),
 - the devtools report — the same thing as text.
@@ -259,7 +259,7 @@ Later steps use blocks from earlier ones — it's worth going in order (the "nex
 
 ## What it looks like in a project
 
-Files of this example (\`examples/next\`):
+Files of the Next.js example (\`examples/next\`):
 
 \`\`\`
 ui/contract.ts           — contract: components and their props (shared by server and frontend) + the Ctx type
@@ -527,7 +527,7 @@ Debug mode (\`trace\`) **bypasses the page cache** — it neither reads nor writ
 
 \`ui.resolve(result, { ctx })\` turns a \`PageResult\` (layout and data separately) into a \`ResolvedPage\` — a tree of \`{ key, component, props, slots, children }\` with final props. For each node: when the component has \`toProps\`, its result is the final props (it receives the props from the layout — already with \`defaults\` — the node's data and \`ctx\`); without \`toProps\`, data (an object) is merged with props (deep merge).
 
-\`resolve\` is a pure function — it can run on the server (as in this example) or on the frontend, when the frontend receives a \`PageResult\` through an API. It checks the format version (\`dedal: 1\`) and rejects unknown ones.
+\`resolve\` is a pure function — it can run on the server (as in these docs) or on the frontend, when the frontend receives a \`PageResult\` through an API. It checks the format version (\`dedal: 1\`) and rejects unknown ones.
 
 ## Registry
 
@@ -614,7 +614,7 @@ The panel doesn't ask the server for anything — everything is in the payload f
 
 ## How to enable it (Next, React Server Components)
 
-Four pieces in debug mode: build and resolve with \`trace\`, markers in the DOM, the payload on the page, and the panel. A simplified version of \`ui/page-view.tsx\` from this example (here \`isDebug()\` simply means \`?debug=1\`):
+Four pieces in debug mode: build and resolve with \`trace\`, markers in the DOM, the payload on the page, and the panel. A simplified version of \`ui/page-view.tsx\` from \`examples/next\` (here \`isDebug()\` simply means \`?debug=1\`):
 
 \`\`\`tsx
 import { Suspense } from 'react'
@@ -665,7 +665,7 @@ async function DeferredSection({ sectionKey, ctx, registry, debug }: { sectionKe
 ## Enabling it safely
 
 Debug mode **exposes the structure and data of the page** (all props, node data, cache keys) and bypasses the page cache — every request in debug is a full build with API calls. That's why the application turns it on, deliberately:
-- outside production — always, or with a switch (this example: \`?debug=1\`),
+- outside production — always, or with a switch (\`examples/next\`: \`?debug=1\`),
 - in production — only for trusted people, e.g. a cookie with a secret set by a protected endpoint. A query param alone in production is an invitation to everyone.
 
 \`\`\`ts

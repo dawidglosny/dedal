@@ -100,7 +100,7 @@ export async function PageView({ path, registry, searchParams }: { path: string;
         </a>
         {/* right side: docs and the debug toggle */}
         <span style={{ marginLeft: 'auto', display: 'flex', gap: 24 }}>
-          <a href="/docs" style={link(false)}>
+          <a href="https://dawidglosny.github.io/dedal/" style={link(false)}>
             docs — all cases, errors and warnings
           </a>
           <a href={href(path, { debug: debug ? '0' : '1' })} style={link(debug)}>

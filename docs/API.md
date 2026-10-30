@@ -1,6 +1,6 @@
 # API reference
 
-The complete reference of the package: formats, rules and every option. For an introduction, start with the [README](../README.md); for a guided tour with live examples, the documentation in [`examples/next`](../examples/next) (`/docs`).
+The complete reference of the package: formats, rules and every option. For an introduction, start with the [README](../README.md); for a guided tour with live examples, the [documentation site](https://dawidglosny.github.io/dedal/).
 
 ## Pipeline
 
@@ -164,7 +164,7 @@ const payload = inspect(result, resolved)               // JSON: sections, nodes
 - Browser panel: `<Render debug>` (node markers in the DOM), `<DevtoolsData payload={payload} />` (payload on the page; payloads of streamed sections are merged), `<Devtools />` from `dedal/react/devtools`. The panel (Shadow DOM) has the tabs *node* (pick an element: ID, selector, data, prop origin), *tree* (search: selector, ID, section, text in data), *sections* (messages and bindings), *timing* (timeline of loaders and queries) and `copy report`; `Alt+Shift+S` opens / closes, `⇤` / `⇥` moves it to the other side, the state is remembered in the tab. Outside React: `mountDevtools()` from `dedal/devtools/panel`.
 - Debug mode is enabled by the application — the payload reveals the page's structure and data. Example: `examples/next`, `?debug=1`.
 
-Guide (enabling, safely enabling in production, other environments, the panel, common problems): the *Devtools* page in the [`examples/next`](../examples/next) documentation (`/docs/devtools`).
+Guide (enabling, safely enabling in production, other environments, the panel, common problems): the [*Devtools* page](https://dawidglosny.github.io/dedal/docs/devtools/) of the documentation.
 
 ### Renderable tree (`resolve`)
 
@@ -210,7 +210,7 @@ export const registry = {
 - Unknown component → `fallback` (nothing by default).
 - React is an optional `peerDependency`; the `dedal` core doesn't import it.
 
-Example: [`examples/next`](../examples/next) — the same page on Radix Themes and shadcn/ui (one contract, two registries), switching `ctx`, debug mode, a JSON endpoint. Documentation by example: `/docs` in this example — an introduction to server-driven UI for new team members, a 13-step tutorial (with a debugging exercise), and every feature, warning and error as a separate page with a description, code, result and devtools report.
+Example: [`examples/next`](../examples/next) — the same page on Radix Themes and shadcn/ui (one contract, two registries), switching `ctx`, debug mode, a JSON endpoint. Documentation by example (a tutorial, every feature, warning and error as a live page): the [documentation site](https://dawidglosny.github.io/dedal/), sources in [`site`](../site).
 
 Example: [`examples/custom-ds`](../examples/custom-ds) — a page on a custom design system, without a renderer: queries, shared sections with loaders, desktop / mobile variants, slots (carousel, CTA), per-component bindings, a data-dependent section.
 
@@ -232,7 +232,7 @@ await ui.invalidate(['home'])  // e.g. after publishing
 - Store: `memoryStore({ max })` by default (LRU, frozen copies of entries); Redis / Mongo / KV via the `Store` interface.
 - A page without `cache` is not cached. Personalized data: the key must include the user or the page has no `cache`.
 
-More (deployments, store, query, debug): the *Cache & queries* page in the [`examples/next`](../examples/next) documentation (`/docs/cache`).
+More (deployments, store, query, debug): the [*Cache & queries* page](https://dawidglosny.github.io/dedal/docs/cache/) of the documentation.
 
 ### Data assignment (`assign`)
 

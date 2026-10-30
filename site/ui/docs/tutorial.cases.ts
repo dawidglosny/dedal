@@ -406,7 +406,7 @@ Debug mode bypasses the page cache (devtools show a fresh build), but queries st
 
 The **registry** maps component names to library components — above is the card in Radix Themes: it gets props from the contract (\`title\`, \`href\`, \`size\`) and slots as React elements (\`badge\`, \`footer\`). \`satisfies Registry<Contract>\` checks at compile time that the registry has every component.
 
-In debug mode you add \`trace\`, \`<Render debug>\`, \`<DevtoolsData>\` and \`<Devtools />\` — the panel you've been using throughout this tutorial. The finished page from this tutorial is, in practice, this example's home page (\`/radix\`, \`/shadcn\` — the same page, two registries).
+In debug mode you add \`trace\`, \`<Render debug>\`, \`<DevtoolsData>\` and \`<Devtools />\` — the panel you've been using throughout this tutorial. The finished page from this tutorial is, in practice, the home page of \`examples/next\` (\`/radix\`, \`/shadcn\` — the same page, two registries).
 
 Next: step 13 — a debugging exercise. After that, the *Layout*, *Data*, *Sections*… groups describe each feature separately, and *Errors* covers what to do when the build throws an exception.`,
     run: build(ui, finalPage),

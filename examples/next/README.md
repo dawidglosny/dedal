@@ -16,7 +16,6 @@ Run `npm run dedal` instead of `npm install` — it also installs the remaining 
 - `?device=desktop|mobile` — `ctx.device` (number of columns, featured card),
 - `?debug=1` — the devtools panel (the "dedal" button in the bottom-right corner: "pick" a page element, tree, sections, live selector) and a view from `inspect()` (`dedal/devtools`): sections and data sources, cache key, node tree with suggested selectors, prop origin (default / template / patch / data), assignments; a build with `trace` bypasses the cache,
 - `/api/home?device=mobile` — the same page as JSON (middleware → front end topology).
-- `/docs` — documentation by example: every feature, warning and error as a separate page with a description, code, result and devtools report (see below).
 
 ## Structure
 
@@ -27,8 +26,6 @@ Run `npm run dedal` instead of `npm install` — it also installs the remaining 
 | `ui/home.page.ts` | blocks and page: slots `media`, `actions`, `badge`, `footer`, data into slots via selectors, `cache` |
 | `ui/registries/shadcn.tsx` | contract → shadcn components + Tailwind classes |
 | `ui/registries/radix-themes.tsx` | contract → Radix Themes components and their scales (`size="1".."9"`, `variant="soft"`…) |
-| `ui/docs/*.cases.ts` | documentation cases grouped as in the menu (layout, data, sections, cache, rendering, errors, devtools); the code shown on the page is the `// #region <slug>` region from these files |
-| `ui/docs/doc-view.tsx`, `ui/docs/run.ts` | case page: build with `trace`, `resolve`, devtools report or the caught exception |
 | `ui/page-view.tsx` | shared view: `build` → `resolve` → `<Render registry={...}>` |
 | `components/ui/*` | shadcn components (card, badge, button, tabs, avatar, separator) — code in the project, as after `shadcn add` |
 | `app/(shadcn)`, `app/(radix)` | separate root layouts: Tailwind and Radix Themes styles don't mix |
@@ -48,25 +45,9 @@ They can be generated officially: `npx shadcn@latest add card badge button tabs 
 - **Deferred section** — "For you" (`defer`): the page goes out immediately with a placeholder, and the section (slow API, 600 ms) is streamed in via `<Suspense>` (`ui/page-view.tsx`).
 - **RSC + client components** — the renderer runs on the server; the tabs (Radix Tabs) are interactive on the client.
 
-## Documentation by example (`/docs`)
+## Documentation
 
-A step-by-step tutorial, then every package feature, every warning and every error as a separate page — grouped in the menu on the left:
-
-| Group | Cases |
-|---|---|
-| Why Dedal, Introduction | the problem and the use cases; how Dedal works, an example step by step, a glossary |
-| Tutorial | 12 steps: a site's home page from the contract, through data, slots, shared sections, variants, patch, missing data, streaming, query and cache, to render and devtools; step 13 — a debugging exercise (5 hidden mistakes, tasks with solutions) |
-| Layout | blocks and `repeat`, slots, aliases, `patch` and selectors, patch without matches, `remove`, removing a section root, `ctx` variants |
-| Data | bindings, `toProps` and `defaults`, `null` items, shortages (`onShortage: 'remove'` / `'keep'`), surplus, binding without matches, binding order, dropped |
-| Sections | section loader vs page `data`, `optional` and `onSectionError`, `onEmpty` (`remove` / `keep` / block), `required`, `defer` (streaming), `unknownData`, loader without `return` |
-| Cache & queries | page cache, `undefined` key, query statuses (`miss` / `hit` / `stale` / `bypass`), `invalidate` |
-| Rendering | component missing from the registry, non-object data, exception in `toProps`, `toProps` returns a non-object, data without a node, `onIssue: 'throw'` |
-| Errors (thrown) | every exception that aborts a build or `resolve` — with the message text |
-| Devtools | panel, timing, build without `trace` |
-
-Each group has an introduction page (`/docs/layout`, `/docs/data`…): why this part exists, how it works, why it is designed this way, how to use it and what to watch out for — and `/docs` (*Why Dedal*) is the starting point for someone new: what problem server-driven UI solves, where Dedal came from, when it fits and when it doesn't, how it compares with React Server Components and Web Components. *Introduction* follows: the server / front end split of roles, how data flows, an example from the page definition through JSON (`PageResult`, `ResolvedPage`) to render, a glossary, common tasks (e.g. adding a new component). Content: `ui/docs/intros.ts`. The pages are read in order (the "next" link at the bottom: the group introduction, then its cases).
-
-Case page: a description (what it is, when it appears, what to do), a "See it live" box — what to open in the devtools panel and what to look for there (`ui/docs/live.ts`; for cases with an exception — why the panel is empty), the code (a region from `ui/docs/*.cases.ts` — the same one that runs), the result (Radix Themes), the devtools report (the same as "copy report" in the panel) or the caught exception. The dot next to a case in the menu: green — works, yellow — warning in devtools, red — error in devtools, purple — the build throws an exception. The devtools panel is enabled on every page.
+The documentation by example — a tutorial and every feature, warning and error as a live page — is a separate app in [`site`](../../site), published at https://dawidglosny.github.io/dedal/. It uses the same contract, instance and Radix Themes registry as this example.
 
 ## Known differences between the libraries
 
