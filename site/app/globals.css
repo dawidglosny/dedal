@@ -474,6 +474,11 @@ a {
   color-scheme: light;
 }
 
+/* Radix Themes treats a <Theme> without a parent theme as the page root and gives it min-height: 100vh */
+.result .radix-themes {
+  min-height: 0;
+}
+
 .missing {
   padding: 12px;
   border: 2px dashed #c33;
