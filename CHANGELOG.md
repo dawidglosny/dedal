@@ -13,7 +13,8 @@ Documentation (no changes to the API or behavior):
 - a new docs group, *Another domain: a dashboard* — the same engine on a different contract: widgets per role, a layout saved per customer as JSON, a failing data source; the tutorial notes that its content-site example is just one domain,
 - docs site: no empty space under the rendered examples (Radix Themes gave the result frame the height of the screen),
 - the devtools button described where the docs mention opening the panel (*Devtools*: a new section, *Opening the panel*),
-- the logo: in the README, the docs site header and favicon; the site's colors follow it (blueprint blue, an orange core) in both light and dark themes.
+- the logo: in the README, the docs site header and favicon; the site's colors follow it (blueprint blue, an orange core) in both light and dark themes,
+- `examples/web-components`: the design system's colors follow the logo too (a navy-to-blue hero, an orange primary button, blue badges).
 
 ## 0.6.3
 

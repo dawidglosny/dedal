@@ -19,7 +19,7 @@ class DsHero extends DsElement {
   lead = ''
   template() {
     return `<style>
-        header { padding: 48px 32px; border-radius: 16px; background: linear-gradient(135deg, #1e1b4b, #4338ca); color: #fff; }
+        header { padding: 48px 32px; border-radius: 16px; background: linear-gradient(135deg, #0b1220, #1f3a8a 55%, #2f6bff); color: #fff; }
         h1 { margin: 0 0 8px; font-size: 36px; }
         p { margin: 0 0 24px; opacity: .85; }
         .actions { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -35,7 +35,7 @@ class DsButton extends DsElement {
   template() {
     return `<style>
         a { display: inline-block; padding: 10px 18px; border-radius: 8px; font-weight: 600; text-decoration: none; border: 2px solid #fff; }
-        .solid { background: #fff; color: #312e81; }
+        .solid { background: #e28025; border-color: #e28025; color: #fff; }
         .outline { color: #fff; }
       </style>
       <a class="${escape(this.variant)}" href="${escape(this.href)}">${escape(this.label)}</a>`
@@ -64,8 +64,8 @@ class DsCard extends DsElement {
   size: 'sm' | 'md' | 'lg' = 'md'
   template() {
     return `<style>
-        article { padding: 20px; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; height: 100%; box-sizing: border-box; }
-        a { display: block; margin-top: 10px; color: #111827; font-weight: 600; text-decoration: none; }
+        article { padding: 20px; border: 1px solid #dfe7f5; border-radius: 12px; background: #fff; height: 100%; box-sizing: border-box; }
+        a { display: block; margin-top: 10px; color: #0f1b33; font-weight: 600; text-decoration: none; }
         .sm a { font-size: 15px; } .md a { font-size: 18px; } .lg a { font-size: 22px; }
       </style>
       <article class="${escape(this.size)}"><slot name="badge"></slot><a href="${escape(this.href)}">${escape(this.heading)}</a></article>`
@@ -78,7 +78,7 @@ class DsBadge extends DsElement {
   template() {
     return `<style>
         span { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
-        .neutral { background: #f3f4f6; color: #374151; } .accent { background: #e0e7ff; color: #3730a3; }
+        .neutral { background: #f5f8fd; color: #4d5b78; } .accent { background: #e8efff; color: #1d4fd8; }
       </style>
       <span class="${escape(this.tone)}">${escape(this.label)}</span>`
   }
