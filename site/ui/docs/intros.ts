@@ -304,7 +304,7 @@ app/(radix)/radix/…      — Next routes that render PageView with the chosen 
 
 In a larger project blocks are usually extracted into separate modules (e.g. \`blocks.ts\`), and each page into its own file.
 
-Installation: \`npm i github:dawidglosny/dedal#v0.6.3\`. You need TypeScript and React (for \`dedal/react\`, React 18+); the server can be anything (Node 20.9+) — here it's Next.js (App Router, Server Components).`,
+Installation: \`npm i github:dawidglosny/dedal#v0.6.4\`. You need TypeScript and React (for \`dedal/react\`, React 18+); the server can be anything (Node 20.9+) — here it's Next.js (App Router, Server Components).`,
 
   production: `The tutorial covers the model. This group covers what you add before production: data shared between pages, slow sections, and not calling your APIs on every request.
 

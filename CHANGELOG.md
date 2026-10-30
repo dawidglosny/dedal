@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.4
 
 Devtools:
 - the panel's toggle button carries the Dedal logo and the logo's colors (the label stays `dedal`).
