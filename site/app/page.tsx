@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Code } from '@/components/code'
 import { GITHUB, VERSION } from '@/components/header'
+import { LogoMark } from '@/components/logo'
 
 const contract = `// contract.ts — the only thing the server and every frontend share
 import type { Slot } from 'dedal'
@@ -51,6 +52,7 @@ export default function Home() {
   return (
     <main className="landing">
       <section className="hero">
+        <LogoMark size={96} className="hero-logo" />
         <div className="hero-badge">v{VERSION} · TypeScript · zero dependencies</div>
         <h1>
           Structure, data and components.

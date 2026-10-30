@@ -1,3 +1,5 @@
+<p align="center"><img src="logo.svg" width="128" alt="Dedal logo — a labyrinth D on a blueprint grid"></p>
+
 # Dedal
 
 **Structure, data and components — kept apart, joined at the last moment.**

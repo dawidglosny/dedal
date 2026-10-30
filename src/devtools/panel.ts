@@ -67,8 +67,11 @@ const STYLE = `
 :host { all: initial; }
 * { box-sizing: border-box; }
 .root { font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; color: #e8e8e8; }
-.toggle { position: fixed; right: 16px; bottom: 16px; z-index: 2147483647; background: #111; color: #9cf; border: 1px solid #333;
-  border-radius: 6px; padding: 6px 10px; cursor: pointer; font: inherit; }
+.toggle { position: fixed; right: 16px; bottom: 16px; z-index: 2147483647; display: flex; align-items: center; gap: 7px;
+  background: #0b1220; color: #9cc4ff; border: 1px solid #2f6bff66; border-radius: 8px; padding: 5px 10px 5px 7px; cursor: pointer;
+  font: inherit; font-weight: 600; box-shadow: 0 4px 16px #0b122040; }
+.toggle:hover { border-color: #4998f3; color: #fff; }
+.toggle svg { width: 18px; height: 18px; flex: none; }
 .panel { position: fixed; right: 16px; bottom: 56px; width: min(560px, calc(100vw - 32px)); max-height: 70vh; display: flex; flex-direction: column;
   z-index: 2147483647; background: #111; border: 1px solid #333; border-radius: 8px; box-shadow: 0 8px 32px #0008; }
 .panel[hidden] { display: none; }
@@ -165,6 +168,17 @@ function h(tag: string, attrs: Record<string, unknown> = {}, ...children: (Node 
 }
 
 
+/** The Dedal mark: a labyrinth "D" with the core in the middle. */
+const LOGO =
+  '<svg viewBox="52 52 316 316" fill="none" aria-hidden="true"><path d="M75 210V75H260L345 160V260L260 345H75V270" stroke-width="30" stroke="#4998F3"/>' +
+  '<path d="M285 235L235 285H135V135H235L260 160" stroke-width="30" stroke="#4998F3"/><rect x="180" y="180" width="60" height="60" fill="#E28025"/></svg>'
+
+const logo = () => {
+  const template = document.createElement('template')
+  template.innerHTML = LOGO
+  return template.content.firstChild as Node
+}
+
 const short = (value: unknown) => {
   const text = JSON.stringify(value) ?? String(value)
   return text.length > 80 ? `${text.slice(0, 77)}…` : text
@@ -216,6 +230,7 @@ export function mountDevtools(options: MountOptions = {}): () => void {
   const toggle = h(
     'button',
     { class: 'toggle', title: 'dedal devtools (Alt+Shift+S)', onclick: () => ((panel.hidden = !panel.hidden), persist(), render()) },
+    logo(),
     'dedal'
   )
   shadow.append(h('style', {}, STYLE), root)

@@ -1,14 +1,20 @@
 :root {
+  /* the logo's palette: blueprint blue lines, an orange core, a pale blueprint paper */
   --bg: #ffffff;
-  --bg-soft: #f7f8fa;
-  --bg-code: #f6f8fa;
-  --border: #e6e8eb;
-  --text: #1c2024;
-  --text-soft: #60646c;
-  --text-faint: #8b8d98;
-  --accent: #4f46e5;
-  --accent-soft: #eef2ff;
-  --accent-text: #3730a3;
+  --bg-soft: #f5f8fd;
+  --bg-code: #f5f8fd;
+  --border: #dfe7f5;
+  --text: #0f1b33;
+  --text-soft: #4d5b78;
+  --text-faint: #8794ad;
+  --accent: #2f6bff;
+  --accent-soft: #e8efff;
+  --accent-text: #1d4fd8;
+  --orange: #e28025;
+  --orange-soft: #fdf0e3;
+  --grid-line: rgb(47 107 255 / 0.09);
+  --logo-line: #4998f3;
+  --logo-core: #e28025;
   --ok: #2b8a3e;
   --warning: #b7791f;
   --error: #c92a2a;
@@ -21,16 +27,22 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #111113;
-    --bg-soft: #18191b;
-    --bg-code: #18191b;
-    --border: #2e3035;
-    --text: #edeef0;
-    --text-soft: #b0b4ba;
-    --text-faint: #777b84;
-    --accent: #8b8cf8;
-    --accent-soft: #1f1f3a;
-    --accent-text: #c4c6ff;
+    /* the same blueprint at night: navy paper, brighter lines */
+    --bg: #0a1120;
+    --bg-soft: #0f1a30;
+    --bg-code: #0d172b;
+    --border: #1d2b47;
+    --text: #e6edf9;
+    --text-soft: #a7b4cc;
+    --text-faint: #6c7b98;
+    --accent: #5a92ff;
+    --accent-soft: #14244a;
+    --accent-text: #a9c6ff;
+    --orange: #f0953f;
+    --orange-soft: #33220f;
+    --grid-line: rgb(73 152 243 / 0.1);
+    --logo-line: #4998f3;
+    --logo-core: #f0953f;
     --ok: #4cc38a;
     --warning: #f1b44c;
     --error: #ff6b6b;
@@ -91,10 +103,6 @@ a {
   text-decoration: none;
 }
 
-.logo-mark {
-  color: var(--accent);
-  font-size: 22px;
-}
 
 .version {
   padding: 1px 8px;
@@ -306,7 +314,7 @@ a {
 }
 
 .eyebrow {
-  color: var(--accent);
+  color: var(--orange);
   font-size: 13px;
   font-weight: 600;
 }
@@ -618,8 +626,31 @@ a {
 }
 
 .hero {
-  padding: 96px 0 56px;
+  position: relative;
+  isolation: isolate;
+  margin: 0 -24px 24px;
+  padding: 72px 24px 64px;
   text-align: center;
+}
+
+/* the blueprint grid from the logo, fading out at the edges (on a layer of its own, so the content isn't masked) */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 30px 30px;
+  background-position: center top;
+  -webkit-mask-image: radial-gradient(ellipse 70% 80% at 50% 35%, #000 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse 70% 80% at 50% 35%, #000 40%, transparent 100%);
+}
+
+.hero-logo {
+  display: block;
+  margin: 0 auto 20px;
 }
 
 .hero-badge {
@@ -640,7 +671,7 @@ a {
 }
 
 .hero h1 span {
-  background: linear-gradient(90deg, var(--accent), #db2777);
+  background: linear-gradient(90deg, var(--logo-line), var(--accent) 45%, var(--orange));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -684,6 +715,12 @@ a {
   filter: brightness(1.08);
 }
 
+@media (prefers-color-scheme: dark) {
+  .button-primary {
+    color: #0a1120;
+  }
+}
+
 .hero-install {
   max-width: 420px;
   margin: 0 auto;
@@ -710,9 +747,9 @@ a {
   width: 26px;
   height: 26px;
   margin-bottom: 10px;
-  border-radius: 26px;
-  background: var(--accent-soft);
-  color: var(--accent-text);
+  border-radius: 4px;
+  background: var(--orange-soft);
+  color: var(--orange);
   font-size: 13px;
   font-weight: 700;
 }
@@ -757,7 +794,18 @@ a {
 .feature {
   padding: 20px;
   border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
   border-radius: 12px;
+  background: var(--bg);
+}
+
+.feature:nth-child(4n + 2),
+.feature:nth-child(4n + 4) {
+  border-top-color: var(--logo-line);
+}
+
+.feature:last-child {
+  border-top-color: var(--orange);
 }
 
 .feature h3 {
@@ -801,8 +849,13 @@ a {
 .landing-cta {
   margin-bottom: 72px;
   padding: 48px;
+  border: 1px solid var(--border);
   border-radius: 16px;
-  background: var(--accent-soft);
+  background-color: var(--accent-soft);
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 30px 30px;
   text-align: center;
 }
 
