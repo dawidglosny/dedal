@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+Documentation:
+- the docs menu in four parts — *Get started*, *Learn*, *Features*, *Troubleshooting*; a group's cases are shown only for the group being read (the others collapsed, with a count), and a legend explains the colored dots.
+
 ## 0.6.5
 
 Devtools:

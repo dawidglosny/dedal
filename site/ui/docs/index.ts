@@ -119,6 +119,14 @@ export const groups: DocGroup[] = [
   },
 ]
 
+/** Parts of the menu: groups in the order of a reader's needs — first steps, learning, features, when something's wrong. */
+export const parts: { title: string; groups: string[] }[] = [
+  { title: 'Get started', groups: ['why', 'quick-start', 'introduction'] },
+  { title: 'Learn', groups: ['tutorial', 'production', 'dashboard'] },
+  { title: 'Features', groups: ['layout', 'data', 'sections', 'cache', 'rendering'] },
+  { title: 'Troubleshooting', groups: ['errors', 'devtools'] },
+]
+
 export const allCases = groups.flatMap(group => group.cases.map(docCase => ({ group, docCase })))
 
 export const findCase = (slug: string): { group: DocGroup; docCase: DocCase } | undefined =>

@@ -8,7 +8,7 @@ import { Code, langOf } from '@/components/code'
 import { GITHUB } from '@/components/header'
 import type { Contract, Ctx } from '../contract'
 import { radixThemes } from '../registries/radix-themes'
-import { groups, readingOrder } from './index'
+import { findGroup, groups, parts, readingOrder } from './index'
 import { LIVE_THROWS, live } from './live'
 import { caseCode, codeOf, runCase } from './run'
 import type { CaseLevel, CaseOutput, DocCase, DocGroup } from './types'
@@ -121,22 +121,46 @@ function Prose({ text }: { text: string }) {
   )
 }
 
+/** The menu: parts → groups; a group's cases are shown only for the group being read (the others can be expanded). */
 function Sidebar({ current }: { current: string }) {
+  const currentGroup = groups.find(group => group.slug === current || group.cases.some(docCase => docCase.slug === current))
   return (
     <nav className="sidebar">
-      {groups.map(group => (
-        <div key={group.slug} className="sidebar-group">
-          <Link href={docHref(group.slug)} className={`sidebar-title${group.slug === current ? ' active' : ''}`}>
-            {group.title}
-          </Link>
-          {group.cases.map(docCase => (
-            <Link key={docCase.slug} href={docHref(docCase.slug)} className={`sidebar-link${docCase.slug === current ? ' active' : ''}`}>
-              <span className={`dot ${levels[docCase.level].className}`} />
-              {docCase.title}
-            </Link>
-          ))}
+      {parts.map(part => (
+        <div key={part.title} className="sidebar-part">
+          <div className="sidebar-part-title">{part.title}</div>
+          {part.groups.map(slug => {
+            const group = findGroup(slug)!
+            const title = (
+              <Link href={docHref(group.slug)} className={`sidebar-title${group.slug === current ? ' active' : ''}`}>
+                {group.title}
+              </Link>
+            )
+            if (!group.cases.length) return <div key={slug}>{title}</div>
+            return (
+              <details key={slug} className="sidebar-group" open={group === currentGroup}>
+                <summary>
+                  {title}
+                  <span className="sidebar-count">{group.cases.length}</span>
+                </summary>
+                {group.cases.map(docCase => (
+                  <Link key={docCase.slug} href={docHref(docCase.slug)} className={`sidebar-link${docCase.slug === current ? ' active' : ''}`}>
+                    <span className={`dot ${levels[docCase.level].className}`} />
+                    {docCase.title}
+                  </Link>
+                ))}
+              </details>
+            )
+          })}
         </div>
       ))}
+      <div className="sidebar-legend">
+        {Object.values(levels).map(({ label, className }) => (
+          <span key={className}>
+            <span className={`dot ${className}`} /> {label}
+          </span>
+        ))}
+      </div>
     </nav>
   )
 }
