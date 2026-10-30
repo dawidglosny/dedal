@@ -98,6 +98,19 @@ Change the structure in storage and the page follows — no frontend release (wi
 - **Devtools.** A browser panel that shows, for any element on the page, where each prop came from (default, template, patch, data), which selector assigned the data, what got dropped and why, and how long each loader and query took.
 - **A bonus: no lock-in.** Because the page is plain JSON, the registry is the only place that knows your components — switching component libraries doesn't touch the pages, and the zero-dependency core works with any renderer (React included; [Web Components](examples/web-components) in a few lines).
 
+## Size and speed
+
+| | |
+|---|---|
+| `dedal/react` in the browser | **0.6 KB** min + gzip (`<Render>` alone: 0.5 KB); React itself is a peer dependency |
+| `dedal` core | 8.3 KB min + gzip, **zero dependencies** — in the browser only if you run `resolve` there |
+| devtools panel | 12.6 KB min + gzip — a separate chunk, fetched only when `<Devtools />` mounts (debug mode) |
+| build + resolve, 530 nodes | **0.8 ms** |
+| build + resolve, 3620 nodes | 7 ms |
+| tests | 336 (vitest) |
+
+Timings from `npm run bench` on an Apple M-series laptop, Node 22 — run it on your machine. Sizes: the published ESM entry points, bundled and minified with esbuild, React external.
+
 ## How it compares
 
 Dedal doesn't replace your framework or your components — it decides **what** is on the page; they decide **how** it looks and behaves. It is not a way to distribute a component library: if your problem is sharing components across apps or frameworks, use Web Components or build your library for each framework.

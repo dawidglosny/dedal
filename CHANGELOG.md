@@ -3,6 +3,7 @@
 ## Unreleased
 
 Documentation:
+- README: *Size and speed* — bundle sizes of the entry points, benchmark timings, the number of tests,
 - *Limitations* — what Dedal doesn't do, or doesn't do yet — and *Glossary* as pages of their own, in the *Reference* part of the menu,
 - `CONTRIBUTING.md`: setup, where things are, the docs site and the examples, what a pull request needs,
 - the API reference on the docs site (from `docs/API.md` — one source), with a *Reference* part in the menu; the docs pages render tables, `###` headings and links,
