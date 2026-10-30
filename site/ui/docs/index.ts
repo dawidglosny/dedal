@@ -78,6 +78,30 @@ export const groups: DocGroup[] = [
     cases: [],
   },
   {
+    slug: 'adopting',
+    title: 'Adopting in an existing app',
+    description: 'One block first, your components kept, a registry as an adapter — grow from there, or stop.',
+    intro: intros.guideAdopting,
+    file: '',
+    cases: [],
+  },
+  {
+    slug: 'clients-without-react',
+    title: 'A client without React',
+    description: 'The page format, a renderer in a few dozen lines, older mobile apps, types on the client.',
+    intro: intros.guideClients,
+    file: '',
+    cases: [],
+  },
+  {
+    slug: 'testing',
+    title: 'Testing',
+    description: 'Pages, the registry and toProps in tests: build reports, resolve issues, devtools messages, snapshots.',
+    intro: intros.guideTesting,
+    file: '',
+    cases: [],
+  },
+  {
     slug: 'layout',
     intro: intros.layout,
     title: 'Layout',
@@ -139,7 +163,7 @@ export const groups: DocGroup[] = [
 export const parts: { title: string; groups: string[] }[] = [
   { title: 'Get started', groups: ['why', 'quick-start', 'introduction'] },
   { title: 'Learn', groups: ['tutorial', 'production', 'dashboard'] },
-  { title: 'Guides', groups: ['templates-in-storage', 'templates-from-figma'] },
+  { title: 'Guides', groups: ['templates-in-storage', 'templates-from-figma', 'adopting', 'clients-without-react', 'testing'] },
   { title: 'Features', groups: ['layout', 'data', 'sections', 'cache', 'rendering'] },
   { title: 'Troubleshooting', groups: ['errors', 'devtools'] },
 ]

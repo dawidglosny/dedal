@@ -495,6 +495,249 @@ An instance of a component that isn't in the contract stops the conversion: \`he
 - **One instance = one node.** The converter doesn't collapse repeated instances into \`repeat\`; that's fine — a template with three \`card\` nodes works the same.
 - **Figma's API shape can change** — keep the converter small and covered by a test with a saved response.`,
 
+  guideAdopting: `**In short:** you don't have to rebuild an app to try Dedal. Hand one block of one page over to it, keep your components, and grow from there — or stop, if it doesn't pay off.
+
+## Pick the block
+
+Choose a part of a page whose structure changes more often than its components — a news list, a promotions strip, a set of tiles. Everything else on the page stays as it is.
+
+## 1. A contract for that block only
+
+List just the components the block uses, with the props it needs (*Quick start*, step 2). The contract grows when the next block moves over.
+
+## 2. A registry over the components you already have
+
+The registry doesn't need new components: it adapts the contract to the props of the existing ones. Here an \`ArticleCard\` that takes \`heading\`, \`link\` and \`tag\` serves as the contract's \`card\`:
+
+\`\`\`tsx
+import { Render, type Registry } from 'dedal/react'
+import type { ReactNode } from 'react'
+import type { Contract } from './ui/contract'
+import { home, ui } from './ui/home'
+
+// ---- what the app has today ----
+function ArticleCard({ heading, link, tag }: { heading: string; link: string; tag?: ReactNode }) {
+  return (
+    <article className="article-card">
+      {tag}
+      <a href={link}>{heading}</a>
+    </article>
+  )
+}
+const Tag = ({ text }: { text: string }) => <span className="tag">{text}</span>
+const Header = () => <header>Site header</header>
+const Footer = () => <footer>Site footer</footer>
+
+// ---- the registry adapts the existing components to the contract — nothing is rewritten ----
+const registry = {
+  section: ({ title, children }) => (
+    <section>
+      <h2>{title}</h2>
+      {children}
+    </section>
+  ),
+  card: ({ title = '', href = '#', badge }) => <ArticleCard heading={title} link={href} tag={badge} />,
+  badge: ({ label = '' }) => <Tag text={label} />,
+} satisfies Registry<Contract>
+
+// ---- the page as it was, with one block handed over to Dedal ----
+async function HomePage() {
+  const news = ui.resolve(await home.build())
+  return (
+    <>
+      <Header />
+      {/* was: <LatestNews articles={articles} /> */}
+      <Render tree={news} registry={registry} />
+      <Footer />
+    </>
+  )
+}
+\`\`\`
+
+\`home\` is a page with one section that reproduces the block as it was — the template written from the old JSX, the data from the loader the block used before (*Quick start*, step 3).
+
+## 3. Compare and switch
+
+Render the old block and the new one side by side (a feature flag, a query parameter) until they match — devtools show where every prop came from. Then remove the old block.
+
+## 4. Next blocks — or not
+
+Each next block adds its components to the contract and the registry. Once the structure of a page lives in a template, it can move out of the code (*Templates in a database or CMS*). If after the first block the structure turns out to change rarely, keep the plain component — Dedal pays off where layouts change, not everywhere.
+
+## Without a server framework
+
+The core runs in the browser too. A single-page app can get the page as JSON from any endpoint (\`ui.resolve(await home.build(ctx))\` on the server) and render it with \`<Render>\` — the registry is the same.`,
+
+  guideClients: `**In short:** \`dedal/react\` is one renderer of many possible. The page Dedal produces is plain JSON with a small, fixed shape, and a renderer is a function that walks it — a few dozen lines in any language: a mobile app, Web Components, server-side templates.
+
+## The format
+
+\`ui.resolve()\` returns a \`ResolvedPage\`:
+
+\`\`\`ts
+type ResolvedPage = {
+  dedal: 1                                              // the format version — check it
+  sections: { key: string; tree: ResolvedNode; deferred?: true }[]
+  issues: { id: string; message: string }[]             // problems resolve worked around
+}
+
+type ResolvedNode = {
+  key: string                                           // a stable ID — use it as the key in lists
+  component: string                                     // a name from the contract
+  props: Record<string, unknown>                       // final props, plain JSON
+  slots?: Record<string, ResolvedNode | ResolvedNode[]> // named places: one node or a list
+  children?: ResolvedNode[]
+}
+\`\`\`
+
+Serve it from an endpoint — \`Response.json(ui.resolve(await page.build(ctx), { ctx }))\` — and the client renders it.
+
+## A renderer
+
+Walk the tree: look up the component, render the slots and children first, pass them to it. This one produces HTML strings, with no dependencies:
+
+\`\`\`ts
+import type { ResolvedNode, ResolvedPage } from 'dedal'
+import type { Contract } from './ui/contract'
+
+// a renderer without React: component name → a function from props, slots and children to HTML
+type Html = string
+type Renderer = (props: Record<string, any>, slots: Record<string, Html | Html[]>, children: Html[]) => Html
+
+const escape = (text: unknown) => String(text ?? '').replace(/[&<>"']/g, char => \`&#\${char.charCodeAt(0)};\`)
+
+const views: Record<keyof Contract, Renderer> = {
+  section: (props, _, children) => \`<section><h2>\${escape(props.title)}</h2>\${children.join('')}</section>\`,
+  card: (props, slots) => \`<article>\${slots.badge ?? ''}<a href="\${escape(props.href)}">\${escape(props.title)}</a></article>\`,
+  badge: props => \`<span class="badge">\${escape(props.label)}</span>\`,
+}
+
+function renderNode(node: ResolvedNode<Contract>): Html {
+  const view = views[node.component as keyof Contract]
+  if (!view) return '' // an unknown component: render nothing (or a placeholder) — an older client, a newer server
+  const slots = Object.fromEntries(
+    Object.entries(node.slots ?? {}).map(([name, content]) => [name, Array.isArray(content) ? content.map(renderNode) : renderNode(content)])
+  )
+  return view(node.props as Record<string, any>, slots, (node.children ?? []).map(renderNode))
+}
+
+export const renderPage = (page: ResolvedPage<Contract>) => page.sections.map(({ tree }) => renderNode(tree)).join('\\n')
+\`\`\`
+
+The same walk works in Swift or Kotlin (a view per component name), and with Web Components — \`examples/web-components\` renders the tree into custom elements, with Dedal slots mapped onto native \`<slot>\`s.
+
+Three rules every renderer needs:
+- **an unknown component** renders nothing or a placeholder — never crashes: the server may know components an older client doesn't,
+- **\`deferred: true\`** marks a placeholder of a deferred section: render it, then fetch the section from its own endpoint (*Deferred without Suspense*),
+- **\`dedal\`** — refuse a format version you don't know.
+
+## Older clients
+
+A web frontend updates on every deploy; a mobile app doesn't. Let the client say what it supports — an app version in \`ctx\` — and remove what it can't render, in the template rather than in the client:
+
+\`\`\`ts
+import { createDedal } from 'dedal'
+import type { Contract } from './ui/contract'
+
+const ui = createDedal<Contract>()
+const { node, repeat, section } = ui
+
+// the app tells the server what it supports; older versions don't get components they can't render
+type Ctx = { appVersion: number }
+const BADGES_SINCE = 42 // the app version that added the badge component
+
+const home = ui.page<Ctx>({
+  sections: ({ appVersion }) => [
+    section('news', node('section', { props: { title: 'Latest' }, children: [repeat(node('card', { slots: { badge: node('badge') } }), 2)] }), {
+      remove: appVersion < BADGES_SINCE ? 'badge' : [],
+    }),
+  ],
+  data: async ({ appVersion }) => {
+    const articles = [{ title: 'A', href: '/a', category: 'x' }, { title: 'B', href: '/b', category: 'y' }]
+    return {
+      news: {
+        card: articles.map(({ title, href }) => ({ title, href })),
+        // no badges in the template for older apps — no badge data either
+        ...(appVersion >= BADGES_SINCE && { 'card > :slot(badge)': articles.map(article => ({ label: article.category })) }),
+      },
+    }
+  },
+  cache: { key: ctx => ['home', ctx.appVersion >= BADGES_SINCE] },
+})
+\`\`\`
+
+App 41 gets cards without badges, app 42 with them — and no devtools warnings for either, because the badge data is skipped together with the badges. The app version is in the cache key, so the two variants are cached separately.
+
+## Types on the client
+
+The contract is a TypeScript type. A TypeScript client imports it directly (\`examples/web-components\` does). For Swift or Kotlin, keep the contract as the source of truth and generate the client types from it, or write them by hand next to the registry and check them against stored templates in CI.`,
+
+  guideTesting: `**In short:** most of what can go wrong with a Dedal page is visible without a browser — in the build report, in \`resolve\` issues, in the devtools messages. Put them in tests.
+
+## What to test
+
+- **pages** — they build, every binding finds its nodes, nothing is removed or fails unexpectedly,
+- **the registry** — every component a page uses has an implementation,
+- **toProps** — plain functions: data in, props out,
+- **stored templates** — validated in CI (*Templates in a database or CMS*),
+- **the contract** — the type checker: \`satisfies Registry<Contract>\` and typed templates fail the build when they drift apart.
+
+## A page test
+
+With any test runner — here Node's built-in one (\`node --test\`):
+
+\`\`\`tsx
+import assert from 'node:assert/strict'
+import { test } from 'node:test'
+import { inspect, pageMessages, reportText } from 'dedal/devtools'
+import { renderToString } from 'react-dom/server'
+import { Render } from 'dedal/react'
+import { home, ui } from './ui/home'
+import { registry } from './ui/registry'
+
+test('the home page builds without problems', async () => {
+  const result = await home.build(undefined, { trace: true })
+  const resolved = ui.resolve(result, { onIssue: 'throw' }) // bad data → an exception, not a quiet fallback
+
+  const problems = pageMessages(inspect(result, resolved)).filter(message => message.level !== 'info')
+  assert.deepEqual(problems, [], reportText(inspect(result, resolved))) // the report as the failure message
+
+  assert.equal(result.report.removedSections.length, 0)
+  assert.equal(Object.keys(result.report.failedSections ?? {}).length, 0)
+})
+
+test('every component the page uses is in the registry', async () => {
+  const page = ui.resolve(await home.build())
+  const missing: string[] = []
+  const fallback = ({ component }: { component: string }) => (missing.push(component), null)
+  renderToString(<Render tree={page} registry={registry} fallback={fallback} />)
+  assert.deepEqual(missing, [])
+})
+
+test('a selector typo is reported', async () => {
+  const broken = ui.page({
+    sections: [ui.section('news', ui.node('section', { children: [ui.node('card', { slots: { badge: ui.node('badge') } })] }))],
+    data: async () => ({ news: { card: [{ title: 'a' }], 'card > :slot(badges)': [{ label: 'x' }] } }),
+  })
+  const result = await broken.build(undefined, { trace: true })
+  const errors = pageMessages(inspect(result, ui.resolve(result))).filter(message => message.level === 'error')
+  assert.match(errors[0].text, /binding matches no node/)
+})
+\`\`\`
+
+- \`build(ctx, { trace: true })\` keeps the details the devtools need; \`inspect()\` turns them into a payload, and \`pageMessages()\` into messages — the same ones as the panel's *sections* tab,
+- \`resolve(…, { onIssue: 'throw' })\` turns bad data (a \`toProps\` that throws, data that isn't an object) into an exception instead of a quiet fallback,
+- \`reportText()\` as the failure message: a failing test prints the whole report — what went where, what got dropped and why,
+- a \`fallback\` that records names catches components missing from the registry.
+
+## Data for tests
+
+Point the page's loaders at fixtures — pass the API client in (\`createHomePage(api)\`) or mock the module. Test the edges the page is supposed to survive: an empty list, fewer items than places, a failing optional section — each has a defined outcome (*Data*, *Sections*), so it can be asserted.
+
+## Snapshots
+
+\`reportText(inspect(result, resolved))\` is plain text and stable — a good snapshot. It changes when the structure, the bindings or the data placement change, and the diff says what changed.`,
+
   introduction: `This page shows how Dedal works: who does what, how data flows from a template to the screen, and a small example followed step by step. At the end — a glossary of the terms used throughout the documentation. Why Dedal exists and when to use it: *Why Dedal*.
 
 ## Five words to start with

@@ -4,6 +4,7 @@
 
 Documentation:
 - a new *Guides* part: *Templates in a database or CMS* (the stored shape, validation, caching through `ui.query`, the version in the cache key, drafts and preview, publishing, CI) and *Templates from Figma* (a naming convention and a converter over the Figma REST API); the code in both was run as written,
+- three more guides: *Adopting in an existing app* (one block first, the registry as an adapter over existing components), *A client without React* (the page format, a renderer in a few dozen lines, older mobile apps via the app version in `ctx`, types on the client) and *Testing* (build reports, `onIssue: 'throw'`, devtools messages and snapshots in tests); the code was run as written,
 - the docs menu in parts — *Get started*, *Learn*, *Guides*, *Features*, *Troubleshooting*; a group's cases are shown only for the group being read (the others collapsed, with a count), and a legend explains the colored dots.
 
 ## 0.6.5
