@@ -778,6 +778,11 @@ a {
   gap: 32px;
 }
 
+.fit-lead {
+  margin: -8px 0 14px;
+  color: var(--text);
+}
+
 .fit ul {
   margin: 0;
   padding-left: 20px;

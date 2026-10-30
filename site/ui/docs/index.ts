@@ -14,7 +14,7 @@ export const groups: DocGroup[] = [
   {
     slug: 'why',
     title: 'Why Dedal',
-    description: 'The problem, where Dedal came from, when it fits and when it doesn\'t, how it compares.',
+    description: 'The problem, who it is for and who it isn\'t, how it compares.',
     intro: intros.why,
     file: '',
     cases: [],

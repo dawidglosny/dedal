@@ -3,7 +3,7 @@
  * this way, how to use it and what to watch out for. English prose, technical names as used in the code.
  */
 export const intros = {
-  why: `Dedal is for pages whose **layout is data**: a template stored on the server, filled with content from your APIs and rendered by any frontend with its own components. This page explains the problem it solves, where it came from, when it's worth it — and when it isn't.
+  why: `Dedal lets editors, designers and experiments change page layouts **without a frontend release**: the layout is a template stored on the server as data, filled with content from your APIs and rendered by the frontend with the components it already has. This page explains the problem it solves, who it is for — and who it isn't for.
 
 ## The problem: the layout lives in the frontend code
 
@@ -34,27 +34,29 @@ Dedal grew out of a real setup: **many content sites on one design system**. Pag
 
 Hand-rolled versions of this keep growing the same parts: how the data reaches the right place in the template, what happens when there's less data than places, caching, and finding out why something on the page looks wrong. Dedal is those parts, typed and tested.
 
-## When it fits
+## Who it is for
 
-- **Layouts change more often than components** — editors, designers or experiments rearrange pages, and a frontend release for every change is too slow.
-- **Layouts come from outside the code** — a design-tool export, a page editor, a CMS, a database. Templates are plain JSON (\`examples/web-components\` keeps one in a file).
-- **One page, several frontends** — web and a mobile app, or several sites sharing a design system, each with its own component library.
-- **The component library may change** — the registry is the only place that knows your components; the pages stay the same.
+The question isn't how big the company is or how many frameworks it uses. It's **how often page layouts change, and who changes them**. Dedal is for products where the layout changes more often than the components, and the people changing it don't ship code:
+
+- **Media and content sites** — editors rearrange the home page every day, add special sections, build themed editions.
+- **Many sites on one design system** — templates designed in a design tool, stored on the server and served to every site. This is where Dedal came from.
+- **E-commerce and marketing** — landing pages, seasonal campaigns, A/B tests of the layout, run by marketers rather than developers.
+- **Mobile apps** — the most common home of server-driven UI: a layout change in a native app means a store release and waiting for users to update. Dedal's output is plain JSON, so a native app can render it with its own registry (Dedal ships a React renderer; a native one is up to the app).
 
 ## When it doesn't
 
 - **Application UI** — forms, state, interactions (a dashboard, an editor, a checkout). Dedal assembles pages from content blocks; it doesn't manage state.
-- **One frontend, a layout owned by developers that rarely changes** — plain components in your framework are simpler.
-- **A small team with everything in one repository** — Dedal adds a contract and a registry. They pay off with more sites, more frontends or non-developers editing pages; without those, they are overhead.
+- **A layout owned by developers that rarely changes** — plain components in your framework are simpler. Dedal adds a contract and a registry; they pay off when non-developers or other systems change pages.
+- **Sharing a component library** across apps or frameworks — that's what Web Components or a multi-framework build of your library are for. Dedal doesn't distribute components; it composes pages from the ones you already have.
 
 Note that in a single full-stack app (like this Next.js example) a template written in TypeScript is deployed together with the frontend — there's no release to save. What you still get there: typed templates, data placed by selectors, explicit rules for missing data, cache and devtools. The release-free layout changes come when templates are stored outside the code.
 
 ## How it compares
 
-Dedal decides **what** is on the page. Your framework and components decide **how** it looks and behaves.
+Dedal decides **what** is on the page. Your framework and components decide **how** it looks and behaves. It is not a way to distribute components.
 
 - **React Server Components** — about **where** React runs (the server, less JavaScript in the browser). Complementary: Dedal builds the page, a Server Component renders it — that's what these docs and \`examples/next\` do. RSC says nothing about where the layout comes from.
-- **Web Components** — about a **component** that works in any framework. Complementary: custom elements can be the registry, and Dedal slots map onto native \`<slot>\`s (\`examples/web-components\`).
+- **Web Components, multi-framework UI libraries** — about **sharing components** across apps and frameworks. A different problem: Dedal doesn't ship components, it uses the ones you have — Web Components included. Custom elements can be the registry, and Dedal slots map onto native \`<slot>\`s (\`examples/web-components\`).
 - **Headless CMS, page builders** — editing content, sometimes layouts, in a UI. They can be the source of templates and data; Dedal is the typed engine in between and has no editor of its own.
 - **Hand-made JSON and a \`switch\` over components** — the same idea done ad hoc. This is what Dedal replaces.
 
@@ -65,9 +67,9 @@ Dedal decides **what** is on the page. Your framework and components decide **ho
 - **Data placed by selectors** — \`card\`, \`#featured\`, \`card > :slot(badge)\`: CSS syntax instead of indexes, so adding a heading doesn't shift the data.
 - **Explicit rules for missing data** — fewer items than places, a failing API, an empty section: safe defaults, a strict mode when you want it, and a report of everything that was dropped.
 - **Variants without copies** — \`patch\` and \`remove\` adapt one template per device, site or experiment.
-- **Independence** — from the component library (only the registry changes) and from the framework (a zero-dependency core; a React renderer included, others are a small function over a JSON tree).
 - **Speed** — page and data-source cache with stale-while-revalidate, loaders in parallel, streaming of slow sections; building a 530-node page takes under a millisecond.
 - **Devtools** — click any element on the page and see where each prop came from, which selector placed the data and what went missing.
+- **A bonus: no lock-in** — the page is plain JSON and the registry is the only place that knows your components: switching component libraries doesn't touch the pages, and the zero-dependency core works with any renderer.
 
 Next: *Introduction* — how Dedal works, step by step, on a small example.`,
 

@@ -6,6 +6,7 @@ Documentation only, no changes to the API or behavior:
 - README rewritten as an introduction: what Dedal is for, when it fits and when it doesn't, how it compares with React Server Components, Web Components and CMSs; the API reference moved to [docs/API.md](docs/API.md) (with a new section on templates stored as JSON), the changelog to this file,
 - the documentation by example moved from `examples/next` to a static site in `site/`, published on GitHub Pages (https://dawidglosny.github.io/dedal/): a landing page, sidebar, table of contents, search, highlighted code, dark mode; the devtools panel works on every case page,
 - a new first docs page, *Why Dedal*; *Introduction* starts with five basic terms,
+- positioning: Dedal is about changing page layouts without a frontend release; who it is for by kind of product (media, many sites on one design system, e-commerce, mobile apps); framework independence is a bonus, and Dedal is not a way to distribute a component library,
 - new example [`examples/web-components`](examples/web-components): a JSON template validated at startup, a plain Node server, a ~20-line DOM renderer and custom elements with native slots,
 - [docs/ROADMAP.md](docs/ROADMAP.md): templates stored as JSON (`defaults` and runtime validation).
 
