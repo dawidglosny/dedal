@@ -91,7 +91,10 @@ export default function Home() {
           <strong>without a code change or a release</strong> — while your components and your APIs stay exactly as they are.
         </p>
         <div className="hero-actions">
-          <Link href="/docs/" className="button button-primary">
+          <Link href="/docs/quick-start/" className="button button-primary">
+            Quick start
+          </Link>
+          <Link href="/docs/" className="button">
             Why Dedal
           </Link>
           <Link href="/docs/tutorial/" className="button">

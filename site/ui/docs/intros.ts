@@ -89,7 +89,160 @@ Dedal grew out of one instance of the property above: **many content sites on on
 
 Hand-rolled versions of this keep growing the same parts: how the data reaches the right place in the template, what happens when there's less data than places, caching, and finding out why something on the page looks wrong. Dedal is those parts, typed and tested.
 
-Next: *Introduction* — how Dedal works, step by step, on a small example.`,
+Next: *Quick start* — a rendered page in five files; or *Introduction* — how Dedal works, step by step, on a small example.`,
+
+  quickstart: `From nothing to a rendered page in five files. The code on this page is complete — copy it into a TypeScript project and it runs.
+
+## 1. Install
+
+\`\`\`bash
+npm i github:dawidglosny/dedal#v0.6.4
+\`\`\`
+
+You need Node 20.9+ and TypeScript. For rendering with React (\`dedal/react\`) — React 18+, which your app most likely has already. The core (\`dedal\`) has no dependencies.
+
+## 2. The contract
+
+The contract lists the components a page can use and their props. It is types only, and it is the one thing the server and the frontend share. \`Slot\` marks a place for another component.
+
+\`\`\`ts
+// ui/contract.ts
+import type { Slot } from 'dedal'
+
+export type Contract = {
+  section: { title?: string }
+  card: { title?: string; href?: string; badge?: Slot }
+  badge: { label?: string }
+}
+\`\`\`
+
+## 3. A page: structure and data
+
+Create one instance per project. A page has **sections** — each with a template (the structure) — and a \`data\` function that loads data and says where it goes. \`card\` and \`card > :slot(badge)\` are selectors, in CSS syntax: "every card" and "the badge in every card".
+
+\`\`\`ts
+// ui/home.ts
+import { createDedal } from 'dedal'
+import { fetchArticles } from './api'
+import type { Contract } from './contract'
+
+// one instance per project
+export const ui = createDedal<Contract>()
+const { node, repeat, section } = ui
+
+export const home = ui.page({
+  // the structure: a section with three cards, each with a badge
+  sections: [
+    section(
+      'news',
+      node('section', {
+        props: { title: 'Latest' },
+        children: [repeat(node('card', { slots: { badge: node('badge') } }), 3)],
+      })
+    ),
+  ],
+  // the data: from your API, placed by selectors
+  data: async () => {
+    const articles = await fetchArticles()
+    return {
+      news: {
+        card: articles.map(article => ({ title: article.title, href: article.url })),
+        'card > :slot(badge)': articles.map(article => ({ label: article.category })),
+      },
+    }
+  },
+})
+\`\`\`
+
+\`fetchArticles\` is your API. To try it right away, a stand-in:
+
+\`\`\`ts
+// ui/api.ts
+export const fetchArticles = async () => [
+  { title: 'Night trains are coming back', url: '/a/night-trains', category: 'Travel' },
+  { title: 'A quiet year for comets', url: '/a/comets', category: 'Science' },
+  { title: 'Why bread rises', url: '/a/bread', category: 'Food' },
+]
+\`\`\`
+
+## 4. The registry
+
+On the frontend, each name from the contract gets a component — from any library or your own design system. Slots arrive as props named after the slot (\`badge\`), children from the template as \`children\`. \`satisfies Registry<Contract>\` makes a missing component or a wrong prop a compile error.
+
+\`\`\`tsx
+// ui/registry.tsx
+import type { Registry } from 'dedal/react'
+import type { Contract } from './contract'
+
+export const registry = {
+  section: ({ title, children }) => (
+    <section>
+      <h2>{title}</h2>
+      <div className="grid">{children}</div>
+    </section>
+  ),
+  card: ({ title, href, badge }) => (
+    <article>
+      {badge}
+      <a href={href}>{title}</a>
+    </article>
+  ),
+  badge: ({ label }) => <span className="badge">{label}</span>,
+} satisfies Registry<Contract>
+\`\`\`
+
+## 5. Render
+
+\`home.build()\` loads the data and puts it into the structure; \`ui.resolve()\` turns that into the final props — plain JSON, the description of the page. \`<Render>\` draws it with the registry.
+
+**Next.js** (App Router) — a Server Component:
+
+\`\`\`tsx
+// app/page.tsx
+import { Render } from 'dedal/react'
+import { home, ui } from '@/ui/home'
+import { registry } from '@/ui/registry'
+
+export default async function Page() {
+  const page = ui.resolve(await home.build())
+  return <Render tree={page} registry={registry} />
+}
+\`\`\`
+
+**Plain Node**, no framework — the same page as HTML:
+
+\`\`\`tsx
+// render.tsx
+import { Render } from 'dedal/react'
+import { renderToString } from 'react-dom/server'
+import { home, ui } from './ui/home'
+import { registry } from './ui/registry'
+
+const page = ui.resolve(await home.build())
+console.log(renderToString(<Render tree={page} registry={registry} />))
+\`\`\`
+
+\`\`\`
+<section><h2>Latest</h2><div class="grid">
+  <article><span class="badge">Travel</span><a href="/a/night-trains">Night trains are coming back</a></article>
+  <article><span class="badge">Science</span><a href="/a/comets">A quiet year for comets</a></article>
+  <article><span class="badge">Food</span><a href="/a/bread">Why bread rises</a></article>
+</div></section>
+\`\`\`
+
+**Another frontend** (a mobile app, Web Components, a different framework) — send the description as JSON and render it there with its own registry: \`Response.json(page)\`. \`examples/web-components\` does exactly that.
+
+## What just happened
+
+- The **structure** (a section, three cards, a badge in each) is in the template, not in JSX. Change \`repeat(…, 3)\` to \`4\`, or add a heading — the data still finds the cards.
+- The **data** reached its place by selectors, not by position.
+- The **components** are only in the registry — swap them for another library, and the page code doesn't change.
+
+## Next steps
+
+- **The template as data** — move the structure out of the code, into JSON stored on the server: *Tutorial*, step 4.
+- **See inside** — the devtools panel shows where every prop came from: *Devtools*, "How to enable it".
+- **Learn it properly** — *Tutorial*, then *Layout*, *Data*, *Sections*.`,
 
   introduction: `This page shows how Dedal works: who does what, how data flows from a template to the screen, and a small example followed step by step. At the end — a glossary of the terms used throughout the documentation. Why Dedal exists and when to use it: *Why Dedal*.
 
@@ -260,7 +413,7 @@ export default async function Page() {
 
 Each case page shows one thing: a description, the code (the same code that runs), the result and the devtools report — or the exception, when the build fails. The "See it live" box tells you what to open in the devtools panel (the button with the Dedal logo in the bottom-right corner). The dot next to a case in the menu: green — works, yellow — warning in devtools, red — error in devtools, purple — build throws an exception.
 
-Reading order: *Why Dedal* if you haven't yet, *Tutorial* (a whole page step by step), *Going to production* and *Another domain: a dashboard*, then *Layout*, *Data* and *Sections* — your everyday tools. *Cache & queries* and *Rendering* — once the page already works. *Errors* and *Devtools* — when something doesn't work.`,
+Reading order: *Why Dedal* and *Quick start* if you haven't yet, *Tutorial* (a whole page step by step), *Going to production* and *Another domain: a dashboard*, then *Layout*, *Data* and *Sections* — your everyday tools. *Cache & queries* and *Rendering* — once the page already works. *Errors* and *Devtools* — when something doesn't work.`,
 
   tutorial: `In seven steps you will build the home page of a news site — and then change its layout without touching the code. Each step adds one thing and shows the result live; step 8 is an exercise: the same page with five hidden mistakes to find in the devtools panel.
 

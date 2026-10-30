@@ -22,6 +22,14 @@ export const groups: DocGroup[] = [
     cases: [],
   },
   {
+    slug: 'quick-start',
+    title: 'Quick start',
+    description: 'Install, a contract, a page, a registry — and a rendered page in five files.',
+    intro: intros.quickstart,
+    file: '',
+    cases: [],
+  },
+  {
     slug: 'introduction',
     title: 'Introduction',
     description: 'How Dedal works: roles, data flow, an example step by step, a glossary.',

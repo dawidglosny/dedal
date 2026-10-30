@@ -15,6 +15,7 @@ export function Header() {
         <span className="version">v{VERSION}</span>
         <nav className="header-nav">
           <Link href="/docs/">Docs</Link>
+          <Link href="/docs/quick-start/">Quick start</Link>
           <Link href="/docs/tutorial/">Tutorial</Link>
           <a href={`${GITHUB}/blob/main/docs/API.md`}>API</a>
         </nav>

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+Documentation:
+- a *Quick start* page: install, a contract, a page, a registry, render in Next.js or plain Node — the code runs as written; linked from the home page, the header and the README.
+
 Examples:
 - `examples/custom-ds` removed — `examples/next` and `examples/web-components` cover the same features, and the docs site covers the rest.
 
