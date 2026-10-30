@@ -131,8 +131,7 @@ Requires Node 20.9+. React 18+ only for `dedal/react` (an optional peer dependen
 - **API reference** — [docs/API.md](docs/API.md): formats, design rules, every option.
 - **Examples**
   - [`examples/next`](examples/next) — Next.js: one page, two component libraries (Radix Themes and shadcn/ui), cache, streaming, devtools,
-  - [`examples/web-components`](examples/web-components) — a JSON template, a plain Node server, custom elements in the browser,
-  - [`examples/custom-ds`](examples/custom-ds) — a larger page on a custom design system: shared sections, device variants, data-dependent sections.
+  - [`examples/web-components`](examples/web-components) — a JSON template, a plain Node server, custom elements in the browser.
 
 ## Status
 

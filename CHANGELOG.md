@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+Examples:
+- `examples/custom-ds` removed — `examples/next` and `examples/web-components` cover the same features, and the docs site covers the rest.
+
 Devtools:
 - fix: closing the panel (the button or `Alt+Shift+S`) clears the highlight boxes on the page and ends picking — they used to stay until the next hover.
 

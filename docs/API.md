@@ -215,8 +215,6 @@ export const registry = {
 
 Example: [`examples/next`](../examples/next) — the same page on Radix Themes and shadcn/ui (one contract, two registries), switching `ctx`, debug mode, a JSON endpoint. Documentation by example (a tutorial, every feature, warning and error as a live page): the [documentation site](https://dawidglosny.github.io/dedal/), sources in [`site`](../site).
 
-Example: [`examples/custom-ds`](../examples/custom-ds) — a page on a custom design system, without a renderer: queries, shared sections with loaders, desktop / mobile variants, slots (carousel, CTA), per-component bindings, a data-dependent section.
-
 Example: [`examples/web-components`](../examples/web-components) — the same kind of page rendered without React: a small DOM renderer and a registry of Web Components (custom elements with native `<slot>`s).
 
 ### Page cache (`page({ cache })`)
