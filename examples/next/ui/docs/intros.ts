@@ -3,19 +3,17 @@
  * this way, how to use it and what to watch out for. English prose, technical names as used in the code.
  */
 export const intros = {
-  introduction: `Dedal is a library for building pages with the **server-driven UI** model. If that term is new to you, start here: this page explains the idea, walks through a real example showing what happens to the data step by step, and collects a glossary of the terms used throughout the documentation.
+  why: `Dedal is for pages whose **layout is data**: a template stored on the server, filled with content from your APIs and rendered by any frontend with its own components. This page explains the problem it solves, where it came from, when it's worth it — and when it isn't.
 
-## The problem: page layout baked into the frontend
+## The problem: the layout lives in the frontend code
 
-In a classic application the page layout lives in the frontend code: the home page component imports \`<Hero>\`, \`<NewsGrid>\`, \`<Promotions>\` and arranges them in JSX. The server (API) only delivers data — lists of articles, promotions, menus.
+In a typical application the home page is a component that imports \`<Hero>\`, \`<NewsGrid>\`, \`<Promotions>\` and arranges them in JSX. The API only delivers data.
 
-Every layout change — the order of blocks, a new section, a different number of cards on mobile, an A/B variant, hiding promotions on one site — is a change to the frontend code and a deployment of it. When there are several frontends (web, app), the same change is made several times.
+That works until the layout starts changing more often than the components: a new section, a different order, three cards instead of four on mobile, an A/B test, a promotion hidden on one site. Every such change is a code change and a frontend release. With several frontends (web, a mobile app, several sites), it is made several times.
 
-## The idea of server-driven UI
+## The idea: send the screen, not only the data
 
-The server sends not only data but a **description of the screen**: a tree like "component \`grid\` with props \`{ columns: 2 }\`, containing two \`card\`s with these titles". The frontend has a catalog of components (in Dedal: the **registry**) and renders whatever it receives. It doesn't know which page it is assembling or where the data came from.
-
-An analogy: the frontend has the building blocks, the server sends the instructions for putting them together. New instructions (a different layout) need no new blocks. A new kind of block (a new component) does — and that is the only change that touches the frontend.
+In **server-driven UI** the server sends a description of the screen — "a \`grid\` with two columns, inside it two \`card\`s with these titles" — and the frontend renders whatever it gets from a catalog of its own components:
 
 \`\`\`
 classic
@@ -25,24 +23,70 @@ classic
 server-driven UI
   server:   { component: "grid", props: { columns: 2 },
               children: [{ component: "card", props: { title: "First" } }, …] }
-  frontend: registry { grid: Grid, card: Card } + <Render tree={…} /> ← generic renderer
+  frontend: { grid: Grid, card: Card } + <Render tree={…} />      ← a generic renderer
 \`\`\`
 
-## What exactly Dedal does
+The frontend has the building blocks; the server sends the instructions. A new layout needs no new blocks. Only a new kind of block (a new component) touches the frontend.
 
-Dedal ships neither components nor an API client — you bring your own (shadcn, Radix, your own design system; fetch, an SDK, a database). It provides what sits in between:
+## Where Dedal came from
 
-- **layout described in TypeScript** — blocks built with the \`node()\` function, typed by the contract: a typo in a component or prop name is a compile error,
-- **connecting the layout with data** — data reaches its place in the layout through selectors in CSS syntax (\`card\`, \`#featured\`, \`card > :slot(badge)\`), not through indexes,
-- **explicit rules for missing data** — what to do when there are fewer articles than cards, when the API doesn't respond, when a section is empty,
-- **cache** for pages and data sources (stale-while-revalidate) and **streaming** of slow sections,
-- a **React renderer** (\`<Render>\`) and **devtools** — a panel that shows where every prop came from and what went wrong.
+Dedal grew out of a real setup: **many content sites on one design system**. Page templates are designed in a design tool, exported, stored on the server and served to the sites, which render them with the design system's components. Nobody writes the layout of a home page by hand — it is data that editors and designers change, while the components change rarely.
+
+Hand-rolled versions of this keep growing the same parts: how the data reaches the right place in the template, what happens when there's less data than places, caching, and finding out why something on the page looks wrong. Dedal is those parts, typed and tested.
+
+## When it fits
+
+- **Layouts change more often than components** — editors, designers or experiments rearrange pages, and a frontend release for every change is too slow.
+- **Layouts come from outside the code** — a design-tool export, a page editor, a CMS, a database. Templates are plain JSON (\`examples/web-components\` keeps one in a file).
+- **One page, several frontends** — web and a mobile app, or several sites sharing a design system, each with its own component library.
+- **The component library may change** — the registry is the only place that knows your components; the pages stay the same.
+
+## When it doesn't
+
+- **Application UI** — forms, state, interactions (a dashboard, an editor, a checkout). Dedal assembles pages from content blocks; it doesn't manage state.
+- **One frontend, a layout owned by developers that rarely changes** — plain components in your framework are simpler.
+- **A small team with everything in one repository** — Dedal adds a contract and a registry. They pay off with more sites, more frontends or non-developers editing pages; without those, they are overhead.
+
+Note that in a single full-stack app (like this Next.js example) a template written in TypeScript is deployed together with the frontend — there's no release to save. What you still get there: typed templates, data placed by selectors, explicit rules for missing data, cache and devtools. The release-free layout changes come when templates are stored outside the code.
+
+## How it compares
+
+Dedal decides **what** is on the page. Your framework and components decide **how** it looks and behaves.
+
+- **React Server Components** — about **where** React runs (the server, less JavaScript in the browser). Complementary: Dedal builds the page, a Server Component renders it — that's what this example does. RSC says nothing about where the layout comes from.
+- **Web Components** — about a **component** that works in any framework. Complementary: custom elements can be the registry, and Dedal slots map onto native \`<slot>\`s (\`examples/web-components\`).
+- **Headless CMS, page builders** — editing content, sometimes layouts, in a UI. They can be the source of templates and data; Dedal is the typed engine in between and has no editor of its own.
+- **Hand-made JSON and a \`switch\` over components** — the same idea done ad hoc. This is what Dedal replaces.
+
+## What you get
+
+- **The layout is data** — plain JSON templates you can store, version and generate.
+- **One typed contract** — a TypeScript type of components and props, shared by the server and every frontend; templates in code and registries are checked at compile time.
+- **Data placed by selectors** — \`card\`, \`#featured\`, \`card > :slot(badge)\`: CSS syntax instead of indexes, so adding a heading doesn't shift the data.
+- **Explicit rules for missing data** — fewer items than places, a failing API, an empty section: safe defaults, a strict mode when you want it, and a report of everything that was dropped.
+- **Variants without copies** — \`patch\` and \`remove\` adapt one template per device, site or experiment.
+- **Independence** — from the component library (only the registry changes) and from the framework (a zero-dependency core; a React renderer included, others are a small function over a JSON tree).
+- **Speed** — page and data-source cache with stale-while-revalidate, loaders in parallel, streaming of slow sections; building a 530-node page takes under a millisecond.
+- **Devtools** — click any element on the page and see where each prop came from, which selector placed the data and what went missing.
+
+Next: *Introduction* — how Dedal works, step by step, on a small example.`,
+
+  introduction: `This page shows how Dedal works: who does what, how data flows from a template to the screen, and a small example followed step by step. At the end — a glossary of the terms used throughout the documentation. Why Dedal exists and when to use it: *Why Dedal*.
+
+## Five words to start with
+
+You need only these to follow the rest of this page (the full glossary is at the end):
+- **contract** — a TypeScript type: which components exist and what props they take. The server and the frontend share it.
+- **block** — a piece of layout: \`node('card', { props })\`, or the same thing as plain JSON. Structure only, no data.
+- **section** — a block placed on a page under a key (\`news\`), together with the rules for its data.
+- **binding** — "this data goes to these nodes": \`{ card: articles }\`. The key is a selector in CSS syntax.
+- **registry** — on the frontend: component name → your component.
 
 ## Who is responsible for what
 
 The model has two sides:
-- the **server** defines pages (blocks, sections, data loaders), builds the result (\`build\`) and combines layout with data into props (\`resolve\`),
-- the **frontend** has the registry and renders the finished tree (\`<Render>\`).
+- the **server** keeps the templates (blocks), loads the data, puts the two together (\`build\`) and turns the result into final props (\`resolve\`),
+- the **frontend** maps component names to its components (the registry) and renders the finished tree (\`<Render>\`).
 
 They are connected by the **contract** — a TypeScript type describing which components exist and what props they take. It is the only thing both sides have to share.
 
@@ -163,7 +207,7 @@ export default async function Page() {
 - **contract** — a TypeScript type: component name → its props (\`card: { title: string; size?: 'sm' | 'md' | 'lg'; badge?: Slot }\`). A single source of truth for the server and the frontend.
 - **component** — a name from the contract (\`card\`, \`grid\`). It is not a React component — the registry assigns a React component to that name.
 - **instance** — the result of \`createDedal<Contract>(options)\`, created once per project; you take \`node\`, \`repeat\`, \`section\`, \`page\`, \`query\`, \`resolve\` from it.
-- **block** — a tree built from \`node()\` / \`repeat()\`: pure structure, without data and without IDs. A plain value (or a function returning a block) that can be exported and used across many pages.
+- **block** — a tree built from \`node()\` / \`repeat()\` or written as plain JSON: pure structure, without data and without IDs. A plain value (or a function returning a block) that can be exported and used across many pages.
 - **node** — an element of the tree: component, props, children, slots, an optional alias. In the layout it gets an ID.
 - **children and slot** — two ways of nesting. Children are regular content (\`children\` in React). A slot is a named place declared in the contract as \`Slot\` (one node) or \`Slot[]\` (a list) — it goes to the prop with that name.
 - **ID** — a node identifier derived from its position: \`news\` (section root), \`news.0.1\` (children), \`news.0:badge\` (slot), \`hero:actions.1\` (list slot). Layout and data meet by ID.
@@ -196,7 +240,7 @@ export default async function Page() {
 
 Each case page shows one thing: a description, the code (the same code that runs), the result and the devtools report — or the exception, when the build fails. The "See it live" box tells you what to open in the devtools panel (the **dedal** button in the bottom right corner). The dot next to a case in the menu: green — works, yellow — warning in devtools, red — error in devtools, purple — build throws an exception.
 
-Reading order: *Tutorial* (a whole page step by step), then *Layout*, *Data* and *Sections* — your everyday tools. *Cache & queries* and *Rendering* — once the page already works. *Errors* and *Devtools* — when something doesn't work.`,
+Reading order: *Why Dedal* if you haven't yet, *Tutorial* (a whole page step by step), then *Layout*, *Data* and *Sections* — your everyday tools. *Cache & queries* and *Rendering* — once the page already works. *Errors* and *Devtools* — when something doesn't work.`,
 
   tutorial: `In 12 steps you will build the home page of a news site: a hero, the latest articles, a "More" section, recommendations — with data from an API, mobile variants, cache and devtools. Each step adds one thing and shows the result live. Step 13 is an exercise: the same page with five hidden mistakes to find in the devtools panel.
 

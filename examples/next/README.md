@@ -3,9 +3,13 @@
 The same page (contract, template, data) rendered with two component libraries. Only the registry differs.
 
 ```bash
-npm run dedal   # build the package → npm pack → install from vendor/ (a single copy of React, as for a consumer)
-npm run build && npm start
+npm install            # in the repository root (the package build needs its dev dependencies)
+cd examples/next
+npm run dedal          # build the package → npm pack → install from vendor/ (a single copy of React, as for a consumer)
+npm run dev            # or: npm run build && npm start
 ```
+
+Run `npm run dedal` instead of `npm install` — it also installs the remaining dependencies. A plain `npm install` fails until `vendor/dedal.tgz` exists. Run `npm run dedal` again after every change in the package sources.
 
 - `/shadcn` — shadcn/ui (Tailwind v4, components in `components/ui`),
 - `/radix` — Radix Themes (`@radix-ui/themes`),
@@ -50,6 +54,7 @@ A step-by-step tutorial, then every package feature, every warning and every err
 
 | Group | Cases |
 |---|---|
+| Why Dedal, Introduction | the problem and the use cases; how Dedal works, an example step by step, a glossary |
 | Tutorial | 12 steps: a site's home page from the contract, through data, slots, shared sections, variants, patch, missing data, streaming, query and cache, to render and devtools; step 13 — a debugging exercise (5 hidden mistakes, tasks with solutions) |
 | Layout | blocks and `repeat`, slots, aliases, `patch` and selectors, patch without matches, `remove`, removing a section root, `ctx` variants |
 | Data | bindings, `toProps` and `defaults`, `null` items, shortages (`onShortage: 'remove'` / `'keep'`), surplus, binding without matches, binding order, dropped |
@@ -59,7 +64,7 @@ A step-by-step tutorial, then every package feature, every warning and every err
 | Errors (thrown) | every exception that aborts a build or `resolve` — with the message text |
 | Devtools | panel, timing, build without `trace` |
 
-Each group has an introduction page (`/docs/layout`, `/docs/data`…): why this part exists, how it works, why it is designed this way, how to use it and what to watch out for — and `/docs` (Introduction) is the starting point for someone new: what server-driven UI is and what problem it solves, what Dedal does, the server / front end split of roles, how data flows, an example from the page definition through JSON (`PageResult`, `ResolvedPage`) to render, a glossary, common tasks (e.g. adding a new component). Content: `ui/docs/intros.ts`. The pages are read in order (the "next" link at the bottom: the group introduction, then its cases).
+Each group has an introduction page (`/docs/layout`, `/docs/data`…): why this part exists, how it works, why it is designed this way, how to use it and what to watch out for — and `/docs` (*Why Dedal*) is the starting point for someone new: what problem server-driven UI solves, where Dedal came from, when it fits and when it doesn't, how it compares with React Server Components and Web Components. *Introduction* follows: the server / front end split of roles, how data flows, an example from the page definition through JSON (`PageResult`, `ResolvedPage`) to render, a glossary, common tasks (e.g. adding a new component). Content: `ui/docs/intros.ts`. The pages are read in order (the "next" link at the bottom: the group introduction, then its cases).
 
 Case page: a description (what it is, when it appears, what to do), a "See it live" box — what to open in the devtools panel and what to look for there (`ui/docs/live.ts`; for cases with an exception — why the panel is empty), the code (a region from `ui/docs/*.cases.ts` — the same one that runs), the result (Radix Themes), the devtools report (the same as "copy report" in the panel) or the caught exception. The dot next to a case in the menu: green — works, yellow — warning in devtools, red — error in devtools, purple — the build throws an exception. The devtools panel is enabled on every page.
 

@@ -1,0 +1,24 @@
+{
+  "hero": {
+    "component": "hero",
+    "slots": {
+      "actions": [
+        { "component": "button", "props": { "variant": "solid" } },
+        { "component": "button", "props": { "variant": "outline" } }
+      ]
+    }
+  },
+  "news": {
+    "component": "section",
+    "props": { "heading": "Latest" },
+    "children": [
+      {
+        "component": "grid",
+        "props": { "columns": 3 },
+        "children": [
+          { "component": "card", "repeat": 6, "props": { "size": "md" }, "slots": { "badge": { "component": "badge", "props": { "tone": "accent" } } } }
+        ]
+      }
+    ]
+  }
+}

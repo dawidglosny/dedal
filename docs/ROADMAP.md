@@ -1,10 +1,10 @@
 # Roadmap — open plans and development principles
 
-Things not yet done, open questions and the principles we follow in further work. User documentation (how to use the package) is in [`examples/next`](../examples/next) (`/docs`) and in the [README](../README.md). The earlier contracts (cache, devtools, performance) have been implemented — their full text, with measurements and the reasoning behind decisions, is in the git history (`docs/CACHE.md`, `docs/DEVTOOLS.md`, `docs/PERFORMANCE.md`, up to version 0.5.2).
+Things not yet done, open questions and the principles we follow in further work. User documentation (how to use the package) is in [`examples/next`](../examples/next) (`/docs`), the [README](../README.md) and the [API reference](API.md). The earlier contracts (cache, devtools, performance) have been implemented — their full text, with measurements and the reasoning behind decisions, is in the git history (`docs/CACHE.md`, `docs/DEVTOOLS.md`, `docs/PERFORMANCE.md`, up to version 0.5.2).
 
 ## Principles for further development
 
-They complement the "Hard rules" in the README.
+They complement the "Design rules" in the [API reference](API.md).
 
 **Cache**
 - Caching is enabled by the page (`page({ cache: { key } })`), not by the package. No automatic cache with a key guessed from `ctx` — that risks leaking data between users.
@@ -64,6 +64,14 @@ ui.page({ sections, data, assign: { prune: 'grid, wrapper-group' } })   // for t
 - Should `prune` have a default value, or always an explicit selector? Explicit is safer — it says which components are "just a wrapper".
 - `prune` in the contract (a per-component "container" flag in the instance options) instead of on every page?
 - Is a node with slots but no children (a card with an empty slot) empty? Proposal: no — slots are the component's content.
+
+### Templates stored as JSON
+
+Status: proposal, not implemented.
+
+Blocks are plain JSON, so templates can live outside the code (a database, a design-tool export) — see `examples/web-components`. Two gaps today:
+- **`defaults` are not applied** — `node()` adds them when a block is created in code; a block parsed from JSON never goes through `node()`. Proposal: apply `defaults` in `layout()` (props from the block win), so both paths behave the same; `trace` already reports `default` as a source there.
+- **No runtime validation** — the contract is types only, so an unknown component or a wrong slot name in a stored template is found only at render time (`fallback`). Proposal: an optional `createDedal({ components })` list (or a validator function) checked when a section is created, with an error pointing to the path in the template.
 
 ### `dedal/astro`
 

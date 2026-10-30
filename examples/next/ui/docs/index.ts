@@ -12,9 +12,17 @@ import type { DocCase, DocGroup } from './types'
 /** Documentation groups in menu order; `file` — the group file whose `#region`s are shown as code. */
 export const groups: DocGroup[] = [
   {
+    slug: 'why',
+    title: 'Why Dedal',
+    description: 'The problem, where Dedal came from, when it fits and when it doesn\'t, how it compares.',
+    intro: intros.why,
+    file: '',
+    cases: [],
+  },
+  {
     slug: 'introduction',
     title: 'Introduction',
-    description: 'What Dedal is, how data flows, a glossary, first steps.',
+    description: 'How Dedal works: roles, data flow, an example step by step, a glossary.',
     intro: intros.introduction,
     file: '',
     cases: [],

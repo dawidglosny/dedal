@@ -1,0 +1,21 @@
+{
+  "name": "dedal-example-web-components",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dedal": "rm -rf vendor && mkdir vendor && npm pack ../.. --pack-destination vendor && mv vendor/dedal-*.tgz vendor/dedal.tgz && npm install ./vendor/dedal.tgz",
+    "build:client": "esbuild client/main.ts --bundle --format=esm --outfile=public/main.js",
+    "start": "npm run build:client && node --import tsx src/server.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "dedal": "file:vendor/dedal.tgz"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "esbuild": "^0.25.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}

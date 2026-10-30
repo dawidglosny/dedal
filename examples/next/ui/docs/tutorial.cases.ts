@@ -283,7 +283,7 @@ Below is the first page: one section with one \`section\` node and its props. No
     files: [{ title: 'instance', file: 'ui/dedal.ts' }],
     description: `The **instance** (\`createDedal<Contract>(options)\`) is the entry point: it gives you \`node\`, \`repeat\`, \`section\`, \`page\`, \`query\`, \`resolve\`. You create it once per project (in a module), with default component props and data mappings (more on those in step 4).
 
-A **block** is a tree of nodes: \`node(component, { props, children, slots })\`. \`repeat(node, 3)\` duplicates a node — here one card definition becomes three. A block is a plain value: you can export it, parametrise it and use it in many pages.
+A **block** is a tree of nodes: \`node(component, { props, children, slots })\`. \`repeat(node, 3)\` duplicates a node — here one card definition becomes three. A block is a plain value: you can export it, parametrise it and use it in many pages. It doesn't even have to be code — \`node()\` only builds an object like \`{ component: 'card', props: { … } }\`, so a template can just as well be JSON stored in a database or exported from a design tool (\`examples/web-components\` loads one from a file).
 
 Every node gets an ID from its position (\`news.0.0\`, \`news.0.1\`…) — this is how layout meets data.
 

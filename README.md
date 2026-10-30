@@ -1,8 +1,101 @@
 # Dedal
 
-A server-driven UI engine independent of framework and component library. Templates describe the structure, data is assigned with selectors, and the renderer (React, Astro, Vue, …) receives a tree ready to render with any component library (your own design system, MUI, Radix, …).
+**Store page layouts as data on the server. Fill them with content. Let any frontend render them with its own components.**
 
-Named after Daedalus (Dedal in Polish), the mythical architect: the server designs the page, the front end builds it.
+Dedal is a TypeScript library for **server-driven UI**. The server keeps a template of a page — which components, in what order, with which settings — as plain JSON, fills it with data from your APIs and sends the finished page to the frontend. The frontend only maps component names to its components and renders. It doesn't know which page it is showing or where the data came from.
+
+Named after Daedalus (Dedal in Polish), the mythical architect: the server designs the page, the frontend builds it.
+
+```
+design tool / editor ─► template (JSON) ─► server: + data ─► page (JSON) ─► frontend: name → component
+                                             Dedal                           React, Web Components, a mobile app…
+```
+
+## Who is it for
+
+Dedal was born from a real setup: **many content sites built on one design system**, where page templates are designed in a design tool, exported, stored on the server and served to the sites. Nobody writes the layout of a home page in JSX — it is data, and it changes far more often than the components do.
+
+It fits when:
+- **layouts change more often than components** — editors, designers or A/B tests rearrange pages, and you don't want a frontend release for every change,
+- **layouts come from outside the code** — a design-tool export, a page editor, a CMS, a database,
+- **one page has several frontends** — web and a mobile app, or several sites sharing one design system, each with its own component library,
+- **you want to swap the component library** without touching the pages — only the mapping (registry) changes.
+
+It's probably not worth it when:
+- the UI is mostly forms, state and interactions (a dashboard, an editor, a checkout) rather than content assembled from blocks,
+- there is one frontend, the developers own the layout, and it rarely changes — plain components in your framework are simpler,
+- the team is small and the layout lives in one repository anyway: Dedal adds a layer (a contract, a registry) that pays off only with more sites, more frontends or non-developers editing pages.
+
+## A quick look
+
+```ts
+// contract.ts — the only thing the server and every frontend share: component → props
+import type { Slot } from 'dedal'
+
+export type Contract = {
+  grid: { columns?: 1 | 2 | 3 | 4 }
+  card: { title?: string; href?: string; badge?: Slot }
+  badge: { label?: string }
+}
+```
+
+```ts
+// server: a template (here inline — usually loaded from storage) + data from your API
+import { createDedal, type BlockDefinition } from 'dedal'
+
+const ui = createDedal<Contract>()
+
+const newsTemplate = { component: 'grid', props: { columns: 3 }, children: [
+  { component: 'card', repeat: 6, slots: { badge: { component: 'badge' } } },
+] } satisfies BlockDefinition<Contract>
+
+const home = ui.page({
+  sections: [ui.section('news', newsTemplate)],
+  data: async () => {
+    const articles = await api.latest(6)
+    return { news: {
+      card: articles.map(a => ({ title: a.headline, href: a.url })),   // each card gets the next article
+      'card > :slot(badge)': articles.map(a => ({ label: a.category })), // CSS-like selectors, not indexes
+    } }
+  },
+})
+
+const page = ui.resolve(await home.build())   // plain JSON: send it, cache it, render it
+```
+
+```tsx
+// frontend (React): component names → your components
+import { Render, type Registry } from 'dedal/react'
+
+const registry = { grid: Grid, card: Card, badge: Badge } satisfies Registry<Contract>   // missing one = compile error
+
+<Render tree={page} registry={registry} />
+```
+
+The same `page` can be rendered by Web Components ([`examples/web-components`](examples/web-components)) or by a mobile app with its own registry.
+
+## What you get
+
+- **The layout is data.** Templates are plain JSON — store them, version them, generate them from a design tool. Changing a page doesn't change code.
+- **One contract, typed end to end.** A TypeScript type lists components and their props. Templates written in code (`ui.node()`) and registries are checked against it at compile time.
+- **Data finds its place by selectors.** `card`, `#featured`, `card > :slot(badge)`, `card:nth-child(odd)` — CSS syntax you already know, instead of fragile indexes. Adding a heading to a template doesn't shift the data.
+- **Explicit rules for missing data.** Fewer articles than cards, an API that fails, an empty section — each case has a default that keeps the page alive and an option to make it strict. Nothing disappears silently: everything is in the report.
+- **Variants without copies.** `patch` and `remove` adjust a template per device, site or A/B variant — one template, many versions.
+- **Component library independence.** The registry is the only place that knows your components. Moving from one library to another is a change to the registry, not to the pages.
+- **Framework independence.** The core has zero dependencies and runs in Node, on the edge and in the browser. React renderer included; any other is a small function over a JSON tree.
+- **Built-in performance tools.** Page and data-source cache (stale-while-revalidate, no request stampedes, invalidation by prefix), loaders running in parallel, streaming of slow sections. A 530-node page builds and resolves in under 1 ms.
+- **Devtools.** A browser panel that shows, for any element on the page, where each prop came from (default, template, patch, data), which selector assigned the data, what got dropped and why, and how long each loader and query took.
+
+## How it compares
+
+Dedal doesn't replace your framework or your components — it decides **what** to render; they decide **how**.
+
+| | What it solves | Relation to Dedal |
+|---|---|---|
+| **React Server Components** | **where** React runs: on the server, with less JavaScript in the browser | Complementary. Dedal builds the page, RSC can render it — that's exactly what [`examples/next`](examples/next) does. RSC doesn't say anything about where the layout comes from. |
+| **Web Components** | a **component** that works in any framework | Complementary. Web Components can be the registry: Dedal slots map to native `<slot>`s ([`examples/web-components`](examples/web-components)). |
+| **Headless CMS, page builders** | editing content (and sometimes layouts) in a UI | Can be the source of templates and data. Dedal is the typed engine in between: contract, data binding, missing-data rules, cache, devtools. It has no editor of its own. |
+| **Hand-made JSON + a `switch` over components** | the same idea, done ad hoc | What Dedal replaces. The ad-hoc version usually grows its own data binding, IDs, cache and debugging — Dedal has them, typed and tested. |
 
 ## Installation
 
@@ -10,277 +103,25 @@ Named after Daedalus (Dedal in Polish), the mythical architect: the server desig
 npm i github:dawidglosny/dedal#v0.6.1
 ```
 
-Current version: **0.6.1**. Requires Node 20.9+; React 18+ only for `dedal/react` (optional `peerDependency`). The package builds on install (`prepare`).
+Requires Node 20.9+. React 18+ only for `dedal/react` (an optional peer dependency). The package builds on install.
 
-Entry points: `dedal` (core), `dedal/react` (renderer), `dedal/devtools` (`inspect`, report), `dedal/devtools/panel` (panel outside React), `dedal/react/devtools` (the `<Devtools />` component).
-
-New to server-driven UI? Start with the documentation by example in [`examples/next`](examples/next) (`/docs`): an introduction to the SDUI idea, a step-by-step tutorial, and every feature, warning and error as a separate page.
-
-## Pipeline
-
-```
-ctx ─► layout ─► load (IO) ─► assign ─► resolve ─► render
-         │                       │          │
-     LayoutNode               DataMap  ResolvedNode     ← JSON formats, boundaries where a network can be placed
-```
-
-The same package handles a fullstack project (everything in one process) and a backend → middleware → front end setup (cutting the pipeline at any point).
-
-## Hard rules
-
-1. **Formats between stages are plain JSON** — no functions, classes, `Symbol`, `Map`, `Date`, or `undefined` as a meaningful value. Round-trip tests `JSON.parse(JSON.stringify(x))` enforce this.
-2. **Versioned envelope on the wire** — `{ dedal: 1, ... }`; an unknown component goes to the renderer's `fallback` instead of breaking the page.
-3. **`page()` separates `block` (pure) from `data` (IO)** — the layout can be built without data (cache, separate endpoint), loaders run only where data is accessible.
-4. **`toProps` is a pure module next to the contract, without IO** — `resolve` can run on either side of the network.
-5. **`ctx` is serializable** — middleware can pass it on or use it in a cache key.
-6. **`build()` is only a composition of the exported stages** — `load`, `layout`, `assign`, `resolve` are available separately.
-7. **The core knows neither the transport nor the framework** — zero dependencies, ESM, runs in Node, on the edge and in the browser. Framework bindings live in separate entry points (`dedal/react`; `dedal/astro` planned).
-8. **Functions are pure** — nothing mutates the input, unchanged subtrees are shared.
-9. **Props on the node, before slots and children** — `node(component, { props, slots, children })`.
-
-## Component contract
-
-A single source of truth: component name → props. Slots (nodes in props) are marked with the `Slot` / `Slot[]` type:
-
-```ts
-import type { Slot } from 'dedal'
-
-type Contract = {
-  grid: { columns?: 1 | 2 | 3 | 4 }
-  card: { title?: string; href?: string; size?: 'sm' | 'md' | 'lg' }
-  hero: { title?: string; media?: Slot }
-  tabs: { labels?: string[]; content?: Slot[] }
-}
-```
-
-The contract is types only — used by the server and every front end. A front end's registry (`name → component`) satisfies the contract via `satisfies Registry<Contract>`.
-
-## API (current state)
-
-```ts
-const ui = createDedal<Contract>({ defaults: { card: { size: 'md' } } })
-const { node, repeat, clone } = ui
-
-const root = ui.layout(
-  node('grid', {
-    props: { columns: 3 },
-    children: [
-      node('hero', { slots: { media: node('card') } }),
-      repeat(node('card'), 6),
-    ],
-  }),
-  'news'
-)
-
-ui.patch(root, { 'grid > card:nth-child(odd)': { size: 'lg' }, 'hero > :slot(media)': { size: 'sm' } })
-ui.remove(root, 'card:nth-child(n+5)')
-ui.select(root, '#featured card')
-
-const { layout, data, report } = ui.assign(root, {
-  '#hero': [hero],                                      // specific selectors before general ones
-  card: articles,                                       // data in order to the matching nodes
-  'profile': { items: profiles, onShortage: 'keep' } // policy for a single selector
-})
-```
-
-### Page (`page`, `section`)
-
-```ts
-const categoryPage = ui.page<{ device: 'desktop' | 'mobile'; page: number }>({
-  sections: ({ device }) => [
-    section('breadcrumbs', breadcrumbsBlock),
-    section('pageHeader', titleBlock, { patch: { 'page-title': { headerTag: 'h1' } } }),
-    device === 'desktop'
-      ? section('mainContent', cardGrid9, { patch: { card: { loading: 'eager' } } })
-      : section('mainContent', cardListMobile, { remove: 'divider', patch: { card: { size: 'small' } } }),
-    section('about', aboutBlock),
-  ],
-  data: async ctx => {
-    const { articles, category } = await fetchCategory(ctx)
-    return {
-      pageHeader: { 'page-title': [{ title: category.name }] },
-      mainContent: { card: articles },
-    }
-  },
-})
-
-const result = await categoryPage.build({ device: 'mobile', page: 1 })
-// { dedal: 1, sections: [{ key, layout }], data: { 'mainContent.0.0': ... }, report }
-```
-
-- Section key = prefix of its node IDs (`mainContent.0.2`) and the key of its data — section IDs don't depend on the sections above.
-- Section: `layout` → `remove` → `patch` → `assign` (section `policies` over instance policies).
-- Stages separately: `page.layout(ctx)` (no IO, cacheable), `page.load(ctx)`, `page.assign(sections, data, ctx)`; `build` composes them.
-- `report`: the `assign` report per section, `unknownData` (data without a section), `removedSections`, `failedSections`, `emptySections`.
-- Empty section: a section that received bindings (from the section loader or the page's `data`), but after assignment no node has data — `onEmpty: 'remove'` (default, it disappears) | `'keep'` | `'error'` | a block (empty state, e.g. "No results"). `required: 'card'` — empty when no node matching the selector received data (e.g. the heading always gets it). Not subject to this: static sections (no data) and sections for which the loader or the page's `data` returned `undefined` — they stay with just the layout (devtools warn).
-- Section keys must be unique within the page, and node IDs across the whole page (data is a single `ID → data` map); a duplicate = exception.
-
-### Queries and section loaders (`ui.query`, `section({ data })`)
-
-```ts
-// query: a cached data source, shared by pages and sections
-const menuQuery = ui.query({
-  key: ({ service }: { service: string }) => ['menu', service],
-  fn: ({ service }) => api.menu(service),
-  staleTime: 10 * 60_000,
-})
-
-// shared section with its own loader — added to pages without adding data in each one
-export const header = section('header', headerBlock, {
-  data: async (ctx: Ctx) => ({ 'menu-item': (await menuQuery({ service: ctx.service })).items }),
-})
-
-// deferred section: a placeholder in the page result, content from page.section() in a separate request (Suspense, server islands)
-const forYou = section('forYou', recommendedBlock, {
-  defer: { fallback: skeletonBlock },
-  optional: true,                       // a loader error removes the section (report.failedSections) instead of breaking the page
-  data: async ctx => ({ card: await api.forUser(ctx.userId) }),
-})
-
-const home = ui.page<Ctx>({ sections: [header, main, forYou], data: async ctx => ({ main: { card: await api.news() } }) })
-await home.section('forYou', ctx)       // the section alone → resolve → <Render>
-```
-
-- `page.load` runs the page's `data` and the section loaders in parallel — only for sections present in the variant and not removed; data for a section with its own loader returned by the page's `data` = error.
-- `ui.query` is optional — the page's `data` and section loaders are plain `async` functions; you can call any source in them (`fetch`, an API client, a cache the application already has). `ui.query` adds an instance-level server cache: deduplication of parallel calls, stale-while-revalidate (`staleTime` 5 s by default, `maxAge` 5 min), `ui.invalidate(prefix)` shared with the page cache, and a swappable store (e.g. Redis).
-- A query result is shared between requests and users: for user-dependent data, put the user in the key or don't use `ui.query`.
-- The cache lives as long as the instance: create it once (at module level), not in every request.
-- Query results and pages from the cache are frozen (read-only): `[...items].sort()` instead of `items.sort()`.
-- `<Render deferred={({ sectionKey, fallback }) => <Suspense fallback={fallback}>…</Suspense>}>` — streaming deferred sections in Next.
-
-### Debug (`trace`, `dedal/devtools`)
-
-```ts
-import { inspect } from 'dedal/devtools'
-
-const result = await home.build(ctx, { trace: true })   // bypasses the page cache
-const resolved = ui.resolve(result, { ctx, trace: true })
-const payload = inspect(result, resolved)               // JSON: sections, nodes, selectors, prop origin
-```
-
-- `trace`: the origin of every prop (`default`, `template`, `patch` with selector and section, `data`) and `report.trace` (section data source, cache key).
-- `report.trace.timing`: `layout` / `load` / `assign` times, loaders (`page data` and section) and `ui.query` calls with cache status (`hit` / `stale` / `miss` / `bypass` / `error`), attributed to a loader. Attributing queries requires `AsyncLocalStorage` — global in Next.js and edge environments; elsewhere `createDedal({ AsyncLocalStorage })` from `node:async_hooks`.
-- `inspect()`: a node index with a suggested selector (the shortest one matching only that node), the data and the selector that assigned it, and issues. Mismatch diagnosis: bindings without matches (with a hint for the corrected selector — including slot names, e.g. `:slot(badges)` → `:slot(badge)`), bindings "taken" by an earlier selector, `patch` / `remove` selectors with no effect, data without a place, removed nodes and dropped data.
-- Functions for tests and logs: `reportText(payload)` (text report), `pageMessages(payload)` (`{ level, subject, text }` messages), `searchNodes(payload, query)` (search by selector, ID, section and data).
-- Browser panel: `<Render debug>` (node markers in the DOM), `<DevtoolsData payload={payload} />` (payload on the page; payloads of streamed sections are merged), `<Devtools />` from `dedal/react/devtools`. The panel (Shadow DOM) has the tabs *node* (pick an element: ID, selector, data, prop origin), *tree* (search: selector, ID, section, text in data), *sections* (messages and bindings), *timing* (timeline of loaders and queries) and `copy report`; `Alt+Shift+S` opens / closes, `⇤` / `⇥` moves it to the other side, the state is remembered in the tab. Outside React: `mountDevtools()` from `dedal/devtools/panel`.
-- Debug mode is enabled by the application — the payload reveals the page's structure and data. Example: `examples/next`, `?debug=1`.
-
-Guide (enabling, safely enabling in production, other environments, the panel, common problems): the *Devtools* page in the [`examples/next`](examples/next) documentation (`/docs/devtools`).
-
-### Renderable tree (`resolve`)
-
-```ts
-// contract/to-props.ts — a pure module next to the contract, imported wherever resolve runs
-export const toProps: ToProps<Contract> = {
-  card: ({ props, data }: ToPropsInput<Contract, 'card', Article>) =>
-    data ? { ...props, title: data.headline, href: data.url } : props,
-}
-
-const ui = createDedal<Contract>({ toProps })
-const resolved = ui.resolve(await page.build(ctx), { ctx, trace: isDev })
-// { dedal: 1, sections: [{ key, tree: ResolvedNode }], issues: [] }
-```
-
-```ts
-type ResolvedNode = { key; component; props; slots?; children?; trace? }
-```
-
-- Node props: `toProps[component]({ props, data, node, ctx })`; without a mapping — a deep merge of layout props with data (data wins). The mapping is also called for nodes without data.
-- The mapping result is checked against the contract; the `data` type can be narrowed in the implementation (`ToPropsInput<C, 'card', Article>`).
-- Issues don't break rendering: non-object data without a mapping, an exception in a mapping, data without a node (e.g. a mismatch between the cached layout and the data) go to `issues`, and the node gets the props from the layout. `onIssue: 'throw'` turns this into an exception.
-- `trace: true` — on every node `trace: { prop: PropSource }`, where `PropSource` is `{ from: 'default' | 'template' | 'patch' | 'layout' | 'data' }` (`patch` with `selector` and `section`; `layout` when the layout was built without `trace`).
-- The input is checked for the envelope version; `resolve` runs on either side of the network (input after `JSON.parse` gives the same result).
-
-### React renderer (`dedal/react`)
-
-```tsx
-import { Render, type Registry } from 'dedal/react'
-
-export const registry = {
-  card: ({ title, href }) => <a href={href}>{title}</a>,
-  hero: ({ title, media }) => <header>{media}<h1>{title}</h1></header>,   // slot as a prop (ReactNode)
-  tabs: ({ labels, content }) => ...,                                      // list slot as ReactNode[]
-  // ...
-} satisfies Registry<Contract>   // a missing component or wrong props = compile error
-
-<Render tree={resolved} registry={registry} fallback={Missing} />
-```
-
-- No hooks and no state — works in React Server Components, with SSR and on the client; registry components can be client components.
-- Slots go to props named after the slot, layout children to `children` (the contract's `children` prop stays when the node has no children).
-- Unknown component → `fallback` (nothing by default).
-- React is an optional `peerDependency`; the `dedal` core doesn't import it.
-
-Example: [`examples/next`](examples/next) — the same page on Radix Themes and shadcn/ui (one contract, two registries), switching `ctx`, debug mode, a JSON endpoint. Documentation by example: `/docs` in this example — an introduction to server-driven UI for new team members, a 13-step tutorial (with a debugging exercise), and every feature, warning and error as a separate page with a description, code, result and devtools report.
-
-Example: [`examples/custom-ds`](examples/custom-ds) — a page on a custom design system, without a renderer: queries, shared sections with loaders, desktop / mobile variants, slots (carousel, CTA), per-component bindings, a data-dependent section.
-
-### Page cache (`page({ cache })`)
-
-```ts
-const ui = createDedal<Contract>({ toProps, cache: { staleTime: 5_000 } })   // optional: store and timings
-
-const home = ui.page<Ctx>({ sections, data, cache: { key: ctx => ['home', ctx.device] } })
-await home.build(ctx)          // from the cache
-await ui.invalidate(['home'])  // e.g. after publishing
-```
-
-- The instance holds the shared store and timings, the page provides the key — `key` (an array; everything the sections and data depend on; `undefined` = no cache), `staleTime` (5 s by default), `maxAge` (5 min by default), `invalidate(prefix)`.
-- Stale-while-revalidate: the entry is returned immediately, refreshed in the background (`waitUntil` on the edge); older than `maxAge` — the request waits for `build`.
-- Parallel requests for the same key wait for a single `build`; errors are not cached.
-- Store: `memoryStore({ max })` by default (LRU, frozen copies of entries); Redis / Mongo / KV via the `Store` interface.
-- A page without `cache` is not cached. Personalized data: the key must include the user or the page has no `cache`.
-
-More (deployments, store, query, debug): the *Cache & queries* page in the [`examples/next`](examples/next) documentation (`/docs/cache`).
-
-### Data assignment (`assign`)
-
-- Data items go in order to the nodes matching the selector, in tree order.
-- Selectors are processed in entry order; a node taken by an earlier selector (even without data) is skipped by later ones.
-- `null` / `undefined` in the data = no data for the node.
-- `onShortage` — a node without data: `'remove'` (default) | `'keep'` | `'error'`.
-- `onSurplus` — data without a node: `'ignore'` (default) | `'error'`.
-- Policies (weakest first): package defaults → `createDedal({ assign })` → section `policies` or the `assign(..., policies)` call → `{ items, onShortage }` for a selector.
-- Removing a node removes its subtree; the descendants' data goes to `report.dropped`.
-- The result (`layout`, `data`, `report`) is plain JSON; `data` is a flat `ID → data` map.
-
-### ID
-
-Positional, opaque — used only for keying (data, `key` in the renderer). By default:
-
-| node | ID |
+| Entry point | Contents |
 |---|---|
-| root | `news` |
-| child | `news.0`, `news.0.2` |
-| single slot | `news.0:media` |
-| list slot | `news.1:content.0` |
+| `dedal` | the core: `createDedal`, pages, sections, `resolve`, cache |
+| `dedal/react` | `<Render>` — the React renderer (works in Server Components, SSR and on the client) |
+| `dedal/devtools` | `inspect()` and text reports, for tests and logs |
+| `dedal/react/devtools` | `<Devtools />` — the browser panel |
+| `dedal/devtools/panel` | `mountDevtools()` — the panel outside React |
 
-The generator can be replaced with the `id` option (`createDedal({ id })`). A custom generator must produce IDs unique across the whole page — the simplest way is with a prefix (the section key), like the default one; a duplicate within a section or between sections throws an exception.
+## Documentation
 
-### Selectors (CSS syntax)
-
-| Selector | Meaning |
-|---|---|
-| `card`, `*` | component / any |
-| `#hero` | alias |
-| `[size]`, `[size=small]`, `[style.height="100%"]` | prop exists / has a value |
-| `:first-child`, `:last-child`, `:nth-child(an+b \| odd \| even)`, `:nth-last-child(...)` | position among siblings (from 1); in a list slot — within the slot |
-| `:slot`, `:slot(media)` | node in any / a specific slot of the parent |
-| `:root` | root of the tree (section) |
-| `a b`, `a > b`, `a, b` | descendant (also through slots), child or slot content, list |
-
-Tree order: slots first (in key order), then children. With several patches on the same node, the later entry wins; selectors are matched against the input tree (like CSS against the DOM).
+- **Learn by example** — [`examples/next`](examples/next), route `/docs`: what server-driven UI is, a 12-step tutorial, and every feature, warning and error as a live page with its code, result and devtools report.
+- **API reference** — [docs/API.md](docs/API.md): formats, design rules, every option.
+- **Examples**
+  - [`examples/next`](examples/next) — Next.js: one page, two component libraries (Radix Themes and shadcn/ui), cache, streaming, devtools,
+  - [`examples/web-components`](examples/web-components) — a JSON template, a plain Node server, custom elements in the browser,
+  - [`examples/custom-ds`](examples/custom-ds) — a larger page on a custom design system: shared sections, device variants, data-dependent sections.
 
 ## Status
 
-Version **0.6.1**. Recent changes:
-- **0.6.1** — README, `/docs`, examples and tests in English; English identifiers, URLs and data in the examples. No changes to the API or behavior.
-- **0.6.0** — new name: **Dedal** (formerly ssduie). Breaking changes: package and imports `dedal`, `dedal/react`, `dedal/devtools`…; `createDedal`, `DedalOptions`, `Dedal`; wire envelope `{ dedal: 1, … }` (instead of `ssduie`); devtools markers `<dedal-node data-dedal-key>`, `data-dedal-devtools`, `#dedal-devtools`. API and behavior unchanged.
-- **0.5.3** — `<Devtools />` without the `open` prop restores the panel state remembered in the browser tab (previously it always started closed); the devtools guide moved to `/docs` (the *Devtools* page: enabling in Next, safe enabling, common problems, costs); the developer contracts in `docs/` replaced by [docs/ROADMAP.md](docs/ROADMAP.md).
-- **0.5.2** — devtools suggest the correct slot name for a binding without matches (`card > :slot(badges)` → `card > :slot(badge)`); the `examples/next` documentation (`/docs`) checked against the code and expanded for people new to server-driven UI.
-- **0.5.1** — node IDs unique across sections (exception on a duplicate from a custom generator); node issues (`resolve` issues) in devtools messages and report; clearer `required` / `remove` messages.
-- **0.5.0** — devtools: *timing* tab, `copy report`, tree search (selector, ID, section, data), remembered panel state, `Alt+Shift+S`, switching the panel side.
-
-Done: contract and types, `createDedal`, builders, `layout()` with slots, selectors, `patch` / `remove` / `select` (with type narrowing for `select(root, 'card')`), `assign`, `page` / `section`, `resolve` / `resolveTree`, `dedal/react`, page cache, queries, section loaders, deferred sections, `dedal/devtools` (inspect, panel), `examples/next`.
-
-Next: `dedal/astro`; `assign` — removing empty containers (`prune`) and related nodes (`removeWith`); cache — a Redis adapter example, tracking page dependencies on queries; devtools — build diff; performance — `layout()` and a single pass in `assign`. Details, open questions and development principles: [docs/ROADMAP.md](docs/ROADMAP.md). Measurements: `npm run bench`.
+Version **0.6.1**. The API may still change before 1.0 — see [CHANGELOG.md](CHANGELOG.md). Plans (an Astro renderer, pruning empty containers, cache adapters): [docs/ROADMAP.md](docs/ROADMAP.md).
