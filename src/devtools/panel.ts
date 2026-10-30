@@ -697,7 +697,12 @@ export function mountDevtools(options: MountOptions = {}): () => void {
 
   function render() {
     persist()
-    if (panel.hidden) return
+    if (panel.hidden) {
+      // a closed panel leaves nothing on the page: no highlight boxes, no picking
+      picking = false
+      highlight([])
+      return
+    }
     head.replaceChildren(
       tabButton('node', 'node'),
       tabButton('tree', 'tree'),

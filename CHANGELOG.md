@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+Devtools:
+- fix: closing the panel (the button or `Alt+Shift+S`) clears the highlight boxes on the page and ends picking — they used to stay until the next hover.
+
 Documentation only:
 - deferred sections and fallbacks: *Sections* explains the two different fallbacks (`defer.fallback` — a block; `<Render fallback>` — a component for missing names), what replaces the placeholder when a deferred section fails or is empty, and deferred sections without `<Suspense>` (an endpoint); new cases *Deferred: the placeholder*, *Deferred: when the section fails or is empty*, *Deferred without Suspense*; *Rendering* covers `<Render fallback>` (props, development vs production, release order),
 - `examples/web-components`: a deferred section "For you" with a skeleton placeholder, served by its own endpoint and swapped in by the browser,

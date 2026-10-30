@@ -248,6 +248,31 @@ describe('panel: picking', () => {
     expect(shadow().querySelectorAll('.box')).toHaveLength(0)
   })
 
+  it('closing the panel clears the highlight and ends picking (button and Alt+Shift+S)', async () => {
+    await renderPage()
+    withLayout()
+    dispose = mountDevtools({ open: true })
+    const toggle = shadow().querySelector('.toggle') as HTMLElement
+
+    button('pick').click()
+    document.querySelector('a')!.dispatchEvent(new MouseEvent('mousemove', { bubbles: true }))
+    expect(shadow().querySelectorAll('.box')).toHaveLength(1)
+
+    toggle.click()
+    expect(shadow().querySelectorAll('.box, .label')).toHaveLength(0)
+    // picking ended: moving over a node no longer highlights it
+    document.querySelector('a')!.dispatchEvent(new MouseEvent('mousemove', { bubbles: true }))
+    expect(shadow().querySelectorAll('.box')).toHaveLength(0)
+
+    // the same with the shortcut, after selecting a node
+    toggle.click()
+    button('pick').click()
+    document.querySelector('a')!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+    expect(shadow().querySelectorAll('.box')).toHaveLength(1)
+    document.dispatchEvent(new KeyboardEvent('keydown', { altKey: true, shiftKey: true, code: 'KeyS' }))
+    expect(shadow().querySelectorAll('.box')).toHaveLength(0)
+  })
+
   it('mouse movement while picking highlights the node with a label; outside a node — clears it', async () => {
     await renderPage()
     withLayout()
