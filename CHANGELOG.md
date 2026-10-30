@@ -1,20 +1,18 @@
 # Changelog
 
-## Unreleased
-
-Documentation:
-- a *Quick start* page: install, a contract, a page, a registry, render in Next.js or plain Node — the code runs as written; linked from the home page, the header and the README.
-
-Examples:
-- `examples/custom-ds` removed — `examples/next` and `examples/web-components` cover the same features, and the docs site covers the rest.
+## 0.6.5
 
 Devtools:
 - fix: closing the panel (the button or `Alt+Shift+S`) clears the highlight boxes on the page and ends picking — they used to stay until the next hover.
 
-Documentation only:
-- deferred sections and fallbacks: *Sections* explains the two different fallbacks (`defer.fallback` — a block; `<Render fallback>` — a component for missing names), what replaces the placeholder when a deferred section fails or is empty, and deferred sections without `<Suspense>` (an endpoint); new cases *Deferred: the placeholder*, *Deferred: when the section fails or is empty*, *Deferred without Suspense*; *Rendering* covers `<Render fallback>` (props, development vs production, release order),
+Documentation:
+- a *Quick start* page: install, a contract, a page, a registry, render in Next.js or plain Node — the code runs as written; linked from the home page, the header and the README,
+- the docs site's home page explains Dedal at a glance: the benefit in the first lines, the three parts (structure, data, components) and who changes each, a before/after example, and how Dedal compares with React Server Components, Web Components, CMSs and hand-made JSON,
+- deferred sections and fallbacks: *Sections* explains the two different fallbacks (`defer.fallback` — a block; `<Render fallback>` — a component for missing names), what replaces the placeholder when a deferred section fails or is empty, and deferred sections without `<Suspense>` (an endpoint); new cases *Deferred: the placeholder*, *Deferred: when the section fails or is empty*, *Deferred without Suspense*; *Rendering* covers `<Render fallback>` (props, development vs production, release order).
+
+Examples:
 - `examples/web-components`: a deferred section "For you" with a skeleton placeholder, served by its own endpoint and swapped in by the browser,
-- the docs site's landing page explains Dedal at a glance: the benefit in the first lines, the three parts (structure, data, components) and who changes each, a before/after example, and how Dedal compares with React Server Components, Web Components, CMSs and hand-made JSON.
+- `examples/custom-ds` removed — `examples/next` and `examples/web-components` cover the same features, and the docs site covers the rest.
 
 ## 0.6.4
 

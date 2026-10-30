@@ -3,7 +3,7 @@ import { LogoMark } from './logo'
 import { Search } from './search'
 
 export const GITHUB = 'https://github.com/dawidglosny/dedal'
-export const VERSION = '0.6.4'
+export const VERSION = '0.6.5'
 
 export function Header() {
   return (
