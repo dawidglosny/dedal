@@ -365,7 +365,7 @@ That's the whole model. What's left before production — shared sections with t
     codeCollapsed: true,
     description: `You get a report from the editors: "the home page looks almost right, but something is off". It's the tutorial's page, grown a bit — with five mistakes of the kind that happen in a real project. Nothing throws an exception and the page renders — the problems only show when you look closely.
 
-Find the causes with the **devtools panel** (the **dedal** button with the logo in the bottom-right corner, or \`Alt+Shift+S\`) before you look at the code — the code is below, collapsed. Each task is a symptom, a hint about where to look, and a solution you can expand.
+Find the causes with the **devtools panel** (the button with the Dedal logo in the bottom-right corner, or \`Alt+Shift+S\`) before you look at the code — the code is below, collapsed. Each task is a symptom, a hint about where to look, and a solution you can expand.
 
 A good order for every report: *sections* (are there warnings and errors) → \`pick\` on the suspicious element → *tree* with search → *timing*, when it's about time. Attach the report from \`copy report\` to the ticket.`,
     tasks: [

@@ -175,7 +175,7 @@ function LiveHint({ text, throws }: { text?: string; throws: boolean }) {
       {!throws && (
         <span className="callout-note">
           {' '}
-          — open the panel: the <strong>dedal</strong> button with the logo in the bottom-right corner, or <code>Alt+Shift+S</code>
+          — open the panel: the button with the Dedal logo in the bottom-right corner, or <code>Alt+Shift+S</code>
         </span>
       )}
       <div>

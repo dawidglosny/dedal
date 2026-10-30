@@ -258,7 +258,7 @@ export default async function Page() {
 
 ## How to read these docs
 
-Each case page shows one thing: a description, the code (the same code that runs), the result and the devtools report — or the exception, when the build fails. The "See it live" box tells you what to open in the devtools panel (the **dedal** button in the bottom right corner). The dot next to a case in the menu: green — works, yellow — warning in devtools, red — error in devtools, purple — build throws an exception.
+Each case page shows one thing: a description, the code (the same code that runs), the result and the devtools report — or the exception, when the build fails. The "See it live" box tells you what to open in the devtools panel (the button with the Dedal logo in the bottom-right corner). The dot next to a case in the menu: green — works, yellow — warning in devtools, red — error in devtools, purple — build throws an exception.
 
 Reading order: *Why Dedal* if you haven't yet, *Tutorial* (a whole page step by step), *Going to production* and *Another domain: a dashboard*, then *Layout*, *Data* and *Sections* — your everyday tools. *Cache & queries* and *Rendering* — once the page already works. *Errors* and *Devtools* — when something doesn't work.`,
 
@@ -283,7 +283,7 @@ Each step has:
 - a description — what we're doing and why,
 - the code — the real files behind these docs (contract, instance, toProps, registry — the same as in \`examples/next\`) and the page code for this step,
 - the result — the page built from this code,
-- "See it live" — what to open in the devtools panel (the **dedal** button with the logo in the bottom-right corner, or \`Alt+Shift+S\`),
+- "See it live" — what to open in the devtools panel (the button with the Dedal logo in the bottom-right corner, or \`Alt+Shift+S\`),
 - the devtools report — the same thing as text.
 
 Later steps use blocks from earlier ones — it's worth going in order (the "next" link at the bottom of the page).
@@ -752,7 +752,7 @@ Without debug mode nothing changes: the \`build\` / \`resolve\` result is the sa
 
 ## Opening the panel
 
-With debug mode on, a button sits in the bottom-right corner of the page: the Dedal logo (a blue labyrinth "D" with an orange core) and the label **dedal**. Click it, or press \`Alt+Shift+S\`, to open the panel; \`⇤\` / \`⇥\` moves both to the other side of the screen. The button exists only where the app renders \`<Devtools />\` — in debug mode; a page without it has no button, no panel and no devtools code.
+With debug mode on, a button sits in the bottom-right corner of the page: the Dedal logo (a blue labyrinth "D" with an orange core), with no text. Click it, or press \`Alt+Shift+S\`, to open the panel; \`⇤\` / \`⇥\` moves both to the other side of the screen. The button exists only where the app renders \`<Devtools />\` — in debug mode; a page without it has no button, no panel and no devtools code.
 
 ## node — a single element of the page
 

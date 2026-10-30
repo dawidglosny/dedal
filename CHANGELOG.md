@@ -3,7 +3,8 @@
 ## 0.6.4
 
 Devtools:
-- the panel's toggle button carries the Dedal logo and the logo's colors (the label stays `dedal`).
+- the panel's toggle button is the Dedal logo in the logo's colors, on a navy background (no text label; `aria-label` for screen readers),
+- the panel follows the logo's palette: navy blueprint paper with a faint grid, blue accents and page highlights, orange for multiple matches; green (data) and red (errors) keep their meaning.
 
 Documentation (no changes to the API or behavior):
 - README, landing page and *Why Dedal* start from the general idea — structure, data and components kept apart and joined at the last moment — instead of one use case,

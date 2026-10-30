@@ -53,8 +53,8 @@ describe('mountDevtools', () => {
 
     expect(mountDevtools()).toBe(dispose)
     expect(document.querySelectorAll('#dedal-devtools')).toHaveLength(1)
-    expect(shadow().querySelector('.toggle')!.textContent).toBe('dedal')
-    expect(shadow().querySelector('.toggle svg rect')!.getAttribute('fill')).toBe('#E28025') // the Dedal mark
+    expect(shadow().querySelector('.toggle')!.getAttribute('aria-label')).toBe('dedal devtools')
+    expect(shadow().querySelector('.toggle svg rect')!.getAttribute('fill')).toBe('#E28025') // the Dedal mark, no label
   })
 
   it('picking a page element shows the node: selector, props source, data', async () => {

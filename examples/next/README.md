@@ -14,7 +14,7 @@ Run `npm run dedal` instead of `npm install` — it also installs the remaining 
 - `/shadcn` — shadcn/ui (Tailwind v4, components in `components/ui`),
 - `/radix` — Radix Themes (`@radix-ui/themes`),
 - `?device=desktop|mobile` — `ctx.device` (number of columns, featured card),
-- `?debug=1` — the devtools panel (the "dedal" button with the logo in the bottom-right corner: "pick" a page element, tree, sections, live selector) and a view from `inspect()` (`dedal/devtools`): sections and data sources, cache key, node tree with suggested selectors, prop origin (default / template / patch / data), assignments; a build with `trace` bypasses the cache,
+- `?debug=1` — the devtools panel (the button with the Dedal logo in the bottom-right corner: "pick" a page element, tree, sections, live selector) and a view from `inspect()` (`dedal/devtools`): sections and data sources, cache key, node tree with suggested selectors, prop origin (default / template / patch / data), assignments; a build with `trace` bypasses the cache,
 - `/api/home?device=mobile` — the same page as JSON (middleware → front end topology).
 
 ## Structure
