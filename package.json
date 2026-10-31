@@ -2,7 +2,7 @@
   "name": "dedal",
   "version": "0.7.0",
   "private": true,
-  "description": "Dedal — a server-driven UI engine independent of framework and component library",
+  "description": "Dedal \u2014 a server-driven UI engine independent of framework and component library",
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -21,6 +21,10 @@
     "./devtools/panel": {
       "types": "./dist/devtools/panel.d.ts",
       "import": "./dist/devtools/panel.js"
+    },
+    "./figma": {
+      "types": "./dist/figma/index.d.ts",
+      "import": "./dist/figma/index.js"
     },
     "./react/devtools": {
       "types": "./dist/react/devtools.d.ts",

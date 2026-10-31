@@ -8,6 +8,7 @@ export default defineConfig({
     'react/devtools': 'src/react/devtools.ts',
     'devtools/index': 'src/devtools/index.ts',
     'devtools/panel': 'src/devtools/panel.ts',
+    'figma/index': 'src/figma/index.ts',
   },
   format: ['esm'],
   dts: true,
