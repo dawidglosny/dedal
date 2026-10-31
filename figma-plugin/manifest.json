@@ -1,0 +1,13 @@
+{
+  "name": "Dedal",
+  "id": "dedal-bridge",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["http://localhost:7377"],
+    "reasoning": "Receives build specs from the local Dedal bridge (dedal-figma build, dedal-mcp) and fetches the images it serves."
+  }
+}

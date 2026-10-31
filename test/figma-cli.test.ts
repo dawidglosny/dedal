@@ -1,5 +1,7 @@
 /** The dedal-figma CLI with the network and the file system replaced — the real mapping module, the real fixture. */
-import { readFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { parseFigmaUrl, run, type CliDeps } from '../src/figma/cli'
 
@@ -172,5 +174,61 @@ describe('dedal-figma component / audit', () => {
     expect(out.stdout).toContain('Button → button: in the design, not in the contract — prop iconRight; prop size; variant: secondary, ghost, brand')
     expect(out.stdout).toContain('PricingCard (9:9) — no contract component; propose one: dedal-figma component <url>?node-id=9-9')
     expect(await run(['audit', 'KEY'], setup({ fetch }).deps)).toBe(2) // --mapping required
+  })
+})
+
+describe('dedal-figma build', () => {
+  // a file whose library has Card (a set: Title, Kind) and a Grid with an Items slot
+  const file = {
+    document: { id: '0:0', name: 'Document', type: 'DOCUMENT', children: [{ id: '1:0', name: 'Library', type: 'CANVAS', children: [
+      { id: '1:1', name: 'Card', type: 'COMPONENT_SET', componentPropertyDefinitions: { 'Title#1:0': { type: 'TEXT' }, Kind: { type: 'VARIANT', variantOptions: ['primary', 'ghost'] } } },
+      { id: '1:2', name: 'Grid', type: 'COMPONENT', componentPropertyDefinitions: { 'Items#1:9': { type: 'SLOT' } } },
+    ] }] },
+  }
+  const mappingFile = async () => {
+    const { mapping } = await import('../src/figma')
+    const { defineContract } = await import('../src')
+    const { z } = await import('zod')
+    return { default: mapping(defineContract({ card: { props: z.object({ title: z.string(), kind: z.enum(['primary', 'ghost']).optional() }) }, grid: {}, quote: {} }), {}) }
+  }
+  const template = { news: { component: 'grid', children: [{ component: 'card', props: { title: 'A', kind: 'ghost' } }] } }
+  const withTemplate = (value: unknown) => ({ importModule: mappingFile, fetch: (async () => ({ ok: true, status: 200, json: async () => file })) as CliDeps['fetch'], cwd: mkdtemp(value) })
+  function mkdtemp(value: unknown) {
+    const dir = mkdtempSync(join(tmpdir(), 'dedal-build-'))
+    writeFileSync(join(dir, 'home.json'), JSON.stringify(value))
+    return dir
+  }
+
+  it('--spec writes the build plan: library components by id, properties by key, children in the slot', async () => {
+    const { deps, out } = setup(withTemplate(template))
+    expect(await run(['build', 'KEY', '--template', 'home.json', '--mapping', 'm.mjs', '--name', 'Home', '--spec', 'plan.json'], deps)).toBe(0)
+    const plan = JSON.parse(out.files[join(deps.cwd, 'plan.json')] as string)
+    expect(plan).toEqual({
+      version: 1, name: 'Home',
+      sections: [{ key: 'news', node: { kind: 'instance', path: 'news', component: { id: '1:2', name: 'Grid' }, properties: {}, slots: {
+        'Items#1:9': [{ kind: 'instance', path: 'news.children[0]', component: { id: '1:1', name: 'Card' }, properties: { 'Title#1:0': 'A', Kind: 'ghost' }, slots: {} }],
+      } } }],
+    })
+  })
+
+  it('through the bridge: the plugin\'s result is reported; parts with no counterpart stop the build unless --force', async () => {
+    const submitted: unknown[] = []
+    const fakeBridge = async () => ({ url: 'http://localhost:7377', lastSeen: () => 0, close: async () => {}, submit: async (spec: unknown) => (submitted.push(spec), { ok: true, frameId: '9:9', created: 1, warnings: ['news: a warning'], errors: [] }) })
+    const ok = setup({ ...withTemplate(template), startBridge: fakeBridge })
+    expect(await run(['build', 'KEY', '--template', 'home.json', '--mapping', 'm.mjs'], ok.deps)).toBe(0)
+    expect(ok.out.stderr).toContain('Waiting for the Dedal plugin')
+    expect(ok.out.stderr).toContain('warning  news: a warning')
+    expect(ok.out.stderr).toContain('✓ built "Dedal page" in Figma — 1 section(s), frame 9:9')
+
+    const partial = { ...template, quote: { component: 'quote' } }
+    const stopped = setup({ ...withTemplate(partial), startBridge: fakeBridge })
+    expect(await run(['build', 'KEY', '--template', 'home.json', '--mapping', 'm.mjs'], stopped.deps)).toBe(1)
+    expect(stopped.out.stderr).toContain('quote — no component of the Figma library maps to "quote"')
+    expect(stopped.out.stderr).toContain('nothing built')
+    expect(submitted).toHaveLength(1)
+
+    const noPlugin = setup({ ...withTemplate(template), startBridge: async () => ({ url: 'x', lastSeen: () => 0, close: async () => {}, submit: async () => undefined }) })
+    expect(await run(['build', 'KEY', '--template', 'home.json', '--mapping', 'm.mjs', '--timeout', '1'], noPlugin.deps)).toBe(1)
+    expect(noPlugin.out.stderr).toContain('is the Dedal plugin open in Figma?')
   })
 })

@@ -84,6 +84,20 @@ npx dedal-figma component "https://www.figma.com/design/<file>/<name>?node-id=9-
 
 `component` takes a component, a component set or any instance (resolved to its main component) and proposes what to add: the contract entry (`TEXT` → `z.string()`, `VARIANT` → `z.enum([...options])`, `BOOLEAN` → `z.boolean()`, `INSTANCE_SWAP` → the swapped component's name, native slots → slots), a registry entry to start from, a mapping entry when needed, and the **questions** the design doesn't answer — which texts are required, whether a slot holds one block or a list, how to shorten a swap value. With `--mapping`, it also says whether the contract already has the component and how it differs. In code: `contractFromFigma(entry, { mapping })` from `dedal/figma`.
 
+## Build: a template → a frame in Figma
+
+The other direction: a template becomes a frame in the Figma file, built from the file's own library components — the mapping applied in reverse (every block an instance of its library component, props as component properties, slots and children in native slots). Creating things in Figma needs the Plugin API, so the build goes through the **Dedal plugin** (`figma-plugin/` in the package — import its `manifest.json` once in Figma desktop, then run it in the file):
+
+```bash
+npx dedal-figma build "https://www.figma.com/design/<file>/<name>" --template templates/home.json --mapping ./figma.mapping.mjs --name "Home — draft"
+```
+
+- It reads the file's library (`GET /v1/files/:key`) and plans the build (`templateToFigma` from `dedal/figma`). Parts with no counterpart — a component with no library component, a prop with no component property, a value that isn't a variant option — are listed, and **nothing is built** unless `--force`.
+- `--spec plan.json` writes the plan only: library components by id, properties by their exact keys, slot contents.
+- Otherwise it starts a local bridge (`http://localhost:7377`) and waits for the plugin (`--timeout`, default 300 s); the plugin builds the frame next to the existing content, fetching images from the project's `public/` through the bridge, and the result — warnings included — comes back to the terminal.
+
+A frame built from a template and pulled again gives the same template back: the mapping works in both directions.
+
 ## Testing your mapping
 
 `--raw response.json` saves the REST response. Commit it (trimmed, if it's large) as a fixture, and test the mapping without the network:

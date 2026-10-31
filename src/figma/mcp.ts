@@ -71,6 +71,24 @@ const tools = [
     },
   },
   {
+    name: 'template_to_figma',
+    description:
+      'Build Dedal templates as a frame in a Figma file, from the file\'s own library components — the mapping applied in reverse: every block an instance of its library component, props set as component properties, slots and children placed in native slots. Builds through the Dedal Figma plugin (figma-plugin/ in the package), which must be open in Figma desktop; waits for it. Parts of the template with no counterpart in the library are reported and stop the build unless `force`. With `spec`, only writes the build plan.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        url: { type: 'string', description: 'The Figma file (URL or key) whose library the frame is built from.' },
+        template: { description: 'The templates (section key → block) as JSON — or a string: a path to a JSON file.' },
+        mapping: mappingInput,
+        name: { type: 'string', description: 'The name of the frame to create.' },
+        spec: { type: 'string', description: 'Write the build plan to this file instead of building.' },
+        force: { type: 'boolean', description: 'Build even when parts of the template have no counterpart in the library. Ask the user first.' },
+        timeout: { type: 'number', description: 'Seconds to wait for the plugin (default 120).' },
+      },
+      required: ['url', 'template', 'mapping'],
+    },
+  },
+  {
     name: 'validate_template',
     description: 'Validate Dedal templates (an object: section key → block, or one block) against the contract of a mapping module. Returns every problem with its path.',
     inputSchema: {
@@ -122,6 +140,22 @@ async function callTool(name: string, args: Record<string, unknown>, deps: McpDe
     const code = await run(argv, { ...defaultDeps(), ...deps, stdout: chunk => void (output += chunk), stderr: chunk => void (output += chunk) })
     return text(output.trim(), code !== 0)
   }
+  if (name === 'template_to_figma') {
+    let templatePath = typeof args.template === 'string' ? args.template : undefined
+    if (templatePath === undefined) {
+      const { mkdtemp, writeFile } = await import('node:fs/promises')
+      const { tmpdir } = await import('node:os')
+      templatePath = resolve(await mkdtemp(resolve(tmpdir(), 'dedal-')), 'template.json')
+      await writeFile(templatePath, JSON.stringify(args.template))
+    }
+    const argv = ['build', String(args.url ?? ''), '--template', templatePath, '--mapping', String(args.mapping ?? ''), '--timeout', String(args.timeout ?? 120)]
+    if (typeof args.name === 'string') argv.push('--name', args.name)
+    if (typeof args.spec === 'string') argv.push('--spec', args.spec)
+    if (args.force === true) argv.push('--force')
+    let output = ''
+    const code = await run(argv, { ...defaultDeps(), ...deps, stdout: chunk => void (output += chunk), stderr: chunk => void (output += chunk) })
+    return text(output.trim(), code !== 0)
+  }
   if (name === 'validate_template') {
     const contract = await contractOf(deps, args.mapping)
     const template = typeof args.template === 'string' ? JSON.parse(await readFile(resolve(deps.cwd, args.template), 'utf8')) : args.template
@@ -149,7 +183,7 @@ export async function handle(message: Request, deps: McpDeps): Promise<Json | un
         capabilities: { tools: {} },
         serverInfo: { name: 'dedal', version: deps.env.DEDAL_VERSION ?? packageVersion() },
         instructions:
-          'Dedal tools: turn a Figma frame into Dedal templates checked against the contract (figma_to_template), propose a contract entry for a Figma component (figma_component_to_contract), compare a whole Figma file with the contract (figma_audit), validate templates (validate_template), read what a template may contain (contract_schema). The tools take the path to the project\'s mapping module.',
+          'Dedal tools: turn a Figma frame into Dedal templates checked against the contract (figma_to_template), propose a contract entry for a Figma component (figma_component_to_contract), compare a whole Figma file with the contract (figma_audit), build templates as a Figma frame through the Dedal plugin (template_to_figma), validate templates (validate_template), read what a template may contain (contract_schema). The tools take the path to the project\'s mapping module.',
       })
     case 'ping':
       return reply({})

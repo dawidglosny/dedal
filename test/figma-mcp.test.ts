@@ -23,7 +23,7 @@ describe('dedal-mcp', () => {
     const init = (await handle({ jsonrpc: '2.0', id: 0, method: 'initialize', params: { protocolVersion: '2025-06-18' } }, deps)) as { result: { protocolVersion: string; serverInfo: unknown; capabilities: unknown } }
     expect(init.result).toMatchObject({ protocolVersion: '2025-06-18', serverInfo: { name: 'dedal', version: '0.9.0' }, capabilities: { tools: {} } })
     const list = (await handle({ jsonrpc: '2.0', id: 1, method: 'tools/list' }, deps)) as { result: { tools: { name: string }[] } }
-    expect(list.result.tools.map(tool => tool.name)).toEqual(['figma_to_template', 'figma_component_to_contract', 'figma_audit', 'validate_template', 'contract_schema'])
+    expect(list.result.tools.map(tool => tool.name)).toEqual(['figma_to_template', 'figma_component_to_contract', 'figma_audit', 'template_to_figma', 'validate_template', 'contract_schema'])
     expect(await handle({ jsonrpc: '2.0', id: 2, method: 'ping' }, deps)).toEqual({ jsonrpc: '2.0', id: 2, result: {} })
     expect(await handle({ jsonrpc: '2.0', method: 'notifications/initialized' }, deps)).toBeUndefined()
     expect(await handle({ jsonrpc: '2.0', id: 3, method: 'resources/list' }, deps)).toMatchObject({ error: { code: -32601 } })

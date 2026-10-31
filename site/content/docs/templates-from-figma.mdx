@@ -14,6 +14,8 @@ description: "From a Figma frame to a page: what's in the box — the mapping, t
 | **`dedal-figma audit` / `component`** | the library next to the contract: which components match, drifted or are missing in the code; a proposed contract entry for a component, with the questions to ask | *dedal-figma pull* |
 | **`dedal-mcp`** | an MCP server: the same pull, validation and the contract as JSON Schema, for agents | *Agents: dedal-mcp and the skill* |
 | **`figma-to-dedal`** | a Claude Code skill: pulls a frame, sorts the report into fixes, saves the template | *Agents: dedal-mcp and the skill* |
+| **`dedal-figma build`** + the Dedal plugin | the other direction: a template → a frame in the Figma file, from its library components (`figma-plugin/`, run in Figma desktop) | *dedal-figma pull* |
+| **`page-to-dedal`** | a Claude Code skill: a description of a page → a template from the existing components (and a Figma frame), asking where the description is open | *Agents: dedal-mcp and the skill* |
 | **`figma-component-to-code`** | a Claude Code skill: a Figma component → a contract entry and a registry component, asking where the design is open | *Agents: dedal-mcp and the skill* |
 | **`examples/figma`** | a landing page designed in Figma, pulled and rendered by Dedal | *A page from Figma, end to end* |
 

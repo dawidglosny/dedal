@@ -5,6 +5,9 @@
 Added:
 - `contractFromFigma(entry, { mapping? })` (`dedal/figma`) — a Figma component or component set → a proposed contract entry (`TEXT` → string, `VARIANT` → enum of its options, `BOOLEAN` → boolean, `INSTANCE_SWAP` → the swapped component's name, native slots → slots), a registry stub, a mapping entry, the questions the design doesn't answer, and the drift from the contract's entry; `mapping(…).keyFor()`.
 - `dedal-figma component <url>` (a component, a set or an instance) and `dedal-figma audit <file> --mapping` (every component of the file: matching, drifted, missing in the code); the same in `dedal-mcp`: `figma_component_to_contract`, `figma_audit`.
+- `templateToFigma(sections, { mapping, library })` — the mapping in reverse: templates → a build plan (library components by id, properties by key, slot contents), with every part that has no counterpart in the library; `libraryFromFile()`. A round trip on the demo file (frame → template → plan → frame → template) gives the same template.
+- The Dedal Figma plugin (`figma-plugin/`, shipped with the package) and a local bridge (`startBridge()`): `dedal-figma build <file> --template … --mapping …` builds a template as a frame in Figma, from its library components — through the Plugin API, with no MCP call limits; `--spec` writes the plan only. In `dedal-mcp`: `template_to_figma`.
+- The `page-to-dedal` skill: a description of a page → a template from the existing components (validated, saved) and optionally a Figma frame; asks wherever the description is open, never invents a component.
 - The `figma-component-to-code` skill: a Figma component → a contract entry and a registry component, asking the user wherever the design leaves a choice open; `figma-to-dedal` offers it when a pull reports a component the code doesn't have.
 
 ## 0.9.1

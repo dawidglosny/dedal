@@ -8,7 +8,7 @@
 import { mkdir, writeFile as fsWriteFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { contractFromFigma, imageRefs, replaceImageRefs, type ComponentProposal, type FigmaConversion, type FigmaNode, type FigmaNodesResponse } from './index'
+import { contractFromFigma, imageRefs, libraryFromFile, replaceImageRefs, startBridge, templateToFigma, type Bridge, type ComponentProposal, type FigmaConversion, type FigmaNode, type FigmaNodesResponse } from './index'
 
 /** What `run` needs from the outside world — replaced in tests. */
 export type CliDeps = {
@@ -21,6 +21,8 @@ export type CliDeps = {
   download: (url: string) => Promise<{ bytes: Uint8Array; type: string }>
   stdout: (text: string) => void
   stderr: (text: string) => void
+  /** Starts the local bridge to the Dedal Figma plugin (`dedal-figma build`). */
+  startBridge?: (options: { port?: number; cwd?: string }) => Promise<Bridge>
 }
 
 type Converter = {
@@ -43,10 +45,13 @@ const USAGE = `Usage: dedal-figma pull <file key | Figma URL> [node id] --mappin
 
        dedal-figma component <Figma URL of a component, a component set or an instance> [--mapping <module>]
        dedal-figma audit <file key | Figma URL> --mapping <module>
+       dedal-figma build <file key | Figma URL> --template <file.json> --mapping <module> [--name <frame>] [--spec <file>] [--force] [--timeout <s>]
 
   component          propose a contract entry for a Figma component: props, slots, a registry stub, a mapping entry,
                      the questions to answer — and, with --mapping, how it differs from the contract's entry
   audit              every component of the file: mapped to the contract, drifted from it, or missing in the code
+  build              build a template as a frame in the Figma file, from its library's components — through the
+                     Dedal plugin (figma-plugin/ in the package; open it in Figma desktop); --spec writes the plan only
 
 The token is read from FIGMA_TOKEN (a personal access token with file content read access).`
 
@@ -109,6 +114,7 @@ export async function run(argv: string[], deps: CliDeps = defaultDeps()): Promis
   }
   const [command, target, nodeArg] = args.positional
   if (!args.flags.help && (command === 'component' || command === 'audit') && target) return inspectComponents(command, target, nodeArg, args.flags, deps)
+  if (!args.flags.help && command === 'build' && target) return buildInFigma(target, args.flags, deps)
   if (args.flags.help || command !== 'pull' || !target) {
     stderr(`${USAGE}\n`)
     return args.flags.help ? 0 : 2
@@ -364,4 +370,75 @@ async function inspectComponents(command: 'component' | 'audit', target: string,
     ].join('\n') + '\n'
   )
   return 0
+}
+
+// ---- build: a template → a frame in Figma, through the Dedal plugin
+
+async function buildInFigma(target: string, flags: Flags, deps: CliDeps): Promise<number> {
+  const { stderr } = deps
+  if (typeof flags.template !== 'string' || typeof flags.mapping !== 'string') {
+    stderr(`--template and --mapping are required for build\n\n${USAGE}\n`)
+    return 2
+  }
+  let file: string
+  try {
+    ;({ file } = parseFigmaUrl(target))
+  } catch (error) {
+    stderr(`${(error as Error).message}\n`)
+    return 2
+  }
+  const token = deps.env.FIGMA_TOKEN
+  if (!token) {
+    stderr(`FIGMA_TOKEN is not set — create a personal access token in Figma (Settings → Security) with file content read access\n`)
+    return 2
+  }
+  let converter: Converter & Parameters<typeof templateToFigma>[1]['mapping']
+  let template: Record<string, unknown>
+  try {
+    const module = await deps.importModule(resolve(deps.cwd, flags.mapping))
+    converter = (module.default ?? module.fromFigma) as typeof converter
+    if (!converter || typeof converter.entryFor !== 'function') throw new Error('the default export must be a mapping — export default mapping(contract, { … })')
+  } catch (error) {
+    stderr(`${flags.mapping}: ${(error as Error).message.split('\n')[0]}\n`)
+    return 2
+  }
+  try {
+    template = JSON.parse(await (await import('node:fs/promises')).readFile(resolve(deps.cwd, flags.template), 'utf8'))
+  } catch (error) {
+    stderr(`${flags.template}: can't read the template — ${(error as Error).message.split('\n')[0]}\n`)
+    return 2
+  }
+  const got = await figmaGet(deps, token, `files/${encodeURIComponent(file)}`)
+  if (!got.ok) return stderr(`${got.message}\n`), 1
+  const library = libraryFromFile(got.body as { document: FigmaNode })
+  const plan = templateToFigma(template, { mapping: converter, library, name: typeof flags.name === 'string' ? flags.name : 'Dedal page' })
+  if (plan.unmapped.length) {
+    stderr(`${plan.unmapped.length} part(s) of the template have no counterpart in the Figma library:\n`)
+    for (const { path, reason } of plan.unmapped) stderr(`  ${path} — ${reason}\n`)
+  }
+  if (typeof flags.spec === 'string') {
+    await deps.writeFile(resolve(deps.cwd, flags.spec), JSON.stringify(plan.spec, null, 2) + '\n')
+    stderr(`${plan.ok ? '✓' : '!'} the build plan (${plan.spec.sections.length} section(s)) → ${flags.spec}\n`)
+    return plan.ok ? 0 : 1
+  }
+  if (!plan.ok && !flags.force) {
+    stderr(`✗ nothing built — map what's missing, or --force to build the rest\n`)
+    return 1
+  }
+  const bridge = await (deps.startBridge ?? startBridge)({ cwd: deps.cwd })
+  const timeout = (Number(flags.timeout) || 300) * 1000
+  stderr(`Waiting for the Dedal plugin — in Figma desktop, open the file and run Plugins → Development → Dedal (bridge: ${bridge.url})\n`)
+  try {
+    const result = await bridge.submit(plan.spec, timeout)
+    if (!result) {
+      stderr(`✗ no plugin picked the build up in ${timeout / 1000} s — is the Dedal plugin open in Figma? (import figma-plugin/manifest.json once: Plugins → Development → Import plugin from manifest)\n`)
+      return 1
+    }
+    for (const warning of result.warnings) stderr(`warning  ${warning}\n`)
+    for (const error of result.errors) stderr(`error  ${error}\n`)
+    if (result.ok) stderr(`✓ built "${plan.spec.name}" in Figma — ${result.created} section(s), frame ${result.frameId}\n`)
+    return result.ok && plan.ok ? 0 : 1
+  } finally {
+    await bridge.close()
+  }
 }

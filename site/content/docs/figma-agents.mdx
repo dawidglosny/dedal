@@ -20,6 +20,7 @@ Every tool takes `mapping` — the path to the mapping module, relative to the p
 | `figma_to_template` | `url` (a Figma URL or a file key), `node?`, `mapping`, `out?`, `images?`, `imageUrl?`, `force?` | the report (layers left out, warnings, errors with the Figma layer) and the templates — or writes them to `out`; an error result when the templates don't match the contract |
 | `figma_component_to_contract` | `url` (the component, the set or an instance), `node?`, `mapping?` | the proposed contract entry, a registry entry, a mapping entry, the questions to ask, and how it differs from the contract — read-only |
 | `figma_audit` | `url` (the file), `mapping` | every component of the file: matching the contract, drifted from it, missing in the code — read-only |
+| `template_to_figma` | `url` (the file), `template` (JSON or a path), `mapping`, `name?`, `spec?`, `force?`, `timeout?` | builds the templates as a Figma frame through the Dedal plugin (it must be open in Figma desktop) and reports the result; parts with no counterpart in the library stop the build unless `force` |
 | `validate_template` | `mapping`, `template` (the templates as JSON, one block, or a path to a JSON file) | `valid`, or every problem with its path |
 | `contract_schema` | `mapping` | the contract as JSON Schema: components, props with their types and allowed values, slots — what a template may contain |
 
@@ -51,6 +52,15 @@ It never uses `force` or extends the contract without your explicit OK, and neve
 5. type-checks and re-runs the pull or the validation.
 
 `figma-to-dedal` hands over to it: when a pull reports an instance no contract component maps, it says the component may be missing and offers this skill.
+
+## The page-to-dedal skill
+
+`skills/page-to-dedal/SKILL.md`: a description of a page → a Dedal template from the components the contract already has, and optionally a Figma frame. It:
+
+1. reads the contract (`contract_schema`) and the existing templates,
+2. plans the page in words — and **asks** where the description could mean several components, where a variant or an order isn't said, and where something has **no component** (it never invents one: leave it out, use a named alternative, or add a component first with `figma-component-to-code`),
+3. writes the template, validates it (`validate_template`) and saves it,
+4. builds it in Figma if you want (`template_to_figma` — through the Dedal plugin), asking before building around parts that have no counterpart in the library.
 
 ## With Figma's own MCP server
 

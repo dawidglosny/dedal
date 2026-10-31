@@ -58,10 +58,20 @@ type SourceContext = {
 /** Where a prop's value comes from in Figma — `text`, `variant`, `boolean`, `swap` or `layer`. */
 export type FigmaSource = {
   readonly read: (context: SourceContext) => unknown
+  /** What the source reads — so the mapping can also be applied in reverse (a template → a Figma frame). */
+  readonly reads?: SourceReads
 }
+
+/** What a source reads, for the reverse direction: `templateToFigma`. */
+export type SourceReads =
+  | { kind: 'text' | 'variant' | 'boolean'; property: string; values?: Record<string, unknown> }
+  | { kind: 'swap'; property: string; toValue: (name: string, component: FigmaComponentRef) => unknown }
+  | { kind: 'layer'; name: string }
+  | { kind: 'image' }
 
 /** A `TEXT` component property → a string prop (`figma.string` in Code Connect). */
 export const text = (property: string): FigmaSource => ({
+  reads: { kind: 'text', property },
   read: ({ property: get }) => {
     const value = get(property)?.value
     return typeof value === 'string' ? value : undefined
@@ -70,6 +80,7 @@ export const text = (property: string): FigmaSource => ({
 
 /** A `VARIANT` component property → a prop; `values` maps Figma's values to the contract's (`figma.enum`). */
 export const variant = (property: string, values?: Record<string, unknown>): FigmaSource => ({
+  reads: { kind: 'variant', property, ...(values && { values }) },
   read: ({ property: get }) => {
     const value = get(property)?.value
     return values && typeof value === 'string' && Object.hasOwn(values, value) ? values[value] : value
@@ -78,6 +89,7 @@ export const variant = (property: string, values?: Record<string, unknown>): Fig
 
 /** A `BOOLEAN` component property → a prop; `values` maps `true` / `false` to the contract's (`figma.boolean`). */
 export const boolean = (property: string, values?: { true?: unknown; false?: unknown }): FigmaSource => ({
+  reads: { kind: 'boolean', property, ...(values && { values: values as Record<string, unknown> }) },
   read: ({ property: get }) => {
     const value = get(property)?.value
     if (typeof value !== 'boolean') return undefined
@@ -94,6 +106,7 @@ export const swap = (
   property: string,
   toValue: (name: string, component: FigmaComponentRef) => unknown = name => name
 ): FigmaSource => ({
+  reads: { kind: 'swap', property, toValue },
   read: ({ property: get, component }) => {
     const id = get(property)?.value
     const ref = typeof id === 'string' ? component(id) : undefined
@@ -103,6 +116,7 @@ export const swap = (
 
 /** The content of a text layer inside the node (`figma.textContent` in Code Connect). */
 export const layer = (name: string): FigmaSource => ({
+  reads: { kind: 'layer', name },
   read: ({ textLayer }) => textLayer(name),
 })
 
@@ -114,6 +128,7 @@ export const FIGMA_IMAGE = 'figma-image:'
  * expire — `dedal-figma pull --images <dir>` downloads the images and replaces these values with local paths.
  */
 export const image = (): FigmaSource => ({
+  reads: { kind: 'image' },
   read: ({ node }) => {
     const fill = node.fills?.find(fill => fill.type === 'IMAGE' && fill.visible !== false && fill.imageRef)
     return fill ? `${FIGMA_IMAGE}${fill.imageRef}` : undefined
@@ -526,6 +541,13 @@ export function mapping<
     contract,
     /** The contract component a Figma component (or component set) name maps to — explicitly or by the convention. */
     keyFor: (figmaName: string): string | undefined => components.get(lookupName(figmaName))?.key,
+    /** The explicit entry for a contract component, if the mapping has one (its Figma name, its sources, its slots). */
+    entryFor: (key: string): { figma: string; props: SourceMap; structure?: FigmaSlots } | undefined => {
+      const entry = (entries as Record<string, ComponentEntry | FrameEntry | undefined>)[key]
+      return entry?.kind === 'component' ? { figma: entry.figma, props: entry.props, ...(entry.structure && { structure: entry.structure }) } : undefined
+    },
+    /** The component used for loose texts (the `text` option). */
+    textComponent: options.text,
     /** The `componentName` rule of the mapping, if any. */
     componentName: options.componentName,
     /** Converts a node of a nodes response (`GET /v1/files/:key/nodes?ids=…`): its top-level layers become sections. */
@@ -549,3 +571,5 @@ export function mapping<
 }
 
 export { contractFromFigma, type ComponentProposal, type ContractDrift, type FigmaPropertyDefinition, type ProposedProp, type ProposedSlot } from './component'
+export { libraryFromFile, templateToFigma, type FigmaBuildNode, type FigmaBuildPlan, type FigmaBuildSpec, type FigmaLibraryComponent, type ReversibleMapping } from './build'
+export { DEFAULT_BRIDGE_PORT, startBridge, type Bridge, type FigmaBuildResult } from './bridge'

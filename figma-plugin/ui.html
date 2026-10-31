@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+  <body style="font: 12px/1.5 Inter, system-ui, sans-serif; margin: 12px; color: #222">
+    <strong>Dedal</strong>
+    <p style="margin: 6px 0">Builds pages from Dedal templates sent by <code>dedal-figma build</code> or an agent (<code>dedal-mcp</code>). Keep this window open.</p>
+    <label>Bridge <input id="url" value="http://localhost:7377" style="width: 180px" /></label>
+    <p id="status" style="margin: 8px 0; color: #666">Connecting…</p>
+    <p id="last" style="margin: 0; color: #666"></p>
+    <script>
+      const status = document.getElementById('status')
+      const last = document.getElementById('last')
+      const url = () => document.getElementById('url').value.replace(/\/$/, '')
+
+      // images: collected from the spec, fetched through the bridge (project files or remote URLs)
+      function imagesOf(node, into) {
+        if (node.kind === 'instance') {
+          if (node.image) into.add(node.image)
+          for (const key of Object.keys(node.slots)) for (const child of node.slots[key]) imagesOf(child, into)
+        }
+        return into
+      }
+      async function fetchImages(spec) {
+        const paths = new Set()
+        for (const section of spec.sections) imagesOf(section.node, paths)
+        const images = {}
+        for (const path of paths) {
+          const query = /^https?:/.test(path) ? 'url=' + encodeURIComponent(path) : 'path=' + encodeURIComponent(path)
+          const response = await fetch(url() + '/asset?' + query)
+          if (response.ok) images[path] = new Uint8Array(await response.arrayBuffer())
+        }
+        return images
+      }
+
+      let pending = null
+      onmessage = event => {
+        const message = event.data.pluginMessage
+        if (message && message.type === 'result' && pending) {
+          fetch(url() + '/result', { method: 'POST', body: JSON.stringify(message) })
+          last.textContent = (message.ok ? 'Built: ' + message.created + ' section(s)' : 'Failed: ' + message.errors.join('; ')) + (message.warnings.length ? ' — ' + message.warnings.length + ' warning(s)' : '')
+          pending()
+          pending = null
+        }
+      }
+
+      async function loop() {
+        for (;;) {
+          try {
+            const response = await fetch(url() + '/next?wait=20')
+            status.textContent = 'Connected — waiting for a page to build'
+            if (response.status !== 200) continue
+            const job = await response.json()
+            status.textContent = 'Building "' + job.spec.name + '"…'
+            const images = await fetchImages(job.spec)
+            await new Promise(done => {
+              pending = done
+              parent.postMessage({ pluginMessage: { type: 'build', id: job.id, spec: job.spec, images } }, '*')
+            })
+          } catch (error) {
+            status.textContent = 'No bridge at ' + url() + ' — run dedal-figma build, or use an agent with dedal-mcp'
+            await new Promise(done => setTimeout(done, 3000))
+          }
+        }
+      }
+      loop()
+    </script>
+  </body>
+</html>
