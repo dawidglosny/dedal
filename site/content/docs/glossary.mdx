@@ -30,3 +30,7 @@ Every term used in these docs, in one place. The five to start with — contract
 - **query** — a data source with the instance's cache (`ui.query`), shared by loaders and requests.
 - **deferred section** — a section built in a separate request and streamed in later (`defer`).
 - **trace** — debug mode: props origin, a detailed report, timings — for devtools.
+- **mapping** (`dedal/figma`) — how a Figma frame becomes templates: Figma components, properties and native slots → contract components, props and slots. By the naming convention where names match, explicitly (`component('FeatureCard', { icon: swap('Icon') })`) where they don't.
+- **pull** — `dedal-figma pull`: fetch a frame from the Figma REST API, convert it with the mapping, validate it against the contract, write the templates (and download the images).
+- **unmapped** — the layers of a frame that didn't become part of the template, each with its Figma path and the reason; nothing is dropped silently.
+- **native slot (Figma)** — a `SLOT` component property: a place in a Figma component where designers put other components. A Figma slot named like a contract slot fills it; other slots become the block's children.

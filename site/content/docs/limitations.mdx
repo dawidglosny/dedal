@@ -8,7 +8,8 @@ What Dedal doesn't do — or doesn't do yet. Knowing this before you start saves
 ## Scope
 
 - **No state, no behaviour in templates.** Props are JSON: a template can't carry a function or an event handler. Interactive parts — tabs, forms, a cart — are registry components with their own logic; the template only places them and passes data. Dedal is for screens assembled from blocks, not for application UI (*Why Dedal*).
-- **No editor.** Templates come from code, a database, a CMS or Figma (*Guides*); Dedal has no visual editor and no Figma plugin.
+- **No editor.** Templates come from code, a database, a CMS or Figma (*Guides*); Dedal has no visual editor of its own.
+- **Figma through the REST API.** Frames are pulled with a token — by the `dedal-figma` CLI or the `dedal-mcp` server; there's no Figma plugin yet. Figma's variables (design tokens) aren't part of a template — colors and spacing stay in your components.
 - **React is the only renderer shipped.** `dedal/react` works with Server Components, SSR and on the client. Any other client renders the JSON with its own small renderer (*A client without React*); `dedal/astro` is planned.
 - **The server side is JavaScript.** The engine runs in Node 20.9+, edge runtimes and the browser. A backend in another language needs a JS layer that builds the pages, or serves only the data to one.
 

@@ -28,7 +28,7 @@ data (your APIs) ───────────┘
 
 Dedal is built for one setup above all: **web products on a shared design system, whose pages are designed in Figma or assembled in a page builder or a CMS** — not written in JSX.
 
-- **Pages from Figma** — designers build a page from the design system's components and publish; a converter turns the frame into a template ([Templates from Figma](https://dawidglosny.github.io/dedal/docs/templates-from-figma/)).
+- **Pages from Figma** — designers build a page from the design system's components and publish; `dedal-figma pull` (or an agent, through the `dedal-mcp` server) turns the frame into a template checked against the contract ([a working example](examples/figma), [the guide](https://dawidglosny.github.io/dedal/docs/templates-from-figma/)).
 - **Page builders and CMSs** — Dedal is the engine: the contract says what the editor can place and with which props, a template is what it saves, the frontend renders it with your components.
 - **Many products, one design system** — templates designed once, served to every product, each rendering them with its registry.
 
@@ -89,6 +89,31 @@ const registry = { grid: Grid, card: Card, badge: Badge } satisfies Registry<Con
 
 Change the structure in storage and the page follows — no frontend release (with a page cache: after `ui.invalidate()` or once the entry goes stale). Templates loaded from storage aren't seen by TypeScript — with the contract as a value, `ui.validate` checks them against it — see [Templates as JSON](docs/API.md#templates-as-json).
 
+## From Figma
+
+Designers build the page from the design system's components — sections included, their content in native Figma slots. A mapping says where Figma's names differ from the contract; everything else follows the convention:
+
+```js
+// figma.mapping.mjs
+import { component, image, mapping, swap } from 'dedal/figma'
+import { contract } from './contract.mjs'
+
+export default mapping(contract, {
+  feature: component('FeatureCard', { icon: swap('Icon', name => name.replace('icon/', '')) }),
+  image: component('Image', { src: image() }),
+})
+```
+
+```text
+$ FIGMA_TOKEN=… npx dedal-figma pull "https://www.figma.com/design/…?node-id=31-398" --mapping ./figma.mapping.mjs --out templates/home.json --images public/figma
+1 layer(s) not in the template:
+  Frame 427/Group 12/icon/lock-open — an instance of "icon/lock-open", which no contract component maps
+3 image(s) → public/figma
+✓ 10 section(s) → templates/home.json
+```
+
+The template is checked against the contract — a variant the code doesn't have stops the pull, with the template path and the Figma layer; every layer that didn't make it in is listed. The frontend renders it with your components; change the frame, pull again, and the page follows. The same through an agent: `dedal-mcp` (an MCP server) and a Claude Code skill (`skills/figma-to-dedal`). See [`examples/figma`](examples/figma) and [*A page from Figma, end to end*](https://dawidglosny.github.io/dedal/docs/figma-demo/).
+
 ## What you get
 
 - **Structure is data.** Templates are plain JSON — store them, version them, generate them from Figma. Changing a page doesn't change code.
@@ -109,7 +134,7 @@ Change the structure in storage and the page follows — no frontend release (wi
 | devtools panel | 12.6 KB min + gzip — a separate chunk, fetched only when `<Devtools />` mounts (debug mode) |
 | build + resolve, 530 nodes | **0.8 ms** |
 | build + resolve, 3620 nodes | 6.5 ms |
-| tests | 399 (vitest) |
+| tests | 405 (vitest) |
 
 Timings from `npm run bench` on an Apple M-series laptop, Node 22 — run it on your machine. Sizes: the published ESM entry points, bundled and minified with esbuild, React external.
 
@@ -145,6 +170,7 @@ Requires Node 20.9+. React 18+ only for `dedal/react` (an optional peer dependen
 
 - **Quick start** — [a rendered page in five files](https://dawidglosny.github.io/dedal/docs/quick-start/): install, a contract, a page, a registry, render in Next.js or plain Node.
 - **Guide** — **[dawidglosny.github.io/dedal](https://dawidglosny.github.io/dedal/)**: why Dedal, how it works, a tutorial (ending with a template edited without a release), the same engine in another domain (a dashboard), and every feature, warning and error as a live page with its code, result and devtools report.
+- **From Figma** — [Templates from Figma](https://dawidglosny.github.io/dedal/docs/templates-from-figma/) (the mapping, the CLI, the MCP server and the skill) and [A page from Figma, end to end](https://dawidglosny.github.io/dedal/docs/figma-demo/) (the example, file by file).
 - **Limitations** — [what Dedal doesn't do (yet)](https://dawidglosny.github.io/dedal/docs/limitations/).
 - **Decisions** — [docs/adr](docs/adr): the positioning, the scope, and every larger decision with its alternatives.
 - **API reference** — [on the site](https://dawidglosny.github.io/dedal/docs/api/) (source: [docs/API.md](docs/API.md)): formats, design rules, every option; every exported function and type in the [type reference](https://dawidglosny.github.io/dedal/types/), generated from the source.

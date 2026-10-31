@@ -103,7 +103,7 @@ The cards in the stored template don't set `size` — they still get `size: "md"
 
 ## Publishing
 
-1. The editor (or a Figma export, see *Templates from Figma*) saves a **draft** — `templates.check` refuses one that doesn't match the contract, with the paths of the problems.
+1. The editor (or `dedal-figma pull`, see *Templates from Figma*) saves a **draft** — `templates.check` refuses one that doesn't match the contract, with the paths of the problems.
 2. A preview renders the draft (`{ preview: true }`), in debug mode with devtools — editors see where every prop comes from before they publish.
 3. Publishing copies the draft to **published**, then calls `templates.onPublish(name)`: the cached template and the cached pages are dropped, and the next request builds from the new version.
 4. Rollback = publish an older version again.

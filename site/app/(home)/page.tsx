@@ -36,7 +36,7 @@ const registry = { grid: Grid, card: Card, badge: Badge } satisfies Registry<Con
 <Render tree={page} registry={registry} />`
 
 const features = [
-  ['Structure is data', 'Templates are plain JSON — store them, version them, generate them from Figma. Rearranging a screen doesn’t change code.'],
+  ['Structure is data', 'Templates are plain JSON — store them, version them, pull them from Figma with `dedal-figma`. Rearranging a screen doesn’t change code.'],
   ['One contract, two checks', 'Components, props and slots — typed at compile time, validated at runtime (templates from storage or Figma), exported to JSON Schema for a page builder.'],
   ['Data placed by selectors', '`card`, `#featured`, `card > :slot(badge)` — CSS syntax instead of indexes. Adding a heading doesn’t shift the data.'],
   ['Explicit rules for missing data', 'Fewer items than places, a failing API, an empty section: safe defaults, a strict mode, and a report of everything dropped.'],
@@ -59,6 +59,12 @@ const after = `{ "component": "grid", "props": { "columns": 3 },
     { "component": "card", "repeat": 3,
       "slots": { "badge": { "component": "badge" } } }
   ] }`
+
+const pullOutput = `$ dedal-figma pull "https://www.figma.com/design/…?node-id=31-398" --mapping ./figma.mapping.mjs --out templates/home.json --images public/figma
+1 layer(s) not in the template:
+  Frame 427/Group 12/icon/lock-open — an instance of "icon/lock-open", which no contract component maps
+3 image(s) → public/figma
+✓ 10 section(s) → templates/home.json`
 
 const axes = [
   ['Structure', 'Which blocks, in what order, what goes inside what.', 'Designers, editors, experiments, other systems'],
@@ -123,6 +129,36 @@ export default function Home() {
           <Code code={`npm i github:dawidglosny/dedal#v${VERSION}`} lang="bash" />
         </div>
       </section>
+
+      <Section
+        title="From Figma to a page"
+        lead="Designers build the page from your design system’s components. One command turns the frame into a template checked against the contract; your components render it. Change the frame, pull again — the page follows, no release."
+      >
+        <ol className="grid gap-4 md:grid-cols-3">
+          {[
+            ['Design', 'Sections and components from the library, content in native Figma slots — no naming tricks.'],
+            ['Pull', '`dedal-figma pull` (or an agent through `dedal-mcp`): converted, validated, every layer left out reported with its path.'],
+            ['Render', 'The template is plain JSON; the registry maps its names to your React components.'],
+          ].map(([title, text], i) => (
+            <li key={title} className={card}>
+              <div className="flex size-7 items-center justify-center rounded-full bg-fd-primary text-sm font-semibold text-fd-primary-foreground">{i + 1}</div>
+              <div className="mt-3 font-semibold">{title}</div>
+              <div className="mt-1 text-sm text-fd-muted-foreground">{inline(text)}</div>
+            </li>
+          ))}
+        </ol>
+        <div className="mt-6">
+          <Code code={pullOutput} lang="bash" title="npm run pull" />
+        </div>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link href="/docs/figma-demo/" className={primary}>
+            A page from Figma, end to end
+          </Link>
+          <a href={`${GITHUB}/tree/main/examples/figma`} className={button}>
+            examples/figma
+          </a>
+        </div>
+      </Section>
 
       <Section
         title="Three things that usually live in one place"
