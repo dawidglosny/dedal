@@ -125,6 +125,26 @@ describe('mountDevtools', () => {
     expect(text()).toContain('section forYou')
   })
 
+  it('client-side navigation: a payload removed from the page leaves the panel, a new one replaces it', async () => {
+    await renderPage()
+    dispose = mountDevtools({ open: true })
+    button('tree').click()
+    expect(text()).toContain('section news')
+
+    document.querySelector('main')!.remove() // the router swaps the page: the old payload goes…
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(text()).not.toContain('section news')
+
+    const next = ui.page({ sections: [section('about', node('card'))], data: () => ({ about: { card: [{ title: 'Y' }] } }) })
+    const result = await next.build()
+    const main = document.createElement('main')
+    main.innerHTML = renderToStaticMarkup(createElement(DevtoolsData, { payload: inspect(result, ui.resolve(result)) }))
+    document.body.append(main) // …and the next page's comes
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(text()).toContain('section about')
+    expect(text()).not.toContain('section news')
+  })
+
   it('unmounting removes the panel', async () => {
     await renderPage()
     dispose = mountDevtools()

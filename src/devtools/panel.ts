@@ -27,7 +27,7 @@ import {
 /**
  * In-browser devtools panel: plain DOM in Shadow DOM (styles isolated both ways), one for React and Astro.
  *
- * Reads payloads from `<script type="application/json" data-dedal-devtools>` (also those streamed in later — `MutationObserver`)
+ * Reads payloads from `<script type="application/json" data-dedal-devtools>` (also those streamed in later, and drops removed ones — `MutationObserver`)
  * and `<dedal-node data-dedal-key>` markers from `<Render debug>`. Content built exclusively via `textContent` —
  * the payload contains page data, so no `innerHTML` from data.
  */
@@ -734,13 +734,12 @@ export function mountDevtools(options: MountOptions = {}): () => void {
 
   // --- start and cleanup
 
+  // a payload added (a streamed section) or removed (client-side navigation to another page) → read them again
+  const isPayload = (changed: Node) =>
+    changed instanceof Element && (changed.matches('script[data-dedal-devtools]') || changed.querySelector('script[data-dedal-devtools]') !== null)
   const observer = new MutationObserver(mutations => {
-    const added = mutations.some(mutation =>
-      [...mutation.addedNodes].some(
-        added => added instanceof Element && (added.matches('script[data-dedal-devtools]') || added.querySelector('script[data-dedal-devtools]'))
-      )
-    )
-    if (added) scan()
+    const changed = mutations.some(mutation => [...mutation.addedNodes].some(isPayload) || [...mutation.removedNodes].some(isPayload))
+    if (changed) scan()
     if (highlighted.length) refresh()
   })
   observer.observe(document.documentElement, { childList: true, subtree: true })
