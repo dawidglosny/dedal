@@ -139,7 +139,7 @@ Requires Node 20.9+. React 18+ only for `dedal/react` (an optional peer dependen
 | `dedal/devtools` | `inspect()` and text reports, for tests and logs |
 | `dedal/react/devtools` | `<Devtools />` — the browser panel |
 | `dedal/devtools/panel` | `mountDevtools()` — the panel outside React |
-| `dedal/figma` | `mapping()` — Figma frames to templates, checked against the contract; the `dedal-figma pull` CLI |
+| `dedal/figma` | `mapping()` — Figma frames to templates, checked against the contract; the `dedal-figma pull` CLI, the `dedal-mcp` server for agents and a Claude Code skill (`skills/figma-to-dedal`) |
 
 ## Documentation
 

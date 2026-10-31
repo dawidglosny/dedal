@@ -82,6 +82,17 @@ const response = await fetch(`https://api.figma.com/v1/files/${file}/nodes?ids=$
 const { ok, sections, errors, unmapped, warnings } = await fromFigma.convert(response, node)
 ```
 
+## With an agent: the MCP server and the skill
+
+- **`dedal-mcp`** — an MCP server (stdio) with three tools: `figma_to_template` (the pull, with its report), `validate_template` (templates against the contract), `contract_schema` (the contract as JSON Schema — what a template may contain). Each takes the path to the mapping module; the conversion and the report are the CLI's.
+
+```json
+{ "mcpServers": { "dedal": { "command": "npx", "args": ["dedal-mcp"], "env": { "FIGMA_TOKEN": "${FIGMA_TOKEN}" } } } }
+```
+
+- **The `figma-to-dedal` skill** for Claude Code (`skills/figma-to-dedal/SKILL.md` in the package — copy it to `.claude/skills/`): give it a Figma link; it reads the contract, pulls the frame, sorts the report — a fix in the mapping, a change in the Figma file (with the layer path), or a contract change it proposes and you approve — and saves the template. It never extends the contract or forces a template on its own.
+- With Figma's own MCP server next to it, an agent can also read the design (`get_metadata`) to start a mapping for a new design system.
+
 ## From Figma to the page
 
 1. Designers build the page frame from library components and publish.

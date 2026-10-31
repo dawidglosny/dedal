@@ -66,7 +66,8 @@ const parseArgs = (argv: string[]) => {
   return { positional, flags }
 }
 
-const defaultDeps = (): CliDeps => ({
+/** The real world: process env and cwd, `fetch`, the file system, the process's streams. */
+export const defaultDeps = (): CliDeps => ({
   env: process.env,
   cwd: process.cwd(),
   fetch: (url, init) => fetch(url, init),

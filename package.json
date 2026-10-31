@@ -34,11 +34,13 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "dedal-figma": "./bin/dedal-figma.mjs"
+    "dedal-figma": "./bin/dedal-figma.mjs",
+    "dedal-mcp": "./bin/dedal-mcp.mjs"
   },
   "files": [
     "dist",
-    "bin"
+    "bin",
+    "skills"
   ],
   "scripts": {
     "build": "tsup",

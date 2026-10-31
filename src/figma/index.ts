@@ -522,6 +522,8 @@ export function mapping<
   }
 
   return {
+    /** The contract the mapping converts to — for tools that validate templates or describe the contract (`dedal-mcp`). */
+    contract,
     /** Converts a node of a nodes response (`GET /v1/files/:key/nodes?ids=…`): its top-level layers become sections. */
     async convert(response: FigmaNodesResponse, nodeId: string): Promise<FigmaConversion<C>> {
       const entry = response.nodes[nodeId] ?? response.nodes[nodeId.replaceAll('-', ':')]

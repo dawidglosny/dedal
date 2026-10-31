@@ -26,3 +26,13 @@ The template in the repository works without a token; its images are placeholder
 3. Reload the page — it follows, with no code change. With `?debug=1`, click any element: the panel shows where each prop came from.
 
 A change the contract doesn't allow — a variant the code doesn't have, a component no registry renders — stops the pull with the template path and the Figma layer, before anything is written.
+
+## With an agent
+
+The same pull through the `dedal-mcp` server — for Claude Code, a `.mcp.json` in this directory:
+
+```json
+{ "mcpServers": { "dedal": { "command": "npx", "args": ["dedal-mcp"], "env": { "FIGMA_TOKEN": "${FIGMA_TOKEN}" } } } }
+```
+
+Then ask for the page from the Figma link: the tools `figma_to_template`, `validate_template` and `contract_schema` take `figma.mapping.mjs` as the mapping. With the `figma-to-dedal` skill (`skills/figma-to-dedal/SKILL.md` in the repository, copied to `.claude/skills/`), the agent also sorts the report — what to fix in the mapping, what to change in Figma, what needs a contract change you approve.

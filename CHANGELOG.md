@@ -5,6 +5,9 @@
 Added:
 - `dedal/figma`: `image()` — a node's image fill as `figma-image:<imageRef>`; `imageRefs()` and `replaceImageRefs()` to resolve them.
 - `dedal-figma pull --images <dir> [--image-url <prefix>]` — downloads the images (Figma's image URLs expire) and puts local paths in the templates.
+- `dedal-mcp` — an MCP server (stdio, no dependencies) for agents: `figma_to_template`, `validate_template`, `contract_schema`. `mapping()` exposes its `contract`.
+- The `figma-to-dedal` skill for Claude Code (`skills/`, shipped with the package): pull a frame, sort the report, fix the mapping, propose Figma or contract changes, save the template.
+- `examples/figma` — a landing page designed in Figma, pulled and rendered by Dedal; *A page from Figma, end to end* in the docs.
 
 ## 0.8.0
 

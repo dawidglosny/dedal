@@ -10,6 +10,7 @@ export default defineConfig({
     'devtools/panel': 'src/devtools/panel.ts',
     'figma/index': 'src/figma/index.ts',
     'figma/cli': 'src/figma/cli.ts',
+    'figma/mcp': 'src/figma/mcp.ts',
   },
   format: ['esm'],
   dts: true,
