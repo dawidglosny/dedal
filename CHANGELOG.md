@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.8.0
 
 **Figma in the package** — `dedal/figma` turns a Figma frame into templates, checked against the contract ([ADR-003](docs/adr/003-figma-mapping.md)).
 
@@ -13,7 +13,14 @@ Added:
 
 Documentation:
 - *Templates from Figma* rewritten on `dedal/figma` and the CLI; the converter that relied on invented naming conventions (`slot:` layers, props in frame names) is gone,
-- ADR-003: from Figma to templates — a mapping per component.
+- ADR-003: from Figma to templates — a mapping per component (accepted).
+
+Fixed:
+- The devtools panel drops payloads removed from the page — with `<Devtools />` in a layout that survives client-side navigation, a page without a payload no longer shows the previous page's data.
+
+Documentation site:
+- moved to Fumadocs: MDX pages, sidebar, table of contents, search, dark mode; the live examples keep Radix Themes, scoped to their preview; the same URLs,
+- a link checker for the exported site (`npm run check-links` in `site/`).
 
 ## 0.7.0
 

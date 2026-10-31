@@ -7,6 +7,6 @@ Decisions that shape Dedal, one per file: the context, the decision, the alterna
 | [000](000-positioning.md) | Positioning: the engine behind pages from Figma and page builders | accepted |
 | [001](001-scope.md) | Scope: what Dedal is and what it isn't | accepted |
 | [002](002-runtime-contract.md) | The contract at runtime: a value with schemas, validation, defaults in layout, async sections, JSON Schema | accepted |
-| [003](003-figma-mapping.md) | From Figma to templates: a mapping per component, modelled on Code Connect | proposed |
+| [003](003-figma-mapping.md) | From Figma to templates: a mapping per component, modelled on Code Connect | accepted |
 
 Format: `NNN-title.md` with *Status*, *Context*, *Decision*, *Alternatives*, *Consequences*.

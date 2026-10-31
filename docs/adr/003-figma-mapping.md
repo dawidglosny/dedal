@@ -1,6 +1,6 @@
 # 003 — From Figma to templates: a mapping per component
 
-- **Status:** proposed
+- **Status:** accepted (0.8.0)
 - **Date:** 2026-10-31
 
 ## Context
