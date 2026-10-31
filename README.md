@@ -87,12 +87,12 @@ const registry = { grid: Grid, card: Card, badge: Badge } satisfies Registry<Con
 <Render tree={page} registry={registry} />
 ```
 
-Change the structure in storage and the page follows — no frontend release (with a page cache: after `ui.invalidate()` or once the entry goes stale). Templates loaded from storage aren't checked by TypeScript, so validate them when you load them — see [Templates as JSON](docs/API.md#templates-as-json).
+Change the structure in storage and the page follows — no frontend release (with a page cache: after `ui.invalidate()` or once the entry goes stale). Templates loaded from storage aren't seen by TypeScript — with the contract as a value, `ui.validate` checks them against it — see [Templates as JSON](docs/API.md#templates-as-json).
 
 ## What you get
 
 - **Structure is data.** Templates are plain JSON — store them, version them, generate them from Figma. Changing a page doesn't change code.
-- **One typed contract.** A TypeScript type lists components and their props. Templates written in code (`ui.node()`) and registries are checked against it at compile time.
+- **One contract, checked at compile time and at runtime.** Components, props and slots — as a TypeScript type, or as a value with schemas (zod, valibot…) the type is inferred from. Then templates from storage or Figma are validated with paths to every problem (`news.children[2].props.size`), devtools flag mismatches in debug builds, and the contract exports to JSON Schema — for a page builder's property panels or a CMS.
 - **Data placed by selectors.** `card`, `#featured`, `card > :slot(badge)`, `card:nth-child(odd)` — CSS syntax you already know, instead of fragile indexes. Adding a heading to a template doesn't shift the data.
 - **Explicit rules for missing data.** Fewer articles than cards, an API that fails, an empty section — each case has a default that keeps the page alive and an option to make it strict. Nothing disappears silently: everything is in the report.
 - **Variants without copies.** `patch` and `remove` adjust a template per device, site or A/B variant — one template, many versions.

@@ -37,7 +37,7 @@ const registry = { grid: Grid, card: Card, badge: Badge } satisfies Registry<Con
 
 const features = [
   ['Structure is data', 'Templates are plain JSON — store them, version them, generate them from Figma. Rearranging a screen doesn’t change code.'],
-  ['One typed contract', 'A TypeScript type of components and props, shared by the server and every frontend. Registries are checked at compile time.'],
+  ['One contract, two checks', 'Components, props and slots — typed at compile time, validated at runtime (templates from storage or Figma), exported to JSON Schema for a page builder.'],
   ['Data placed by selectors', '`card`, `#featured`, `card > :slot(badge)` — CSS syntax instead of indexes. Adding a heading doesn’t shift the data.'],
   ['Explicit rules for missing data', 'Fewer items than places, a failing API, an empty section: safe defaults, a strict mode, and a report of everything dropped.'],
   ['Variants without copies', '`patch` and `remove` adapt one template per device, site or experiment.'],

@@ -76,7 +76,7 @@ Dedal decides **what** is on the page. Your framework and components decide **ho
 ## What you get
 
 - **Structure is data** — plain JSON templates you can store, version and generate.
-- **One typed contract** — a TypeScript type of components and props, shared by the server and every frontend; templates in code and registries are checked at compile time.
+- **One contract, two checks** — components, props and slots, shared by the server and every frontend: typed at compile time, and — written as a value with schemas — validated at runtime (templates from storage or Figma, with a path to every problem) and exported to JSON Schema (a page builder's property panels).
 - **Data placed by selectors** — \`card\`, \`#featured\`, \`card > :slot(badge)\`: CSS syntax instead of indexes, so adding a heading doesn't shift the data.
 - **Explicit rules for missing data** — fewer items than places, a failing API, an empty section: safe defaults, a strict mode when you want it, and a report of everything that was dropped.
 - **Variants without copies** — \`patch\` and \`remove\` adapt one template per device, site or experiment.
@@ -116,6 +116,8 @@ export type Contract = {
   badge: { label?: string }
 }
 \`\`\`
+
+Here the contract is a TypeScript type — the simplest start. When templates come from outside the code (a database, a CMS, Figma), write it as a value with schemas instead (\`defineContract\`): the same type is inferred from it, and templates are checked against it at runtime (*Templates in a database or CMS*).
 
 ## 3. A page: structure and data
 
