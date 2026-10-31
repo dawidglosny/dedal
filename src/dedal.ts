@@ -18,6 +18,7 @@ import {
 } from './resolve'
 import type { BlockDefinition, ComponentDefaults, LayoutNode, Selected } from './types'
 import { validateTemplate, type ValidationResult } from './validate'
+import { contractToJsonSchema, type ContractJsonSchema, type ContractJsonSchemaOptions } from './json-schema'
 
 /** Options of `createDedal()`: the contract, default props, `toProps` mappings, the ID generator, assignment policies and the cache. */
 export type DedalOptions<C> = {
@@ -132,6 +133,12 @@ function createInstance<C extends object>(options: DedalOptions<C>) {
       const errors = await validateTemplate(requireContract(options.contract), value, path)
       return errors.length ? { ok: false, errors } : { ok: true, value: value as BlockDefinition<C>, errors: [] }
     },
+    /**
+     * The contract as JSON Schema: a template block (to validate templates outside JavaScript) and the full props schema
+     * of every component (e.g. a page builder's property panel). Needs `createDedal({ contract })`.
+     */
+    jsonSchema: (jsonSchemaOptions?: ContractJsonSchemaOptions): ContractJsonSchema =>
+      contractToJsonSchema(requireContract(options.contract), jsonSchemaOptions),
     /** `validate` for templates stored per section — `{ news: block, hero: block }`; paths start with the section key. */
     validateSections: async (value: unknown): Promise<ValidationResult<Record<string, BlockDefinition<C>>>> => {
       const contract = requireContract(options.contract)
@@ -145,7 +152,7 @@ function createInstance<C extends object>(options: DedalOptions<C>) {
 }
 
 const requireContract = (contract: ContractDefinition | undefined): ContractDefinition => {
-  if (!contract) throw new Error('validate: the instance has no contract value — create it with createDedal({ contract: defineContract({ … }) })')
+  if (!contract) throw new Error('the instance has no contract value — create it with createDedal({ contract: defineContract({ … }) })')
   return contract
 }
 

@@ -2,6 +2,8 @@
  * A contract defined as a value (schemas) — the inferred type must work with every existing type unchanged.
  * Type assertions are checked by `npm run typecheck`; the runtime part by vitest.
  */
+import { toJsonSchema } from '@valibot/to-json-schema'
+import Ajv2020 from 'ajv/dist/2020'
 import * as v from 'valibot'
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import { z } from 'zod'
@@ -240,5 +242,56 @@ describe('async sections — templates from storage', () => {
     const result = await home.build({ name: 'home' })
     expect(result.sections[0].layout.children).toHaveLength(2) // 3 cards, 2 data items: the third is removed
     expect(result.report.sections.news.removed).toEqual(['news.2'])
+  })
+})
+
+describe('jsonSchema', () => {
+  const ui = createDedal({ contract: withZod })
+  const templates: unknown[] = [
+    { component: 'grid', props: { columns: 2 }, children: [{ component: 'card', repeat: 3, slots: { badge: { component: 'divider' } } }] },
+    { component: 'card' }, // props left to the data
+    { component: 'tabs', slots: { content: [{ component: 'card', props: { title: 'A', size: 'lg' } }] } },
+    { component: 'carousel' },
+    { component: 'card', props: { size: 'xl' } },
+    { component: 'card', slots: { badges: { component: 'divider' } } },
+    { component: 'tabs', slots: { content: { component: 'card' } } },
+    { component: 'card', repeat: 0 },
+    { component: 'card', colour: 'red' },
+    { component: 'grid', children: [{ component: 'grid', children: [{ component: 'card', props: { href: 1 } }] }] },
+  ]
+
+  it('the template schema accepts and rejects the same templates as ui.validate', async () => {
+    const check = new Ajv2020({ strict: false }).compile(ui.jsonSchema().template)
+    const bySchema = templates.map(template => check(template))
+    const byValidate = await Promise.all(templates.map(async template => (await ui.validate(template)).ok))
+
+    expect(bySchema).toEqual(byValidate)
+    expect(bySchema).toEqual([true, true, true, false, false, false, false, false, false, false])
+  })
+
+  it('the props schemas keep the required props — for a property panel', () => {
+    expect(ui.jsonSchema().props.card).toEqual(
+      expect.objectContaining({
+        type: 'object',
+        properties: expect.objectContaining({ size: expect.objectContaining({ enum: ['sm', 'md', 'lg'] }) }),
+        required: ['title'],
+      })
+    )
+    expect(ui.jsonSchema().unconverted).toEqual([])
+  })
+
+  it('libraries without Standard JSON Schema take a converter (valibot); without one, props stay open and are listed', () => {
+    const local = createDedal({ contract: withValibot })
+
+    const withConverter = local.jsonSchema({ propsToJsonSchema: schema => toJsonSchema(schema as never) as never })
+    expect(withConverter.props.card).toEqual(expect.objectContaining({ required: ['title'] }))
+    expect(withConverter.unconverted).toEqual([])
+
+    expect(local.jsonSchema().unconverted).toEqual(['grid', 'card', 'tabs'])
+  })
+
+  it('is plain JSON', () => {
+    const schema = ui.jsonSchema()
+    expect(JSON.parse(JSON.stringify(schema))).toEqual(schema)
   })
 })
