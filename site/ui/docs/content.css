@@ -1,0 +1,174 @@
+/*
+ * The parts of the docs pages Fumadocs has no component for: case statuses, the live result, tasks, the case list.
+ * Colors come from Fumadocs' theme variables, so they follow its light/dark mode.
+ */
+
+:root {
+  --dedal-ok: #2b8a3e;
+  --dedal-warning: #b7791f;
+  --dedal-error: #c92a2a;
+  --dedal-throws: #862e9c;
+}
+
+.dark {
+  --dedal-ok: #4cc38a;
+  --dedal-warning: #f1b44c;
+  --dedal-error: #ff6b6b;
+  --dedal-throws: #d08cf0;
+}
+
+/* a case status: the dot (sidebar, case list) and the badge (title) */
+
+.dot {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.dot.ok { background: var(--dedal-ok); }
+.dot.warning { background: var(--dedal-warning); }
+.dot.error { background: var(--dedal-error); }
+.dot.throws { background: var(--dedal-throws); }
+
+.badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 10px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+.badge.ok { color: var(--dedal-ok); }
+.badge.warning { color: var(--dedal-warning); }
+.badge.error { color: var(--dedal-error); }
+.badge.throws { color: var(--dedal-throws); }
+
+/* "See it live" */
+
+.callout {
+  margin: 20px 0;
+  padding: 12px 16px;
+  border: 1px solid var(--color-fd-border);
+  border-left: 4px solid var(--color-fd-primary);
+  border-radius: 8px;
+  background: var(--color-fd-card);
+}
+
+.callout-throws {
+  border-left-color: var(--dedal-throws);
+}
+
+.callout-throws strong:first-child {
+  color: var(--dedal-throws);
+}
+
+.callout-note {
+  color: var(--color-fd-muted-foreground);
+}
+
+.code-error pre,
+.code-error .shiki span {
+  color: var(--dedal-error) !important;
+  white-space: pre-wrap;
+}
+
+/* the live result: Radix Themes, always light, styled only by the scoped stylesheet (app/radix-themes.css) */
+
+.result {
+  margin: 0 0 20px;
+  padding: 8px 24px;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 10px;
+  background: #fff;
+  color: #1c2024;
+  color-scheme: light;
+}
+
+/* Radix Themes treats a <Theme> without a parent theme as the page root and gives it min-height: 100vh */
+.result .radix-themes {
+  min-height: 0;
+}
+
+.missing {
+  padding: 12px;
+  border: 2px dashed #c33;
+  border-radius: 6px;
+  color: #c33;
+}
+
+.spoiler summary {
+  margin-bottom: 12px;
+  color: var(--color-fd-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* tasks */
+
+.task-symptom {
+  font-weight: 600;
+}
+
+.task-hint {
+  margin-top: 2px;
+  color: var(--color-fd-muted-foreground);
+}
+
+.task-hint > span {
+  color: var(--color-fd-primary);
+  font-weight: 600;
+}
+
+.tasks summary {
+  color: var(--dedal-ok);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.task-solution {
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--color-fd-muted);
+}
+
+/* the cases of a group */
+
+.case-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.case-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 2px 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 10px;
+  background: var(--color-fd-card);
+  color: var(--color-fd-card-foreground);
+  text-decoration: none;
+}
+
+.case-card:hover {
+  background: var(--color-fd-accent);
+}
+
+.case-title {
+  font-weight: 600;
+}
+
+.case-level {
+  grid-column: 2;
+  color: var(--color-fd-muted-foreground);
+  font-size: 12.5px;
+}

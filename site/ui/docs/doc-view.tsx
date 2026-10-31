@@ -4,7 +4,8 @@ import { Theme } from '@radix-ui/themes'
 import { inspect } from 'dedal/devtools'
 import { DevtoolsData, Render, type Registry } from 'dedal/react'
 import { Devtools } from 'dedal/react/devtools'
-import { Code, langOf } from '@/components/code'
+import { langOf } from '@/components/code'
+import { Code } from '@/components/docs-code'
 import { GITHUB } from '@/components/header'
 import type { Contract, Ctx } from '../contract'
 import { radixThemes } from '../registries/radix-themes'
@@ -13,7 +14,7 @@ import { LIVE_THROWS, live } from './live'
 import { caseCode, codeOf, runCase } from './run'
 import type { CaseLevel, CaseOutput, DocCase, DocGroup } from './types'
 
-const levels: Record<CaseLevel, { label: string; className: string }> = {
+export const levels: Record<CaseLevel, { label: string; className: string }> = {
   ok: { label: 'works', className: 'ok' },
   warning: { label: 'devtools warning', className: 'warning' },
   error: { label: 'devtools error', className: 'error' },
@@ -41,7 +42,7 @@ function LinkTo({ href, children }: { href: string; children: ReactNode }) {
 }
 
 /** Inline text: `code`, **bold**, *emphasis* (tab names) and [links](url). */
-function Inline({ text }: { text: string }) {
+export function Inline({ text }: { text: string }) {
   return (
     <>
       {text.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\]\([^)\s]+\)|\*[^*]+\*)/).map((part, i) =>
@@ -295,7 +296,7 @@ function Tasks({ tasks }: { tasks: NonNullable<DocCase['tasks']> }) {
   )
 }
 
-function Badge({ level }: { level: CaseLevel }) {
+export function Badge({ level }: { level: CaseLevel }) {
   return <span className={`badge ${levels[level].className}`}>{levels[level].label}</span>
 }
 
@@ -339,8 +340,18 @@ function Pager({ href }: { href: string }) {
   )
 }
 
-/** A documentation page: description, code, result and what devtools report (or the thrown error). */
-export async function DocView({ group, docCase }: { group: DocGroup; docCase: DocCase }) {
+type TocEntry = { id: string; title: string; level?: number }
+
+/**
+ * Radix Themes' CSS, scoped to `.dedal-preview` (see `app/radix-themes.css/route.ts`) and loaded only by the pages that
+ * render a live result: React hoists the stylesheet into `<head>` and loads it once.
+ */
+function PreviewStyles() {
+  return <link rel="stylesheet" href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/radix-themes.css`} precedence="radix-themes" />
+}
+
+/** The content of a case page, under its title: description, code, result and what devtools report (or the thrown error). */
+export async function caseContent(group: DocGroup, docCase: DocCase): Promise<{ toc: TocEntry[]; body: ReactNode }> {
   const registry = docCase.registry ?? (radixThemes as Partial<Registry<Contract>>)
   const run = await runCase(docCase, registry)
   const toc = [
@@ -355,12 +366,8 @@ export async function DocView({ group, docCase }: { group: DocGroup; docCase: Do
         ]),
   ]
 
-  return (
-    <Shell current={docCase.slug} toc={toc}>
-      <div className="eyebrow">{group.title}</div>
-      <h1>
-        {docCase.title} <Badge level={docCase.level} />
-      </h1>
+  const body = (
+    <>
       <Prose text={docCase.description} />
       <LiveHint text={docCase.level === 'throws' ? LIVE_THROWS : live[docCase.slug]} throws={docCase.level === 'throws'} />
 
@@ -391,7 +398,8 @@ export async function DocView({ group, docCase }: { group: DocGroup; docCase: Do
       ) : (
         <>
           <h2 id="result">Result</h2>
-          <div className="result">
+          <PreviewStyles />
+          <div className="result dedal-preview not-prose">
             <Theme appearance="light" accentColor="indigo" grayColor="slate" radius="medium" hasBackground={false}>
               <Render
                 tree={run.resolved}
@@ -416,27 +424,22 @@ export async function DocView({ group, docCase }: { group: DocGroup; docCase: Do
           <DevtoolsData payload={run.payload} />
         </>
       )}
-
-      <Pager href={`/docs/${docCase.slug}`} />
-      <a className="edit" href={editLink(`ui/docs/${group.file}`)}>
-        Edit this page on GitHub
-      </a>
-    </Shell>
+    </>
   )
+  return { toc, body }
 }
 
-/** A group page: the context of this part of Dedal, then its cases. */
-export function GroupView({ group }: { group: DocGroup }) {
-  return (
-    <Shell current={group.slug} toc={[...proseHeadings(group.intro), ...(group.cases.length ? [{ id: 'cases', title: 'Cases in this group' }] : [])]}>
-      <div className="eyebrow">Documentation</div>
-      <h1>{group.title}</h1>
+/** The content of a group page, under its title: the context of this part of Dedal, then its cases. */
+export function groupContent(group: DocGroup): { toc: TocEntry[]; body: ReactNode } {
+  const toc = [...proseHeadings(group.intro), ...(group.cases.length ? [{ id: 'cases', title: 'Cases in this group' }] : [])]
+  const body = (
+    <>
       <Prose text={group.intro} />
 
       {group.cases.length > 0 && (
         <>
           <h2 id="cases">Cases in this group</h2>
-          <div className="case-list">
+          <div className="case-list not-prose">
             {group.cases.map(docCase => (
               <Link key={docCase.slug} href={docHref(docCase.slug)} className="case-card">
                 <span className={`dot ${levels[docCase.level].className}`} />
@@ -447,7 +450,41 @@ export function GroupView({ group }: { group: DocGroup }) {
           </div>
         </>
       )}
+    </>
+  )
+  return { toc, body }
+}
 
+/** The file to edit for a page, relative to the repository root. */
+export const editPath = (group: DocGroup, docCase?: DocCase) =>
+  docCase ? `site/ui/docs/${group.file}` : (group.source ?? 'site/ui/docs/intros.ts')
+
+/** The old chrome's case page (before Fumadocs) — no longer routed. */
+export async function DocView({ group, docCase }: { group: DocGroup; docCase: DocCase }) {
+  const { toc, body } = await caseContent(group, docCase)
+  return (
+    <Shell current={docCase.slug} toc={toc}>
+      <div className="eyebrow">{group.title}</div>
+      <h1>
+        {docCase.title} <Badge level={docCase.level} />
+      </h1>
+      {body}
+      <Pager href={`/docs/${docCase.slug}`} />
+      <a className="edit" href={editLink(`ui/docs/${group.file}`)}>
+        Edit this page on GitHub
+      </a>
+    </Shell>
+  )
+}
+
+/** The old chrome's group page (before Fumadocs) — no longer routed. */
+export function GroupView({ group }: { group: DocGroup }) {
+  const { toc, body } = groupContent(group)
+  return (
+    <Shell current={group.slug} toc={toc}>
+      <div className="eyebrow">Documentation</div>
+      <h1>{group.title}</h1>
+      {body}
       <Pager href={`/docs/${group.slug}`} />
       <a className="edit" href={group.source ? `${GITHUB}/blob/main/${group.source}` : editLink('ui/docs/intros.ts')}>
         Edit this page on GitHub

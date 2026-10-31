@@ -11,7 +11,11 @@
   },
   "dependencies": {
     "@radix-ui/themes": "^3.3.0",
+    "@types/mdx": "^2.0.14",
     "dedal": "file:vendor/dedal.tgz",
+    "fumadocs-core": "^16.17.9",
+    "fumadocs-mdx": "^15.4.10",
+    "fumadocs-ui": "^16.17.9",
     "next": "^16.4.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
@@ -19,9 +23,12 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "postcss": "^8.5.32",
+    "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3"
   }
 }

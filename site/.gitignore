@@ -5,3 +5,4 @@ out/
 public/types/
 next-env.d.ts
 *.tsbuildinfo
+.source/
