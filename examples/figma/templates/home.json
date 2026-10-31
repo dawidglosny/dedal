@@ -106,7 +106,7 @@
           "media": {
             "component": "image",
             "props": {
-              "src": "figma-image:f36126ad54bf950ebdceaa024f76d6bfdefecb3d",
+              "src": "/figma/f36126ad54bf950ebdceaa024f76d6bfdefecb3d.png",
               "alt": "Figma frame → typed JSON → Dedal → your page"
             }
           }
@@ -196,7 +196,7 @@
       {
         "component": "image",
         "props": {
-          "src": "figma-image:c707a6594499f1267bb1e24fbda16aae0fc56003",
+          "src": "/figma/c707a6594499f1267bb1e24fbda16aae0fc56003.png",
           "alt": "A Figma frame next to the template Dedal produces from it"
         }
       },
@@ -363,7 +363,7 @@
           "media": {
             "component": "image",
             "props": {
-              "src": "figma-image:bbd8e9a1878a1c103f26c67cbd982c0f16768cd0",
+              "src": "/figma/bbd8e9a1878a1c103f26c67cbd982c0f16768cd0.png",
               "alt": "The Dedal devtools panel: where each prop of a card came from"
             }
           }
