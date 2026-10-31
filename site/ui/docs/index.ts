@@ -77,7 +77,7 @@ export const groups: DocGroup[] = [
   {
     slug: 'templates-from-figma',
     title: 'Templates from Figma',
-    description: 'A naming convention and a converter over the Figma REST API: design the page, publish, get a template.',
+    description: 'dedal/figma and dedal-figma pull: component properties, native slots and text styles mapped to the contract; what didn\'t fit, reported.',
     intro: intros.guideFigma,
     file: '',
     cases: [],

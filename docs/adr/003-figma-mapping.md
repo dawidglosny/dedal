@@ -55,23 +55,29 @@ export const radixFromFigma = mapping(radixContract, { /* … */ }, { componentN
 
 const result = await shadcnFromFigma.convert(response, '5:2')
 // { ok: true, sections: { hero: block, features: block, … }, unmapped: [layer paths] }
-// { ok: false, errors: [{ path: 'features.children[1].props.variant', message }], unmapped }
+// { ok: false, errors: [{ path: 'features.children[1].props.variant', figma: 'features/features-row[0]/FeatureCard', message }], … }
 ```
 
 0. **One contract per component library.** A design built on a library is converted with that library's contract and rendered with that library's registry: the shadcn/ui frame becomes a shadcn/ui template and page, the Radix frame a Radix template and page. The contract mirrors the library's components and their values almost one to one — there is no translation to "neutral" values between libraries; that would be a different design, not the same page.
-1. **Convention first.** A Figma component (or component set) with the contract component's name, and properties with the props' names, need no configuration — names compared case-insensitively, Figma's `#id` suffix dropped (`Label#3:0` → `label`). A mapping is written only where names differ — e.g. a library suffix in Figma (`Button (Radix)` → `button`), set once for all components with a name rule.
+1. **Convention first — for components.** A Figma component (or component set) with the contract component's name, and properties with the props' names, need no configuration — names compared case-insensitively, Figma's `#id` suffix dropped (`Label#3:0` → `label`). A mapping is written only where names differ — e.g. a library suffix in Figma (`Button (Radix)` → `button`), set once for all components with a name rule (applied to the names in `component()` too). The convention fills only props the contract declares, so it needs the props' names: for a props schema that can't be read as JSON Schema (e.g. a union), only explicit sources apply.
+   - **Ambiguity fails early:** two entries for the same Figma component, or two contract components whose names are the same for Figma (`section_heading` / `sectionHeading`), throw when the mapping is created. A prop name that isn't in the contract is a compile error, and an error at creation.
 2. **An explicit mapping per component**, as in Code Connect:
    - `text(property)` — a `TEXT` property,
    - `variant(property, values?)` — a `VARIANT` property, optionally with a value map,
    - `boolean(property, values?)` — a `BOOLEAN` property,
-   - `swap(property, toValue?)` — an `INSTANCE_SWAP` property, resolved to the swapped component's name (or a value derived from it),
-   - `layer(name)` — the content of a text layer inside the node (`textContent` in Code Connect),
-   - `slot(property)` — a native Figma slot → a Dedal slot (`'one'` or `'many'` from the contract).
-3. **Plain frames** map by name (`frame('hero', …)`), their content from text layers; their child frames and instances become children.
+   - `swap(property, toValue?)` — an `INSTANCE_SWAP` property, resolved to the swapped component's name (or a value derived from it; for a variant of a component set, `toValue` also gets the variant's own name),
+   - `layer(name)` — the content of a text layer inside the node (`textContent` in Code Connect); it takes the first layer of that name not read yet,
+   - **native slots** (`SLOT` properties; the REST API returns them as `SLOT` nodes bound through `componentPropertyReferences.slotContentId`, content included): a slot named like a contract slot fills it — `'one'` or `'many'` from the contract — and any other slot becomes the block's children; explicitly `component('Split', {}, { slots: { media: 'Media' }, children: 'Content' })`. Several slots merged into children give a warning; with `children` set, other unmapped slots are reported.
+
+   A prop mapped explicitly is never filled by the convention, even when its source finds nothing. Sources take only what they read — `text('Caption')` reads the property, not a text layer called `Caption`.
+3. **Plain frames map only explicitly** (`frame('hero', …)`, a name or an anchored pattern), their content from text layers; their child frames and instances become children. **The content of an instance isn't converted** — it belongs to the component — except what sits in its native slots; a mapped instance nested elsewhere in an instance is reported (expose it as a component property or put it in a slot). There is no naming convention for frames: frames are named freely, and mock-ups in a design reuse component names (a mock canvas with frames `hero`, `grid`, `cta`). A plain frame that isn't mapped is layout — its children are converted in its place.
 4. **Hidden layers** (`visible: false`) are skipped.
-5. **Nothing is dropped silently.** Layers that match no mapping and aren't plain layout are listed in `unmapped`, with their paths (`features.features-row[0]`); purely visual layers (vectors, shapes) are ignored.
-6. **Validated against the contract** ([002](002-runtime-contract.md)): the result goes through `validateSections`; errors carry the path in the template, and the Figma layer it came from.
-7. **Sections:** every top-level layer of the converted frame is a section — its name is the section key.
+   - **Loose text layers** — text outside any mapped component, e.g. a section of plain text — are reported by default. With `{ text: 'text' }` they become blocks of that contract component: `{ component: 'text', props: { text, style } }`, where `style` is the name of the layer's Figma text style (`h2`, `body`), a design-system token, not a font size. Structured content (steps, code blocks, link lists) still needs components; the text option keeps it from disappearing.
+5. **Nothing is dropped silently.** Layers that match no mapping and aren't plain layout are listed in `unmapped`, with their paths (`features/features-row[0]`); purely visual layers (vectors, shapes) are ignored.
+   - **Decorative layers are ignored explicitly**: `mapping(contract, entries, { ignore: ['pipeline', /-mock$/] })`. An ignored layer is skipped whole — no instance inside it is lifted into the template — and reported once in `unmapped`. Without it, an instance deep inside an unmapped illustration (a badge in a mock panel) would become a sibling of real blocks.
+   - **Warnings** for what matches the contract but probably not the design: a mapped frame that ends up with no props and no children (`warnings: [{ path, message }]`). The block stays; `ok` means *valid against the contract*, not *faithful to the design* — that's what `unmapped` and `warnings` are for.
+6. **Validated against the contract** ([002](002-runtime-contract.md)): every section goes through `validateTemplate`; errors carry the path in the template (`path`) and the Figma layer of the block it's in (`figma`).
+7. **Sections:** every top-level layer of the converted frame is a section — its name is the section key (`hero`, then `hero-2` for a duplicate; Figma paths in reports use the key). A section frame with several blocks needs the `section` option (a container component).
 8. **Sources:** the input is a node in the REST API shape. First adapter: the REST response (`convert(response, nodeId)`), and a CLI `dedal-figma pull <file> <node>` that fetches it with a token from the environment. A Figma plugin (the Plugin API sees native slots) comes later, on the same mapping.
 
 ## Alternatives
@@ -86,4 +92,5 @@ const result = await shadcnFromFigma.convert(response, '5:2')
 - The *Templates from Figma* guide is rewritten on `dedal/figma`; the prototype converter goes away.
 - Tests run on the real, trimmed REST response of the demo file — no network in tests.
 - The demo: each version of the landing page converted with its own library's contract and rendered with that library — the shadcn/ui frame as a shadcn/ui page, the Radix frame as a Radix page; the docs site's home page built from one of them by Dedal.
-- Open: whether the REST API returns native slots (to check on a file that uses them); the plugin adapter; incremental updates (only changed sections).
+- Checked (2026-11-01): the REST API returns native slots, nested ones too. The component version of the demo (`test/fixtures/figma-landing-components.json` — sections as library components, content in slots, mock-ups as `Image` instances) converts with one explicit mapping entry; only a deliberately messy frame is reported.
+- Open: image sources (`imageRef` in an image fill → a URL through `GET /v1/images`); the plugin adapter; incremental updates (only changed sections).

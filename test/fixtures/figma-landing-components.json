@@ -1,0 +1,3658 @@
+{
+ "name": "Dedal — landing",
+ "nodes": {
+  "31:398": {
+   "document": {
+    "id": "31:398",
+    "name": "Dedal — landing (desktop) · components",
+    "type": "FRAME",
+    "children": [
+     {
+      "id": "31:400",
+      "name": "nav",
+      "type": "INSTANCE",
+      "componentId": "30:410",
+      "componentProperties": {
+       "Links#30:6": {
+        "type": "SLOT",
+        "value": {
+         "guid": {
+          "sessionID": 31,
+          "localID": 806
+         }
+        },
+        "preferredValues": []
+       },
+       "Actions#30:7": {
+        "type": "SLOT",
+        "value": {
+         "guid": {
+          "sessionID": 31,
+          "localID": 415
+         }
+        },
+        "preferredValues": []
+       }
+      },
+      "children": [
+       {
+        "id": "I31:400;30:411",
+        "name": "Logo",
+        "type": "INSTANCE",
+        "componentId": "3:158",
+        "children": [
+         {
+          "id": "I31:400;30:411;3:159",
+          "name": "mark",
+          "type": "FRAME",
+          "children": [
+           {
+            "id": "I31:400;30:411;3:160",
+            "name": "D",
+            "type": "TEXT",
+            "characters": "D"
+           }
+          ]
+         },
+         {
+          "id": "I31:400;30:411;3:162",
+          "name": "wordmark",
+          "type": "TEXT",
+          "characters": "Dedal",
+          "styles": {
+           "text": "2:38"
+          }
+         }
+        ]
+       },
+       {
+        "id": "I31:400;30:416",
+        "name": "Links",
+        "type": "SLOT",
+        "componentPropertyReferences": {
+         "slotContentId": "Links#30:6"
+        },
+        "children": [
+         {
+          "id": "I31:400;30:416;31:807",
+          "name": "Button",
+          "type": "INSTANCE",
+          "componentId": "3:94",
+          "componentProperties": {
+           "Icon right#3:11": {
+            "type": "BOOLEAN",
+            "value": false
+           },
+           "Label#3:0": {
+            "type": "TEXT",
+            "value": "Docs"
+           },
+           "variant": {
+            "value": "ghost",
+            "type": "VARIANT",
+            "boundVariables": {}
+           },
+           "size": {
+            "value": "default",
+            "type": "VARIANT",
+            "boundVariables": {}
+           }
+          },
+          "children": [
+           {
+            "id": "I31:400;30:416;31:807;3:95",
+            "name": "label",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Label#3:0"
+            },
+            "characters": "Docs",
+            "styles": {
+             "text": "2:42"
+            }
+           },
+           {
+            "id": "I31:400;30:416;31:807;3:96",
+            "name": "icon-right",
+            "visible": false,
+            "type": "INSTANCE",
+            "componentPropertyReferences": {
+             "visible": "Icon right#3:11"
+            },
+            "componentId": "3:46",
+            "children": [
+             {
+              "id": "I31:400;30:416;31:807;3:96;3:43",
+              "name": "glyph",
+              "type": "FRAME"
+             }
+            ]
+           }
+          ]
+         },
+         {
+          "id": "I31:400;30:416;31:811",
+          "name": "Button",
+          "type": "INSTANCE",
+          "componentId": "3:94",
+          "componentProperties": {
+           "Icon right#3:11": {
+            "type": "BOOLEAN",
+            "value": false
+           },
+           "Label#3:0": {
+            "type": "TEXT",
+            "value": "Guides"
+           },
+           "variant": {
+            "value": "ghost",
+            "type": "VARIANT",
+            "boundVariables": {}
+           },
+           "size": {
+            "value": "default",
+            "type": "VARIANT",
+            "boundVariables": {}
+           }
+          },
+          "children": [
+           {
+            "id": "I31:400;30:416;31:811;3:95",
+            "name": "label",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Label#3:0"
+            },
+            "characters": "Guides",
+            "styles": {
+             "text": "2:42"
+            }
+           },
+           {
+            "id": "I31:400;30:416;31:811;3:96",
+            "name": "icon-right",
+            "visible": false,
+            "type": "INSTANCE",
+            "componentPropertyReferences": {
+             "visible": "Icon right#3:11"
+            },
+            "componentId": "3:46",
+            "children": [
+             {
+              "id": "I31:400;30:416;31:811;3:96;3:43",
+              "name": "glyph",
+              "type": "FRAME"
+             }
+            ]
+           }
+          ]
+         },
+         {
+          "id": "I31:400;30:416;31:815",
+          "name": "Button",
+          "type": "INSTANCE",
+          "componentId": "3:94",
+          "componentProperties": {
+           "Icon right#3:11": {
+            "type": "BOOLEAN",
+            "value": false
+           },
+           "Label#3:0": {
+            "type": "TEXT",
+            "value": "Examples"
+           },
+           "variant": {
+            "value": "ghost",
+            "type": "VARIANT",
+            "boundVariables": {}
+           },
+           "size": {
+            "value": "default",
+            "type": "VARIANT",
+            "boundVariables": {}
+           }
+          },
+          "children": [
+           {
+            "id": "I31:400;30:416;31:815;3:95",
+            "name": "label",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Label#3:0"
+            },
+            "characters": "Examples",
+            "styles": {
+             "text": "2:42"
+            }
+           },
+           {
+            "id": "I31:400;30:416;31:815;3:96",
+            "name": "icon-right",
+            "visible": false,
+            "type": "INSTANCE",
+            "componentPropertyReferences": {
+             "visible": "Icon right#3:11"
+            },
+            "componentId": "3:46",
+            "children": [
+             {
+              "id": "I31:400;30:416;31:815;3:96;3:43",
+              "name": "glyph",
+              "type": "FRAME"
+             }
+            ]
+           }
+          ]
+         },
+         {
+          "id": "I31:400;30:416;31:819",
+          "name": "Button",
+          "type": "INSTANCE",
+          "componentId": "3:94",
+          "componentProperties": {
+           "Icon right#3:11": {
+            "type": "BOOLEAN",
+            "value": false
+           },
+           "Label#3:0": {
+            "type": "TEXT",
+            "value": "Changelog"
+           },
+           "variant": {
+            "value": "ghost",
+            "type": "VARIANT",
+            "boundVariables": {}
+           },
+           "size": {
+            "value": "default",
+            "type": "VARIANT",
+            "boundVariables": {}
+           }
+          },
+          "children": [
+           {
+            "id": "I31:400;30:416;31:819;3:95",
+            "name": "label",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Label#3:0"
+            },
+            "characters": "Changelog",
+            "styles": {
+             "text": "2:42"
+            }
+           },
+           {
+            "id": "I31:400;30:416;31:819;3:96",
+            "name": "icon-right",
+            "visible": false,
+            "type": "INSTANCE",
+            "componentPropertyReferences": {
+             "visible": "Icon right#3:11"
+            },
+            "componentId": "3:46",
+            "children": [
+             {
+              "id": "I31:400;30:416;31:819;3:96;3:43",
+              "name": "glyph",
+              "type": "FRAME"
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "id": "I31:400;30:417",
+        "name": "Actions",
+        "type": "SLOT",
+        "componentPropertyReferences": {
+         "slotContentId": "Actions#30:7"
+        },
+        "children": [
+         {
+          "id": "I31:400;30:417;31:416",
+          "name": "Button",
+          "type": "INSTANCE",
+          "componentId": "3:88",
+          "componentProperties": {
+           "Icon right#3:11": {
+            "type": "BOOLEAN",
+            "value": false
+           },
+           "Label#3:0": {
+            "type": "TEXT",
+            "value": "GitHub"
+           },
+           "variant": {
+            "value": "outline",
+            "type": "VARIANT",
+            "boundVariables": {}
+           },
+           "size": {
+            "value": "default",
+            "type": "VARIANT",
+            "boundVariables": {}
+           }
+          },
+          "children": [
+           {
+            "id": "I31:400;30:417;31:416;3:89",
+            "name": "label",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Label#3:0"
+            },
+            "characters": "GitHub",
+            "styles": {
+             "text": "2:42"
+            }
+           },
+           {
+            "id": "I31:400;30:417;31:416;3:90",
+            "name": "icon-right",
+            "visible": false,
+            "type": "INSTANCE",
+            "componentPropertyReferences": {
+             "visible": "Icon right#3:11"
+            },
+            "componentId": "3:46",
+            "children": [
+             {
+              "id": "I31:400;30:417;31:416;3:90;3:43",
+              "name": "glyph",
+              "type": "FRAME"
+             }
+            ]
+           }
+          ]
+         },
+         {
+          "id": "I31:400;30:417;31:420",
+          "name": "Button",
+          "type": "INSTANCE",
+          "componentId": "3:76",
+          "componentProperties": {
+           "Icon right#3:11": {
+            "type": "BOOLEAN",
+            "value": false
+           },
+           "Label#3:0": {
+            "type": "TEXT",
+            "value": "Get started"
+           },
+           "variant": {
+            "value": "default",
+            "type": "VARIANT",
+            "boundVariables": {}
+           },
+           "size": {
+            "value": "default",
+            "type": "VARIANT",
+            "boundVariables": {}
+           }
+          },
+          "children": [
+           {
+            "id": "I31:400;30:417;31:420;3:77",
+            "name": "label",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Label#3:0"
+            },
+            "characters": "Get started",
+            "styles": {
+             "text": "2:42"
+            }
+           },
+           {
+            "id": "I31:400;30:417;31:420;3:78",
+            "name": "icon-right",
+            "visible": false,
+            "type": "INSTANCE",
+            "componentPropertyReferences": {
+             "visible": "Icon right#3:11"
+            },
+            "componentId": "3:46",
+            "children": [
+             {
+              "id": "I31:400;30:417;31:420;3:78;3:43",
+              "name": "glyph",
+              "type": "FRAME"
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "id": "31:421",
+      "name": "hero",
+      "type": "INSTANCE",
+      "componentId": "29:398",
+      "componentProperties": {
+       "Content#29:3": {
+        "type": "SLOT",
+        "value": {
+         "guid": {
+          "sessionID": 31,
+          "localID": 431
+         }
+        },
+        "preferredValues": []
+       },
+       "tone": {
+        "value": "default",
+        "type": "VARIANT",
+        "boundVariables": {}
+       }
+      },
+      "children": [
+       {
+        "id": "I31:421;29:399",
+        "name": "Content",
+        "type": "SLOT",
+        "componentPropertyReferences": {
+         "slotContentId": "Content#29:3"
+        },
+        "children": [
+         {
+          "id": "I31:421;29:399;31:432",
+          "name": "hero",
+          "type": "INSTANCE",
+          "componentId": "30:402",
+          "componentProperties": {
+           "Badge#30:0": {
+            "type": "SLOT",
+            "value": {
+             "guid": {
+              "sessionID": 31,
+              "localID": 435
+             }
+            },
+            "preferredValues": []
+           },
+           "Media#30:2": {
+            "type": "SLOT",
+            "value": {
+             "guid": {
+              "sessionID": 31,
+              "localID": 457
+             }
+            },
+            "preferredValues": []
+           },
+           "Lead#30:4": {
+            "type": "TEXT",
+            "value": "Dedal turns a Figma frame built from your design system into a typed template, fills it with data from your APIs and serves it to your frontend. Rearranging a screen is a publish, not a deploy."
+           },
+           "Actions#30:1": {
+            "type": "SLOT",
+            "value": {
+             "guid": {
+              "sessionID": 31,
+              "localID": 443
+             }
+            },
+            "preferredValues": []
+           },
+           "Install#30:5": {
+            "type": "TEXT",
+            "value": "$ npm i github:dawidglosny/dedal"
+           },
+           "Title#30:3": {
+            "type": "TEXT",
+            "value": "Design the page in Figma.\nShip it without a release."
+           }
+          },
+          "children": [
+           {
+            "id": "I31:421;29:399;31:432;30:403",
+            "name": "Badge",
+            "type": "SLOT",
+            "componentPropertyReferences": {
+             "slotContentId": "Badge#30:0"
+            },
+            "children": [
+             {
+              "id": "I31:421;29:399;31:432;30:403;31:436",
+              "name": "Badge",
+              "type": "INSTANCE",
+              "componentId": "3:143",
+              "componentProperties": {
+               "Label#3:22": {
+                "type": "TEXT",
+                "value": "v0.6.6 · TypeScript · zero dependencies"
+               },
+               "variant": {
+                "value": "brand",
+                "type": "VARIANT",
+                "boundVariables": {}
+               }
+              },
+              "children": [
+               {
+                "id": "I31:421;29:399;31:432;30:403;31:436;3:144",
+                "name": "label",
+                "type": "TEXT",
+                "componentPropertyReferences": {
+                 "characters": "Label#3:22"
+                },
+                "characters": "v0.6.6 · TypeScript · zero dependencies",
+                "styles": {
+                 "text": "2:43"
+                }
+               }
+              ]
+             }
+            ]
+           },
+           {
+            "id": "I31:421;29:399;31:432;30:404",
+            "name": "title",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Title#30:3"
+            },
+            "characters": "Design the page in Figma.\nShip it without a release.",
+            "styles": {
+             "text": "2:36"
+            }
+           },
+           {
+            "id": "I31:421;29:399;31:432;30:405",
+            "name": "lead",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Lead#30:4"
+            },
+            "characters": "Dedal turns a Figma frame built from your design system into a typed template, fills it with data from your APIs and serves it to your frontend. Rearranging a screen is a publish, not a deploy.",
+            "styles": {
+             "text": "2:39"
+            }
+           },
+           {
+            "id": "I31:421;29:399;31:432;30:406",
+            "name": "Actions",
+            "type": "SLOT",
+            "componentPropertyReferences": {
+             "slotContentId": "Actions#30:1"
+            },
+            "children": [
+             {
+              "id": "I31:421;29:399;31:432;30:406;31:444",
+              "name": "Button",
+              "type": "INSTANCE",
+              "componentId": "3:106",
+              "componentProperties": {
+               "Icon right#3:11": {
+                "type": "BOOLEAN",
+                "value": true
+               },
+               "Label#3:0": {
+                "type": "TEXT",
+                "value": "Get started"
+               },
+               "variant": {
+                "value": "default",
+                "type": "VARIANT",
+                "boundVariables": {}
+               },
+               "size": {
+                "value": "lg",
+                "type": "VARIANT",
+                "boundVariables": {}
+               }
+              },
+              "children": [
+               {
+                "id": "I31:421;29:399;31:432;30:406;31:444;3:107",
+                "name": "label",
+                "type": "TEXT",
+                "componentPropertyReferences": {
+                 "characters": "Label#3:0"
+                },
+                "characters": "Get started",
+                "styles": {
+                 "text": "2:42"
+                }
+               },
+               {
+                "id": "I31:421;29:399;31:432;30:406;31:444;3:108",
+                "name": "icon-right",
+                "type": "INSTANCE",
+                "componentPropertyReferences": {
+                 "visible": "Icon right#3:11"
+                },
+                "componentId": "3:46",
+                "children": [
+                 {
+                  "id": "I31:421;29:399;31:432;30:406;31:444;3:108;3:43",
+                  "name": "glyph",
+                  "type": "FRAME"
+                 }
+                ]
+               }
+              ]
+             },
+             {
+              "id": "I31:421;29:399;31:432;30:406;31:448",
+              "name": "Button",
+              "type": "INSTANCE",
+              "componentId": "3:118",
+              "componentProperties": {
+               "Icon right#3:11": {
+                "type": "BOOLEAN",
+                "value": false
+               },
+               "Label#3:0": {
+                "type": "TEXT",
+                "value": "Watch the 60-second demo"
+               },
+               "variant": {
+                "value": "outline",
+                "type": "VARIANT",
+                "boundVariables": {}
+               },
+               "size": {
+                "value": "lg",
+                "type": "VARIANT",
+                "boundVariables": {}
+               }
+              },
+              "children": [
+               {
+                "id": "I31:421;29:399;31:432;30:406;31:448;3:119",
+                "name": "label",
+                "type": "TEXT",
+                "componentPropertyReferences": {
+                 "characters": "Label#3:0"
+                },
+                "characters": "Watch the 60-second demo",
+                "styles": {
+                 "text": "2:42"
+                }
+               },
+               {
+                "id": "I31:421;29:399;31:432;30:406;31:448;3:120",
+                "name": "icon-right",
+                "visible": false,
+                "type": "INSTANCE",
+                "componentPropertyReferences": {
+                 "visible": "Icon right#3:11"
+                },
+                "componentId": "3:46",
+                "children": [
+                 {
+                  "id": "I31:421;29:399;31:432;30:406;31:448;3:120;3:43",
+                  "name": "glyph",
+                  "type": "FRAME"
+                 }
+                ]
+               }
+              ]
+             }
+            ]
+           },
+           {
+            "id": "I31:421;29:399;31:432;30:407",
+            "name": "install",
+            "type": "FRAME",
+            "children": [
+             {
+              "id": "I31:421;29:399;31:432;30:408",
+              "name": "install",
+              "type": "TEXT",
+              "componentPropertyReferences": {
+               "characters": "Install#30:5"
+              },
+              "characters": "$ npm i github:dawidglosny/dedal",
+              "styles": {
+               "text": "2:44"
+              }
+             }
+            ]
+           },
+           {
+            "id": "I31:421;29:399;31:432;30:409",
+            "name": "Media",
+            "type": "SLOT",
+            "componentPropertyReferences": {
+             "slotContentId": "Media#30:2"
+            },
+            "children": [
+             {
+              "id": "I31:421;29:399;31:432;30:409;31:458",
+              "name": "Image",
+              "type": "INSTANCE",
+              "componentId": "29:427",
+              "componentProperties": {
+               "Alt#29:22": {
+                "type": "TEXT",
+                "value": "Figma frame → typed JSON → Dedal → your page"
+               }
+              },
+              "children": [
+               {
+                "id": "I31:421;29:399;31:432;30:409;31:458;29:428",
+                "name": "alt",
+                "visible": false,
+                "type": "TEXT",
+                "componentPropertyReferences": {
+                 "characters": "Alt#29:22"
+                },
+                "characters": "Figma frame → typed JSON → Dedal → your page",
+                "styles": {
+                 "text": "2:43"
+                }
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "id": "31:459",
+      "name": "principle",
+      "type": "INSTANCE",
+      "componentId": "29:398",
+      "componentProperties": {
+       "Content#29:3": {
+        "type": "SLOT",
+        "value": {
+         "guid": {
+          "sessionID": 31,
+          "localID": 469
+         }
+        },
+        "preferredValues": []
+       },
+       "tone": {
+        "value": "default",
+        "type": "VARIANT",
+        "boundVariables": {}
+       }
+      },
+      "children": [
+       {
+        "id": "I31:459;29:399",
+        "name": "Content",
+        "type": "SLOT",
+        "componentPropertyReferences": {
+         "slotContentId": "Content#29:3"
+        },
+        "children": [
+         {
+          "id": "I31:459;29:399;31:470",
+          "name": "section-heading",
+          "type": "INSTANCE",
+          "componentId": "29:405",
+          "componentProperties": {
+           "Badge#29:16": {
+            "type": "SLOT",
+            "value": {
+             "guid": {
+              "sessionID": 31,
+              "localID": 467
+             }
+            },
+            "preferredValues": []
+           },
+           "Subtitle#29:18": {
+            "type": "TEXT",
+            "value": "Structure, data and components have different owners. Dedal joins them at the last moment, so each one can change on its own schedule."
+           },
+           "Title#29:17": {
+            "type": "TEXT",
+            "value": "Three things change at different speeds.\nKeep them apart."
+           },
+           "align": {
+            "value": "center",
+            "type": "VARIANT",
+            "boundVariables": {}
+           },
+           "tone": {
+            "value": "default",
+            "type": "VARIANT",
+            "boundVariables": {}
+           }
+          },
+          "children": [
+           {
+            "id": "I31:459;29:399;31:470;29:406",
+            "name": "Badge",
+            "type": "SLOT",
+            "componentPropertyReferences": {
+             "slotContentId": "Badge#29:16"
+            },
+            "children": [
+             {
+              "id": "I31:459;29:399;31:470;29:406;31:468",
+              "name": "Badge",
+              "type": "INSTANCE",
+              "componentId": "3:143",
+              "componentProperties": {
+               "Label#3:22": {
+                "type": "TEXT",
+                "value": "THE IDEA"
+               },
+               "variant": {
+                "value": "brand",
+                "type": "VARIANT",
+                "boundVariables": {}
+               }
+              },
+              "children": [
+               {
+                "id": "I31:459;29:399;31:470;29:406;31:468;3:144",
+                "name": "label",
+                "type": "TEXT",
+                "componentPropertyReferences": {
+                 "characters": "Label#3:22"
+                },
+                "characters": "THE IDEA",
+                "styles": {
+                 "text": "2:43"
+                }
+               }
+              ]
+             }
+            ]
+           },
+           {
+            "id": "I31:459;29:399;31:470;29:407",
+            "name": "title",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Title#29:17"
+            },
+            "characters": "Three things change at different speeds.\nKeep them apart.",
+            "styles": {
+             "text": "2:37"
+            }
+           },
+           {
+            "id": "I31:459;29:399;31:470;29:408",
+            "name": "subtitle",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Subtitle#29:18"
+            },
+            "characters": "Structure, data and components have different owners. Dedal joins them at the last moment, so each one can change on its own schedule.",
+            "styles": {
+             "text": "2:39"
+            }
+           }
+          ]
+         },
+         {
+          "id": "I31:459;29:399;31:473",
+          "name": "grid",
+          "type": "INSTANCE",
+          "componentId": "29:422",
+          "componentProperties": {
+           "Items#29:19": {
+            "type": "SLOT",
+            "value": {
+             "guid": {
+              "sessionID": 31,
+              "localID": 485
+             }
+            },
+            "preferredValues": []
+           }
+          },
+          "children": [
+           {
+            "id": "I31:459;29:399;31:473;29:423",
+            "name": "Items",
+            "type": "SLOT",
+            "componentPropertyReferences": {
+             "slotContentId": "Items#29:19"
+            },
+            "children": [
+             {
+              "id": "I31:459;29:399;31:473;29:423;31:486",
+              "name": "FeatureCard",
+              "type": "INSTANCE",
+              "componentId": "3:148",
+              "componentProperties": {
+               "Icon#3:30": {
+                "type": "INSTANCE_SWAP",
+                "value": "3:52",
+                "preferredValues": []
+               },
+               "Description#3:29": {
+                "type": "TEXT",
+                "value": "Which blocks, in what order, what sits inside what. Owned by designers and editors — lives in Figma or a CMS."
+               },
+               "Title#3:28": {
+                "type": "TEXT",
+                "value": "Structure"
+               }
+              },
+              "children": [
+               {
+                "id": "I31:459;29:399;31:473;29:423;31:486;3:149",
+                "name": "icon-tile",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:459;29:399;31:473;29:423;31:486;3:150",
+                  "name": "icon",
+                  "type": "INSTANCE",
+                  "componentPropertyReferences": {
+                   "mainComponent": "Icon#3:30"
+                  },
+                  "componentId": "3:52",
+                  "children": [
+                   {
+                    "id": "I31:459;29:399;31:473;29:423;31:486;3:150;3:47",
+                    "name": "glyph",
+                    "type": "FRAME"
+                   }
+                  ]
+                 }
+                ]
+               },
+               {
+                "id": "I31:459;29:399;31:473;29:423;31:486;3:155",
+                "name": "body",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:459;29:399;31:473;29:423;31:486;3:156",
+                  "name": "title",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Title#3:28"
+                  },
+                  "characters": "Structure",
+                  "styles": {
+                   "text": "2:38"
+                  }
+                 },
+                 {
+                  "id": "I31:459;29:399;31:473;29:423;31:486;3:157",
+                  "name": "description",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Description#3:29"
+                  },
+                  "characters": "Which blocks, in what order, what sits inside what. Owned by designers and editors — lives in Figma or a CMS.",
+                  "styles": {
+                   "text": "2:41"
+                  }
+                 }
+                ]
+               }
+              ]
+             },
+             {
+              "id": "I31:459;29:399;31:473;29:423;31:502",
+              "name": "FeatureCard",
+              "type": "INSTANCE",
+              "componentId": "3:148",
+              "componentProperties": {
+               "Icon#3:30": {
+                "type": "INSTANCE_SWAP",
+                "value": "3:57",
+                "preferredValues": []
+               },
+               "Description#3:29": {
+                "type": "TEXT",
+                "value": "What is inside the blocks. Comes from your APIs and is placed by CSS-like selectors, not fragile indexes."
+               },
+               "Title#3:28": {
+                "type": "TEXT",
+                "value": "Data"
+               }
+              },
+              "children": [
+               {
+                "id": "I31:459;29:399;31:473;29:423;31:502;3:149",
+                "name": "icon-tile",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:459;29:399;31:473;29:423;31:502;3:150",
+                  "name": "icon",
+                  "type": "INSTANCE",
+                  "componentPropertyReferences": {
+                   "mainComponent": "Icon#3:30"
+                  },
+                  "componentId": "3:57",
+                  "children": [
+                   {
+                    "id": "I31:459;29:399;31:473;29:423;31:502;3:150;3:53",
+                    "name": "glyph",
+                    "type": "FRAME"
+                   }
+                  ]
+                 }
+                ]
+               },
+               {
+                "id": "I31:459;29:399;31:473;29:423;31:502;3:155",
+                "name": "body",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:459;29:399;31:473;29:423;31:502;3:156",
+                  "name": "title",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Title#3:28"
+                  },
+                  "characters": "Data",
+                  "styles": {
+                   "text": "2:38"
+                  }
+                 },
+                 {
+                  "id": "I31:459;29:399;31:473;29:423;31:502;3:157",
+                  "name": "description",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Description#3:29"
+                  },
+                  "characters": "What is inside the blocks. Comes from your APIs and is placed by CSS-like selectors, not fragile indexes.",
+                  "styles": {
+                   "text": "2:41"
+                  }
+                 }
+                ]
+               }
+              ]
+             },
+             {
+              "id": "I31:459;29:399;31:473;29:423;31:518",
+              "name": "FeatureCard",
+              "type": "INSTANCE",
+              "componentId": "3:148",
+              "componentProperties": {
+               "Icon#3:30": {
+                "type": "INSTANCE_SWAP",
+                "value": "3:63",
+                "preferredValues": []
+               },
+               "Description#3:29": {
+                "type": "TEXT",
+                "value": "What a card or a button looks like. Owned by the UI team — your design system, untouched."
+               },
+               "Title#3:28": {
+                "type": "TEXT",
+                "value": "Components"
+               }
+              },
+              "children": [
+               {
+                "id": "I31:459;29:399;31:473;29:423;31:518;3:149",
+                "name": "icon-tile",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:459;29:399;31:473;29:423;31:518;3:150",
+                  "name": "icon",
+                  "type": "INSTANCE",
+                  "componentPropertyReferences": {
+                   "mainComponent": "Icon#3:30"
+                  },
+                  "componentId": "3:63",
+                  "children": [
+                   {
+                    "id": "I31:459;29:399;31:473;29:423;31:518;3:150;3:58",
+                    "name": "glyph",
+                    "type": "FRAME"
+                   }
+                  ]
+                 }
+                ]
+               },
+               {
+                "id": "I31:459;29:399;31:473;29:423;31:518;3:155",
+                "name": "body",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:459;29:399;31:473;29:423;31:518;3:156",
+                  "name": "title",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Title#3:28"
+                  },
+                  "characters": "Components",
+                  "styles": {
+                   "text": "2:38"
+                  }
+                 },
+                 {
+                  "id": "I31:459;29:399;31:473;29:423;31:518;3:157",
+                  "name": "description",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Description#3:29"
+                  },
+                  "characters": "What a card or a button looks like. Owned by the UI team — your design system, untouched.",
+                  "styles": {
+                   "text": "2:41"
+                  }
+                 }
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "id": "31:519",
+      "name": "showcase",
+      "type": "INSTANCE",
+      "componentId": "29:400",
+      "componentProperties": {
+       "Content#29:3": {
+        "type": "SLOT",
+        "value": {
+         "guid": {
+          "sessionID": 31,
+          "localID": 529
+         }
+        },
+        "preferredValues": []
+       },
+       "tone": {
+        "value": "muted",
+        "type": "VARIANT",
+        "boundVariables": {}
+       }
+      },
+      "children": [
+       {
+        "id": "I31:519;29:401",
+        "name": "Content",
+        "type": "SLOT",
+        "componentPropertyReferences": {
+         "slotContentId": "Content#29:3"
+        },
+        "children": [
+         {
+          "id": "I31:519;29:401;31:530",
+          "name": "section-heading",
+          "type": "INSTANCE",
+          "componentId": "29:405",
+          "componentProperties": {
+           "Badge#29:16": {
+            "type": "SLOT",
+            "value": {
+             "guid": {
+              "sessionID": 31,
+              "localID": 527
+             }
+            },
+            "preferredValues": []
+           },
+           "Subtitle#29:18": {
+            "type": "TEXT",
+            "value": "Name layers after your components and give the grid a Layout Grid. Dedal reads the frame and produces a template your server can serve."
+           },
+           "Title#29:17": {
+            "type": "TEXT",
+            "value": "Your Figma file is the source of the page."
+           },
+           "align": {
+            "value": "center",
+            "type": "VARIANT",
+            "boundVariables": {}
+           },
+           "tone": {
+            "value": "default",
+            "type": "VARIANT",
+            "boundVariables": {}
+           }
+          },
+          "children": [
+           {
+            "id": "I31:519;29:401;31:530;29:406",
+            "name": "Badge",
+            "type": "SLOT",
+            "componentPropertyReferences": {
+             "slotContentId": "Badge#29:16"
+            },
+            "children": [
+             {
+              "id": "I31:519;29:401;31:530;29:406;31:528",
+              "name": "Badge",
+              "type": "INSTANCE",
+              "componentId": "3:143",
+              "componentProperties": {
+               "Label#3:22": {
+                "type": "TEXT",
+                "value": "FROM FIGMA"
+               },
+               "variant": {
+                "value": "brand",
+                "type": "VARIANT",
+                "boundVariables": {}
+               }
+              },
+              "children": [
+               {
+                "id": "I31:519;29:401;31:530;29:406;31:528;3:144",
+                "name": "label",
+                "type": "TEXT",
+                "componentPropertyReferences": {
+                 "characters": "Label#3:22"
+                },
+                "characters": "FROM FIGMA",
+                "styles": {
+                 "text": "2:43"
+                }
+               }
+              ]
+             }
+            ]
+           },
+           {
+            "id": "I31:519;29:401;31:530;29:407",
+            "name": "title",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Title#29:17"
+            },
+            "characters": "Your Figma file is the source of the page.",
+            "styles": {
+             "text": "2:37"
+            }
+           },
+           {
+            "id": "I31:519;29:401;31:530;29:408",
+            "name": "subtitle",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Subtitle#29:18"
+            },
+            "characters": "Name layers after your components and give the grid a Layout Grid. Dedal reads the frame and produces a template your server can serve.",
+            "styles": {
+             "text": "2:39"
+            }
+           }
+          ]
+         },
+         {
+          "id": "I31:519;29:401;31:533",
+          "name": "Image",
+          "type": "INSTANCE",
+          "componentId": "29:427",
+          "componentProperties": {
+           "Alt#29:22": {
+            "type": "TEXT",
+            "value": "A Figma frame next to the template Dedal produces from it"
+           }
+          },
+          "children": [
+           {
+            "id": "I31:519;29:401;31:533;29:428",
+            "name": "alt",
+            "visible": false,
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Alt#29:22"
+            },
+            "characters": "A Figma frame next to the template Dedal produces from it",
+            "styles": {
+             "text": "2:43"
+            }
+           }
+          ]
+         },
+         {
+          "id": "I31:519;29:401;31:536",
+          "name": "steps",
+          "type": "INSTANCE",
+          "componentId": "29:422",
+          "componentProperties": {
+           "Items#29:19": {
+            "type": "SLOT",
+            "value": {
+             "guid": {
+              "sessionID": 31,
+              "localID": 543
+             }
+            },
+            "preferredValues": []
+           }
+          },
+          "children": [
+           {
+            "id": "I31:519;29:401;31:536;29:423",
+            "name": "Items",
+            "type": "SLOT",
+            "componentPropertyReferences": {
+             "slotContentId": "Items#29:19"
+            },
+            "children": [
+             {
+              "id": "I31:519;29:401;31:536;29:423;31:544",
+              "name": "Step",
+              "type": "INSTANCE",
+              "componentId": "29:442",
+              "componentProperties": {
+               "Description#29:29": {
+                "type": "TEXT",
+                "value": "Compose the frame from your design-system components."
+               },
+               "Title#29:28": {
+                "type": "TEXT",
+                "value": "Design"
+               },
+               "Number#29:27": {
+                "type": "TEXT",
+                "value": "1"
+               }
+              },
+              "children": [
+               {
+                "id": "I31:519;29:401;31:536;29:423;31:544;29:443",
+                "name": "number",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:519;29:401;31:536;29:423;31:544;29:444",
+                  "name": "number",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Number#29:27"
+                  },
+                  "characters": "1",
+                  "styles": {
+                   "text": "2:42"
+                  }
+                 }
+                ]
+               },
+               {
+                "id": "I31:519;29:401;31:536;29:423;31:544;29:445",
+                "name": "copy",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:519;29:401;31:536;29:423;31:544;29:446",
+                  "name": "title",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Title#29:28"
+                  },
+                  "characters": "Design",
+                  "styles": {
+                   "text": "2:42"
+                  }
+                 },
+                 {
+                  "id": "I31:519;29:401;31:536;29:423;31:544;29:447",
+                  "name": "description",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Description#29:29"
+                  },
+                  "characters": "Compose the frame from your design-system components.",
+                  "styles": {
+                   "text": "2:41"
+                  }
+                 }
+                ]
+               }
+              ]
+             },
+             {
+              "id": "I31:519;29:401;31:536;29:423;31:551",
+              "name": "Step",
+              "type": "INSTANCE",
+              "componentId": "29:442",
+              "componentProperties": {
+               "Description#29:29": {
+                "type": "TEXT",
+                "value": "dedal-figma pull validates it against the contract."
+               },
+               "Title#29:28": {
+                "type": "TEXT",
+                "value": "Pull"
+               },
+               "Number#29:27": {
+                "type": "TEXT",
+                "value": "2"
+               }
+              },
+              "children": [
+               {
+                "id": "I31:519;29:401;31:536;29:423;31:551;29:443",
+                "name": "number",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:519;29:401;31:536;29:423;31:551;29:444",
+                  "name": "number",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Number#29:27"
+                  },
+                  "characters": "2",
+                  "styles": {
+                   "text": "2:42"
+                  }
+                 }
+                ]
+               },
+               {
+                "id": "I31:519;29:401;31:536;29:423;31:551;29:445",
+                "name": "copy",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:519;29:401;31:536;29:423;31:551;29:446",
+                  "name": "title",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Title#29:28"
+                  },
+                  "characters": "Pull",
+                  "styles": {
+                   "text": "2:42"
+                  }
+                 },
+                 {
+                  "id": "I31:519;29:401;31:536;29:423;31:551;29:447",
+                  "name": "description",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Description#29:29"
+                  },
+                  "characters": "dedal-figma pull validates it against the contract.",
+                  "styles": {
+                   "text": "2:41"
+                  }
+                 }
+                ]
+               }
+              ]
+             },
+             {
+              "id": "I31:519;29:401;31:536;29:423;31:558",
+              "name": "Step",
+              "type": "INSTANCE",
+              "componentId": "29:442",
+              "componentProperties": {
+               "Description#29:29": {
+                "type": "TEXT",
+                "value": "The page follows on the next request. No frontend release."
+               },
+               "Title#29:28": {
+                "type": "TEXT",
+                "value": "Publish"
+               },
+               "Number#29:27": {
+                "type": "TEXT",
+                "value": "3"
+               }
+              },
+              "children": [
+               {
+                "id": "I31:519;29:401;31:536;29:423;31:558;29:443",
+                "name": "number",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:519;29:401;31:536;29:423;31:558;29:444",
+                  "name": "number",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Number#29:27"
+                  },
+                  "characters": "3",
+                  "styles": {
+                   "text": "2:42"
+                  }
+                 }
+                ]
+               },
+               {
+                "id": "I31:519;29:401;31:536;29:423;31:558;29:445",
+                "name": "copy",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:519;29:401;31:536;29:423;31:558;29:446",
+                  "name": "title",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Title#29:28"
+                  },
+                  "characters": "Publish",
+                  "styles": {
+                   "text": "2:42"
+                  }
+                 },
+                 {
+                  "id": "I31:519;29:401;31:536;29:423;31:558;29:447",
+                  "name": "description",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Description#29:29"
+                  },
+                  "characters": "The page follows on the next request. No frontend release.",
+                  "styles": {
+                   "text": "2:41"
+                  }
+                 }
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "id": "31:564",
+      "name": "features",
+      "type": "INSTANCE",
+      "componentId": "29:398",
+      "componentProperties": {
+       "Content#29:3": {
+        "type": "SLOT",
+        "value": {
+         "guid": {
+          "sessionID": 31,
+          "localID": 574
+         }
+        },
+        "preferredValues": []
+       },
+       "tone": {
+        "value": "default",
+        "type": "VARIANT",
+        "boundVariables": {}
+       }
+      },
+      "children": [
+       {
+        "id": "I31:564;29:399",
+        "name": "Content",
+        "type": "SLOT",
+        "componentPropertyReferences": {
+         "slotContentId": "Content#29:3"
+        },
+        "children": [
+         {
+          "id": "I31:564;29:399;31:575",
+          "name": "section-heading",
+          "type": "INSTANCE",
+          "componentId": "29:405",
+          "componentProperties": {
+           "Badge#29:16": {
+            "type": "SLOT",
+            "value": {
+             "guid": {
+              "sessionID": 31,
+              "localID": 572
+             }
+            },
+            "preferredValues": []
+           },
+           "Subtitle#29:18": {
+            "type": "TEXT",
+            "value": "Data binding, missing-data rules, caching and debugging — typed and tested, instead of growing them ad hoc around a switch statement."
+           },
+           "Title#29:17": {
+            "type": "TEXT",
+            "value": "Everything the hand-rolled version ends up needing."
+           },
+           "align": {
+            "value": "center",
+            "type": "VARIANT",
+            "boundVariables": {}
+           },
+           "tone": {
+            "value": "default",
+            "type": "VARIANT",
+            "boundVariables": {}
+           }
+          },
+          "children": [
+           {
+            "id": "I31:564;29:399;31:575;29:406",
+            "name": "Badge",
+            "type": "SLOT",
+            "componentPropertyReferences": {
+             "slotContentId": "Badge#29:16"
+            },
+            "children": [
+             {
+              "id": "I31:564;29:399;31:575;29:406;31:573",
+              "name": "Badge",
+              "type": "INSTANCE",
+              "componentId": "3:143",
+              "componentProperties": {
+               "Label#3:22": {
+                "type": "TEXT",
+                "value": "WHAT YOU GET"
+               },
+               "variant": {
+                "value": "brand",
+                "type": "VARIANT",
+                "boundVariables": {}
+               }
+              },
+              "children": [
+               {
+                "id": "I31:564;29:399;31:575;29:406;31:573;3:144",
+                "name": "label",
+                "type": "TEXT",
+                "componentPropertyReferences": {
+                 "characters": "Label#3:22"
+                },
+                "characters": "WHAT YOU GET",
+                "styles": {
+                 "text": "2:43"
+                }
+               }
+              ]
+             }
+            ]
+           },
+           {
+            "id": "I31:564;29:399;31:575;29:407",
+            "name": "title",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Title#29:17"
+            },
+            "characters": "Everything the hand-rolled version ends up needing.",
+            "styles": {
+             "text": "2:37"
+            }
+           },
+           {
+            "id": "I31:564;29:399;31:575;29:408",
+            "name": "subtitle",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Subtitle#29:18"
+            },
+            "characters": "Data binding, missing-data rules, caching and debugging — typed and tested, instead of growing them ad hoc around a switch statement.",
+            "styles": {
+             "text": "2:39"
+            }
+           }
+          ]
+         },
+         {
+          "id": "I31:564;29:399;31:578",
+          "name": "grid",
+          "type": "INSTANCE",
+          "componentId": "29:422",
+          "componentProperties": {
+           "Items#29:19": {
+            "type": "SLOT",
+            "value": {
+             "guid": {
+              "sessionID": 31,
+              "localID": 588
+             }
+            },
+            "preferredValues": []
+           }
+          },
+          "children": [
+           {
+            "id": "I31:564;29:399;31:578;29:423",
+            "name": "Items",
+            "type": "SLOT",
+            "componentPropertyReferences": {
+             "slotContentId": "Items#29:19"
+            },
+            "children": [
+             {
+              "id": "I31:564;29:399;31:578;29:423;31:589",
+              "name": "FeatureCard",
+              "type": "INSTANCE",
+              "componentId": "3:148",
+              "componentProperties": {
+               "Icon#3:30": {
+                "type": "INSTANCE_SWAP",
+                "value": "3:10",
+                "preferredValues": []
+               },
+               "Description#3:29": {
+                "type": "TEXT",
+                "value": "A TypeScript contract shared by the server and every frontend. A missing component in the registry is a compile error."
+               },
+               "Title#3:28": {
+                "type": "TEXT",
+                "value": "One typed contract"
+               }
+              },
+              "children": [
+               {
+                "id": "I31:564;29:399;31:578;29:423;31:589;3:149",
+                "name": "icon-tile",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:589;3:150",
+                  "name": "icon",
+                  "type": "INSTANCE",
+                  "componentPropertyReferences": {
+                   "mainComponent": "Icon#3:30"
+                  },
+                  "componentId": "3:10",
+                  "children": [
+                   {
+                    "id": "I31:564;29:399;31:578;29:423;31:589;3:150;3:7",
+                    "name": "glyph",
+                    "type": "FRAME"
+                   }
+                  ]
+                 }
+                ]
+               },
+               {
+                "id": "I31:564;29:399;31:578;29:423;31:589;3:155",
+                "name": "body",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:589;3:156",
+                  "name": "title",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Title#3:28"
+                  },
+                  "characters": "One typed contract",
+                  "styles": {
+                   "text": "2:38"
+                  }
+                 },
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:589;3:157",
+                  "name": "description",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Description#3:29"
+                  },
+                  "characters": "A TypeScript contract shared by the server and every frontend. A missing component in the registry is a compile error.",
+                  "styles": {
+                   "text": "2:41"
+                  }
+                 }
+                ]
+               }
+              ]
+             },
+             {
+              "id": "I31:564;29:399;31:578;29:423;31:605",
+              "name": "FeatureCard",
+              "type": "INSTANCE",
+              "componentId": "3:148",
+              "componentProperties": {
+               "Icon#3:30": {
+                "type": "INSTANCE_SWAP",
+                "value": "3:17",
+                "preferredValues": []
+               },
+               "Description#3:29": {
+                "type": "TEXT",
+                "value": "card, #featured, card > :slot(badge). Adding a heading to the template doesn’t shift the data."
+               },
+               "Title#3:28": {
+                "type": "TEXT",
+                "value": "Selectors, not indexes"
+               }
+              },
+              "children": [
+               {
+                "id": "I31:564;29:399;31:578;29:423;31:605;3:149",
+                "name": "icon-tile",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:605;3:150",
+                  "name": "icon",
+                  "type": "INSTANCE",
+                  "componentPropertyReferences": {
+                   "mainComponent": "Icon#3:30"
+                  },
+                  "componentId": "3:17",
+                  "children": [
+                   {
+                    "id": "I31:564;29:399;31:578;29:423;31:605;3:150;3:11",
+                    "name": "glyph",
+                    "type": "FRAME"
+                   }
+                  ]
+                 }
+                ]
+               },
+               {
+                "id": "I31:564;29:399;31:578;29:423;31:605;3:155",
+                "name": "body",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:605;3:156",
+                  "name": "title",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Title#3:28"
+                  },
+                  "characters": "Selectors, not indexes",
+                  "styles": {
+                   "text": "2:38"
+                  }
+                 },
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:605;3:157",
+                  "name": "description",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Description#3:29"
+                  },
+                  "characters": "card, #featured, card > :slot(badge). Adding a heading to the template doesn’t shift the data.",
+                  "styles": {
+                   "text": "2:41"
+                  }
+                 }
+                ]
+               }
+              ]
+             },
+             {
+              "id": "I31:564;29:399;31:578;29:423;31:621",
+              "name": "FeatureCard",
+              "type": "INSTANCE",
+              "componentId": "3:148",
+              "componentProperties": {
+               "Icon#3:30": {
+                "type": "INSTANCE_SWAP",
+                "value": "3:21",
+                "preferredValues": []
+               },
+               "Description#3:29": {
+                "type": "TEXT",
+                "value": "Fewer articles than cards or a failing API: safe defaults, a strict mode, and a report of everything dropped."
+               },
+               "Title#3:28": {
+                "type": "TEXT",
+                "value": "Rules for missing data"
+               }
+              },
+              "children": [
+               {
+                "id": "I31:564;29:399;31:578;29:423;31:621;3:149",
+                "name": "icon-tile",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:621;3:150",
+                  "name": "icon",
+                  "type": "INSTANCE",
+                  "componentPropertyReferences": {
+                   "mainComponent": "Icon#3:30"
+                  },
+                  "componentId": "3:21",
+                  "children": [
+                   {
+                    "id": "I31:564;29:399;31:578;29:423;31:621;3:150;3:18",
+                    "name": "glyph",
+                    "type": "FRAME"
+                   }
+                  ]
+                 }
+                ]
+               },
+               {
+                "id": "I31:564;29:399;31:578;29:423;31:621;3:155",
+                "name": "body",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:621;3:156",
+                  "name": "title",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Title#3:28"
+                  },
+                  "characters": "Rules for missing data",
+                  "styles": {
+                   "text": "2:38"
+                  }
+                 },
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:621;3:157",
+                  "name": "description",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Description#3:29"
+                  },
+                  "characters": "Fewer articles than cards or a failing API: safe defaults, a strict mode, and a report of everything dropped.",
+                  "styles": {
+                   "text": "2:41"
+                  }
+                 }
+                ]
+               }
+              ]
+             },
+             {
+              "id": "I31:564;29:399;31:578;29:423;31:636",
+              "name": "FeatureCard",
+              "type": "INSTANCE",
+              "componentId": "3:148",
+              "componentProperties": {
+               "Icon#3:30": {
+                "type": "INSTANCE_SWAP",
+                "value": "3:27",
+                "preferredValues": []
+               },
+               "Description#3:29": {
+                "type": "TEXT",
+                "value": "patch and remove adapt one template per device, site or A/B test."
+               },
+               "Title#3:28": {
+                "type": "TEXT",
+                "value": "Variants without copies"
+               }
+              },
+              "children": [
+               {
+                "id": "I31:564;29:399;31:578;29:423;31:636;3:149",
+                "name": "icon-tile",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:636;3:150",
+                  "name": "icon",
+                  "type": "INSTANCE",
+                  "componentPropertyReferences": {
+                   "mainComponent": "Icon#3:30"
+                  },
+                  "componentId": "3:27",
+                  "children": [
+                   {
+                    "id": "I31:564;29:399;31:578;29:423;31:636;3:150;3:22",
+                    "name": "glyph",
+                    "type": "FRAME"
+                   }
+                  ]
+                 }
+                ]
+               },
+               {
+                "id": "I31:564;29:399;31:578;29:423;31:636;3:155",
+                "name": "body",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:636;3:156",
+                  "name": "title",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Title#3:28"
+                  },
+                  "characters": "Variants without copies",
+                  "styles": {
+                   "text": "2:38"
+                  }
+                 },
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:636;3:157",
+                  "name": "description",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Description#3:29"
+                  },
+                  "characters": "patch and remove adapt one template per device, site or A/B test.",
+                  "styles": {
+                   "text": "2:41"
+                  }
+                 }
+                ]
+               }
+              ]
+             },
+             {
+              "id": "I31:564;29:399;31:578;29:423;31:650",
+              "name": "FeatureCard",
+              "type": "INSTANCE",
+              "componentId": "3:148",
+              "componentProperties": {
+               "Icon#3:30": {
+                "type": "INSTANCE_SWAP",
+                "value": "3:30",
+                "preferredValues": []
+               },
+               "Description#3:29": {
+                "type": "TEXT",
+                "value": "Stale-while-revalidate cache, parallel loaders, streaming. A 530-node page builds in under 1 ms."
+               },
+               "Title#3:28": {
+                "type": "TEXT",
+                "value": "Fast by default"
+               }
+              },
+              "children": [
+               {
+                "id": "I31:564;29:399;31:578;29:423;31:650;3:149",
+                "name": "icon-tile",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:650;3:150",
+                  "name": "icon",
+                  "type": "INSTANCE",
+                  "componentPropertyReferences": {
+                   "mainComponent": "Icon#3:30"
+                  },
+                  "componentId": "3:30",
+                  "children": [
+                   {
+                    "id": "I31:564;29:399;31:578;29:423;31:650;3:150;3:28",
+                    "name": "glyph",
+                    "type": "FRAME"
+                   }
+                  ]
+                 }
+                ]
+               },
+               {
+                "id": "I31:564;29:399;31:578;29:423;31:650;3:155",
+                "name": "body",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:650;3:156",
+                  "name": "title",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Title#3:28"
+                  },
+                  "characters": "Fast by default",
+                  "styles": {
+                   "text": "2:38"
+                  }
+                 },
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:650;3:157",
+                  "name": "description",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Description#3:29"
+                  },
+                  "characters": "Stale-while-revalidate cache, parallel loaders, streaming. A 530-node page builds in under 1 ms.",
+                  "styles": {
+                   "text": "2:41"
+                  }
+                 }
+                ]
+               }
+              ]
+             },
+             {
+              "id": "I31:564;29:399;31:578;29:423;31:666",
+              "name": "FeatureCard",
+              "type": "INSTANCE",
+              "componentId": "3:148",
+              "componentProperties": {
+               "Icon#3:30": {
+                "type": "INSTANCE_SWAP",
+                "value": "3:38",
+                "preferredValues": []
+               },
+               "Description#3:29": {
+                "type": "TEXT",
+                "value": "Click any element and see where each prop came from, which selector placed the data and what went missing."
+               },
+               "Title#3:28": {
+                "type": "TEXT",
+                "value": "Devtools"
+               }
+              },
+              "children": [
+               {
+                "id": "I31:564;29:399;31:578;29:423;31:666;3:149",
+                "name": "icon-tile",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:666;3:150",
+                  "name": "icon",
+                  "type": "INSTANCE",
+                  "componentPropertyReferences": {
+                   "mainComponent": "Icon#3:30"
+                  },
+                  "componentId": "3:38",
+                  "children": [
+                   {
+                    "id": "I31:564;29:399;31:578;29:423;31:666;3:150;3:31",
+                    "name": "glyph",
+                    "type": "FRAME"
+                   }
+                  ]
+                 }
+                ]
+               },
+               {
+                "id": "I31:564;29:399;31:578;29:423;31:666;3:155",
+                "name": "body",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:666;3:156",
+                  "name": "title",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Title#3:28"
+                  },
+                  "characters": "Devtools",
+                  "styles": {
+                   "text": "2:38"
+                  }
+                 },
+                 {
+                  "id": "I31:564;29:399;31:578;29:423;31:666;3:157",
+                  "name": "description",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Description#3:29"
+                  },
+                  "characters": "Click any element and see where each prop came from, which selector placed the data and what went missing.",
+                  "styles": {
+                   "text": "2:41"
+                  }
+                 }
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "id": "31:667",
+      "name": "devtools",
+      "type": "INSTANCE",
+      "componentId": "29:402",
+      "componentProperties": {
+       "Content#29:3": {
+        "type": "SLOT",
+        "value": {
+         "guid": {
+          "sessionID": 31,
+          "localID": 672
+         }
+        },
+        "preferredValues": []
+       },
+       "tone": {
+        "value": "dark",
+        "type": "VARIANT",
+        "boundVariables": {}
+       }
+      },
+      "children": [
+       {
+        "id": "I31:667;29:403",
+        "name": "Content",
+        "type": "SLOT",
+        "componentPropertyReferences": {
+         "slotContentId": "Content#29:3"
+        },
+        "children": [
+         {
+          "id": "I31:667;29:403;31:673",
+          "name": "split",
+          "type": "INSTANCE",
+          "componentId": "29:424",
+          "componentProperties": {
+           "Content#29:20": {
+            "type": "SLOT",
+            "value": {
+             "guid": {
+              "sessionID": 31,
+              "localID": 682
+             }
+            },
+            "preferredValues": []
+           },
+           "Media#29:21": {
+            "type": "SLOT",
+            "value": {
+             "guid": {
+              "sessionID": 31,
+              "localID": 706
+             }
+            },
+            "preferredValues": []
+           }
+          },
+          "children": [
+           {
+            "id": "I31:667;29:403;31:673;29:425",
+            "name": "Content",
+            "type": "SLOT",
+            "componentPropertyReferences": {
+             "slotContentId": "Content#29:20"
+            },
+            "children": [
+             {
+              "id": "I31:667;29:403;31:673;29:425;31:683",
+              "name": "section-heading",
+              "type": "INSTANCE",
+              "componentId": "29:417",
+              "componentProperties": {
+               "Badge#29:16": {
+                "type": "SLOT",
+                "value": {
+                 "guid": {
+                  "sessionID": 31,
+                  "localID": 680
+                 }
+                },
+                "preferredValues": []
+               },
+               "Subtitle#29:18": {
+                "type": "TEXT",
+                "value": "Server-driven UI is hard to debug when the answer lives on the server. The Dedal panel answers it for any element on the page."
+               },
+               "Title#29:17": {
+                "type": "TEXT",
+                "value": "“Why does this element look like this?”"
+               },
+               "align": {
+                "value": "start",
+                "type": "VARIANT",
+                "boundVariables": {}
+               },
+               "tone": {
+                "value": "inverse",
+                "type": "VARIANT",
+                "boundVariables": {}
+               }
+              },
+              "children": [
+               {
+                "id": "I31:667;29:403;31:673;29:425;31:683;29:418",
+                "name": "Badge",
+                "type": "SLOT",
+                "componentPropertyReferences": {
+                 "slotContentId": "Badge#29:16"
+                },
+                "children": [
+                 {
+                  "id": "I31:667;29:403;31:673;29:425;31:683;29:418;31:681",
+                  "name": "Badge",
+                  "type": "INSTANCE",
+                  "componentId": "3:145",
+                  "componentProperties": {
+                   "Label#3:22": {
+                    "type": "TEXT",
+                    "value": "DEVTOOLS"
+                   },
+                   "variant": {
+                    "value": "accent",
+                    "type": "VARIANT",
+                    "boundVariables": {}
+                   }
+                  },
+                  "children": [
+                   {
+                    "id": "I31:667;29:403;31:673;29:425;31:683;29:418;31:681;3:146",
+                    "name": "label",
+                    "type": "TEXT",
+                    "componentPropertyReferences": {
+                     "characters": "Label#3:22"
+                    },
+                    "characters": "DEVTOOLS",
+                    "styles": {
+                     "text": "2:43"
+                    }
+                   }
+                  ]
+                 }
+                ]
+               },
+               {
+                "id": "I31:667;29:403;31:673;29:425;31:683;29:419",
+                "name": "title",
+                "type": "TEXT",
+                "componentPropertyReferences": {
+                 "characters": "Title#29:17"
+                },
+                "characters": "“Why does this element look like this?”",
+                "styles": {
+                 "text": "2:37"
+                }
+               },
+               {
+                "id": "I31:667;29:403;31:673;29:425;31:683;29:420",
+                "name": "subtitle",
+                "type": "TEXT",
+                "componentPropertyReferences": {
+                 "characters": "Subtitle#29:18"
+                },
+                "characters": "Server-driven UI is hard to debug when the answer lives on the server. The Dedal panel answers it for any element on the page.",
+                "styles": {
+                 "text": "2:39"
+                }
+               }
+              ]
+             },
+             {
+              "id": "I31:667;29:403;31:673;29:425;31:691",
+              "name": "CheckItem",
+              "type": "INSTANCE",
+              "componentId": "29:436",
+              "componentProperties": {
+               "Text#29:26": {
+                "type": "TEXT",
+                "value": "Where each prop came from: default, template, patch or data"
+               },
+               "tone": {
+                "value": "inverse",
+                "type": "VARIANT",
+                "boundVariables": {}
+               }
+              },
+              "children": [
+               {
+                "id": "I31:667;29:403;31:673;29:425;31:691;29:437",
+                "name": "icon/check",
+                "type": "INSTANCE",
+                "componentId": "3:66",
+                "children": [
+                 {
+                  "id": "I31:667;29:403;31:673;29:425;31:691;29:437;3:64",
+                  "name": "glyph",
+                  "type": "FRAME"
+                 }
+                ]
+               },
+               {
+                "id": "I31:667;29:403;31:673;29:425;31:691;29:440",
+                "name": "text",
+                "type": "TEXT",
+                "componentPropertyReferences": {
+                 "characters": "Text#29:26"
+                },
+                "characters": "Where each prop came from: default, template, patch or data",
+                "styles": {
+                 "text": "2:40"
+                }
+               }
+              ]
+             },
+             {
+              "id": "I31:667;29:403;31:673;29:425;31:697",
+              "name": "CheckItem",
+              "type": "INSTANCE",
+              "componentId": "29:436",
+              "componentProperties": {
+               "Text#29:26": {
+                "type": "TEXT",
+                "value": "Which selector placed the data — and which data was dropped"
+               },
+               "tone": {
+                "value": "inverse",
+                "type": "VARIANT",
+                "boundVariables": {}
+               }
+              },
+              "children": [
+               {
+                "id": "I31:667;29:403;31:673;29:425;31:697;29:437",
+                "name": "icon/check",
+                "type": "INSTANCE",
+                "componentId": "3:66",
+                "children": [
+                 {
+                  "id": "I31:667;29:403;31:673;29:425;31:697;29:437;3:64",
+                  "name": "glyph",
+                  "type": "FRAME"
+                 }
+                ]
+               },
+               {
+                "id": "I31:667;29:403;31:673;29:425;31:697;29:440",
+                "name": "text",
+                "type": "TEXT",
+                "componentPropertyReferences": {
+                 "characters": "Text#29:26"
+                },
+                "characters": "Which selector placed the data — and which data was dropped",
+                "styles": {
+                 "text": "2:40"
+                }
+               }
+              ]
+             },
+             {
+              "id": "I31:667;29:403;31:673;29:425;31:703",
+              "name": "CheckItem",
+              "type": "INSTANCE",
+              "componentId": "29:436",
+              "componentProperties": {
+               "Text#29:26": {
+                "type": "TEXT",
+                "value": "How long every loader and query took"
+               },
+               "tone": {
+                "value": "inverse",
+                "type": "VARIANT",
+                "boundVariables": {}
+               }
+              },
+              "children": [
+               {
+                "id": "I31:667;29:403;31:673;29:425;31:703;29:437",
+                "name": "icon/check",
+                "type": "INSTANCE",
+                "componentId": "3:66",
+                "children": [
+                 {
+                  "id": "I31:667;29:403;31:673;29:425;31:703;29:437;3:64",
+                  "name": "glyph",
+                  "type": "FRAME"
+                 }
+                ]
+               },
+               {
+                "id": "I31:667;29:403;31:673;29:425;31:703;29:440",
+                "name": "text",
+                "type": "TEXT",
+                "componentPropertyReferences": {
+                 "characters": "Text#29:26"
+                },
+                "characters": "How long every loader and query took",
+                "styles": {
+                 "text": "2:40"
+                }
+               }
+              ]
+             }
+            ]
+           },
+           {
+            "id": "I31:667;29:403;31:673;29:426",
+            "name": "Media",
+            "type": "SLOT",
+            "componentPropertyReferences": {
+             "slotContentId": "Media#29:21"
+            },
+            "children": [
+             {
+              "id": "I31:667;29:403;31:673;29:426;31:707",
+              "name": "Image",
+              "type": "INSTANCE",
+              "componentId": "29:427",
+              "componentProperties": {
+               "Alt#29:22": {
+                "type": "TEXT",
+                "value": "The Dedal devtools panel: where each prop of a card came from"
+               }
+              },
+              "children": [
+               {
+                "id": "I31:667;29:403;31:673;29:426;31:707;29:428",
+                "name": "alt",
+                "visible": false,
+                "type": "TEXT",
+                "componentPropertyReferences": {
+                 "characters": "Alt#29:22"
+                },
+                "characters": "The Dedal devtools panel: where each prop of a card came from",
+                "styles": {
+                 "text": "2:43"
+                }
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "id": "31:708",
+      "name": "contract",
+      "type": "INSTANCE",
+      "componentId": "29:398",
+      "componentProperties": {
+       "Content#29:3": {
+        "type": "SLOT",
+        "value": {
+         "guid": {
+          "sessionID": 31,
+          "localID": 718
+         }
+        },
+        "preferredValues": []
+       },
+       "tone": {
+        "value": "default",
+        "type": "VARIANT",
+        "boundVariables": {}
+       }
+      },
+      "children": [
+       {
+        "id": "I31:708;29:399",
+        "name": "Content",
+        "type": "SLOT",
+        "componentPropertyReferences": {
+         "slotContentId": "Content#29:3"
+        },
+        "children": [
+         {
+          "id": "I31:708;29:399;31:719",
+          "name": "section-heading",
+          "type": "INSTANCE",
+          "componentId": "29:405",
+          "componentProperties": {
+           "Badge#29:16": {
+            "type": "SLOT",
+            "value": {
+             "guid": {
+              "sessionID": 31,
+              "localID": 716
+             }
+            },
+            "preferredValues": []
+           },
+           "Subtitle#29:18": {
+            "type": "TEXT",
+            "value": "The registry is the only place that knows your components. Swap Radix for shadcn/ui and the pages stay as they are."
+           },
+           "Title#29:17": {
+            "type": "TEXT",
+            "value": "The server and every frontend share one type."
+           },
+           "align": {
+            "value": "center",
+            "type": "VARIANT",
+            "boundVariables": {}
+           },
+           "tone": {
+            "value": "default",
+            "type": "VARIANT",
+            "boundVariables": {}
+           }
+          },
+          "children": [
+           {
+            "id": "I31:708;29:399;31:719;29:406",
+            "name": "Badge",
+            "type": "SLOT",
+            "componentPropertyReferences": {
+             "slotContentId": "Badge#29:16"
+            },
+            "children": [
+             {
+              "id": "I31:708;29:399;31:719;29:406;31:717",
+              "name": "Badge",
+              "type": "INSTANCE",
+              "componentId": "3:143",
+              "componentProperties": {
+               "Label#3:22": {
+                "type": "TEXT",
+                "value": "ONE CONTRACT"
+               },
+               "variant": {
+                "value": "brand",
+                "type": "VARIANT",
+                "boundVariables": {}
+               }
+              },
+              "children": [
+               {
+                "id": "I31:708;29:399;31:719;29:406;31:717;3:144",
+                "name": "label",
+                "type": "TEXT",
+                "componentPropertyReferences": {
+                 "characters": "Label#3:22"
+                },
+                "characters": "ONE CONTRACT",
+                "styles": {
+                 "text": "2:43"
+                }
+               }
+              ]
+             }
+            ]
+           },
+           {
+            "id": "I31:708;29:399;31:719;29:407",
+            "name": "title",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Title#29:17"
+            },
+            "characters": "The server and every frontend share one type.",
+            "styles": {
+             "text": "2:37"
+            }
+           },
+           {
+            "id": "I31:708;29:399;31:719;29:408",
+            "name": "subtitle",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Subtitle#29:18"
+            },
+            "characters": "The registry is the only place that knows your components. Swap Radix for shadcn/ui and the pages stay as they are.",
+            "styles": {
+             "text": "2:39"
+            }
+           }
+          ]
+         },
+         {
+          "id": "I31:708;29:399;31:722",
+          "name": "code",
+          "type": "INSTANCE",
+          "componentId": "29:422",
+          "componentProperties": {
+           "Items#29:19": {
+            "type": "SLOT",
+            "value": {
+             "guid": {
+              "sessionID": 31,
+              "localID": 728
+             }
+            },
+            "preferredValues": []
+           }
+          },
+          "children": [
+           {
+            "id": "I31:708;29:399;31:722;29:423",
+            "name": "Items",
+            "type": "SLOT",
+            "componentPropertyReferences": {
+             "slotContentId": "Items#29:19"
+            },
+            "children": [
+             {
+              "id": "I31:708;29:399;31:722;29:423;31:729",
+              "name": "CodeBlock",
+              "type": "INSTANCE",
+              "componentId": "29:448",
+              "componentProperties": {
+               "Code#29:31": {
+                "type": "TEXT",
+                "value": "import type { Slot } from 'dedal'\n\n// component → props: the only shared thing\nexport type Contract = {\n  grid: { columns?: 1 | 2 | 3 | 4 }\n  card: { title?: string; href?: string; badge?: Slot }\n  badge: { label?: string }\n}"
+               },
+               "Filename#29:30": {
+                "type": "TEXT",
+                "value": "contract.ts"
+               }
+              },
+              "children": [
+               {
+                "id": "I31:708;29:399;31:722;29:423;31:729;29:449",
+                "name": "header",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:708;29:399;31:722;29:423;31:729;29:450",
+                  "name": "filename",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Filename#29:30"
+                  },
+                  "characters": "contract.ts",
+                  "styles": {
+                   "text": "2:45"
+                  }
+                 }
+                ]
+               },
+               {
+                "id": "I31:708;29:399;31:722;29:423;31:729;29:451",
+                "name": "body",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:708;29:399;31:722;29:423;31:729;29:452",
+                  "name": "code",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Code#29:31"
+                  },
+                  "characters": "import type { Slot } from 'dedal'\n\n// component → props: the only shared thing\nexport type Contract = {\n  grid: { columns?: 1 | 2 | 3 | 4 }\n  card: { title?: string; href?: string; badge?: Slot }\n  badge: { label?: string }\n}",
+                  "styles": {
+                   "text": "2:44"
+                  }
+                 }
+                ]
+               }
+              ]
+             },
+             {
+              "id": "I31:708;29:399;31:722;29:423;31:735",
+              "name": "CodeBlock",
+              "type": "INSTANCE",
+              "componentId": "29:448",
+              "componentProperties": {
+               "Code#29:31": {
+                "type": "TEXT",
+                "value": "import { Render, type Registry } from 'dedal/react'\nimport { Card, Badge } from '@/components/ui'\n\nconst registry = { grid: Grid, card: Card, badge: Badge }\n  satisfies Registry<Contract> // missing one = compile error\n\nexport default async function Home() {\n  return <Render tree={await home()} registry={registry} />\n}"
+               },
+               "Filename#29:30": {
+                "type": "TEXT",
+                "value": "page.tsx"
+               }
+              },
+              "children": [
+               {
+                "id": "I31:708;29:399;31:722;29:423;31:735;29:449",
+                "name": "header",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:708;29:399;31:722;29:423;31:735;29:450",
+                  "name": "filename",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Filename#29:30"
+                  },
+                  "characters": "page.tsx",
+                  "styles": {
+                   "text": "2:45"
+                  }
+                 }
+                ]
+               },
+               {
+                "id": "I31:708;29:399;31:722;29:423;31:735;29:451",
+                "name": "body",
+                "type": "FRAME",
+                "children": [
+                 {
+                  "id": "I31:708;29:399;31:722;29:423;31:735;29:452",
+                  "name": "code",
+                  "type": "TEXT",
+                  "componentPropertyReferences": {
+                   "characters": "Code#29:31"
+                  },
+                  "characters": "import { Render, type Registry } from 'dedal/react'\nimport { Card, Badge } from '@/components/ui'\n\nconst registry = { grid: Grid, card: Card, badge: Badge }\n  satisfies Registry<Contract> // missing one = compile error\n\nexport default async function Home() {\n  return <Render tree={await home()} registry={registry} />\n}",
+                  "styles": {
+                   "text": "2:44"
+                  }
+                 }
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "id": "31:736",
+      "name": "Frame 427",
+      "type": "FRAME",
+      "children": [
+       {
+        "id": "31:737",
+        "name": "Group 12",
+        "type": "FRAME",
+        "children": [
+         {
+          "id": "31:738",
+          "name": "icon/lock-open",
+          "type": "INSTANCE",
+          "componentId": "3:42",
+          "children": [
+           {
+            "id": "I31:738;3:39",
+            "name": "glyph",
+            "type": "FRAME"
+           }
+          ]
+         },
+         {
+          "id": "31:742",
+          "name": "Open source, MIT licensed",
+          "type": "TEXT",
+          "characters": "Open source, MIT licensed",
+          "styles": {
+           "text": "2:38"
+          }
+         }
+        ]
+       },
+       {
+        "id": "31:743",
+        "name": "Read the code, fork it, send a pull request.",
+        "type": "TEXT",
+        "characters": "Read the code, fork it, send a pull request.",
+        "styles": {
+         "text": "2:41"
+        }
+       }
+      ]
+     },
+     {
+      "id": "31:744",
+      "name": "cta",
+      "type": "INSTANCE",
+      "componentId": "29:398",
+      "componentProperties": {
+       "Content#29:3": {
+        "type": "SLOT",
+        "value": {
+         "guid": {
+          "sessionID": 31,
+          "localID": 750
+         }
+        },
+        "preferredValues": []
+       },
+       "tone": {
+        "value": "default",
+        "type": "VARIANT",
+        "boundVariables": {}
+       }
+      },
+      "children": [
+       {
+        "id": "I31:744;29:399",
+        "name": "Content",
+        "type": "SLOT",
+        "componentPropertyReferences": {
+         "slotContentId": "Content#29:3"
+        },
+        "children": [
+         {
+          "id": "I31:744;29:399;31:751",
+          "name": "cta",
+          "type": "INSTANCE",
+          "componentId": "30:418",
+          "componentProperties": {
+           "Actions#30:8": {
+            "type": "SLOT",
+            "value": {
+             "guid": {
+              "sessionID": 31,
+              "localID": 758
+             }
+            },
+            "preferredValues": []
+           },
+           "Lead#30:10": {
+            "type": "TEXT",
+            "value": "Wrap one section of an existing page and keep the rest. Your components stay exactly as they are."
+           },
+           "Title#30:9": {
+            "type": "TEXT",
+            "value": "Start with one block."
+           }
+          },
+          "children": [
+           {
+            "id": "I31:744;29:399;31:751;30:419",
+            "name": "title",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Title#30:9"
+            },
+            "characters": "Start with one block.",
+            "styles": {
+             "text": "2:37"
+            }
+           },
+           {
+            "id": "I31:744;29:399;31:751;30:420",
+            "name": "lead",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Lead#30:10"
+            },
+            "characters": "Wrap one section of an existing page and keep the rest. Your components stay exactly as they are.",
+            "styles": {
+             "text": "2:39"
+            }
+           },
+           {
+            "id": "I31:744;29:399;31:751;30:421",
+            "name": "Actions",
+            "type": "SLOT",
+            "componentPropertyReferences": {
+             "slotContentId": "Actions#30:8"
+            },
+            "children": [
+             {
+              "id": "I31:744;29:399;31:751;30:421;31:759",
+              "name": "Button",
+              "type": "INSTANCE",
+              "componentId": "3:130",
+              "componentProperties": {
+               "Icon right#3:11": {
+                "type": "BOOLEAN",
+                "value": true
+               },
+               "Label#3:0": {
+                "type": "TEXT",
+                "value": "Read the quick start"
+               },
+               "variant": {
+                "value": "brand",
+                "type": "VARIANT",
+                "boundVariables": {}
+               },
+               "size": {
+                "value": "lg",
+                "type": "VARIANT",
+                "boundVariables": {}
+               }
+              },
+              "children": [
+               {
+                "id": "I31:744;29:399;31:751;30:421;31:759;3:131",
+                "name": "label",
+                "type": "TEXT",
+                "componentPropertyReferences": {
+                 "characters": "Label#3:0"
+                },
+                "characters": "Read the quick start",
+                "styles": {
+                 "text": "2:42"
+                }
+               },
+               {
+                "id": "I31:744;29:399;31:751;30:421;31:759;3:132",
+                "name": "icon-right",
+                "type": "INSTANCE",
+                "componentPropertyReferences": {
+                 "visible": "Icon right#3:11"
+                },
+                "componentId": "3:46",
+                "children": [
+                 {
+                  "id": "I31:744;29:399;31:751;30:421;31:759;3:132;3:43",
+                  "name": "glyph",
+                  "type": "FRAME"
+                 }
+                ]
+               }
+              ]
+             },
+             {
+              "id": "I31:744;29:399;31:751;30:421;31:763",
+              "name": "Button",
+              "type": "INSTANCE",
+              "componentId": "3:118",
+              "componentProperties": {
+               "Icon right#3:11": {
+                "type": "BOOLEAN",
+                "value": false
+               },
+               "Label#3:0": {
+                "type": "TEXT",
+                "value": "Browse examples"
+               },
+               "variant": {
+                "value": "outline",
+                "type": "VARIANT",
+                "boundVariables": {}
+               },
+               "size": {
+                "value": "lg",
+                "type": "VARIANT",
+                "boundVariables": {}
+               }
+              },
+              "children": [
+               {
+                "id": "I31:744;29:399;31:751;30:421;31:763;3:119",
+                "name": "label",
+                "type": "TEXT",
+                "componentPropertyReferences": {
+                 "characters": "Label#3:0"
+                },
+                "characters": "Browse examples",
+                "styles": {
+                 "text": "2:42"
+                }
+               },
+               {
+                "id": "I31:744;29:399;31:751;30:421;31:763;3:120",
+                "name": "icon-right",
+                "visible": false,
+                "type": "INSTANCE",
+                "componentPropertyReferences": {
+                 "visible": "Icon right#3:11"
+                },
+                "componentId": "3:46",
+                "children": [
+                 {
+                  "id": "I31:744;29:399;31:751;30:421;31:763;3:120;3:43",
+                  "name": "glyph",
+                  "type": "FRAME"
+                 }
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "id": "31:764",
+      "name": "footer",
+      "type": "INSTANCE",
+      "componentId": "30:422",
+      "componentProperties": {
+       "Links#30:11": {
+        "type": "SLOT",
+        "value": {
+         "guid": {
+          "sessionID": 31,
+          "localID": 779
+         }
+        },
+        "preferredValues": []
+       },
+       "Tagline#30:12": {
+        "type": "TEXT",
+        "value": "D"
+       }
+      },
+      "children": [
+       {
+        "id": "I31:764;30:423",
+        "name": "brand",
+        "type": "FRAME",
+        "children": [
+         {
+          "id": "I31:764;30:424",
+          "name": "Logo",
+          "type": "INSTANCE",
+          "componentId": "3:158",
+          "children": [
+           {
+            "id": "I31:764;30:424;3:159",
+            "name": "mark",
+            "type": "FRAME",
+            "children": [
+             {
+              "id": "I31:764;30:424;3:160",
+              "name": "D",
+              "type": "TEXT",
+              "characters": "D"
+             }
+            ]
+           },
+           {
+            "id": "I31:764;30:424;3:162",
+            "name": "wordmark",
+            "type": "TEXT",
+            "characters": "Dedal",
+            "styles": {
+             "text": "2:38"
+            }
+           }
+          ]
+         },
+         {
+          "id": "I31:764;30:429",
+          "name": "tagline",
+          "type": "TEXT",
+          "componentPropertyReferences": {
+           "characters": "Tagline#30:12"
+          },
+          "characters": "D",
+          "styles": {
+           "text": "2:41"
+          }
+         }
+        ]
+       },
+       {
+        "id": "I31:764;30:430",
+        "name": "Links",
+        "type": "SLOT",
+        "componentPropertyReferences": {
+         "slotContentId": "Links#30:11"
+        },
+        "children": [
+         {
+          "id": "I31:764;30:430;31:780",
+          "name": "Link",
+          "type": "INSTANCE",
+          "componentId": "29:429",
+          "componentProperties": {
+           "Label#29:23": {
+            "type": "TEXT",
+            "value": "Docs"
+           }
+          },
+          "children": [
+           {
+            "id": "I31:764;30:430;31:780;29:430",
+            "name": "label",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Label#29:23"
+            },
+            "characters": "Docs",
+            "styles": {
+             "text": "2:41"
+            }
+           }
+          ]
+         },
+         {
+          "id": "I31:764;30:430;31:783",
+          "name": "Link",
+          "type": "INSTANCE",
+          "componentId": "29:429",
+          "componentProperties": {
+           "Label#29:23": {
+            "type": "TEXT",
+            "value": "Guides"
+           }
+          },
+          "children": [
+           {
+            "id": "I31:764;30:430;31:783;29:430",
+            "name": "label",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Label#29:23"
+            },
+            "characters": "Guides",
+            "styles": {
+             "text": "2:41"
+            }
+           }
+          ]
+         },
+         {
+          "id": "I31:764;30:430;31:786",
+          "name": "Link",
+          "type": "INSTANCE",
+          "componentId": "29:429",
+          "componentProperties": {
+           "Label#29:23": {
+            "type": "TEXT",
+            "value": "API"
+           }
+          },
+          "children": [
+           {
+            "id": "I31:764;30:430;31:786;29:430",
+            "name": "label",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Label#29:23"
+            },
+            "characters": "API",
+            "styles": {
+             "text": "2:41"
+            }
+           }
+          ]
+         },
+         {
+          "id": "I31:764;30:430;31:789",
+          "name": "Link",
+          "type": "INSTANCE",
+          "componentId": "29:429",
+          "componentProperties": {
+           "Label#29:23": {
+            "type": "TEXT",
+            "value": "Changelog"
+           }
+          },
+          "children": [
+           {
+            "id": "I31:764;30:430;31:789;29:430",
+            "name": "label",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Label#29:23"
+            },
+            "characters": "Changelog",
+            "styles": {
+             "text": "2:41"
+            }
+           }
+          ]
+         },
+         {
+          "id": "I31:764;30:430;31:792",
+          "name": "Link",
+          "type": "INSTANCE",
+          "componentId": "29:429",
+          "componentProperties": {
+           "Label#29:23": {
+            "type": "TEXT",
+            "value": "GitHub"
+           }
+          },
+          "children": [
+           {
+            "id": "I31:764;30:430;31:792;29:430",
+            "name": "label",
+            "type": "TEXT",
+            "componentPropertyReferences": {
+             "characters": "Label#29:23"
+            },
+            "characters": "GitHub",
+            "styles": {
+             "text": "2:41"
+            }
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "components": {
+    "30:410": {
+     "key": "87a82e826b6be8d8fa0dd3c6759ac276d67e881b",
+     "name": "Navbar",
+     "description": "The top bar. Dedal: navbar + slots links (many), actions (many).",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "3:158": {
+     "key": "4d63dfc36c50dfb100038eed5cbe5cec97f926ea",
+     "name": "Logo",
+     "description": "",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "3:94": {
+     "key": "1da97b55d72551730b45417e268f96f1d4e00dda",
+     "name": "variant=ghost, size=default",
+     "description": "",
+     "remote": false,
+     "componentSetId": "3:136",
+     "documentationLinks": []
+    },
+    "3:46": {
+     "key": "b40886ae5c112e6cb4117b07dd4af785e811aec9",
+     "name": "icon/arrow-right",
+     "description": "",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "3:88": {
+     "key": "344afc0af9882c734e024814c4444df14e59d4e6",
+     "name": "variant=outline, size=default",
+     "description": "",
+     "remote": false,
+     "componentSetId": "3:136",
+     "documentationLinks": []
+    },
+    "3:76": {
+     "key": "72e6f12e8187fa2565e63a95777ec12f9318579e",
+     "name": "variant=default, size=default",
+     "description": "",
+     "remote": false,
+     "componentSetId": "3:136",
+     "documentationLinks": []
+    },
+    "29:398": {
+     "key": "99b2a9ea0ca7091b2606b11946ea5e7516e164c2",
+     "name": "tone=default",
+     "description": "",
+     "remote": false,
+     "componentSetId": "29:404",
+     "documentationLinks": []
+    },
+    "30:402": {
+     "key": "732b9b835e4a612269dd3237b8c924b2fce1a16e",
+     "name": "Hero",
+     "description": "The top of a landing page. Dedal: hero { title, lead, install } + slots badge (one), actions (many), media (one).",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "3:143": {
+     "key": "22b1d243cfc3ffb563cdcd32e6c481dc14b4559a",
+     "name": "variant=brand",
+     "description": "",
+     "remote": false,
+     "componentSetId": "3:147",
+     "documentationLinks": []
+    },
+    "3:106": {
+     "key": "160cba9764b7ecd3526d4e43be18a5035edf320a",
+     "name": "variant=default, size=lg",
+     "description": "",
+     "remote": false,
+     "componentSetId": "3:136",
+     "documentationLinks": []
+    },
+    "3:118": {
+     "key": "27ce32f258613ad28ad926fe251f238f3d86a6ad",
+     "name": "variant=outline, size=lg",
+     "description": "",
+     "remote": false,
+     "componentSetId": "3:136",
+     "documentationLinks": []
+    },
+    "29:427": {
+     "key": "22b0284e8ac15f0bf6dc6ddb7fb772d8965920ac",
+     "name": "Image",
+     "description": "A picture (image fill on the instance) and its alt text. Dedal: image { alt, src }.",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "29:405": {
+     "key": "fd9db53ece77ba91caef962f199aab1777f3989d",
+     "name": "align=center, tone=default",
+     "description": "",
+     "remote": false,
+     "componentSetId": "29:421",
+     "documentationLinks": []
+    },
+    "29:422": {
+     "key": "088afc4c45e0a9570eafa3dbbcae13cf85e93daf",
+     "name": "Grid",
+     "description": "Items in rows, wrapping. Dedal: grid with children.",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "3:148": {
+     "key": "c593d19415d601ec77ecffaf5785be3e7e742785",
+     "name": "FeatureCard",
+     "description": "Card + CardHeader composition (shadcn). Dedal contract: feature { title, description, icon }.",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "3:52": {
+     "key": "9a080285ebcfec46f495ced6db31dec01a845378",
+     "name": "icon/pen-tool",
+     "description": "",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "3:57": {
+     "key": "24ae80b5cd29afad6a62b8ee9446499593763825",
+     "name": "icon/database",
+     "description": "",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "3:63": {
+     "key": "0bbd37bad9a8b951acdff576995624f89baa33ca",
+     "name": "icon/component",
+     "description": "",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "29:400": {
+     "key": "c30eeacfa41d06acb7a45211c708fd4a40126bab",
+     "name": "tone=muted",
+     "description": "",
+     "remote": false,
+     "componentSetId": "29:404",
+     "documentationLinks": []
+    },
+    "29:442": {
+     "key": "bec5ccf2118814a0cda2be64a4b03b878a1ca2a2",
+     "name": "Step",
+     "description": "A numbered step. Dedal: step { number, title, description }.",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "3:10": {
+     "key": "9e06d78d79f948a6901e25ca6a0e00431d068529",
+     "name": "icon/braces",
+     "description": "",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "3:17": {
+     "key": "c3be7e95328146f1eaa052c3b1faa8d54b4d78ba",
+     "name": "icon/crosshair",
+     "description": "",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "3:21": {
+     "key": "38c037d0ca66a9c0372fcc1eb5074afb5482384c",
+     "name": "icon/shield-check",
+     "description": "",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "3:27": {
+     "key": "a50513fb422001ae726070a81cf54e1128ec20c2",
+     "name": "icon/git-branch",
+     "description": "",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "3:30": {
+     "key": "c7d1df28694bef775ea4f35ba7e92ccbce89e4c5",
+     "name": "icon/zap",
+     "description": "",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "3:38": {
+     "key": "d7d1080ef17932035b3a4cb53f92d5208e9cf260",
+     "name": "icon/scan-search",
+     "description": "",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "29:402": {
+     "key": "8623917762a624bdcdd47d3f9bea2a766a06287b",
+     "name": "tone=dark",
+     "description": "",
+     "remote": false,
+     "componentSetId": "29:404",
+     "documentationLinks": []
+    },
+    "29:424": {
+     "key": "07eb1a7176cdfb12b2422325c2e0d7192dc7633f",
+     "name": "Split",
+     "description": "Two columns: content and media. Dedal: split with slots content (many) and media (one).",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "29:417": {
+     "key": "9a93ce8a7316b2548afc9f240ddc50a9cda3103e",
+     "name": "align=start, tone=inverse",
+     "description": "",
+     "remote": false,
+     "componentSetId": "29:421",
+     "documentationLinks": []
+    },
+    "3:145": {
+     "key": "70527f2842a776f726dcc52c6ed99447b9f96429",
+     "name": "variant=accent",
+     "description": "",
+     "remote": false,
+     "componentSetId": "3:147",
+     "documentationLinks": []
+    },
+    "29:436": {
+     "key": "0255f0a937bf8af7569f1fe593eea4f2fd45ac6f",
+     "name": "tone=inverse",
+     "description": "",
+     "remote": false,
+     "componentSetId": "29:441",
+     "documentationLinks": []
+    },
+    "3:66": {
+     "key": "62e28291b34277710198001b5b079763044cbf82",
+     "name": "icon/check",
+     "description": "",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "29:448": {
+     "key": "8745ae2a5f9726faa30667b7803cb4c81e21c435",
+     "name": "CodeBlock",
+     "description": "A code sample with its file name. Dedal: codeBlock { filename, code }.",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "3:42": {
+     "key": "c6034274fd2b05d0bd7eb417f36d2de616134ee2",
+     "name": "icon/lock-open",
+     "description": "",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "30:418": {
+     "key": "47997d6e0760915a4b0a40ec707b505ed1b85c16",
+     "name": "CTA",
+     "description": "A closing call to action. Dedal: cta { title, lead } + slot actions (many).",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "3:130": {
+     "key": "81035c8f2f89ed59b75759622248be58eb5238eb",
+     "name": "variant=brand, size=lg",
+     "description": "",
+     "remote": false,
+     "componentSetId": "3:136",
+     "documentationLinks": []
+    },
+    "30:422": {
+     "key": "f4fab8d275e29719aa4a8f6ed8a71ebadb7655b6",
+     "name": "Footer",
+     "description": "The bottom bar. Dedal: footer { tagline } + slot links (many).",
+     "remote": false,
+     "documentationLinks": []
+    },
+    "29:429": {
+     "key": "c04b04e5564cdfb06f9fdcc2f53b1f699d73c377",
+     "name": "Link",
+     "description": "A text link. Dedal: link { label }.",
+     "remote": false,
+     "documentationLinks": []
+    }
+   },
+   "componentSets": {
+    "3:136": {
+     "key": "f9f331ca66626c2bfec55c515e77d99acb490924",
+     "name": "Button",
+     "description": "shadcn/ui <Button variant size>. Label → children, Icon right → <ArrowRight/>.",
+     "remote": false
+    },
+    "29:404": {
+     "key": "786789fdda2a42c7cc5da26d58772ffadc70ef3e",
+     "name": "Section",
+     "description": "A page section: background tone, content in the slot. Dedal: section { tone } with children.",
+     "remote": false
+    },
+    "3:147": {
+     "key": "30e99bca4c1daec670bd6623628f290ea9c0ebcc",
+     "name": "Badge",
+     "description": "shadcn/ui <Badge variant>. brand/accent = Dedal extensions.",
+     "remote": false
+    },
+    "29:421": {
+     "key": "6c3df273b1557318344de3dca4922ce94c0ab636",
+     "name": "SectionHeading",
+     "description": "Eyebrow badge (slot), title and subtitle. Dedal: sectionHeading { title, subtitle, align, tone } + slot badge.",
+     "remote": false
+    },
+    "29:441": {
+     "key": "4bdf71ddc4ae555d6d3e1f1d4f67725f457dfa51",
+     "name": "CheckItem",
+     "description": "A list item with a check mark. Dedal: checkItem { text, tone }.",
+     "remote": false
+    }
+   },
+   "styles": {
+    "2:38": {
+     "name": "h3",
+     "styleType": "TEXT"
+    },
+    "2:42": {
+     "name": "label",
+     "styleType": "TEXT"
+    },
+    "2:43": {
+     "name": "caption",
+     "styleType": "TEXT"
+    },
+    "2:36": {
+     "name": "display",
+     "styleType": "TEXT"
+    },
+    "2:39": {
+     "name": "lead",
+     "styleType": "TEXT"
+    },
+    "2:44": {
+     "name": "code",
+     "styleType": "TEXT"
+    },
+    "2:37": {
+     "name": "h2",
+     "styleType": "TEXT"
+    },
+    "2:41": {
+     "name": "body-sm",
+     "styleType": "TEXT"
+    },
+    "2:40": {
+     "name": "body",
+     "styleType": "TEXT"
+    },
+    "2:45": {
+     "name": "code-sm",
+     "styleType": "TEXT"
+    }
+   }
+  }
+ }
+}

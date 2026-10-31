@@ -1,0 +1,533 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`dedal/figma — sections as components, content in native slots > the whole output — any change shows up as a diff 1`] = `
+{
+  "Frame 427": {
+    "children": [
+      {
+        "component": "text",
+        "props": {
+          "style": "h3",
+          "text": "Open source, MIT licensed",
+        },
+      },
+      {
+        "component": "text",
+        "props": {
+          "style": "body-sm",
+          "text": "Read the code, fork it, send a pull request.",
+        },
+      },
+    ],
+    "component": "section",
+  },
+  "contract": {
+    "children": [
+      {
+        "component": "sectionHeading",
+        "props": {
+          "align": "center",
+          "subtitle": "The registry is the only place that knows your components. Swap Radix for shadcn/ui and the pages stay as they are.",
+          "title": "The server and every frontend share one type.",
+          "tone": "default",
+        },
+        "slots": {
+          "badge": {
+            "component": "badge",
+            "props": {
+              "label": "ONE CONTRACT",
+              "variant": "brand",
+            },
+          },
+        },
+      },
+      {
+        "children": [
+          {
+            "component": "codeBlock",
+            "props": {
+              "code": "import type { Slot } from 'dedal'
+
+// component → props: the only shared thing
+export type Contract = {
+  grid: { columns?: 1 | 2 | 3 | 4 }
+  card: { title?: string; href?: string; badge?: Slot }
+  badge: { label?: string }
+}",
+              "filename": "contract.ts",
+            },
+          },
+          {
+            "component": "codeBlock",
+            "props": {
+              "code": "import { Render, type Registry } from 'dedal/react'
+import { Card, Badge } from '@/components/ui'
+
+const registry = { grid: Grid, card: Card, badge: Badge }
+  satisfies Registry<Contract> // missing one = compile error
+
+export default async function Home() {
+  return <Render tree={await home()} registry={registry} />
+}",
+              "filename": "page.tsx",
+            },
+          },
+        ],
+        "component": "grid",
+      },
+    ],
+    "component": "section",
+    "props": {
+      "tone": "default",
+    },
+  },
+  "cta": {
+    "children": [
+      {
+        "component": "cta",
+        "props": {
+          "lead": "Wrap one section of an existing page and keep the rest. Your components stay exactly as they are.",
+          "title": "Start with one block.",
+        },
+        "slots": {
+          "actions": [
+            {
+              "component": "button",
+              "props": {
+                "iconRight": true,
+                "label": "Read the quick start",
+                "size": "lg",
+                "variant": "brand",
+              },
+            },
+            {
+              "component": "button",
+              "props": {
+                "iconRight": false,
+                "label": "Browse examples",
+                "size": "lg",
+                "variant": "outline",
+              },
+            },
+          ],
+        },
+      },
+    ],
+    "component": "section",
+    "props": {
+      "tone": "default",
+    },
+  },
+  "devtools": {
+    "children": [
+      {
+        "component": "split",
+        "slots": {
+          "content": [
+            {
+              "component": "sectionHeading",
+              "props": {
+                "align": "start",
+                "subtitle": "Server-driven UI is hard to debug when the answer lives on the server. The Dedal panel answers it for any element on the page.",
+                "title": "“Why does this element look like this?”",
+                "tone": "inverse",
+              },
+              "slots": {
+                "badge": {
+                  "component": "badge",
+                  "props": {
+                    "label": "DEVTOOLS",
+                    "variant": "accent",
+                  },
+                },
+              },
+            },
+            {
+              "component": "checkItem",
+              "props": {
+                "text": "Where each prop came from: default, template, patch or data",
+                "tone": "inverse",
+              },
+            },
+            {
+              "component": "checkItem",
+              "props": {
+                "text": "Which selector placed the data — and which data was dropped",
+                "tone": "inverse",
+              },
+            },
+            {
+              "component": "checkItem",
+              "props": {
+                "text": "How long every loader and query took",
+                "tone": "inverse",
+              },
+            },
+          ],
+          "media": {
+            "component": "image",
+            "props": {
+              "alt": "The Dedal devtools panel: where each prop of a card came from",
+            },
+          },
+        },
+      },
+    ],
+    "component": "section",
+    "props": {
+      "tone": "dark",
+    },
+  },
+  "features": {
+    "children": [
+      {
+        "component": "sectionHeading",
+        "props": {
+          "align": "center",
+          "subtitle": "Data binding, missing-data rules, caching and debugging — typed and tested, instead of growing them ad hoc around a switch statement.",
+          "title": "Everything the hand-rolled version ends up needing.",
+          "tone": "default",
+        },
+        "slots": {
+          "badge": {
+            "component": "badge",
+            "props": {
+              "label": "WHAT YOU GET",
+              "variant": "brand",
+            },
+          },
+        },
+      },
+      {
+        "children": [
+          {
+            "component": "feature",
+            "props": {
+              "description": "A TypeScript contract shared by the server and every frontend. A missing component in the registry is a compile error.",
+              "icon": "braces",
+              "title": "One typed contract",
+            },
+          },
+          {
+            "component": "feature",
+            "props": {
+              "description": "card, #featured, card > :slot(badge). Adding a heading to the template doesn’t shift the data.",
+              "icon": "crosshair",
+              "title": "Selectors, not indexes",
+            },
+          },
+          {
+            "component": "feature",
+            "props": {
+              "description": "Fewer articles than cards or a failing API: safe defaults, a strict mode, and a report of everything dropped.",
+              "icon": "shield-check",
+              "title": "Rules for missing data",
+            },
+          },
+          {
+            "component": "feature",
+            "props": {
+              "description": "patch and remove adapt one template per device, site or A/B test.",
+              "icon": "git-branch",
+              "title": "Variants without copies",
+            },
+          },
+          {
+            "component": "feature",
+            "props": {
+              "description": "Stale-while-revalidate cache, parallel loaders, streaming. A 530-node page builds in under 1 ms.",
+              "icon": "zap",
+              "title": "Fast by default",
+            },
+          },
+          {
+            "component": "feature",
+            "props": {
+              "description": "Click any element and see where each prop came from, which selector placed the data and what went missing.",
+              "icon": "scan-search",
+              "title": "Devtools",
+            },
+          },
+        ],
+        "component": "grid",
+      },
+    ],
+    "component": "section",
+    "props": {
+      "tone": "default",
+    },
+  },
+  "footer": {
+    "component": "footer",
+    "props": {
+      "tagline": "D",
+    },
+    "slots": {
+      "links": [
+        {
+          "component": "link",
+          "props": {
+            "label": "Docs",
+          },
+        },
+        {
+          "component": "link",
+          "props": {
+            "label": "Guides",
+          },
+        },
+        {
+          "component": "link",
+          "props": {
+            "label": "API",
+          },
+        },
+        {
+          "component": "link",
+          "props": {
+            "label": "Changelog",
+          },
+        },
+        {
+          "component": "link",
+          "props": {
+            "label": "GitHub",
+          },
+        },
+      ],
+    },
+  },
+  "hero": {
+    "children": [
+      {
+        "component": "hero",
+        "props": {
+          "install": "$ npm i github:dawidglosny/dedal",
+          "lead": "Dedal turns a Figma frame built from your design system into a typed template, fills it with data from your APIs and serves it to your frontend. Rearranging a screen is a publish, not a deploy.",
+          "title": "Design the page in Figma.
+Ship it without a release.",
+        },
+        "slots": {
+          "actions": [
+            {
+              "component": "button",
+              "props": {
+                "iconRight": true,
+                "label": "Get started",
+                "size": "lg",
+                "variant": "default",
+              },
+            },
+            {
+              "component": "button",
+              "props": {
+                "iconRight": false,
+                "label": "Watch the 60-second demo",
+                "size": "lg",
+                "variant": "outline",
+              },
+            },
+          ],
+          "badge": {
+            "component": "badge",
+            "props": {
+              "label": "v0.6.6 · TypeScript · zero dependencies",
+              "variant": "brand",
+            },
+          },
+          "media": {
+            "component": "image",
+            "props": {
+              "alt": "Figma frame → typed JSON → Dedal → your page",
+            },
+          },
+        },
+      },
+    ],
+    "component": "section",
+    "props": {
+      "tone": "default",
+    },
+  },
+  "nav": {
+    "component": "navbar",
+    "slots": {
+      "actions": [
+        {
+          "component": "button",
+          "props": {
+            "iconRight": false,
+            "label": "GitHub",
+            "size": "default",
+            "variant": "outline",
+          },
+        },
+        {
+          "component": "button",
+          "props": {
+            "iconRight": false,
+            "label": "Get started",
+            "size": "default",
+            "variant": "default",
+          },
+        },
+      ],
+      "links": [
+        {
+          "component": "button",
+          "props": {
+            "iconRight": false,
+            "label": "Docs",
+            "size": "default",
+            "variant": "ghost",
+          },
+        },
+        {
+          "component": "button",
+          "props": {
+            "iconRight": false,
+            "label": "Guides",
+            "size": "default",
+            "variant": "ghost",
+          },
+        },
+        {
+          "component": "button",
+          "props": {
+            "iconRight": false,
+            "label": "Examples",
+            "size": "default",
+            "variant": "ghost",
+          },
+        },
+        {
+          "component": "button",
+          "props": {
+            "iconRight": false,
+            "label": "Changelog",
+            "size": "default",
+            "variant": "ghost",
+          },
+        },
+      ],
+    },
+  },
+  "principle": {
+    "children": [
+      {
+        "component": "sectionHeading",
+        "props": {
+          "align": "center",
+          "subtitle": "Structure, data and components have different owners. Dedal joins them at the last moment, so each one can change on its own schedule.",
+          "title": "Three things change at different speeds.
+Keep them apart.",
+          "tone": "default",
+        },
+        "slots": {
+          "badge": {
+            "component": "badge",
+            "props": {
+              "label": "THE IDEA",
+              "variant": "brand",
+            },
+          },
+        },
+      },
+      {
+        "children": [
+          {
+            "component": "feature",
+            "props": {
+              "description": "Which blocks, in what order, what sits inside what. Owned by designers and editors — lives in Figma or a CMS.",
+              "icon": "pen-tool",
+              "title": "Structure",
+            },
+          },
+          {
+            "component": "feature",
+            "props": {
+              "description": "What is inside the blocks. Comes from your APIs and is placed by CSS-like selectors, not fragile indexes.",
+              "icon": "database",
+              "title": "Data",
+            },
+          },
+          {
+            "component": "feature",
+            "props": {
+              "description": "What a card or a button looks like. Owned by the UI team — your design system, untouched.",
+              "icon": "component",
+              "title": "Components",
+            },
+          },
+        ],
+        "component": "grid",
+      },
+    ],
+    "component": "section",
+    "props": {
+      "tone": "default",
+    },
+  },
+  "showcase": {
+    "children": [
+      {
+        "component": "sectionHeading",
+        "props": {
+          "align": "center",
+          "subtitle": "Name layers after your components and give the grid a Layout Grid. Dedal reads the frame and produces a template your server can serve.",
+          "title": "Your Figma file is the source of the page.",
+          "tone": "default",
+        },
+        "slots": {
+          "badge": {
+            "component": "badge",
+            "props": {
+              "label": "FROM FIGMA",
+              "variant": "brand",
+            },
+          },
+        },
+      },
+      {
+        "component": "image",
+        "props": {
+          "alt": "A Figma frame next to the template Dedal produces from it",
+        },
+      },
+      {
+        "children": [
+          {
+            "component": "step",
+            "props": {
+              "description": "Compose the frame from your design-system components.",
+              "number": "1",
+              "title": "Design",
+            },
+          },
+          {
+            "component": "step",
+            "props": {
+              "description": "dedal-figma pull validates it against the contract.",
+              "number": "2",
+              "title": "Pull",
+            },
+          },
+          {
+            "component": "step",
+            "props": {
+              "description": "The page follows on the next request. No frontend release.",
+              "number": "3",
+              "title": "Publish",
+            },
+          },
+        ],
+        "component": "grid",
+      },
+    ],
+    "component": "section",
+    "props": {
+      "tone": "muted",
+    },
+  },
+}
+`;

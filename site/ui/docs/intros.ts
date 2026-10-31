@@ -372,122 +372,104 @@ The contract also exports to JSON Schema (\`ui.jsonSchema()\`), so a CMS or a ba
 - **Data doesn't care about the template:** the loader places data by selectors (\`card\`), so editors can add, remove and move cards without a code change. Changing the **contract** (a renamed prop, a removed component) is a code change — and the reason to validate stored templates.
 - **Debug builds check templates too:** with the contract as a value, devtools report a template that doesn't match it, with the path, even when nobody called \`validate\` (*A template that doesn't match the contract*).`,
 
-  guideFigma: `**In short:** design the page in Figma with your design-system components, publish, and get a Dedal template — no hand-written JSON. Dedal has no Figma plugin; what it needs is a naming convention and a small converter over the Figma REST API, shown here in full.
+  guideFigma: `**In short:** designers build the page in Figma from your design system's components and publish; \`dedal-figma pull\` turns the frame into a template, checked against the contract. \`dedal/figma\` maps Figma's own building blocks — component properties, native slots, text styles — to the contract, by convention where the names match and with a few lines of mapping where they don't. Every layer that didn't make it into the template is reported with its path.
 
-## The convention
+## What maps to what
 
-Figma already has everything a template needs, if the names line up with the contract:
+| In Figma | In the template |
+|---|---|
+| an instance of a library component (or a variant of a component set) | a block — the component's name is the contract name (\`Button\` → \`button\`, \`SectionHeading\` → \`sectionHeading\`) |
+| component properties: text, variant, boolean, instance swap | props — \`Label#3:0\` → \`label\`, \`variant\` → \`variant\`; an instance swap gives the swapped component's name |
+| a native slot (a \`SLOT\` property) | a slot of the same name (\`'one'\` or \`'many'\`, from the contract); any other slot → \`children\` |
+| a frame or a group | layout — its content takes its place; a frame becomes a block only through \`frame()\` |
+| a text layer outside any component | reported — or, with the \`text\` option, a text block with the name of its Figma text style (\`h2\`, \`body\`) |
+| a hidden layer | skipped |
 
-- **an instance of a design-system component → a node.** The main component's name (or the component set's, for variants) is the contract name: \`card\`, \`badge\`.
-- **component properties → props.** Text and boolean properties lose Figma's id suffix (\`title#12:0\` → \`title\`); variant properties keep their name (\`size=md\` → \`size: "md"\`).
-- **a layer \`slot:badge\` inside an instance → the slot \`badge\`.** An instance with that name is a single slot; a frame \`slot:actions\` with instances in it is a list slot.
-- **a frame named after a contract component → a container node**, with props in the name: \`section title=Latest\`, \`grid columns=3\`. Its layers become children.
-- **any other frame or group is only layout in Figma** — its instances go to the parent. Spacing, sizes and colors stay in the components and the design tokens; a template carries structure and props, not pixels.
-- **the page frame:** every top-level layer is a section — its name is the section key (\`news\`), its first layer the section root.
+Spacing, sizes and colors stay in the components and the design tokens; a template carries structure and props, not pixels. Texts typed in Figma become props — for a heading that's the content, for a card that will get data it's a placeholder the data replaces.
 
-Texts typed in Figma become template props. For a heading that is the content; for a card that will get data, it is a placeholder the data replaces.
+The best file for this is one built like a design system: **sections are components too** — \`Hero\`, \`SectionHeading\`, \`Grid\` — with their texts as properties and their content in native slots. Then almost nothing needs a mapping.
 
-## The converter
+## The mapping
 
-It reads the response of the file nodes endpoint (\`GET /v1/files/:file_key/nodes?ids=<frame id>\`): the frame's \`document\`, plus \`components\` and \`componentSets\` — maps from ids to names. The result is checked against the contract (\`ui.validateSections\`, the contract as a value — *Templates in a database or CMS*): a component, a slot or a prop value the contract doesn't allow fails with its path.
+One contract per component library: the contract mirrors the library's components and their values, and the same library's registry renders the page. Names are compared without case, spaces, dashes and underscores; Figma's \`#id\` suffixes are dropped.
 
 \`\`\`ts
-// figma.ts
-import { ui } from './storage/contract'
+// figma.mapping.ts
+import { z } from 'zod'
+import { defineContract } from 'dedal'
+import { component, mapping, swap, text } from 'dedal/figma'
 
-/** The parts of a node from the Figma REST API that the converter reads (GET /v1/files/:key/nodes?ids=…). */
-export type FigmaNode = {
-  name: string
-  type: string // 'FRAME', 'GROUP', 'INSTANCE', 'TEXT', …
-  componentId?: string
-  componentProperties?: Record<string, { type: 'TEXT' | 'BOOLEAN' | 'VARIANT' | 'INSTANCE_SWAP'; value: string | boolean }>
-  children?: FigmaNode[]
-}
-/** \`components\` and \`componentSets\` from the same response: id → name. */
-export type FigmaMeta = {
-  components: Record<string, { name: string; componentSetId?: string }>
-  componentSets: Record<string, { name: string }>
-}
+export const contract = defineContract({
+  section: { props: z.object({ tone: z.enum(['default', 'muted', 'dark']).optional() }) },
+  hero: { props: z.object({ title: z.string(), lead: z.string() }), slots: { badge: 'one', actions: 'many', media: 'one' } },
+  sectionHeading: { props: z.object({ title: z.string(), subtitle: z.string().optional() }), slots: { badge: 'one' } },
+  grid: {},
+  feature: { props: z.object({ title: z.string(), description: z.string(), icon: z.string().optional() }) },
+  button: { props: z.object({ label: z.string(), variant: z.enum(['default', 'outline', 'ghost']).optional() }) },
+  badge: { props: z.object({ label: z.string() }) },
+  text: { props: z.object({ text: z.string(), style: z.string().optional() }) },
+})
 
-const value = (raw: string) => (raw === 'true' ? true : raw === 'false' ? false : raw !== '' && !isNaN(Number(raw)) ? Number(raw) : raw)
-
-/** "grid columns=3 gap=md" → { component: 'grid', props: { columns: 3, gap: 'md' } } */
-const parseLayerName = (name: string) => {
-  const [component, ...pairs] = name.trim().split(/\\s+/)
-  return { component, props: Object.fromEntries(pairs.map(pair => pair.split('=')).map(([key, raw]) => [key, value(raw ?? '')])) }
-}
-
-/**
- * A Figma frame → templates, one per section. Conventions:
- * - every top-level layer of the frame is a section; its name is the section key, its first layer the section root,
- * - an instance of a design-system component → a node; the component (or component set) name is the contract name,
- *   its component properties are props ("title#12:0" → "title"; variants as they are),
- * - a frame named after a contract component ("grid columns=3") → a container node; its layers → children,
- * - a layer named "slot:badge" inside an instance → the slot "badge"; a frame "slot:actions" with instances → a list slot,
- * - any other frame or group is only layout in Figma — its instances go to the parent.
- */
-export async function fromFigma(frame: FigmaNode, meta: FigmaMeta) {
-  const known = ui.contract ?? {}
-  const nameOf = (node: FigmaNode) => {
-    const component = meta.components[node.componentId ?? '']
-    return component?.componentSetId ? meta.componentSets[component.componentSetId]?.name : component?.name
-  }
-
-  const toBlocks = (node: FigmaNode): unknown[] => {
-    if (node.type === 'INSTANCE') {
-      const props = Object.fromEntries(
-        Object.entries(node.componentProperties ?? {})
-          .filter(([, property]) => property.type !== 'INSTANCE_SWAP')
-          .map(([key, property]) => [key.split('#')[0], property.value])
-      )
-      const slots: Record<string, unknown> = {}
-      for (const layer of node.children ?? []) {
-        if (!layer.name.startsWith('slot:')) continue // the component's own layers stay in the component
-        const name = layer.name.slice('slot:'.length)
-        slots[name] = layer.type === 'INSTANCE' ? toBlocks({ ...layer, name: '' })[0] : (layer.children ?? []).flatMap(toBlocks)
-      }
-      const component = nameOf(node)
-      if (!component) throw new Error(\`layer "\${node.name}": an instance of a component that isn't in this file's components\`)
-      return [{ component, ...(Object.keys(props).length && { props }), ...(Object.keys(slots).length && { slots }) }]
-    }
-    const { component, props } = parseLayerName(node.name)
-    const children = (node.children ?? []).flatMap(toBlocks)
-    if (component in known) return [{ component, ...(Object.keys(props).length && { props }), ...(children.length && { children }) }]
-    return children // layout only
-  }
-
-  // every top-level layer is a section: its name is the key, its first layer the root
-  const sections = Object.fromEntries((frame.children ?? []).map(layer => [layer.name, (layer.children ?? []).flatMap(toBlocks)[0]]))
-
-  // checked against the contract — a component, a prop or a slot the contract doesn't know fails with its path
-  const result = await ui.validateSections(sections)
-  if (!result.ok) throw new Error(result.errors.map(({ path, message }) => \`\${path}: \${message}\`).join('\\n'))
-  return result.value
-}
+// only what doesn't follow the convention
+export default mapping(contract, {
+  feature: component('FeatureCard', { icon: swap('Icon', name => name.replace('icon/', '')) }), // instance swap → 'braces'
+}, { section: 'section', text: 'text' })
 \`\`\`
 
-A "Home" frame with a \`section title=Latest\` frame and three card instances (each with a \`slot:badge\` badge) becomes:
+Where names differ, map them explicitly — the same sources as Figma's Code Connect:
 
-\`\`\`json
-{ "news": { "component": "section", "props": { "title": "Latest" }, "children": [
-  { "component": "card", "props": { "title": "Article title" },
-    "slots": { "badge": { "component": "badge", "props": { "label": "Category" } } } },
-  … ] } }
+- \`component('Action', { … })\` — a Figma component with another name; \`componentName: name => name.replace(/ \\(Radix\\)$/, '')\` in the options for a rule that applies to all of them,
+- \`text('Caption')\`, \`variant('Kind', { Primary: 'primary' })\`, \`boolean('Wide')\`, \`swap('Icon', toValue)\` — a property with another name, or other values,
+- \`layer('title')\` — the content of a text layer inside the node,
+- \`component('Split', {}, { slots: { media: 'Media' }, children: 'Content' })\` — where each slot's content goes.
+
+A prop the contract doesn't have is a compile error, and an error when the mapping is created; so are two mappings for one Figma component.
+
+## Pulling a frame
+
+\`\`\`sh
+FIGMA_TOKEN=… npx dedal-figma pull "https://www.figma.com/design/<file>/<name>?node-id=31-398" --mapping ./figma.mapping.js --out templates/home.json
 \`\`\`
 
-What doesn't fit the contract stops the conversion, with the path: \`hero.component: unknown component "Button/Primary"\`, or a variant the contract doesn't allow — \`news.children[0].props.size: Invalid option: expected one of "sm"|"md"|"lg"\`.
+- The token is a personal access token with file content read access, from the environment.
+- Every top-level layer of the frame is a section — its name is the section key.
+- The output is the sections as JSON. What didn't make it into the template goes to stderr: \`Frame 427/Group 12/icon/lock-open — an instance of "icon/lock-open", which no contract component maps\`.
+- A template that doesn't match the contract is **not written** (exit code 1), with the template path and the Figma layer: \`hero.children[0].slots.badge.props.variant (Figma: hero/Content/hero/Badge/Badge): Invalid option…\`. \`--force\` writes it anyway.
+- \`--raw response.json\` also saves the REST response — a fixture for a test of your mapping, no network needed.
+- The mapping module is loaded by Node: write it in JavaScript, or in TypeScript with Node 23.6+ (or a loader such as \`tsx\`).
+
+The same in code — e.g. in a job triggered by a Figma webhook:
+
+\`\`\`ts
+import fromFigma from './figma.mapping'
+
+const response = await fetch(\`https://api.figma.com/v1/files/\${file}/nodes?ids=\${node}\`, { headers: { 'X-Figma-Token': token } }).then(r => r.json())
+const { ok, sections, errors, unmapped, warnings } = await fromFigma.convert(response, node)
+\`\`\`
 
 ## From Figma to the page
 
-1. Designers build the page frame with library components and publish.
-2. A job — triggered by a Figma webhook, a button in your admin, or a schedule — fetches the frame (\`GET /v1/files/:file_key/nodes?ids=…\` with an access token in \`X-Figma-Token\`) and runs \`fromFigma\`.
+1. Designers build the page frame from library components and publish.
+2. A job — a Figma webhook, a button in your admin, a schedule — runs the pull.
 3. The result is saved as a **draft** in your template store — the rest is *Templates in a database or CMS*: preview, publish with a new version, \`onPublish\`.
+
+## Files that aren't built from components
+
+Real files have plain frames with loose texts, illustrations drawn from shapes, layers called \`Frame 427\`. The mapping has a tool for each, and reports the rest:
+
+- \`frame('hero-copy', { title: layer('title') })\` — a plain frame → a block, its props from text layers. There is no naming convention for frames: they are named freely, and mock-ups reuse component names.
+- \`{ ignore: ['pipeline', /-mock$/] }\` — decorative layers skipped whole, reported once. Without it, an instance inside an illustration would become a block next to the real ones.
+- \`{ text: 'text' }\` — loose texts as text blocks, e.g. a section of plain text on a background.
+- \`warnings\` — what matches the contract but probably not the design: an empty container, several slots merged into children.
+
+\`ok: true\` means *valid against the contract*, not *faithful to the design* — read \`unmapped\` and \`warnings\`. The fix is usually in the file: a component instead of a drawn frame, an image instead of an illustration made of shapes.
 
 ## What to watch out for
 
-- **Names are the contract.** Renaming a component in Figma without renaming it in the contract (or the other way round) fails validation — on purpose. Agree on the names with the design team, like any API.
-- **One instance = one node.** The converter doesn't collapse repeated instances into \`repeat\`; that's fine — a template with three \`card\` nodes works the same.
-- **Figma's API shape can change** — keep the converter small and covered by a test with a saved response.`,
+- **Names are the contract.** Renaming a component, a property or a slot in Figma without renaming it in the contract fails validation — on purpose. Agree on the names with the design team, like any API.
+- **The content of an instance belongs to the component** — only what sits in its native slots is converted. A library component nested elsewhere in an instance is reported: expose it as a property, or put it in a slot.
+- **One instance = one block.** Repeated instances aren't collapsed into \`repeat\`; a template with three \`card\` blocks works the same.
+- **Not yet:** image sources (an image fill's reference → a URL through the Figma images endpoint), a Figma plugin as a source, pulling only changed sections.`,
 
   guideAdopting: `**In short:** you don't have to rebuild an app to try Dedal. Hand one block of one page over to it, keep your components, and grow from there — or stop, if it doesn't pay off.
 

@@ -9,6 +9,7 @@ export default defineConfig({
     'devtools/index': 'src/devtools/index.ts',
     'devtools/panel': 'src/devtools/panel.ts',
     'figma/index': 'src/figma/index.ts',
+    'figma/cli': 'src/figma/cli.ts',
   },
   format: ['esm'],
   dts: true,

@@ -40,7 +40,10 @@
             "id": "I5:5;3:162",
             "name": "wordmark",
             "type": "TEXT",
-            "characters": "Dedal"
+            "characters": "Dedal",
+            "styles": {
+             "text": "2:38"
+            }
            }
           ]
          },
@@ -79,13 +82,22 @@
               "id": "I5:11;3:95",
               "name": "label",
               "type": "TEXT",
-              "characters": "Docs"
+              "componentPropertyReferences": {
+               "characters": "Label#3:0"
+              },
+              "characters": "Docs",
+              "styles": {
+               "text": "2:42"
+              }
              },
              {
               "id": "I5:11;3:96",
               "name": "icon-right",
               "visible": false,
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "visible": "Icon right#3:11"
+              },
               "componentId": "3:46",
               "children": [
                {
@@ -127,13 +139,22 @@
               "id": "I5:20;3:95",
               "name": "label",
               "type": "TEXT",
-              "characters": "Guides"
+              "componentPropertyReferences": {
+               "characters": "Label#3:0"
+              },
+              "characters": "Guides",
+              "styles": {
+               "text": "2:42"
+              }
              },
              {
               "id": "I5:20;3:96",
               "name": "icon-right",
               "visible": false,
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "visible": "Icon right#3:11"
+              },
               "componentId": "3:46",
               "children": [
                {
@@ -175,13 +196,22 @@
               "id": "I5:26;3:95",
               "name": "label",
               "type": "TEXT",
-              "characters": "Examples"
+              "componentPropertyReferences": {
+               "characters": "Label#3:0"
+              },
+              "characters": "Examples",
+              "styles": {
+               "text": "2:42"
+              }
              },
              {
               "id": "I5:26;3:96",
               "name": "icon-right",
               "visible": false,
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "visible": "Icon right#3:11"
+              },
               "componentId": "3:46",
               "children": [
                {
@@ -223,13 +253,22 @@
               "id": "I5:32;3:95",
               "name": "label",
               "type": "TEXT",
-              "characters": "Changelog"
+              "componentPropertyReferences": {
+               "characters": "Label#3:0"
+              },
+              "characters": "Changelog",
+              "styles": {
+               "text": "2:42"
+              }
              },
              {
               "id": "I5:32;3:96",
               "name": "icon-right",
               "visible": false,
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "visible": "Icon right#3:11"
+              },
               "componentId": "3:46",
               "children": [
                {
@@ -280,13 +319,22 @@
             "id": "I5:39;3:89",
             "name": "label",
             "type": "TEXT",
-            "characters": "GitHub"
+            "componentPropertyReferences": {
+             "characters": "Label#3:0"
+            },
+            "characters": "GitHub",
+            "styles": {
+             "text": "2:42"
+            }
            },
            {
             "id": "I5:39;3:90",
             "name": "icon-right",
             "visible": false,
             "type": "INSTANCE",
+            "componentPropertyReferences": {
+             "visible": "Icon right#3:11"
+            },
             "componentId": "3:46",
             "children": [
              {
@@ -328,13 +376,22 @@
             "id": "I5:48;3:77",
             "name": "label",
             "type": "TEXT",
-            "characters": "Get started"
+            "componentPropertyReferences": {
+             "characters": "Label#3:0"
+            },
+            "characters": "Get started",
+            "styles": {
+             "text": "2:42"
+            }
            },
            {
             "id": "I5:48;3:78",
             "name": "icon-right",
             "visible": false,
             "type": "INSTANCE",
+            "componentPropertyReferences": {
+             "visible": "Icon right#3:11"
+            },
             "componentId": "3:46",
             "children": [
              {
@@ -381,7 +438,13 @@
             "id": "I5:59;3:144",
             "name": "label",
             "type": "TEXT",
-            "characters": "v0.6.6 · TypeScript · zero dependencies"
+            "componentPropertyReferences": {
+             "characters": "Label#3:22"
+            },
+            "characters": "v0.6.6 · TypeScript · zero dependencies",
+            "styles": {
+             "text": "2:43"
+            }
            }
           ]
          },
@@ -389,13 +452,19 @@
           "id": "5:61",
           "name": "title",
           "type": "TEXT",
-          "characters": "Design the page in Figma.\nShip it without a release."
+          "characters": "Design the page in Figma.\nShip it without a release.",
+          "styles": {
+           "text": "2:36"
+          }
          },
          {
           "id": "5:62",
           "name": "lead",
           "type": "TEXT",
-          "characters": "Dedal turns a Figma frame built from your design system into a typed template, fills it with data from your APIs and serves it to your frontend. Rearranging a screen is a publish, not a deploy."
+          "characters": "Dedal turns a Figma frame built from your design system into a typed template, fills it with data from your APIs and serves it to your frontend. Rearranging a screen is a publish, not a deploy.",
+          "styles": {
+           "text": "2:39"
+          }
          },
          {
           "id": "5:63",
@@ -432,12 +501,21 @@
               "id": "I5:64;3:107",
               "name": "label",
               "type": "TEXT",
-              "characters": "Get started"
+              "componentPropertyReferences": {
+               "characters": "Label#3:0"
+              },
+              "characters": "Get started",
+              "styles": {
+               "text": "2:42"
+              }
              },
              {
               "id": "I5:64;3:108",
               "name": "icon-right",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "visible": "Icon right#3:11"
+              },
               "componentId": "3:46",
               "children": [
                {
@@ -479,13 +557,22 @@
               "id": "I5:73;3:119",
               "name": "label",
               "type": "TEXT",
-              "characters": "Watch the 60-second demo"
+              "componentPropertyReferences": {
+               "characters": "Label#3:0"
+              },
+              "characters": "Watch the 60-second demo",
+              "styles": {
+               "text": "2:42"
+              }
              },
              {
               "id": "I5:73;3:120",
               "name": "icon-right",
               "visible": false,
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "visible": "Icon right#3:11"
+              },
               "componentId": "3:46",
               "children": [
                {
@@ -508,13 +595,19 @@
             "id": "5:83",
             "name": "$",
             "type": "TEXT",
-            "characters": "$"
+            "characters": "$",
+            "styles": {
+             "text": "2:44"
+            }
            },
            {
             "id": "5:84",
             "name": "npm i github:dawidglosny/dedal",
             "type": "TEXT",
-            "characters": "npm i github:dawidglosny/dedal"
+            "characters": "npm i github:dawidglosny/dedal",
+            "styles": {
+             "text": "2:44"
+            }
            }
           ]
          }
@@ -554,19 +647,28 @@
             "id": "5:94",
             "name": "01 · STRUCTURE",
             "type": "TEXT",
-            "characters": "01 · STRUCTURE"
+            "characters": "01 · STRUCTURE",
+            "styles": {
+             "text": "2:43"
+            }
            },
            {
             "id": "5:95",
             "name": "Figma frame",
             "type": "TEXT",
-            "characters": "Figma frame"
+            "characters": "Figma frame",
+            "styles": {
+             "text": "2:38"
+            }
            },
            {
             "id": "5:96",
             "name": "Designers compose the page from design-system components.",
             "type": "TEXT",
-            "characters": "Designers compose the page from design-system components."
+            "characters": "Designers compose the page from design-system components.",
+            "styles": {
+             "text": "2:41"
+            }
            }
           ]
          },
@@ -612,19 +714,28 @@
             "id": "5:107",
             "name": "02 · TEMPLATE",
             "type": "TEXT",
-            "characters": "02 · TEMPLATE"
+            "characters": "02 · TEMPLATE",
+            "styles": {
+             "text": "2:43"
+            }
            },
            {
             "id": "5:108",
             "name": "Typed JSON",
             "type": "TEXT",
-            "characters": "Typed JSON"
+            "characters": "Typed JSON",
+            "styles": {
+             "text": "2:38"
+            }
            },
            {
             "id": "5:109",
             "name": "Converted, validated against the contract, stored and versioned.",
             "type": "TEXT",
-            "characters": "Converted, validated against the contract, stored and versioned."
+            "characters": "Converted, validated against the contract, stored and versioned.",
+            "styles": {
+             "text": "2:41"
+            }
            }
           ]
          },
@@ -670,19 +781,28 @@
             "id": "5:121",
             "name": "03 · ENGINE",
             "type": "TEXT",
-            "characters": "03 · ENGINE"
+            "characters": "03 · ENGINE",
+            "styles": {
+             "text": "2:43"
+            }
            },
            {
             "id": "5:122",
             "name": "Dedal",
             "type": "TEXT",
-            "characters": "Dedal"
+            "characters": "Dedal",
+            "styles": {
+             "text": "2:38"
+            }
            },
            {
             "id": "5:123",
             "name": "Selectors place data from your APIs. Missing data has rules.",
             "type": "TEXT",
-            "characters": "Selectors place data from your APIs. Missing data has rules."
+            "characters": "Selectors place data from your APIs. Missing data has rules.",
+            "styles": {
+             "text": "2:41"
+            }
            },
            {
             "id": "5:124",
@@ -706,7 +826,10 @@
               "id": "5:130",
               "name": "+ data from your API",
               "type": "TEXT",
-              "characters": "+ data from your API"
+              "characters": "+ data from your API",
+              "styles": {
+               "text": "2:45"
+              }
              }
             ]
            }
@@ -754,19 +877,28 @@
             "id": "5:143",
             "name": "04 · RENDER",
             "type": "TEXT",
-            "characters": "04 · RENDER"
+            "characters": "04 · RENDER",
+            "styles": {
+             "text": "2:43"
+            }
            },
            {
             "id": "5:144",
             "name": "Your page",
             "type": "TEXT",
-            "characters": "Your page"
+            "characters": "Your page",
+            "styles": {
+             "text": "2:38"
+            }
            },
            {
             "id": "5:145",
             "name": "The frontend maps names to your components. Nothing else changes.",
             "type": "TEXT",
-            "characters": "The frontend maps names to your components. Nothing else changes."
+            "characters": "The frontend maps names to your components. Nothing else changes.",
+            "styles": {
+             "text": "2:41"
+            }
            }
           ]
          }
@@ -805,7 +937,13 @@
             "id": "I6:66;3:144",
             "name": "label",
             "type": "TEXT",
-            "characters": "THE IDEA"
+            "componentPropertyReferences": {
+             "characters": "Label#3:22"
+            },
+            "characters": "THE IDEA",
+            "styles": {
+             "text": "2:43"
+            }
            }
           ]
          },
@@ -813,13 +951,19 @@
           "id": "6:68",
           "name": "title",
           "type": "TEXT",
-          "characters": "Three things change at different speeds.\nKeep them apart."
+          "characters": "Three things change at different speeds.\nKeep them apart.",
+          "styles": {
+           "text": "2:37"
+          }
          },
          {
           "id": "6:69",
           "name": "subtitle",
           "type": "TEXT",
-          "characters": "Structure, data and components have different owners. Dedal joins them at the last moment, so each one can change on its own schedule."
+          "characters": "Structure, data and components have different owners. Dedal joins them at the last moment, so each one can change on its own schedule.",
+          "styles": {
+           "text": "2:39"
+          }
          }
         ]
        },
@@ -858,6 +1002,9 @@
               "id": "I6:71;3:150",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#3:30"
+              },
               "componentId": "3:52",
               "children": [
                {
@@ -878,13 +1025,25 @@
               "id": "I6:71;3:156",
               "name": "title",
               "type": "TEXT",
-              "characters": "Structure"
+              "componentPropertyReferences": {
+               "characters": "Title#3:28"
+              },
+              "characters": "Structure",
+              "styles": {
+               "text": "2:38"
+              }
              },
              {
               "id": "I6:71;3:157",
               "name": "description",
               "type": "TEXT",
-              "characters": "Which blocks, in what order, what sits inside what. Owned by designers and editors — lives in Figma or a CMS."
+              "componentPropertyReferences": {
+               "characters": "Description#3:29"
+              },
+              "characters": "Which blocks, in what order, what sits inside what. Owned by designers and editors — lives in Figma or a CMS.",
+              "styles": {
+               "text": "2:41"
+              }
              }
             ]
            }
@@ -920,6 +1079,9 @@
               "id": "I6:90;3:150",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#3:30"
+              },
               "componentId": "3:57",
               "children": [
                {
@@ -940,13 +1102,25 @@
               "id": "I6:90;3:156",
               "name": "title",
               "type": "TEXT",
-              "characters": "Data"
+              "componentPropertyReferences": {
+               "characters": "Title#3:28"
+              },
+              "characters": "Data",
+              "styles": {
+               "text": "2:38"
+              }
              },
              {
               "id": "I6:90;3:157",
               "name": "description",
               "type": "TEXT",
-              "characters": "What is inside the blocks. Comes from your APIs and is placed by CSS-like selectors, not fragile indexes."
+              "componentPropertyReferences": {
+               "characters": "Description#3:29"
+              },
+              "characters": "What is inside the blocks. Comes from your APIs and is placed by CSS-like selectors, not fragile indexes.",
+              "styles": {
+               "text": "2:41"
+              }
              }
             ]
            }
@@ -982,6 +1156,9 @@
               "id": "I6:104;3:150",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#3:30"
+              },
               "componentId": "3:63",
               "children": [
                {
@@ -1002,13 +1179,25 @@
               "id": "I6:104;3:156",
               "name": "title",
               "type": "TEXT",
-              "characters": "Components"
+              "componentPropertyReferences": {
+               "characters": "Title#3:28"
+              },
+              "characters": "Components",
+              "styles": {
+               "text": "2:38"
+              }
              },
              {
               "id": "I6:104;3:157",
               "name": "description",
               "type": "TEXT",
-              "characters": "What a card or a button looks like. Owned by the UI team — your design system, untouched."
+              "componentPropertyReferences": {
+               "characters": "Description#3:29"
+              },
+              "characters": "What a card or a button looks like. Owned by the UI team — your design system, untouched.",
+              "styles": {
+               "text": "2:41"
+              }
              }
             ]
            }
@@ -1049,7 +1238,13 @@
             "id": "I6:121;3:144",
             "name": "label",
             "type": "TEXT",
-            "characters": "FROM FIGMA"
+            "componentPropertyReferences": {
+             "characters": "Label#3:22"
+            },
+            "characters": "FROM FIGMA",
+            "styles": {
+             "text": "2:43"
+            }
            }
           ]
          },
@@ -1057,13 +1252,19 @@
           "id": "6:123",
           "name": "title",
           "type": "TEXT",
-          "characters": "Your Figma file is the source of the page."
+          "characters": "Your Figma file is the source of the page.",
+          "styles": {
+           "text": "2:37"
+          }
          },
          {
           "id": "6:124",
           "name": "subtitle",
           "type": "TEXT",
-          "characters": "Name layers after your components and give the grid a Layout Grid. Dedal reads the frame and produces a template your server can serve."
+          "characters": "Name layers after your components and give the grid a Layout Grid. Dedal reads the frame and produces a template your server can serve.",
+          "styles": {
+           "text": "2:39"
+          }
          }
         ]
        },
@@ -1099,7 +1300,10 @@
               "id": "6:134",
               "name": "Home / Desktop",
               "type": "TEXT",
-              "characters": "Home / Desktop"
+              "characters": "Home / Desktop",
+              "styles": {
+               "text": "2:45"
+              }
              }
             ]
            },
@@ -1117,7 +1321,10 @@
                 "id": "6:137",
                 "name": "LAYERS",
                 "type": "TEXT",
-                "characters": "LAYERS"
+                "characters": "LAYERS",
+                "styles": {
+                 "text": "2:43"
+                }
                },
                {
                 "id": "6:138",
@@ -1128,7 +1335,10 @@
                   "id": "6:139",
                   "name": "home",
                   "type": "TEXT",
-                  "characters": "home"
+                  "characters": "home",
+                  "styles": {
+                   "text": "2:45"
+                  }
                  }
                 ]
                },
@@ -1141,7 +1351,10 @@
                   "id": "6:141",
                   "name": "hero",
                   "type": "TEXT",
-                  "characters": "hero"
+                  "characters": "hero",
+                  "styles": {
+                   "text": "2:45"
+                  }
                  }
                 ]
                },
@@ -1154,7 +1367,10 @@
                   "id": "6:143",
                   "name": "grid ⌗ 3 col",
                   "type": "TEXT",
-                  "characters": "grid  ⌗ 3 col"
+                  "characters": "grid  ⌗ 3 col",
+                  "styles": {
+                   "text": "2:45"
+                  }
                  }
                 ]
                },
@@ -1167,7 +1383,10 @@
                   "id": "6:145",
                   "name": "card #featured",
                   "type": "TEXT",
-                  "characters": "card #featured"
+                  "characters": "card #featured",
+                  "styles": {
+                   "text": "2:45"
+                  }
                  }
                 ]
                },
@@ -1180,7 +1399,10 @@
                   "id": "6:147",
                   "name": "card",
                   "type": "TEXT",
-                  "characters": "card"
+                  "characters": "card",
+                  "styles": {
+                   "text": "2:45"
+                  }
                  }
                 ]
                },
@@ -1193,7 +1415,10 @@
                   "id": "6:149",
                   "name": "card",
                   "type": "TEXT",
-                  "characters": "card"
+                  "characters": "card",
+                  "styles": {
+                   "text": "2:45"
+                  }
                  }
                 ]
                },
@@ -1206,7 +1431,10 @@
                   "id": "6:151",
                   "name": "cta",
                   "type": "TEXT",
-                  "characters": "cta"
+                  "characters": "cta",
+                  "styles": {
+                   "text": "2:45"
+                  }
                  }
                 ]
                }
@@ -1226,7 +1454,10 @@
                   "id": "6:154",
                   "name": "hero",
                   "type": "TEXT",
-                  "characters": "hero"
+                  "characters": "hero",
+                  "styles": {
+                   "text": "2:45"
+                  }
                  }
                 ]
                },
@@ -1244,7 +1475,10 @@
                     "id": "6:157",
                     "name": "#featured",
                     "type": "TEXT",
-                    "characters": "#featured"
+                    "characters": "#featured",
+                    "styles": {
+                     "text": "2:45"
+                    }
                    }
                   ]
                  },
@@ -1257,7 +1491,10 @@
                     "id": "6:159",
                     "name": "card",
                     "type": "TEXT",
-                    "characters": "card"
+                    "characters": "card",
+                    "styles": {
+                     "text": "2:45"
+                    }
                    }
                   ]
                  },
@@ -1270,7 +1507,10 @@
                     "id": "6:161",
                     "name": "card",
                     "type": "TEXT",
-                    "characters": "card"
+                    "characters": "card",
+                    "styles": {
+                     "text": "2:45"
+                    }
                    }
                   ]
                  }
@@ -1285,7 +1525,10 @@
                   "id": "6:163",
                   "name": "cta",
                   "type": "TEXT",
-                  "characters": "cta"
+                  "characters": "cta",
+                  "styles": {
+                   "text": "2:45"
+                  }
                  }
                 ]
                }
@@ -1329,7 +1572,10 @@
               "id": "6:171",
               "name": "filename",
               "type": "TEXT",
-              "characters": "templates/home.json"
+              "characters": "templates/home.json",
+              "styles": {
+               "text": "2:45"
+              }
              }
             ]
            },
@@ -1342,7 +1588,10 @@
               "id": "6:173",
               "name": "code",
               "type": "TEXT",
-              "characters": "{\n  \"component\": \"page\",\n  \"children\": [\n    { \"component\": \"hero\", \"props\": { \"title\": \"Today\" } },\n    {\n      \"component\": \"grid\",\n      \"props\": { \"columns\": 3 },\n      \"children\": [\n        { \"component\": \"card\", \"alias\": \"featured\" },\n        { \"component\": \"card\", \"repeat\": 2 }\n      ]\n    },\n    { \"component\": \"cta\" }\n  ]\n}"
+              "characters": "{\n  \"component\": \"page\",\n  \"children\": [\n    { \"component\": \"hero\", \"props\": { \"title\": \"Today\" } },\n    {\n      \"component\": \"grid\",\n      \"props\": { \"columns\": 3 },\n      \"children\": [\n        { \"component\": \"card\", \"alias\": \"featured\" },\n        { \"component\": \"card\", \"repeat\": 2 }\n      ]\n    },\n    { \"component\": \"cta\" }\n  ]\n}",
+              "styles": {
+               "text": "2:44"
+              }
              }
             ]
            }
@@ -1369,7 +1618,10 @@
               "id": "6:177",
               "name": "1",
               "type": "TEXT",
-              "characters": "1"
+              "characters": "1",
+              "styles": {
+               "text": "2:42"
+              }
              }
             ]
            },
@@ -1382,13 +1634,19 @@
               "id": "6:179",
               "name": "Design",
               "type": "TEXT",
-              "characters": "Design"
+              "characters": "Design",
+              "styles": {
+               "text": "2:42"
+              }
              },
              {
               "id": "6:180",
               "name": "Compose the frame from your design-system components.",
               "type": "TEXT",
-              "characters": "Compose the frame from your design-system components."
+              "characters": "Compose the frame from your design-system components.",
+              "styles": {
+               "text": "2:41"
+              }
              }
             ]
            }
@@ -1408,7 +1666,10 @@
               "id": "6:183",
               "name": "2",
               "type": "TEXT",
-              "characters": "2"
+              "characters": "2",
+              "styles": {
+               "text": "2:42"
+              }
              }
             ]
            },
@@ -1421,13 +1682,19 @@
               "id": "6:185",
               "name": "Pull",
               "type": "TEXT",
-              "characters": "Pull"
+              "characters": "Pull",
+              "styles": {
+               "text": "2:42"
+              }
              },
              {
               "id": "6:186",
               "name": "dedal-figma pull validates it against the contract.",
               "type": "TEXT",
-              "characters": "dedal-figma pull validates it against the contract."
+              "characters": "dedal-figma pull validates it against the contract.",
+              "styles": {
+               "text": "2:41"
+              }
              }
             ]
            }
@@ -1447,7 +1714,10 @@
               "id": "6:189",
               "name": "3",
               "type": "TEXT",
-              "characters": "3"
+              "characters": "3",
+              "styles": {
+               "text": "2:42"
+              }
              }
             ]
            },
@@ -1460,13 +1730,19 @@
               "id": "6:191",
               "name": "Publish",
               "type": "TEXT",
-              "characters": "Publish"
+              "characters": "Publish",
+              "styles": {
+               "text": "2:42"
+              }
              },
              {
               "id": "6:192",
               "name": "The page follows on the next request. No frontend release.",
               "type": "TEXT",
-              "characters": "The page follows on the next request. No frontend release."
+              "characters": "The page follows on the next request. No frontend release.",
+              "styles": {
+               "text": "2:41"
+              }
              }
             ]
            }
@@ -1507,7 +1783,13 @@
             "id": "I6:195;3:144",
             "name": "label",
             "type": "TEXT",
-            "characters": "WHAT YOU GET"
+            "componentPropertyReferences": {
+             "characters": "Label#3:22"
+            },
+            "characters": "WHAT YOU GET",
+            "styles": {
+             "text": "2:43"
+            }
            }
           ]
          },
@@ -1515,13 +1797,19 @@
           "id": "6:197",
           "name": "title",
           "type": "TEXT",
-          "characters": "Everything the hand-rolled version ends up needing."
+          "characters": "Everything the hand-rolled version ends up needing.",
+          "styles": {
+           "text": "2:37"
+          }
          },
          {
           "id": "6:198",
           "name": "subtitle",
           "type": "TEXT",
-          "characters": "Data binding, missing-data rules, caching and debugging — typed and tested, instead of growing them ad hoc around a switch statement."
+          "characters": "Data binding, missing-data rules, caching and debugging — typed and tested, instead of growing them ad hoc around a switch statement.",
+          "styles": {
+           "text": "2:39"
+          }
          }
         ]
        },
@@ -1560,6 +1848,9 @@
               "id": "I6:200;3:150",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#3:30"
+              },
               "componentId": "3:10",
               "children": [
                {
@@ -1580,13 +1871,25 @@
               "id": "I6:200;3:156",
               "name": "title",
               "type": "TEXT",
-              "characters": "One typed contract"
+              "componentPropertyReferences": {
+               "characters": "Title#3:28"
+              },
+              "characters": "One typed contract",
+              "styles": {
+               "text": "2:38"
+              }
              },
              {
               "id": "I6:200;3:157",
               "name": "description",
               "type": "TEXT",
-              "characters": "A TypeScript contract shared by the server and every frontend. A missing component in the registry is a compile error."
+              "componentPropertyReferences": {
+               "characters": "Description#3:29"
+              },
+              "characters": "A TypeScript contract shared by the server and every frontend. A missing component in the registry is a compile error.",
+              "styles": {
+               "text": "2:41"
+              }
              }
             ]
            }
@@ -1622,6 +1925,9 @@
               "id": "I6:213;3:150",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#3:30"
+              },
               "componentId": "3:17",
               "children": [
                {
@@ -1642,13 +1948,25 @@
               "id": "I6:213;3:156",
               "name": "title",
               "type": "TEXT",
-              "characters": "Selectors, not indexes"
+              "componentPropertyReferences": {
+               "characters": "Title#3:28"
+              },
+              "characters": "Selectors, not indexes",
+              "styles": {
+               "text": "2:38"
+              }
              },
              {
               "id": "I6:213;3:157",
               "name": "description",
               "type": "TEXT",
-              "characters": "card, #featured, card > :slot(badge). Adding a heading to the template doesn’t shift the data."
+              "componentPropertyReferences": {
+               "characters": "Description#3:29"
+              },
+              "characters": "card, #featured, card > :slot(badge). Adding a heading to the template doesn’t shift the data.",
+              "styles": {
+               "text": "2:41"
+              }
              }
             ]
            }
@@ -1684,6 +2002,9 @@
               "id": "I6:229;3:150",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#3:30"
+              },
               "componentId": "3:21",
               "children": [
                {
@@ -1704,13 +2025,25 @@
               "id": "I6:229;3:156",
               "name": "title",
               "type": "TEXT",
-              "characters": "Rules for missing data"
+              "componentPropertyReferences": {
+               "characters": "Title#3:28"
+              },
+              "characters": "Rules for missing data",
+              "styles": {
+               "text": "2:38"
+              }
              },
              {
               "id": "I6:229;3:157",
               "name": "description",
               "type": "TEXT",
-              "characters": "Fewer articles than cards or a failing API: safe defaults, a strict mode, and a report of everything dropped."
+              "componentPropertyReferences": {
+               "characters": "Description#3:29"
+              },
+              "characters": "Fewer articles than cards or a failing API: safe defaults, a strict mode, and a report of everything dropped.",
+              "styles": {
+               "text": "2:41"
+              }
              }
             ]
            }
@@ -1753,6 +2086,9 @@
               "id": "I6:243;3:150",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#3:30"
+              },
               "componentId": "3:27",
               "children": [
                {
@@ -1773,13 +2109,25 @@
               "id": "I6:243;3:156",
               "name": "title",
               "type": "TEXT",
-              "characters": "Variants without copies"
+              "componentPropertyReferences": {
+               "characters": "Title#3:28"
+              },
+              "characters": "Variants without copies",
+              "styles": {
+               "text": "2:38"
+              }
              },
              {
               "id": "I6:243;3:157",
               "name": "description",
               "type": "TEXT",
-              "characters": "patch and remove adapt one template per device, site or A/B test."
+              "componentPropertyReferences": {
+               "characters": "Description#3:29"
+              },
+              "characters": "patch and remove adapt one template per device, site or A/B test.",
+              "styles": {
+               "text": "2:41"
+              }
              }
             ]
            }
@@ -1815,6 +2163,9 @@
               "id": "I6:258;3:150",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#3:30"
+              },
               "componentId": "3:30",
               "children": [
                {
@@ -1835,13 +2186,25 @@
               "id": "I6:258;3:156",
               "name": "title",
               "type": "TEXT",
-              "characters": "Fast by default"
+              "componentPropertyReferences": {
+               "characters": "Title#3:28"
+              },
+              "characters": "Fast by default",
+              "styles": {
+               "text": "2:38"
+              }
              },
              {
               "id": "I6:258;3:157",
               "name": "description",
               "type": "TEXT",
-              "characters": "Stale-while-revalidate cache, parallel loaders, streaming. A 530-node page builds in under 1 ms."
+              "componentPropertyReferences": {
+               "characters": "Description#3:29"
+              },
+              "characters": "Stale-while-revalidate cache, parallel loaders, streaming. A 530-node page builds in under 1 ms.",
+              "styles": {
+               "text": "2:41"
+              }
              }
             ]
            }
@@ -1877,6 +2240,9 @@
               "id": "I6:270;3:150",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#3:30"
+              },
               "componentId": "3:38",
               "children": [
                {
@@ -1897,13 +2263,25 @@
               "id": "I6:270;3:156",
               "name": "title",
               "type": "TEXT",
-              "characters": "Devtools"
+              "componentPropertyReferences": {
+               "characters": "Title#3:28"
+              },
+              "characters": "Devtools",
+              "styles": {
+               "text": "2:38"
+              }
              },
              {
               "id": "I6:270;3:157",
               "name": "description",
               "type": "TEXT",
-              "characters": "Click any element and see where each prop came from, which selector placed the data and what went missing."
+              "componentPropertyReferences": {
+               "characters": "Description#3:29"
+              },
+              "characters": "Click any element and see where each prop came from, which selector placed the data and what went missing.",
+              "styles": {
+               "text": "2:41"
+              }
              }
             ]
            }
@@ -1949,7 +2327,13 @@
               "id": "I7:162;3:146",
               "name": "label",
               "type": "TEXT",
-              "characters": "DEVTOOLS"
+              "componentPropertyReferences": {
+               "characters": "Label#3:22"
+              },
+              "characters": "DEVTOOLS",
+              "styles": {
+               "text": "2:43"
+              }
              }
             ]
            },
@@ -1957,13 +2341,19 @@
             "id": "7:164",
             "name": "title",
             "type": "TEXT",
-            "characters": "“Why does this element look like this?”"
+            "characters": "“Why does this element look like this?”",
+            "styles": {
+             "text": "2:37"
+            }
            },
            {
             "id": "7:165",
             "name": "subtitle",
             "type": "TEXT",
-            "characters": "Server-driven UI is hard to debug when the answer lives on the server. The Dedal panel answers it for any element on the page."
+            "characters": "Server-driven UI is hard to debug when the answer lives on the server. The Dedal panel answers it for any element on the page.",
+            "styles": {
+             "text": "2:39"
+            }
            },
            {
             "id": "7:166",
@@ -1987,7 +2377,10 @@
               "id": "7:170",
               "name": "Where each prop came from: default, template, patch or data",
               "type": "TEXT",
-              "characters": "Where each prop came from: default, template, patch or data"
+              "characters": "Where each prop came from: default, template, patch or data",
+              "styles": {
+               "text": "2:40"
+              }
              }
             ]
            },
@@ -2013,7 +2406,10 @@
               "id": "7:175",
               "name": "Which selector placed the data — and which data was dropped",
               "type": "TEXT",
-              "characters": "Which selector placed the data — and which data was dropped"
+              "characters": "Which selector placed the data — and which data was dropped",
+              "styles": {
+               "text": "2:40"
+              }
              }
             ]
            },
@@ -2039,7 +2435,10 @@
               "id": "7:180",
               "name": "How long every loader and query took",
               "type": "TEXT",
-              "characters": "How long every loader and query took"
+              "characters": "How long every loader and query took",
+              "styles": {
+               "text": "2:40"
+              }
              }
             ]
            }
@@ -2064,7 +2463,10 @@
                 "id": "7:184",
                 "name": "node",
                 "type": "TEXT",
-                "characters": "node"
+                "characters": "node",
+                "styles": {
+                 "text": "2:45"
+                }
                }
               ]
              },
@@ -2077,7 +2479,10 @@
                 "id": "7:186",
                 "name": "tree",
                 "type": "TEXT",
-                "characters": "tree"
+                "characters": "tree",
+                "styles": {
+                 "text": "2:45"
+                }
                }
               ]
              },
@@ -2090,7 +2495,10 @@
                 "id": "7:188",
                 "name": "sections",
                 "type": "TEXT",
-                "characters": "sections"
+                "characters": "sections",
+                "styles": {
+                 "text": "2:45"
+                }
                }
               ]
              },
@@ -2103,7 +2511,10 @@
                 "id": "7:190",
                 "name": "timing",
                 "type": "TEXT",
-                "characters": "timing"
+                "characters": "timing",
+                "styles": {
+                 "text": "2:45"
+                }
                }
               ]
              }
@@ -2131,13 +2542,19 @@
               "id": "7:200",
               "name": "card#featured",
               "type": "TEXT",
-              "characters": "card#featured"
+              "characters": "card#featured",
+              "styles": {
+               "text": "2:42"
+              }
              },
              {
               "id": "7:201",
               "name": "news.0.0",
               "type": "TEXT",
-              "characters": "news.0.0"
+              "characters": "news.0.0",
+              "styles": {
+               "text": "2:45"
+              }
              }
             ]
            },
@@ -2155,13 +2572,19 @@
                 "id": "7:204",
                 "name": "title",
                 "type": "TEXT",
-                "characters": "title"
+                "characters": "title",
+                "styles": {
+                 "text": "2:45"
+                }
                },
                {
                 "id": "7:205",
                 "name": "\"Markets rally after…\"",
                 "type": "TEXT",
-                "characters": "\"Markets rally after…\""
+                "characters": "\"Markets rally after…\"",
+                "styles": {
+                 "text": "2:44"
+                }
                },
                {
                 "id": "7:206",
@@ -2184,7 +2607,13 @@
                   "id": "I7:206;3:144",
                   "name": "label",
                   "type": "TEXT",
-                  "characters": "data"
+                  "componentPropertyReferences": {
+                   "characters": "Label#3:22"
+                  },
+                  "characters": "data",
+                  "styles": {
+                   "text": "2:43"
+                  }
                  }
                 ]
                }
@@ -2199,13 +2628,19 @@
                 "id": "7:209",
                 "name": "href",
                 "type": "TEXT",
-                "characters": "href"
+                "characters": "href",
+                "styles": {
+                 "text": "2:45"
+                }
                },
                {
                 "id": "7:210",
                 "name": "\"/news/markets-rally\"",
                 "type": "TEXT",
-                "characters": "\"/news/markets-rally\""
+                "characters": "\"/news/markets-rally\"",
+                "styles": {
+                 "text": "2:44"
+                }
                },
                {
                 "id": "7:211",
@@ -2228,7 +2663,13 @@
                   "id": "I7:211;3:144",
                   "name": "label",
                   "type": "TEXT",
-                  "characters": "data"
+                  "componentPropertyReferences": {
+                   "characters": "Label#3:22"
+                  },
+                  "characters": "data",
+                  "styles": {
+                   "text": "2:43"
+                  }
                  }
                 ]
                }
@@ -2243,13 +2684,19 @@
                 "id": "7:214",
                 "name": "size",
                 "type": "TEXT",
-                "characters": "size"
+                "characters": "size",
+                "styles": {
+                 "text": "2:45"
+                }
                },
                {
                 "id": "7:215",
                 "name": "\"large\"",
                 "type": "TEXT",
-                "characters": "\"large\""
+                "characters": "\"large\"",
+                "styles": {
+                 "text": "2:44"
+                }
                },
                {
                 "id": "7:216",
@@ -2272,7 +2719,13 @@
                   "id": "I7:216;3:146",
                   "name": "label",
                   "type": "TEXT",
-                  "characters": "patch #featured"
+                  "componentPropertyReferences": {
+                   "characters": "Label#3:22"
+                  },
+                  "characters": "patch #featured",
+                  "styles": {
+                   "text": "2:43"
+                  }
                  }
                 ]
                }
@@ -2287,13 +2740,19 @@
                 "id": "7:219",
                 "name": "variant",
                 "type": "TEXT",
-                "characters": "variant"
+                "characters": "variant",
+                "styles": {
+                 "text": "2:45"
+                }
                },
                {
                 "id": "7:220",
                 "name": "\"outline\"",
                 "type": "TEXT",
-                "characters": "\"outline\""
+                "characters": "\"outline\"",
+                "styles": {
+                 "text": "2:44"
+                }
                },
                {
                 "id": "7:221",
@@ -2316,7 +2775,13 @@
                   "id": "I7:221;3:140",
                   "name": "label",
                   "type": "TEXT",
-                  "characters": "template"
+                  "componentPropertyReferences": {
+                   "characters": "Label#3:22"
+                  },
+                  "characters": "template",
+                  "styles": {
+                   "text": "2:43"
+                  }
                  }
                 ]
                }
@@ -2331,13 +2796,19 @@
                 "id": "7:224",
                 "name": "badge",
                 "type": "TEXT",
-                "characters": "badge"
+                "characters": "badge",
+                "styles": {
+                 "text": "2:45"
+                }
                },
                {
                 "id": "7:225",
                 "name": "slot → badge",
                 "type": "TEXT",
-                "characters": "slot → badge"
+                "characters": "slot → badge",
+                "styles": {
+                 "text": "2:44"
+                }
                },
                {
                 "id": "7:226",
@@ -2360,7 +2831,13 @@
                   "id": "I7:226;3:144",
                   "name": "label",
                   "type": "TEXT",
-                  "characters": "data"
+                  "componentPropertyReferences": {
+                   "characters": "Label#3:22"
+                  },
+                  "characters": "data",
+                  "styles": {
+                   "text": "2:43"
+                  }
                  }
                 ]
                }
@@ -2375,13 +2852,19 @@
                 "id": "7:229",
                 "name": "elevation",
                 "type": "TEXT",
-                "characters": "elevation"
+                "characters": "elevation",
+                "styles": {
+                 "text": "2:45"
+                }
                },
                {
                 "id": "7:230",
                 "name": "1",
                 "type": "TEXT",
-                "characters": "1"
+                "characters": "1",
+                "styles": {
+                 "text": "2:44"
+                }
                },
                {
                 "id": "7:231",
@@ -2404,7 +2887,13 @@
                   "id": "I7:231;3:142",
                   "name": "label",
                   "type": "TEXT",
-                  "characters": "default"
+                  "componentPropertyReferences": {
+                   "characters": "Label#3:22"
+                  },
+                  "characters": "default",
+                  "styles": {
+                   "text": "2:43"
+                  }
                  }
                 ]
                }
@@ -2434,7 +2923,10 @@
               "id": "7:239",
               "name": "card — 4 items for 6 nodes · 2 removed (onShortage: remove)",
               "type": "TEXT",
-              "characters": "card — 4 items for 6 nodes · 2 removed (onShortage: remove)"
+              "characters": "card — 4 items for 6 nodes · 2 removed (onShortage: remove)",
+              "styles": {
+               "text": "2:45"
+              }
              }
             ]
            }
@@ -2475,7 +2967,13 @@
             "id": "I7:242;3:144",
             "name": "label",
             "type": "TEXT",
-            "characters": "ONE CONTRACT"
+            "componentPropertyReferences": {
+             "characters": "Label#3:22"
+            },
+            "characters": "ONE CONTRACT",
+            "styles": {
+             "text": "2:43"
+            }
            }
           ]
          },
@@ -2483,13 +2981,19 @@
           "id": "7:244",
           "name": "title",
           "type": "TEXT",
-          "characters": "The server and every frontend share one type."
+          "characters": "The server and every frontend share one type.",
+          "styles": {
+           "text": "2:37"
+          }
          },
          {
           "id": "7:245",
           "name": "subtitle",
           "type": "TEXT",
-          "characters": "The registry is the only place that knows your components. Swap Radix for shadcn/ui and the pages stay as they are."
+          "characters": "The registry is the only place that knows your components. Swap Radix for shadcn/ui and the pages stay as they are.",
+          "styles": {
+           "text": "2:39"
+          }
          }
         ]
        },
@@ -2512,7 +3016,10 @@
               "id": "7:249",
               "name": "filename",
               "type": "TEXT",
-              "characters": "contract.ts"
+              "characters": "contract.ts",
+              "styles": {
+               "text": "2:45"
+              }
              }
             ]
            },
@@ -2525,7 +3032,10 @@
               "id": "7:251",
               "name": "code",
               "type": "TEXT",
-              "characters": "import type { Slot } from 'dedal'\n\n// component → props: the only shared thing\nexport type Contract = {\n  grid: { columns?: 1 | 2 | 3 | 4 }\n  card: { title?: string; href?: string; badge?: Slot }\n  badge: { label?: string }\n}"
+              "characters": "import type { Slot } from 'dedal'\n\n// component → props: the only shared thing\nexport type Contract = {\n  grid: { columns?: 1 | 2 | 3 | 4 }\n  card: { title?: string; href?: string; badge?: Slot }\n  badge: { label?: string }\n}",
+              "styles": {
+               "text": "2:44"
+              }
              }
             ]
            }
@@ -2545,7 +3055,10 @@
               "id": "7:254",
               "name": "filename",
               "type": "TEXT",
-              "characters": "page.tsx"
+              "characters": "page.tsx",
+              "styles": {
+               "text": "2:45"
+              }
              }
             ]
            },
@@ -2558,7 +3071,10 @@
               "id": "7:256",
               "name": "code",
               "type": "TEXT",
-              "characters": "import { Render, type Registry } from 'dedal/react'\nimport { Card, Badge } from '@/components/ui'\n\nconst registry = { grid: Grid, card: Card, badge: Badge }\n  satisfies Registry<Contract> // missing one = compile error\n\nexport default async function Home() {\n  return <Render tree={await home()} registry={registry} />\n}"
+              "characters": "import { Render, type Registry } from 'dedal/react'\nimport { Card, Badge } from '@/components/ui'\n\nconst registry = { grid: Grid, card: Card, badge: Badge }\n  satisfies Registry<Contract> // missing one = compile error\n\nexport default async function Home() {\n  return <Render tree={await home()} registry={registry} />\n}",
+              "styles": {
+               "text": "2:44"
+              }
              }
             ]
            }
@@ -2582,13 +3098,19 @@
           "id": "7:259",
           "name": "title",
           "type": "TEXT",
-          "characters": "Start with one block."
+          "characters": "Start with one block.",
+          "styles": {
+           "text": "2:37"
+          }
          },
          {
           "id": "7:260",
           "name": "subtitle",
           "type": "TEXT",
-          "characters": "Wrap one section of an existing page and keep the rest. Your components stay exactly as they are."
+          "characters": "Wrap one section of an existing page and keep the rest. Your components stay exactly as they are.",
+          "styles": {
+           "text": "2:39"
+          }
          },
          {
           "id": "7:261",
@@ -2625,12 +3147,21 @@
               "id": "I7:262;3:131",
               "name": "label",
               "type": "TEXT",
-              "characters": "Read the quick start"
+              "componentPropertyReferences": {
+               "characters": "Label#3:0"
+              },
+              "characters": "Read the quick start",
+              "styles": {
+               "text": "2:42"
+              }
              },
              {
               "id": "I7:262;3:132",
               "name": "icon-right",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "visible": "Icon right#3:11"
+              },
               "componentId": "3:46",
               "children": [
                {
@@ -2672,13 +3203,22 @@
               "id": "I7:271;3:119",
               "name": "label",
               "type": "TEXT",
-              "characters": "Browse examples"
+              "componentPropertyReferences": {
+               "characters": "Label#3:0"
+              },
+              "characters": "Browse examples",
+              "styles": {
+               "text": "2:42"
+              }
              },
              {
               "id": "I7:271;3:120",
               "name": "icon-right",
               "visible": false,
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "visible": "Icon right#3:11"
+              },
               "componentId": "3:46",
               "children": [
                {
@@ -2729,7 +3269,10 @@
             "id": "I7:282;3:162",
             "name": "wordmark",
             "type": "TEXT",
-            "characters": "Dedal"
+            "characters": "Dedal",
+            "styles": {
+             "text": "2:38"
+            }
            }
           ]
          },
@@ -2737,7 +3280,10 @@
           "id": "7:287",
           "name": "Server-driven UI for TypeScript · v0.6.6",
           "type": "TEXT",
-          "characters": "Server-driven UI for TypeScript · v0.6.6"
+          "characters": "Server-driven UI for TypeScript · v0.6.6",
+          "styles": {
+           "text": "2:41"
+          }
          }
         ]
        },
@@ -2750,31 +3296,46 @@
           "id": "7:289",
           "name": "Docs",
           "type": "TEXT",
-          "characters": "Docs"
+          "characters": "Docs",
+          "styles": {
+           "text": "2:41"
+          }
          },
          {
           "id": "7:290",
           "name": "Guides",
           "type": "TEXT",
-          "characters": "Guides"
+          "characters": "Guides",
+          "styles": {
+           "text": "2:41"
+          }
          },
          {
           "id": "7:291",
           "name": "API",
           "type": "TEXT",
-          "characters": "API"
+          "characters": "API",
+          "styles": {
+           "text": "2:41"
+          }
          },
          {
           "id": "7:292",
           "name": "Changelog",
           "type": "TEXT",
-          "characters": "Changelog"
+          "characters": "Changelog",
+          "styles": {
+           "text": "2:41"
+          }
          },
          {
           "id": "7:293",
           "name": "GitHub",
           "type": "TEXT",
-          "characters": "GitHub"
+          "characters": "GitHub",
+          "styles": {
+           "text": "2:41"
+          }
          }
         ]
        }
@@ -2982,6 +3543,48 @@
      "description": "shadcn/ui <Badge variant>. brand/accent = Dedal extensions.",
      "remote": false
     }
+   },
+   "styles": {
+    "2:38": {
+     "name": "h3",
+     "styleType": "TEXT"
+    },
+    "2:42": {
+     "name": "label",
+     "styleType": "TEXT"
+    },
+    "2:43": {
+     "name": "caption",
+     "styleType": "TEXT"
+    },
+    "2:36": {
+     "name": "display",
+     "styleType": "TEXT"
+    },
+    "2:39": {
+     "name": "lead",
+     "styleType": "TEXT"
+    },
+    "2:44": {
+     "name": "code",
+     "styleType": "TEXT"
+    },
+    "2:41": {
+     "name": "body-sm",
+     "styleType": "TEXT"
+    },
+    "2:45": {
+     "name": "code-sm",
+     "styleType": "TEXT"
+    },
+    "2:37": {
+     "name": "h2",
+     "styleType": "TEXT"
+    },
+    "2:40": {
+     "name": "body",
+     "styleType": "TEXT"
+    }
    }
   },
   "14:198": {
@@ -3067,13 +3670,22 @@
               "id": "I14:207;13:253",
               "name": "label",
               "type": "TEXT",
-              "characters": "Docs"
+              "componentPropertyReferences": {
+               "characters": "Label#13:0"
+              },
+              "characters": "Docs",
+              "styles": {
+               "text": "12:252"
+              }
              },
              {
               "id": "I14:207;13:254",
               "name": "icon-right",
               "visible": false,
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "visible": "Icon right#13:21"
+              },
               "componentId": "3:46",
               "children": [
                {
@@ -3120,13 +3732,22 @@
               "id": "I14:216;13:253",
               "name": "label",
               "type": "TEXT",
-              "characters": "Guides"
+              "componentPropertyReferences": {
+               "characters": "Label#13:0"
+              },
+              "characters": "Guides",
+              "styles": {
+               "text": "12:252"
+              }
              },
              {
               "id": "I14:216;13:254",
               "name": "icon-right",
               "visible": false,
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "visible": "Icon right#13:21"
+              },
               "componentId": "3:46",
               "children": [
                {
@@ -3173,13 +3794,22 @@
               "id": "I14:222;13:253",
               "name": "label",
               "type": "TEXT",
-              "characters": "Examples"
+              "componentPropertyReferences": {
+               "characters": "Label#13:0"
+              },
+              "characters": "Examples",
+              "styles": {
+               "text": "12:252"
+              }
              },
              {
               "id": "I14:222;13:254",
               "name": "icon-right",
               "visible": false,
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "visible": "Icon right#13:21"
+              },
               "componentId": "3:46",
               "children": [
                {
@@ -3226,13 +3856,22 @@
               "id": "I14:228;13:253",
               "name": "label",
               "type": "TEXT",
-              "characters": "Changelog"
+              "componentPropertyReferences": {
+               "characters": "Label#13:0"
+              },
+              "characters": "Changelog",
+              "styles": {
+               "text": "12:252"
+              }
              },
              {
               "id": "I14:228;13:254",
               "name": "icon-right",
               "visible": false,
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "visible": "Icon right#13:21"
+              },
               "componentId": "3:46",
               "children": [
                {
@@ -3288,13 +3927,22 @@
             "id": "I14:235;13:247",
             "name": "label",
             "type": "TEXT",
-            "characters": "GitHub"
+            "componentPropertyReferences": {
+             "characters": "Label#13:0"
+            },
+            "characters": "GitHub",
+            "styles": {
+             "text": "12:252"
+            }
            },
            {
             "id": "I14:235;13:248",
             "name": "icon-right",
             "visible": false,
             "type": "INSTANCE",
+            "componentPropertyReferences": {
+             "visible": "Icon right#13:21"
+            },
             "componentId": "3:46",
             "children": [
              {
@@ -3341,13 +3989,22 @@
             "id": "I14:244;13:199",
             "name": "label",
             "type": "TEXT",
-            "characters": "Get started"
+            "componentPropertyReferences": {
+             "characters": "Label#13:0"
+            },
+            "characters": "Get started",
+            "styles": {
+             "text": "12:252"
+            }
            },
            {
             "id": "I14:244;13:200",
             "name": "icon-right",
             "visible": false,
             "type": "INSTANCE",
+            "componentPropertyReferences": {
+             "visible": "Icon right#13:21"
+            },
             "componentId": "3:46",
             "children": [
              {
@@ -3399,7 +4056,13 @@
             "id": "I14:255;13:320",
             "name": "label",
             "type": "TEXT",
-            "characters": "v0.6.6 · TypeScript · zero dependencies"
+            "componentPropertyReferences": {
+             "characters": "Label#13:42"
+            },
+            "characters": "v0.6.6 · TypeScript · zero dependencies",
+            "styles": {
+             "text": "12:253"
+            }
            }
           ]
          },
@@ -3407,13 +4070,19 @@
           "id": "14:257",
           "name": "title",
           "type": "TEXT",
-          "characters": "Design the page in Figma.\nShip it without a release."
+          "characters": "Design the page in Figma.\nShip it without a release.",
+          "styles": {
+           "text": "12:246"
+          }
          },
          {
           "id": "14:258",
           "name": "lead",
           "type": "TEXT",
-          "characters": "Dedal turns a Figma frame built from your design system into a typed template, fills it with data from your APIs and serves it to your frontend. Rearranging a screen is a publish, not a deploy."
+          "characters": "Dedal turns a Figma frame built from your design system into a typed template, fills it with data from your APIs and serves it to your frontend. Rearranging a screen is a publish, not a deploy.",
+          "styles": {
+           "text": "12:249"
+          }
          },
          {
           "id": "14:259",
@@ -3455,12 +4124,18 @@
               "id": "I14:260;13:259",
               "name": "label",
               "type": "TEXT",
+              "componentPropertyReferences": {
+               "characters": "Label#13:0"
+              },
               "characters": "Get started"
              },
              {
               "id": "I14:260;13:260",
               "name": "icon-right",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "visible": "Icon right#13:21"
+              },
               "componentId": "3:46",
               "children": [
                {
@@ -3507,6 +4182,9 @@
               "id": "I14:269;13:265",
               "name": "label",
               "type": "TEXT",
+              "componentPropertyReferences": {
+               "characters": "Label#13:0"
+              },
               "characters": "Watch the 60-second demo"
              },
              {
@@ -3514,6 +4192,9 @@
               "name": "icon-right",
               "visible": false,
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "visible": "Icon right#13:21"
+              },
               "componentId": "3:46",
               "children": [
                {
@@ -3536,13 +4217,19 @@
             "id": "14:279",
             "name": "$",
             "type": "TEXT",
-            "characters": "$"
+            "characters": "$",
+            "styles": {
+             "text": "12:254"
+            }
            },
            {
             "id": "14:280",
             "name": "npm i github:dawidglosny/dedal",
             "type": "TEXT",
-            "characters": "npm i github:dawidglosny/dedal"
+            "characters": "npm i github:dawidglosny/dedal",
+            "styles": {
+             "text": "12:254"
+            }
            }
           ]
          }
@@ -3587,7 +4274,10 @@
               "id": "14:291",
               "name": "01 · STRUCTURE",
               "type": "TEXT",
-              "characters": "01 · STRUCTURE"
+              "characters": "01 · STRUCTURE",
+              "styles": {
+               "text": "12:253"
+              }
              }
             ]
            },
@@ -3595,13 +4285,19 @@
             "id": "14:292",
             "name": "Figma frame",
             "type": "TEXT",
-            "characters": "Figma frame"
+            "characters": "Figma frame",
+            "styles": {
+             "text": "12:248"
+            }
            },
            {
             "id": "14:293",
             "name": "Designers compose the page from design-system components.",
             "type": "TEXT",
-            "characters": "Designers compose the page from design-system components."
+            "characters": "Designers compose the page from design-system components.",
+            "styles": {
+             "text": "12:251"
+            }
            }
           ]
          },
@@ -3652,7 +4348,10 @@
               "id": "14:305",
               "name": "02 · TEMPLATE",
               "type": "TEXT",
-              "characters": "02 · TEMPLATE"
+              "characters": "02 · TEMPLATE",
+              "styles": {
+               "text": "12:253"
+              }
              }
             ]
            },
@@ -3660,13 +4359,19 @@
             "id": "14:306",
             "name": "Typed JSON",
             "type": "TEXT",
-            "characters": "Typed JSON"
+            "characters": "Typed JSON",
+            "styles": {
+             "text": "12:248"
+            }
            },
            {
             "id": "14:307",
             "name": "Converted, validated against the contract, stored and versioned.",
             "type": "TEXT",
-            "characters": "Converted, validated against the contract, stored and versioned."
+            "characters": "Converted, validated against the contract, stored and versioned.",
+            "styles": {
+             "text": "12:251"
+            }
            }
           ]
          },
@@ -3717,7 +4422,10 @@
               "id": "14:320",
               "name": "03 · ENGINE",
               "type": "TEXT",
-              "characters": "03 · ENGINE"
+              "characters": "03 · ENGINE",
+              "styles": {
+               "text": "12:253"
+              }
              }
             ]
            },
@@ -3725,13 +4433,19 @@
             "id": "14:321",
             "name": "Dedal",
             "type": "TEXT",
-            "characters": "Dedal"
+            "characters": "Dedal",
+            "styles": {
+             "text": "12:248"
+            }
            },
            {
             "id": "14:322",
             "name": "Selectors place data from your APIs. Missing data has rules.",
             "type": "TEXT",
-            "characters": "Selectors place data from your APIs. Missing data has rules."
+            "characters": "Selectors place data from your APIs. Missing data has rules.",
+            "styles": {
+             "text": "12:251"
+            }
            },
            {
             "id": "14:323",
@@ -3759,7 +4473,13 @@
               "id": "I14:323;13:328",
               "name": "label",
               "type": "TEXT",
-              "characters": "+ data from your API"
+              "componentPropertyReferences": {
+               "characters": "Label#13:42"
+              },
+              "characters": "+ data from your API",
+              "styles": {
+               "text": "12:253"
+              }
              }
             ]
            }
@@ -3812,7 +4532,10 @@
               "id": "14:338",
               "name": "04 · RENDER",
               "type": "TEXT",
-              "characters": "04 · RENDER"
+              "characters": "04 · RENDER",
+              "styles": {
+               "text": "12:253"
+              }
              }
             ]
            },
@@ -3820,13 +4543,19 @@
             "id": "14:339",
             "name": "Your page",
             "type": "TEXT",
-            "characters": "Your page"
+            "characters": "Your page",
+            "styles": {
+             "text": "12:248"
+            }
            },
            {
             "id": "14:340",
             "name": "The frontend maps names to your components. Nothing else changes.",
             "type": "TEXT",
-            "characters": "The frontend maps names to your components. Nothing else changes."
+            "characters": "The frontend maps names to your components. Nothing else changes.",
+            "styles": {
+             "text": "12:251"
+            }
            }
           ]
          }
@@ -3870,7 +4599,13 @@
             "id": "I14:343;13:320",
             "name": "label",
             "type": "TEXT",
-            "characters": "The idea"
+            "componentPropertyReferences": {
+             "characters": "Label#13:42"
+            },
+            "characters": "The idea",
+            "styles": {
+             "text": "12:253"
+            }
            }
           ]
          },
@@ -3878,13 +4613,19 @@
           "id": "14:345",
           "name": "title",
           "type": "TEXT",
-          "characters": "Three things change at different speeds.\nKeep them apart."
+          "characters": "Three things change at different speeds.\nKeep them apart.",
+          "styles": {
+           "text": "12:247"
+          }
          },
          {
           "id": "14:346",
           "name": "subtitle",
           "type": "TEXT",
-          "characters": "Structure, data and components have different owners. Dedal joins them at the last moment, so each one can change on its own schedule."
+          "characters": "Structure, data and components have different owners. Dedal joins them at the last moment, so each one can change on its own schedule.",
+          "styles": {
+           "text": "12:249"
+          }
          }
         ]
        },
@@ -3923,6 +4664,9 @@
               "id": "I14:348;13:346",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#13:57"
+              },
               "componentId": "3:52",
               "children": [
                {
@@ -3943,13 +4687,22 @@
               "id": "I14:348;13:352",
               "name": "title",
               "type": "TEXT",
+              "componentPropertyReferences": {
+               "characters": "Title#13:55"
+              },
               "characters": "Structure"
              },
              {
               "id": "I14:348;13:353",
               "name": "description",
               "type": "TEXT",
-              "characters": "Which blocks, in what order, what sits inside what. Owned by designers and editors — lives in Figma or a CMS."
+              "componentPropertyReferences": {
+               "characters": "Description#13:56"
+              },
+              "characters": "Which blocks, in what order, what sits inside what. Owned by designers and editors — lives in Figma or a CMS.",
+              "styles": {
+               "text": "12:251"
+              }
              }
             ]
            }
@@ -3985,6 +4738,9 @@
               "id": "I14:367;13:346",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#13:57"
+              },
               "componentId": "3:57",
               "children": [
                {
@@ -4005,13 +4761,22 @@
               "id": "I14:367;13:352",
               "name": "title",
               "type": "TEXT",
+              "componentPropertyReferences": {
+               "characters": "Title#13:55"
+              },
               "characters": "Data"
              },
              {
               "id": "I14:367;13:353",
               "name": "description",
               "type": "TEXT",
-              "characters": "What is inside the blocks. Comes from your APIs and is placed by CSS-like selectors, not fragile indexes."
+              "componentPropertyReferences": {
+               "characters": "Description#13:56"
+              },
+              "characters": "What is inside the blocks. Comes from your APIs and is placed by CSS-like selectors, not fragile indexes.",
+              "styles": {
+               "text": "12:251"
+              }
              }
             ]
            }
@@ -4047,6 +4812,9 @@
               "id": "I14:381;13:346",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#13:57"
+              },
               "componentId": "3:63",
               "children": [
                {
@@ -4067,13 +4835,22 @@
               "id": "I14:381;13:352",
               "name": "title",
               "type": "TEXT",
+              "componentPropertyReferences": {
+               "characters": "Title#13:55"
+              },
               "characters": "Components"
              },
              {
               "id": "I14:381;13:353",
               "name": "description",
               "type": "TEXT",
-              "characters": "What a card or a button looks like. Owned by the UI team — your design system, untouched."
+              "componentPropertyReferences": {
+               "characters": "Description#13:56"
+              },
+              "characters": "What a card or a button looks like. Owned by the UI team — your design system, untouched.",
+              "styles": {
+               "text": "12:251"
+              }
              }
             ]
            }
@@ -4119,7 +4896,13 @@
             "id": "I14:398;13:320",
             "name": "label",
             "type": "TEXT",
-            "characters": "From Figma"
+            "componentPropertyReferences": {
+             "characters": "Label#13:42"
+            },
+            "characters": "From Figma",
+            "styles": {
+             "text": "12:253"
+            }
            }
           ]
          },
@@ -4127,13 +4910,19 @@
           "id": "14:400",
           "name": "title",
           "type": "TEXT",
-          "characters": "Your Figma file is the source of the page."
+          "characters": "Your Figma file is the source of the page.",
+          "styles": {
+           "text": "12:247"
+          }
          },
          {
           "id": "14:401",
           "name": "subtitle",
           "type": "TEXT",
-          "characters": "Name layers after your components and give the grid a Layout Grid. Dedal reads the frame and produces a template your server can serve."
+          "characters": "Name layers after your components and give the grid a Layout Grid. Dedal reads the frame and produces a template your server can serve.",
+          "styles": {
+           "text": "12:249"
+          }
          }
         ]
        },
@@ -4169,7 +4958,10 @@
               "id": "14:411",
               "name": "Home / Desktop",
               "type": "TEXT",
-              "characters": "Home / Desktop"
+              "characters": "Home / Desktop",
+              "styles": {
+               "text": "12:255"
+              }
              }
             ]
            },
@@ -4187,7 +4979,10 @@
                 "id": "14:414",
                 "name": "LAYERS",
                 "type": "TEXT",
-                "characters": "LAYERS"
+                "characters": "LAYERS",
+                "styles": {
+                 "text": "12:253"
+                }
                },
                {
                 "id": "14:415",
@@ -4198,7 +4993,10 @@
                   "id": "14:416",
                   "name": "home",
                   "type": "TEXT",
-                  "characters": "home"
+                  "characters": "home",
+                  "styles": {
+                   "text": "12:255"
+                  }
                  }
                 ]
                },
@@ -4211,7 +5009,10 @@
                   "id": "14:418",
                   "name": "hero",
                   "type": "TEXT",
-                  "characters": "hero"
+                  "characters": "hero",
+                  "styles": {
+                   "text": "12:255"
+                  }
                  }
                 ]
                },
@@ -4224,7 +5025,10 @@
                   "id": "14:420",
                   "name": "grid ⌗ 3 col",
                   "type": "TEXT",
-                  "characters": "grid  ⌗ 3 col"
+                  "characters": "grid  ⌗ 3 col",
+                  "styles": {
+                   "text": "12:255"
+                  }
                  }
                 ]
                },
@@ -4237,7 +5041,10 @@
                   "id": "14:422",
                   "name": "card #featured",
                   "type": "TEXT",
-                  "characters": "card #featured"
+                  "characters": "card #featured",
+                  "styles": {
+                   "text": "12:255"
+                  }
                  }
                 ]
                },
@@ -4250,7 +5057,10 @@
                   "id": "14:424",
                   "name": "card",
                   "type": "TEXT",
-                  "characters": "card"
+                  "characters": "card",
+                  "styles": {
+                   "text": "12:255"
+                  }
                  }
                 ]
                },
@@ -4263,7 +5073,10 @@
                   "id": "14:426",
                   "name": "card",
                   "type": "TEXT",
-                  "characters": "card"
+                  "characters": "card",
+                  "styles": {
+                   "text": "12:255"
+                  }
                  }
                 ]
                },
@@ -4276,7 +5089,10 @@
                   "id": "14:428",
                   "name": "cta",
                   "type": "TEXT",
-                  "characters": "cta"
+                  "characters": "cta",
+                  "styles": {
+                   "text": "12:255"
+                  }
                  }
                 ]
                }
@@ -4296,7 +5112,10 @@
                   "id": "14:431",
                   "name": "hero",
                   "type": "TEXT",
-                  "characters": "hero"
+                  "characters": "hero",
+                  "styles": {
+                   "text": "12:255"
+                  }
                  }
                 ]
                },
@@ -4314,7 +5133,10 @@
                     "id": "14:434",
                     "name": "#featured",
                     "type": "TEXT",
-                    "characters": "#featured"
+                    "characters": "#featured",
+                    "styles": {
+                     "text": "12:255"
+                    }
                    }
                   ]
                  },
@@ -4327,7 +5149,10 @@
                     "id": "14:436",
                     "name": "card",
                     "type": "TEXT",
-                    "characters": "card"
+                    "characters": "card",
+                    "styles": {
+                     "text": "12:255"
+                    }
                    }
                   ]
                  },
@@ -4340,7 +5165,10 @@
                     "id": "14:438",
                     "name": "card",
                     "type": "TEXT",
-                    "characters": "card"
+                    "characters": "card",
+                    "styles": {
+                     "text": "12:255"
+                    }
                    }
                   ]
                  }
@@ -4355,7 +5183,10 @@
                   "id": "14:440",
                   "name": "cta",
                   "type": "TEXT",
-                  "characters": "cta"
+                  "characters": "cta",
+                  "styles": {
+                   "text": "12:255"
+                  }
                  }
                 ]
                }
@@ -4399,7 +5230,10 @@
               "id": "14:448",
               "name": "filename",
               "type": "TEXT",
-              "characters": "templates/home.json"
+              "characters": "templates/home.json",
+              "styles": {
+               "text": "12:255"
+              }
              }
             ]
            },
@@ -4412,7 +5246,10 @@
               "id": "14:450",
               "name": "code",
               "type": "TEXT",
-              "characters": "{\n  \"component\": \"page\",\n  \"children\": [\n    { \"component\": \"hero\", \"props\": { \"title\": \"Today\" } },\n    {\n      \"component\": \"grid\",\n      \"props\": { \"columns\": 3 },\n      \"children\": [\n        { \"component\": \"card\", \"alias\": \"featured\" },\n        { \"component\": \"card\", \"repeat\": 2 }\n      ]\n    },\n    { \"component\": \"cta\" }\n  ]\n}"
+              "characters": "{\n  \"component\": \"page\",\n  \"children\": [\n    { \"component\": \"hero\", \"props\": { \"title\": \"Today\" } },\n    {\n      \"component\": \"grid\",\n      \"props\": { \"columns\": 3 },\n      \"children\": [\n        { \"component\": \"card\", \"alias\": \"featured\" },\n        { \"component\": \"card\", \"repeat\": 2 }\n      ]\n    },\n    { \"component\": \"cta\" }\n  ]\n}",
+              "styles": {
+               "text": "12:254"
+              }
              }
             ]
            }
@@ -4456,7 +5293,13 @@
               "id": "I14:453;13:322",
               "name": "label",
               "type": "TEXT",
-              "characters": "1"
+              "componentPropertyReferences": {
+               "characters": "Label#13:42"
+              },
+              "characters": "1",
+              "styles": {
+               "text": "12:253"
+              }
              }
             ]
            },
@@ -4469,13 +5312,19 @@
               "id": "14:456",
               "name": "Design",
               "type": "TEXT",
-              "characters": "Design"
+              "characters": "Design",
+              "styles": {
+               "text": "12:252"
+              }
              },
              {
               "id": "14:457",
               "name": "Compose the frame from your design-system components.",
               "type": "TEXT",
-              "characters": "Compose the frame from your design-system components."
+              "characters": "Compose the frame from your design-system components.",
+              "styles": {
+               "text": "12:251"
+              }
              }
             ]
            }
@@ -4512,7 +5361,13 @@
               "id": "I14:459;13:322",
               "name": "label",
               "type": "TEXT",
-              "characters": "2"
+              "componentPropertyReferences": {
+               "characters": "Label#13:42"
+              },
+              "characters": "2",
+              "styles": {
+               "text": "12:253"
+              }
              }
             ]
            },
@@ -4525,13 +5380,19 @@
               "id": "14:462",
               "name": "Pull",
               "type": "TEXT",
-              "characters": "Pull"
+              "characters": "Pull",
+              "styles": {
+               "text": "12:252"
+              }
              },
              {
               "id": "14:463",
               "name": "dedal-figma pull validates it against the contract.",
               "type": "TEXT",
-              "characters": "dedal-figma pull validates it against the contract."
+              "characters": "dedal-figma pull validates it against the contract.",
+              "styles": {
+               "text": "12:251"
+              }
              }
             ]
            }
@@ -4568,7 +5429,13 @@
               "id": "I14:465;13:322",
               "name": "label",
               "type": "TEXT",
-              "characters": "3"
+              "componentPropertyReferences": {
+               "characters": "Label#13:42"
+              },
+              "characters": "3",
+              "styles": {
+               "text": "12:253"
+              }
              }
             ]
            },
@@ -4581,13 +5448,19 @@
               "id": "14:468",
               "name": "Publish",
               "type": "TEXT",
-              "characters": "Publish"
+              "characters": "Publish",
+              "styles": {
+               "text": "12:252"
+              }
              },
              {
               "id": "14:469",
               "name": "The page follows on the next request. No frontend release.",
               "type": "TEXT",
-              "characters": "The page follows on the next request. No frontend release."
+              "characters": "The page follows on the next request. No frontend release.",
+              "styles": {
+               "text": "12:251"
+              }
              }
             ]
            }
@@ -4633,7 +5506,13 @@
             "id": "I15:300;13:320",
             "name": "label",
             "type": "TEXT",
-            "characters": "What you get"
+            "componentPropertyReferences": {
+             "characters": "Label#13:42"
+            },
+            "characters": "What you get",
+            "styles": {
+             "text": "12:253"
+            }
            }
           ]
          },
@@ -4641,13 +5520,19 @@
           "id": "15:302",
           "name": "title",
           "type": "TEXT",
-          "characters": "Everything the hand-rolled version ends up needing."
+          "characters": "Everything the hand-rolled version ends up needing.",
+          "styles": {
+           "text": "12:247"
+          }
          },
          {
           "id": "15:303",
           "name": "subtitle",
           "type": "TEXT",
-          "characters": "Data binding, missing-data rules, caching and debugging — typed and tested, instead of growing them ad hoc around a switch statement."
+          "characters": "Data binding, missing-data rules, caching and debugging — typed and tested, instead of growing them ad hoc around a switch statement.",
+          "styles": {
+           "text": "12:249"
+          }
          }
         ]
        },
@@ -4686,6 +5571,9 @@
               "id": "I15:305;13:346",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#13:57"
+              },
               "componentId": "3:10",
               "children": [
                {
@@ -4706,13 +5594,22 @@
               "id": "I15:305;13:352",
               "name": "title",
               "type": "TEXT",
+              "componentPropertyReferences": {
+               "characters": "Title#13:55"
+              },
               "characters": "One typed contract"
              },
              {
               "id": "I15:305;13:353",
               "name": "description",
               "type": "TEXT",
-              "characters": "A TypeScript contract shared by the server and every frontend. A missing component in the registry is a compile error."
+              "componentPropertyReferences": {
+               "characters": "Description#13:56"
+              },
+              "characters": "A TypeScript contract shared by the server and every frontend. A missing component in the registry is a compile error.",
+              "styles": {
+               "text": "12:251"
+              }
              }
             ]
            }
@@ -4748,6 +5645,9 @@
               "id": "I15:318;13:346",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#13:57"
+              },
               "componentId": "3:17",
               "children": [
                {
@@ -4768,13 +5668,22 @@
               "id": "I15:318;13:352",
               "name": "title",
               "type": "TEXT",
+              "componentPropertyReferences": {
+               "characters": "Title#13:55"
+              },
               "characters": "Selectors, not indexes"
              },
              {
               "id": "I15:318;13:353",
               "name": "description",
               "type": "TEXT",
-              "characters": "card, #featured, card > :slot(badge). Adding a heading to the template doesn’t shift the data."
+              "componentPropertyReferences": {
+               "characters": "Description#13:56"
+              },
+              "characters": "card, #featured, card > :slot(badge). Adding a heading to the template doesn’t shift the data.",
+              "styles": {
+               "text": "12:251"
+              }
              }
             ]
            }
@@ -4810,6 +5719,9 @@
               "id": "I15:334;13:346",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#13:57"
+              },
               "componentId": "3:21",
               "children": [
                {
@@ -4830,13 +5742,22 @@
               "id": "I15:334;13:352",
               "name": "title",
               "type": "TEXT",
+              "componentPropertyReferences": {
+               "characters": "Title#13:55"
+              },
               "characters": "Rules for missing data"
              },
              {
               "id": "I15:334;13:353",
               "name": "description",
               "type": "TEXT",
-              "characters": "Fewer articles than cards or a failing API: safe defaults, a strict mode, and a report of everything dropped."
+              "componentPropertyReferences": {
+               "characters": "Description#13:56"
+              },
+              "characters": "Fewer articles than cards or a failing API: safe defaults, a strict mode, and a report of everything dropped.",
+              "styles": {
+               "text": "12:251"
+              }
              }
             ]
            }
@@ -4879,6 +5800,9 @@
               "id": "I15:348;13:346",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#13:57"
+              },
               "componentId": "3:27",
               "children": [
                {
@@ -4899,13 +5823,22 @@
               "id": "I15:348;13:352",
               "name": "title",
               "type": "TEXT",
+              "componentPropertyReferences": {
+               "characters": "Title#13:55"
+              },
               "characters": "Variants without copies"
              },
              {
               "id": "I15:348;13:353",
               "name": "description",
               "type": "TEXT",
-              "characters": "patch and remove adapt one template per device, site or A/B test."
+              "componentPropertyReferences": {
+               "characters": "Description#13:56"
+              },
+              "characters": "patch and remove adapt one template per device, site or A/B test.",
+              "styles": {
+               "text": "12:251"
+              }
              }
             ]
            }
@@ -4941,6 +5874,9 @@
               "id": "I15:363;13:346",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#13:57"
+              },
               "componentId": "3:30",
               "children": [
                {
@@ -4961,13 +5897,22 @@
               "id": "I15:363;13:352",
               "name": "title",
               "type": "TEXT",
+              "componentPropertyReferences": {
+               "characters": "Title#13:55"
+              },
               "characters": "Fast by default"
              },
              {
               "id": "I15:363;13:353",
               "name": "description",
               "type": "TEXT",
-              "characters": "Stale-while-revalidate cache, parallel loaders, streaming. A 530-node page builds in under 1 ms."
+              "componentPropertyReferences": {
+               "characters": "Description#13:56"
+              },
+              "characters": "Stale-while-revalidate cache, parallel loaders, streaming. A 530-node page builds in under 1 ms.",
+              "styles": {
+               "text": "12:251"
+              }
              }
             ]
            }
@@ -5003,6 +5948,9 @@
               "id": "I15:375;13:346",
               "name": "icon",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "mainComponent": "Icon#13:57"
+              },
               "componentId": "3:38",
               "children": [
                {
@@ -5023,13 +5971,22 @@
               "id": "I15:375;13:352",
               "name": "title",
               "type": "TEXT",
+              "componentPropertyReferences": {
+               "characters": "Title#13:55"
+              },
               "characters": "Devtools"
              },
              {
               "id": "I15:375;13:353",
               "name": "description",
               "type": "TEXT",
-              "characters": "Click any element and see where each prop came from, which selector placed the data and what went missing."
+              "componentPropertyReferences": {
+               "characters": "Description#13:56"
+              },
+              "characters": "Click any element and see where each prop came from, which selector placed the data and what went missing.",
+              "styles": {
+               "text": "12:251"
+              }
              }
             ]
            }
@@ -5080,7 +6037,13 @@
               "id": "I15:395;13:330",
               "name": "label",
               "type": "TEXT",
-              "characters": "Devtools"
+              "componentPropertyReferences": {
+               "characters": "Label#13:42"
+              },
+              "characters": "Devtools",
+              "styles": {
+               "text": "12:253"
+              }
              }
             ]
            },
@@ -5088,13 +6051,19 @@
             "id": "15:397",
             "name": "title",
             "type": "TEXT",
-            "characters": "“Why does this element look like this?”"
+            "characters": "“Why does this element look like this?”",
+            "styles": {
+             "text": "12:247"
+            }
            },
            {
             "id": "15:398",
             "name": "subtitle",
             "type": "TEXT",
-            "characters": "Server-driven UI is hard to debug when the answer lives on the server. The Dedal panel answers it for any element on the page."
+            "characters": "Server-driven UI is hard to debug when the answer lives on the server. The Dedal panel answers it for any element on the page.",
+            "styles": {
+             "text": "12:249"
+            }
            },
            {
             "id": "15:399",
@@ -5118,7 +6087,10 @@
               "id": "15:403",
               "name": "Where each prop came from: default, template, patch or data",
               "type": "TEXT",
-              "characters": "Where each prop came from: default, template, patch or data"
+              "characters": "Where each prop came from: default, template, patch or data",
+              "styles": {
+               "text": "12:250"
+              }
              }
             ]
            },
@@ -5144,7 +6116,10 @@
               "id": "15:408",
               "name": "Which selector placed the data — and which data was dropped",
               "type": "TEXT",
-              "characters": "Which selector placed the data — and which data was dropped"
+              "characters": "Which selector placed the data — and which data was dropped",
+              "styles": {
+               "text": "12:250"
+              }
              }
             ]
            },
@@ -5170,7 +6145,10 @@
               "id": "15:413",
               "name": "How long every loader and query took",
               "type": "TEXT",
-              "characters": "How long every loader and query took"
+              "characters": "How long every loader and query took",
+              "styles": {
+               "text": "12:250"
+              }
              }
             ]
            }
@@ -5195,7 +6173,10 @@
                 "id": "15:417",
                 "name": "Node",
                 "type": "TEXT",
-                "characters": "Node"
+                "characters": "Node",
+                "styles": {
+                 "text": "12:252"
+                }
                }
               ]
              },
@@ -5208,7 +6189,10 @@
                 "id": "15:419",
                 "name": "Tree",
                 "type": "TEXT",
-                "characters": "Tree"
+                "characters": "Tree",
+                "styles": {
+                 "text": "12:252"
+                }
                }
               ]
              },
@@ -5221,7 +6205,10 @@
                 "id": "15:421",
                 "name": "Sections",
                 "type": "TEXT",
-                "characters": "Sections"
+                "characters": "Sections",
+                "styles": {
+                 "text": "12:252"
+                }
                }
               ]
              },
@@ -5234,7 +6221,10 @@
                 "id": "15:423",
                 "name": "Timing",
                 "type": "TEXT",
-                "characters": "Timing"
+                "characters": "Timing",
+                "styles": {
+                 "text": "12:252"
+                }
                }
               ]
              }
@@ -5262,7 +6252,10 @@
               "id": "15:433",
               "name": "card#featured",
               "type": "TEXT",
-              "characters": "card#featured"
+              "characters": "card#featured",
+              "styles": {
+               "text": "12:252"
+              }
              },
              {
               "id": "15:434",
@@ -5290,7 +6283,13 @@
                 "id": "I15:434;13:342",
                 "name": "label",
                 "type": "TEXT",
-                "characters": "news.0.0"
+                "componentPropertyReferences": {
+                 "characters": "Label#13:42"
+                },
+                "characters": "news.0.0",
+                "styles": {
+                 "text": "12:253"
+                }
                }
               ]
              }
@@ -5310,13 +6309,19 @@
                 "id": "15:438",
                 "name": "DataList.Label",
                 "type": "TEXT",
-                "characters": "title"
+                "characters": "title",
+                "styles": {
+                 "text": "12:251"
+                }
                },
                {
                 "id": "15:439",
                 "name": "DataList.Value",
                 "type": "TEXT",
-                "characters": "\"Markets rally after…\""
+                "characters": "\"Markets rally after…\"",
+                "styles": {
+                 "text": "12:254"
+                }
                },
                {
                 "id": "15:440",
@@ -5344,7 +6349,13 @@
                   "id": "I15:440;13:320",
                   "name": "label",
                   "type": "TEXT",
-                  "characters": "data"
+                  "componentPropertyReferences": {
+                   "characters": "Label#13:42"
+                  },
+                  "characters": "data",
+                  "styles": {
+                   "text": "12:253"
+                  }
                  }
                 ]
                }
@@ -5359,13 +6370,19 @@
                 "id": "15:443",
                 "name": "DataList.Label",
                 "type": "TEXT",
-                "characters": "href"
+                "characters": "href",
+                "styles": {
+                 "text": "12:251"
+                }
                },
                {
                 "id": "15:444",
                 "name": "DataList.Value",
                 "type": "TEXT",
-                "characters": "\"/news/markets-rally\""
+                "characters": "\"/news/markets-rally\"",
+                "styles": {
+                 "text": "12:254"
+                }
                },
                {
                 "id": "15:445",
@@ -5393,7 +6410,13 @@
                   "id": "I15:445;13:320",
                   "name": "label",
                   "type": "TEXT",
-                  "characters": "data"
+                  "componentPropertyReferences": {
+                   "characters": "Label#13:42"
+                  },
+                  "characters": "data",
+                  "styles": {
+                   "text": "12:253"
+                  }
                  }
                 ]
                }
@@ -5408,13 +6431,19 @@
                 "id": "15:448",
                 "name": "DataList.Label",
                 "type": "TEXT",
-                "characters": "size"
+                "characters": "size",
+                "styles": {
+                 "text": "12:251"
+                }
                },
                {
                 "id": "15:449",
                 "name": "DataList.Value",
                 "type": "TEXT",
-                "characters": "\"large\""
+                "characters": "\"large\"",
+                "styles": {
+                 "text": "12:254"
+                }
                },
                {
                 "id": "15:450",
@@ -5442,7 +6471,13 @@
                   "id": "I15:450;13:328",
                   "name": "label",
                   "type": "TEXT",
-                  "characters": "patch #featured"
+                  "componentPropertyReferences": {
+                   "characters": "Label#13:42"
+                  },
+                  "characters": "patch #featured",
+                  "styles": {
+                   "text": "12:253"
+                  }
                  }
                 ]
                }
@@ -5457,13 +6492,19 @@
                 "id": "15:453",
                 "name": "DataList.Label",
                 "type": "TEXT",
-                "characters": "variant"
+                "characters": "variant",
+                "styles": {
+                 "text": "12:251"
+                }
                },
                {
                 "id": "15:454",
                 "name": "DataList.Value",
                 "type": "TEXT",
-                "characters": "\"surface\""
+                "characters": "\"surface\"",
+                "styles": {
+                 "text": "12:254"
+                }
                },
                {
                 "id": "15:455",
@@ -5491,7 +6532,13 @@
                   "id": "I15:455;13:336",
                   "name": "label",
                   "type": "TEXT",
-                  "characters": "template"
+                  "componentPropertyReferences": {
+                   "characters": "Label#13:42"
+                  },
+                  "characters": "template",
+                  "styles": {
+                   "text": "12:253"
+                  }
                  }
                 ]
                }
@@ -5506,13 +6553,19 @@
                 "id": "15:458",
                 "name": "DataList.Label",
                 "type": "TEXT",
-                "characters": "badge"
+                "characters": "badge",
+                "styles": {
+                 "text": "12:251"
+                }
                },
                {
                 "id": "15:459",
                 "name": "DataList.Value",
                 "type": "TEXT",
-                "characters": "slot → badge"
+                "characters": "slot → badge",
+                "styles": {
+                 "text": "12:254"
+                }
                },
                {
                 "id": "15:460",
@@ -5540,7 +6593,13 @@
                   "id": "I15:460;13:320",
                   "name": "label",
                   "type": "TEXT",
-                  "characters": "data"
+                  "componentPropertyReferences": {
+                   "characters": "Label#13:42"
+                  },
+                  "characters": "data",
+                  "styles": {
+                   "text": "12:253"
+                  }
                  }
                 ]
                }
@@ -5555,13 +6614,19 @@
                 "id": "15:463",
                 "name": "DataList.Label",
                 "type": "TEXT",
-                "characters": "elevation"
+                "characters": "elevation",
+                "styles": {
+                 "text": "12:251"
+                }
                },
                {
                 "id": "15:464",
                 "name": "DataList.Value",
                 "type": "TEXT",
-                "characters": "1"
+                "characters": "1",
+                "styles": {
+                 "text": "12:254"
+                }
                },
                {
                 "id": "15:465",
@@ -5589,7 +6654,13 @@
                   "id": "I15:465;13:342",
                   "name": "label",
                   "type": "TEXT",
-                  "characters": "default"
+                  "componentPropertyReferences": {
+                   "characters": "Label#13:42"
+                  },
+                  "characters": "default",
+                  "styles": {
+                   "text": "12:253"
+                  }
                  }
                 ]
                }
@@ -5636,7 +6707,13 @@
                 "id": "I15:468;13:360",
                 "name": "label",
                 "type": "TEXT",
-                "characters": "card — 4 items for 6 nodes · 2 removed (onShortage: remove)"
+                "componentPropertyReferences": {
+                 "characters": "Text#13:58"
+                },
+                "characters": "card — 4 items for 6 nodes · 2 removed (onShortage: remove)",
+                "styles": {
+                 "text": "12:251"
+                }
                }
               ]
              }
@@ -5684,7 +6761,13 @@
             "id": "I15:481;13:320",
             "name": "label",
             "type": "TEXT",
-            "characters": "One contract"
+            "componentPropertyReferences": {
+             "characters": "Label#13:42"
+            },
+            "characters": "One contract",
+            "styles": {
+             "text": "12:253"
+            }
            }
           ]
          },
@@ -5692,13 +6775,19 @@
           "id": "15:483",
           "name": "title",
           "type": "TEXT",
-          "characters": "The server and every frontend share one type."
+          "characters": "The server and every frontend share one type.",
+          "styles": {
+           "text": "12:247"
+          }
          },
          {
           "id": "15:484",
           "name": "subtitle",
           "type": "TEXT",
-          "characters": "The registry is the only place that knows your components. Swap Radix for shadcn/ui and the pages stay as they are."
+          "characters": "The registry is the only place that knows your components. Swap Radix for shadcn/ui and the pages stay as they are.",
+          "styles": {
+           "text": "12:249"
+          }
          }
         ]
        },
@@ -5721,7 +6810,10 @@
               "id": "15:488",
               "name": "filename",
               "type": "TEXT",
-              "characters": "contract.ts"
+              "characters": "contract.ts",
+              "styles": {
+               "text": "12:255"
+              }
              }
             ]
            },
@@ -5734,7 +6826,10 @@
               "id": "15:490",
               "name": "code",
               "type": "TEXT",
-              "characters": "import type { Slot } from 'dedal'\n\n// component → props: the only shared thing\nexport type Contract = {\n  grid: { columns?: 1 | 2 | 3 | 4 }\n  card: { title?: string; href?: string; badge?: Slot }\n  badge: { label?: string }\n}"
+              "characters": "import type { Slot } from 'dedal'\n\n// component → props: the only shared thing\nexport type Contract = {\n  grid: { columns?: 1 | 2 | 3 | 4 }\n  card: { title?: string; href?: string; badge?: Slot }\n  badge: { label?: string }\n}",
+              "styles": {
+               "text": "12:254"
+              }
              }
             ]
            }
@@ -5754,7 +6849,10 @@
               "id": "15:493",
               "name": "filename",
               "type": "TEXT",
-              "characters": "page.tsx"
+              "characters": "page.tsx",
+              "styles": {
+               "text": "12:255"
+              }
              }
             ]
            },
@@ -5767,7 +6865,10 @@
               "id": "15:495",
               "name": "code",
               "type": "TEXT",
-              "characters": "import { Render, type Registry } from 'dedal/react'\nimport { Card, Badge, Grid } from '@radix-ui/themes'\n\nconst registry = { grid: Grid, card: Card, badge: Badge }\n  satisfies Registry<Contract> // missing one = compile error\n\nexport default async function Home() {\n  return <Render tree={await home()} registry={registry} />\n}"
+              "characters": "import { Render, type Registry } from 'dedal/react'\nimport { Card, Badge, Grid } from '@radix-ui/themes'\n\nconst registry = { grid: Grid, card: Card, badge: Badge }\n  satisfies Registry<Contract> // missing one = compile error\n\nexport default async function Home() {\n  return <Render tree={await home()} registry={registry} />\n}",
+              "styles": {
+               "text": "12:254"
+              }
              }
             ]
            }
@@ -5791,13 +6892,19 @@
           "id": "15:498",
           "name": "title",
           "type": "TEXT",
-          "characters": "Start with one block."
+          "characters": "Start with one block.",
+          "styles": {
+           "text": "12:247"
+          }
          },
          {
           "id": "15:499",
           "name": "subtitle",
           "type": "TEXT",
-          "characters": "Wrap one section of an existing page and keep the rest. Your components stay exactly as they are."
+          "characters": "Wrap one section of an existing page and keep the rest. Your components stay exactly as they are.",
+          "styles": {
+           "text": "12:249"
+          }
          },
          {
           "id": "15:500",
@@ -5839,12 +6946,18 @@
               "id": "I15:501;13:259",
               "name": "label",
               "type": "TEXT",
+              "componentPropertyReferences": {
+               "characters": "Label#13:0"
+              },
               "characters": "Read the quick start"
              },
              {
               "id": "I15:501;13:260",
               "name": "icon-right",
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "visible": "Icon right#13:21"
+              },
               "componentId": "3:46",
               "children": [
                {
@@ -5891,6 +7004,9 @@
               "id": "I15:507;13:271",
               "name": "label",
               "type": "TEXT",
+              "componentPropertyReferences": {
+               "characters": "Label#13:0"
+              },
               "characters": "Browse examples"
              },
              {
@@ -5898,6 +7014,9 @@
               "name": "icon-right",
               "visible": false,
               "type": "INSTANCE",
+              "componentPropertyReferences": {
+               "visible": "Icon right#13:21"
+              },
               "componentId": "3:46",
               "children": [
                {
@@ -5956,7 +7075,10 @@
           "id": "15:523",
           "name": "Server-driven UI for TypeScript · v0.6.6",
           "type": "TEXT",
-          "characters": "Server-driven UI for TypeScript · v0.6.6"
+          "characters": "Server-driven UI for TypeScript · v0.6.6",
+          "styles": {
+           "text": "12:251"
+          }
          }
         ]
        },
@@ -5969,31 +7091,46 @@
           "id": "15:525",
           "name": "Docs",
           "type": "TEXT",
-          "characters": "Docs"
+          "characters": "Docs",
+          "styles": {
+           "text": "12:251"
+          }
          },
          {
           "id": "15:526",
           "name": "Guides",
           "type": "TEXT",
-          "characters": "Guides"
+          "characters": "Guides",
+          "styles": {
+           "text": "12:251"
+          }
          },
          {
           "id": "15:527",
           "name": "API",
           "type": "TEXT",
-          "characters": "API"
+          "characters": "API",
+          "styles": {
+           "text": "12:251"
+          }
          },
          {
           "id": "15:528",
           "name": "Changelog",
           "type": "TEXT",
-          "characters": "Changelog"
+          "characters": "Changelog",
+          "styles": {
+           "text": "12:251"
+          }
          },
          {
           "id": "15:529",
           "name": "GitHub",
           "type": "TEXT",
-          "characters": "GitHub"
+          "characters": "GitHub",
+          "styles": {
+           "text": "12:251"
+          }
          }
         ]
        }
@@ -6231,6 +7368,48 @@
      "description": "<Callout.Root variant=\"soft\" color> <Callout.Icon/> <Callout.Text/>",
      "remote": false
     }
+   },
+   "styles": {
+    "12:252": {
+     "name": "radix/text-2-medium",
+     "styleType": "TEXT"
+    },
+    "12:253": {
+     "name": "radix/text-1-medium",
+     "styleType": "TEXT"
+    },
+    "12:246": {
+     "name": "radix/heading-9",
+     "styleType": "TEXT"
+    },
+    "12:249": {
+     "name": "radix/text-5",
+     "styleType": "TEXT"
+    },
+    "12:254": {
+     "name": "radix/code-2",
+     "styleType": "TEXT"
+    },
+    "12:248": {
+     "name": "radix/heading-5",
+     "styleType": "TEXT"
+    },
+    "12:251": {
+     "name": "radix/text-2",
+     "styleType": "TEXT"
+    },
+    "12:247": {
+     "name": "radix/heading-8",
+     "styleType": "TEXT"
+    },
+    "12:255": {
+     "name": "radix/code-1",
+     "styleType": "TEXT"
+    },
+    "12:250": {
+     "name": "radix/text-3",
+     "styleType": "TEXT"
+    }
    }
   },
   "3:136": {
@@ -6277,13 +7456,22 @@
         "id": "3:77",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#3:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "2:42"
+        }
        },
        {
         "id": "3:78",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#3:11"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -6304,13 +7492,22 @@
         "id": "3:83",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#3:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "2:42"
+        }
        },
        {
         "id": "3:84",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#3:11"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -6331,13 +7528,22 @@
         "id": "3:89",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#3:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "2:42"
+        }
        },
        {
         "id": "3:90",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#3:11"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -6358,13 +7564,22 @@
         "id": "3:95",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#3:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "2:42"
+        }
        },
        {
         "id": "3:96",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#3:11"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -6385,13 +7600,22 @@
         "id": "3:101",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#3:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "2:42"
+        }
        },
        {
         "id": "3:102",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#3:11"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -6412,13 +7636,22 @@
         "id": "3:107",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#3:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "2:42"
+        }
        },
        {
         "id": "3:108",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#3:11"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -6439,13 +7672,22 @@
         "id": "3:113",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#3:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "2:42"
+        }
        },
        {
         "id": "3:114",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#3:11"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -6466,13 +7708,22 @@
         "id": "3:119",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#3:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "2:42"
+        }
        },
        {
         "id": "3:120",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#3:11"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -6493,13 +7744,22 @@
         "id": "3:125",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#3:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "2:42"
+        }
        },
        {
         "id": "3:126",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#3:11"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -6520,13 +7780,22 @@
         "id": "3:131",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#3:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "2:42"
+        }
        },
        {
         "id": "3:132",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#3:11"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -6636,6 +7905,12 @@
      "description": "shadcn/ui <Button variant size>. Label → children, Icon right → <ArrowRight/>.",
      "documentationLinks": []
     }
+   },
+   "styles": {
+    "2:42": {
+     "name": "label",
+     "styleType": "TEXT"
+    }
    }
   },
   "3:147": {
@@ -6670,7 +7945,13 @@
         "id": "3:138",
         "name": "label",
         "type": "TEXT",
-        "characters": "Badge"
+        "componentPropertyReferences": {
+         "characters": "Label#3:22"
+        },
+        "characters": "Badge",
+        "styles": {
+         "text": "2:43"
+        }
        }
       ]
      },
@@ -6683,7 +7964,13 @@
         "id": "3:140",
         "name": "label",
         "type": "TEXT",
-        "characters": "Badge"
+        "componentPropertyReferences": {
+         "characters": "Label#3:22"
+        },
+        "characters": "Badge",
+        "styles": {
+         "text": "2:43"
+        }
        }
       ]
      },
@@ -6696,7 +7983,13 @@
         "id": "3:142",
         "name": "label",
         "type": "TEXT",
-        "characters": "Badge"
+        "componentPropertyReferences": {
+         "characters": "Label#3:22"
+        },
+        "characters": "Badge",
+        "styles": {
+         "text": "2:43"
+        }
        }
       ]
      },
@@ -6709,7 +8002,13 @@
         "id": "3:144",
         "name": "label",
         "type": "TEXT",
-        "characters": "Badge"
+        "componentPropertyReferences": {
+         "characters": "Label#3:22"
+        },
+        "characters": "Badge",
+        "styles": {
+         "text": "2:43"
+        }
        }
       ]
      },
@@ -6722,7 +8021,13 @@
         "id": "3:146",
         "name": "label",
         "type": "TEXT",
-        "characters": "Badge"
+        "componentPropertyReferences": {
+         "characters": "Label#3:22"
+        },
+        "characters": "Badge",
+        "styles": {
+         "text": "2:43"
+        }
        }
       ]
      }
@@ -6777,6 +8082,12 @@
      "description": "shadcn/ui <Badge variant>. brand/accent = Dedal extensions.",
      "documentationLinks": []
     }
+   },
+   "styles": {
+    "2:43": {
+     "name": "caption",
+     "styleType": "TEXT"
+    }
    }
   },
   "3:148": {
@@ -6809,6 +8120,9 @@
         "id": "3:150",
         "name": "icon",
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "mainComponent": "Icon#3:30"
+        },
         "componentId": "3:6",
         "children": [
          {
@@ -6829,13 +8143,25 @@
         "id": "3:156",
         "name": "title",
         "type": "TEXT",
-        "characters": "Feature title"
+        "componentPropertyReferences": {
+         "characters": "Title#3:28"
+        },
+        "characters": "Feature title",
+        "styles": {
+         "text": "2:38"
+        }
        },
        {
         "id": "3:157",
         "name": "description",
         "type": "TEXT",
-        "characters": "Short description of the feature in one or two lines."
+        "componentPropertyReferences": {
+         "characters": "Description#3:29"
+        },
+        "characters": "Short description of the feature in one or two lines.",
+        "styles": {
+         "text": "2:41"
+        }
        }
       ]
      }
@@ -6857,7 +8183,17 @@
      "documentationLinks": []
     }
    },
-   "componentSets": {}
+   "componentSets": {},
+   "styles": {
+    "2:38": {
+     "name": "h3",
+     "styleType": "TEXT"
+    },
+    "2:41": {
+     "name": "body-sm",
+     "styleType": "TEXT"
+    }
+   }
   },
   "13:318": {
    "document": {
@@ -6911,13 +8247,22 @@
         "id": "13:199",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "12:252"
+        }
        },
        {
         "id": "13:200",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -6938,13 +8283,22 @@
         "id": "13:205",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "12:252"
+        }
        },
        {
         "id": "13:206",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -6965,13 +8319,22 @@
         "id": "13:211",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "12:252"
+        }
        },
        {
         "id": "13:212",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -6992,13 +8355,22 @@
         "id": "13:217",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "12:252"
+        }
        },
        {
         "id": "13:218",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -7019,13 +8391,22 @@
         "id": "13:223",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "12:252"
+        }
        },
        {
         "id": "13:224",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -7046,13 +8427,22 @@
         "id": "13:229",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "12:252"
+        }
        },
        {
         "id": "13:230",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -7073,13 +8463,22 @@
         "id": "13:235",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "12:252"
+        }
        },
        {
         "id": "13:236",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -7100,13 +8499,22 @@
         "id": "13:241",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "12:252"
+        }
        },
        {
         "id": "13:242",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -7127,13 +8535,22 @@
         "id": "13:247",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "12:252"
+        }
        },
        {
         "id": "13:248",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -7154,13 +8571,22 @@
         "id": "13:253",
         "name": "label",
         "type": "TEXT",
-        "characters": "Button"
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
+        "characters": "Button",
+        "styles": {
+         "text": "12:252"
+        }
        },
        {
         "id": "13:254",
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -7181,6 +8607,9 @@
         "id": "13:259",
         "name": "label",
         "type": "TEXT",
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
         "characters": "Button"
        },
        {
@@ -7188,6 +8617,9 @@
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -7208,6 +8640,9 @@
         "id": "13:265",
         "name": "label",
         "type": "TEXT",
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
         "characters": "Button"
        },
        {
@@ -7215,6 +8650,9 @@
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -7235,6 +8673,9 @@
         "id": "13:271",
         "name": "label",
         "type": "TEXT",
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
         "characters": "Button"
        },
        {
@@ -7242,6 +8683,9 @@
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -7262,6 +8706,9 @@
         "id": "13:277",
         "name": "label",
         "type": "TEXT",
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
         "characters": "Button"
        },
        {
@@ -7269,6 +8716,9 @@
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -7289,6 +8739,9 @@
         "id": "13:283",
         "name": "label",
         "type": "TEXT",
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
         "characters": "Button"
        },
        {
@@ -7296,6 +8749,9 @@
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -7316,6 +8772,9 @@
         "id": "13:289",
         "name": "label",
         "type": "TEXT",
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
         "characters": "Button"
        },
        {
@@ -7323,6 +8782,9 @@
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -7343,6 +8805,9 @@
         "id": "13:295",
         "name": "label",
         "type": "TEXT",
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
         "characters": "Button"
        },
        {
@@ -7350,6 +8815,9 @@
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -7370,6 +8838,9 @@
         "id": "13:301",
         "name": "label",
         "type": "TEXT",
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
         "characters": "Button"
        },
        {
@@ -7377,6 +8848,9 @@
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -7397,6 +8871,9 @@
         "id": "13:307",
         "name": "label",
         "type": "TEXT",
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
         "characters": "Button"
        },
        {
@@ -7404,6 +8881,9 @@
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -7424,6 +8904,9 @@
         "id": "13:313",
         "name": "label",
         "type": "TEXT",
+        "componentPropertyReferences": {
+         "characters": "Label#13:0"
+        },
         "characters": "Button"
        },
        {
@@ -7431,6 +8914,9 @@
         "name": "icon-right",
         "visible": false,
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "visible": "Icon right#13:21"
+        },
         "componentId": "3:46",
         "children": [
          {
@@ -7620,6 +9106,12 @@
      "description": "@radix-ui/themes <Button variant color size>. color=gray ≈ highContrast gray.",
      "documentationLinks": []
     }
+   },
+   "styles": {
+    "12:252": {
+     "name": "radix/text-2-medium",
+     "styleType": "TEXT"
+    }
    }
   },
   "13:343": {
@@ -7662,7 +9154,13 @@
         "id": "13:320",
         "name": "label",
         "type": "TEXT",
-        "characters": "Badge"
+        "componentPropertyReferences": {
+         "characters": "Label#13:42"
+        },
+        "characters": "Badge",
+        "styles": {
+         "text": "12:253"
+        }
        }
       ]
      },
@@ -7675,7 +9173,13 @@
         "id": "13:322",
         "name": "label",
         "type": "TEXT",
-        "characters": "Badge"
+        "componentPropertyReferences": {
+         "characters": "Label#13:42"
+        },
+        "characters": "Badge",
+        "styles": {
+         "text": "12:253"
+        }
        }
       ]
      },
@@ -7688,7 +9192,13 @@
         "id": "13:324",
         "name": "label",
         "type": "TEXT",
-        "characters": "Badge"
+        "componentPropertyReferences": {
+         "characters": "Label#13:42"
+        },
+        "characters": "Badge",
+        "styles": {
+         "text": "12:253"
+        }
        }
       ]
      },
@@ -7701,7 +9211,13 @@
         "id": "13:326",
         "name": "label",
         "type": "TEXT",
-        "characters": "Badge"
+        "componentPropertyReferences": {
+         "characters": "Label#13:42"
+        },
+        "characters": "Badge",
+        "styles": {
+         "text": "12:253"
+        }
        }
       ]
      },
@@ -7714,7 +9230,13 @@
         "id": "13:328",
         "name": "label",
         "type": "TEXT",
-        "characters": "Badge"
+        "componentPropertyReferences": {
+         "characters": "Label#13:42"
+        },
+        "characters": "Badge",
+        "styles": {
+         "text": "12:253"
+        }
        }
       ]
      },
@@ -7727,7 +9249,13 @@
         "id": "13:330",
         "name": "label",
         "type": "TEXT",
-        "characters": "Badge"
+        "componentPropertyReferences": {
+         "characters": "Label#13:42"
+        },
+        "characters": "Badge",
+        "styles": {
+         "text": "12:253"
+        }
        }
       ]
      },
@@ -7740,7 +9268,13 @@
         "id": "13:332",
         "name": "label",
         "type": "TEXT",
-        "characters": "Badge"
+        "componentPropertyReferences": {
+         "characters": "Label#13:42"
+        },
+        "characters": "Badge",
+        "styles": {
+         "text": "12:253"
+        }
        }
       ]
      },
@@ -7753,7 +9287,13 @@
         "id": "13:334",
         "name": "label",
         "type": "TEXT",
-        "characters": "Badge"
+        "componentPropertyReferences": {
+         "characters": "Label#13:42"
+        },
+        "characters": "Badge",
+        "styles": {
+         "text": "12:253"
+        }
        }
       ]
      },
@@ -7766,7 +9306,13 @@
         "id": "13:336",
         "name": "label",
         "type": "TEXT",
-        "characters": "Badge"
+        "componentPropertyReferences": {
+         "characters": "Label#13:42"
+        },
+        "characters": "Badge",
+        "styles": {
+         "text": "12:253"
+        }
        }
       ]
      },
@@ -7779,7 +9325,13 @@
         "id": "13:338",
         "name": "label",
         "type": "TEXT",
-        "characters": "Badge"
+        "componentPropertyReferences": {
+         "characters": "Label#13:42"
+        },
+        "characters": "Badge",
+        "styles": {
+         "text": "12:253"
+        }
        }
       ]
      },
@@ -7792,7 +9344,13 @@
         "id": "13:340",
         "name": "label",
         "type": "TEXT",
-        "characters": "Badge"
+        "componentPropertyReferences": {
+         "characters": "Label#13:42"
+        },
+        "characters": "Badge",
+        "styles": {
+         "text": "12:253"
+        }
        }
       ]
      },
@@ -7805,7 +9363,13 @@
         "id": "13:342",
         "name": "label",
         "type": "TEXT",
-        "characters": "Badge"
+        "componentPropertyReferences": {
+         "characters": "Label#13:42"
+        },
+        "characters": "Badge",
+        "styles": {
+         "text": "12:253"
+        }
        }
       ]
      }
@@ -7916,6 +9480,12 @@
      "description": "@radix-ui/themes <Badge variant color>",
      "documentationLinks": []
     }
+   },
+   "styles": {
+    "12:253": {
+     "name": "radix/text-1-medium",
+     "styleType": "TEXT"
+    }
    }
   },
   "13:344": {
@@ -7948,6 +9518,9 @@
         "id": "13:346",
         "name": "icon",
         "type": "INSTANCE",
+        "componentPropertyReferences": {
+         "mainComponent": "Icon#13:57"
+        },
         "componentId": "3:6",
         "children": [
          {
@@ -7968,13 +9541,22 @@
         "id": "13:352",
         "name": "title",
         "type": "TEXT",
+        "componentPropertyReferences": {
+         "characters": "Title#13:55"
+        },
         "characters": "Feature title"
        },
        {
         "id": "13:353",
         "name": "description",
         "type": "TEXT",
-        "characters": "Short description of the feature in one or two lines."
+        "componentPropertyReferences": {
+         "characters": "Description#13:56"
+        },
+        "characters": "Short description of the feature in one or two lines.",
+        "styles": {
+         "text": "12:251"
+        }
        }
       ]
      }
@@ -7996,7 +9578,13 @@
      "documentationLinks": []
     }
    },
-   "componentSets": {}
+   "componentSets": {},
+   "styles": {
+    "12:251": {
+     "name": "radix/text-2",
+     "styleType": "TEXT"
+    }
+   }
   },
   "13:368": {
    "document": {
@@ -8040,7 +9628,13 @@
         "id": "13:360",
         "name": "label",
         "type": "TEXT",
-        "characters": "Callout text"
+        "componentPropertyReferences": {
+         "characters": "Text#13:58"
+        },
+        "characters": "Callout text",
+        "styles": {
+         "text": "12:251"
+        }
        }
       ]
      },
@@ -8066,7 +9660,13 @@
         "id": "13:367",
         "name": "label",
         "type": "TEXT",
-        "characters": "Callout text"
+        "componentPropertyReferences": {
+         "characters": "Text#13:58"
+        },
+        "characters": "Callout text",
+        "styles": {
+         "text": "12:251"
+        }
        }
       ]
      }
@@ -8103,6 +9703,12 @@
      "name": "Callout (Radix)",
      "description": "<Callout.Root variant=\"soft\" color> <Callout.Icon/> <Callout.Text/>",
      "documentationLinks": []
+    }
+   },
+   "styles": {
+    "12:251": {
+     "name": "radix/text-2",
+     "styleType": "TEXT"
     }
    }
   }

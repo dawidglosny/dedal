@@ -250,6 +250,29 @@ Example: [`examples/next`](../examples/next) — the same page on Radix Themes a
 
 Example: [`examples/web-components`](../examples/web-components) — the same kind of page rendered without React: a small DOM renderer and a registry of Web Components (custom elements with native `<slot>`s).
 
+### From Figma (`dedal/figma`, `dedal-figma`)
+
+```ts
+import { component, frame, mapping, swap, text, variant, boolean, layer } from 'dedal/figma'
+
+const fromFigma = mapping(contract, {
+  feature: component('FeatureCard', { icon: swap('Icon', name => name.replace('icon/', '')) }),
+  split: component('Split', {}, { slots: { media: 'Media' }, children: 'Content' }),
+  hero: frame('hero-copy', { title: layer('title') }),          // a plain frame — only explicitly
+}, { section: 'section', text: 'text', ignore: [/-mock$/], componentName: name => name.replace(/ \(Radix\)$/, '') })
+
+const { ok, sections, errors, unmapped, warnings } = await fromFigma.convert(response, '31:398') // GET /v1/files/:key/nodes?ids=…
+```
+
+- **Convention first:** an instance of a Figma component named like a contract component is that block; component properties named like its props fill them (`Label#3:0` → `label`; names compared without case, spaces, dashes, underscores); a native slot named like a contract slot fills it (`'one'` / `'many'` from the contract), other slots become `children`.
+- **Explicit sources** (modelled on Figma's Code Connect): `text(property)`, `variant(property, values?)`, `boolean(property, values?)`, `swap(property, toValue?)` (for a variant of a component set, `toValue` also gets the variant's own name), `layer(name)` — a text layer inside the node. A prop mapped explicitly is never filled by the convention.
+- **Options:** `section` — a container for a section frame with several blocks; `text` — a component for loose text layers (`{ text, style }`, `style` = the Figma text style name); `ignore` — layers skipped whole (names or patterns); `componentName` — a rule for Figma component names, applied to `component()` names too.
+- **Fails early:** a prop or slot the contract doesn't have (a compile error for props), two entries for one Figma component, two contract names that are the same for Figma.
+- **The result:** every top-level layer is a section. `errors` — validation against the contract, with the template `path` and the `figma` layer path; `unmapped` — every layer that didn't make it into the template, with its path and why; `warnings` — an empty mapped container, several slots merged into children. Hidden layers are skipped; the content of an instance outside its native slots belongs to the component (a mapped instance there is reported).
+- **CLI:** `dedal-figma pull <file key | URL> [node] --mapping <module> [--out file.json] [--raw response.json] [--force]` — the token from `FIGMA_TOKEN`; a template that doesn't match the contract isn't written (exit code 1) unless `--force`; the mapping module's default export is the mapping.
+
+Guide: *Templates from Figma* on the documentation site. Decision record: [ADR-003](adr/003-figma-mapping.md).
+
 ### Page cache (`page({ cache })`)
 
 ```ts

@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+**Figma in the package** — `dedal/figma` turns a Figma frame into templates, checked against the contract ([ADR-003](docs/adr/003-figma-mapping.md)).
+
+Added:
+- `mapping(contract, entries, options)` — a mapping per contract component, modelled on Figma's Code Connect: convention first (component, property and slot names), explicit sources where names differ — `component`, `frame`, `text`, `variant`, `boolean`, `swap`, `layer`; `convert(response, nodeId)` reads a `GET /v1/files/:key/nodes` response.
+- Native Figma slots → contract slots (`'one'` / `'many'`) or children; `component(…, { slots, children })` to map them explicitly.
+- Options: `section` (a container for a section with several blocks), `text` (loose text layers as text blocks, with their Figma text style), `ignore` (decorative layers skipped whole), `componentName` (a rule for library suffixes).
+- The result: `errors` with the template path and the Figma layer, `unmapped` — every layer left out, with its path and why — and `warnings` (an empty container, merged slots). Ambiguous mappings and unknown props or slots fail when the mapping is created; unknown props are compile errors.
+- `dedal-figma pull <file | URL> [node] --mapping <module> [--out] [--raw] [--force]` — fetches the frame with `FIGMA_TOKEN`, converts it, writes the templates; a template that doesn't match the contract isn't written.
+
+Documentation:
+- *Templates from Figma* rewritten on `dedal/figma` and the CLI; the converter that relied on invented naming conventions (`slot:` layers, props in frame names) is gone,
+- ADR-003: from Figma to templates — a mapping per component.
+
 ## 0.7.0
 
 **The contract at runtime** — templates from storage, Figma or a page builder are now a first-class path ([ADR-002](docs/adr/002-runtime-contract.md)).
