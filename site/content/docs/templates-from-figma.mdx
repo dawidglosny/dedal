@@ -49,4 +49,4 @@ The split between the teams: designers change pages freely within the design sys
 - **Names are the contract.** Renaming a component, a property or a slot in Figma without renaming it in the contract fails the pull — on purpose. Agree on the names with the design team, like any API.
 - **One contract per component library.** A design built on library A is converted with A's contract and rendered with A's registry; there's no translation between libraries.
 - **`ok: true` means valid, not faithful.** The template matches the contract; whether it matches the design is what `unmapped` and `warnings` tell you — read them.
-- **Not yet:** a Figma plugin as a source (frames come through the REST API, with a token), pulling only the changed sections, Figma's variables (design tokens) in templates.
+- **Not yet:** the Dedal plugin as a *source* — it builds frames from templates; pulling a selected frame without a token is planned — pulling only the changed sections, Figma's variables (design tokens) in templates.

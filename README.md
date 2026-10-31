@@ -68,6 +68,8 @@ $ FIGMA_TOKEN=… npx dedal-figma pull "https://www.figma.com/design/…?node-id
 - **Every layer left out is listed** — with its Figma path and the reason; nothing is dropped silently.
 - **The page follows the design** — the frontend renders the template with your components; change the frame, pull again, reload.
 - **With an agent** — `dedal-mcp` (an MCP server) and a Claude Code skill (`skills/figma-to-dedal`) run the same pull and sort its report.
+- **The design system next to the code** — `dedal-figma audit` lists the Figma components that match the contract, drifted from it, or are missing in the code; `dedal-figma component` proposes the contract entry for one, with the questions to answer (and the `figma-component-to-code` skill writes it).
+- **And back to Figma** — `dedal-figma build` turns a template into a frame of the Figma file, from its library components, through the Dedal plugin (`figma-plugin/`); the `page-to-dedal` skill composes that template from a description of the page.
 
 See [`examples/figma`](examples/figma) and [*A page from Figma, end to end*](https://dawidglosny.github.io/dedal/docs/figma-demo/).
 
@@ -169,7 +171,7 @@ Requires Node 20.9+. React 18+ only for `dedal/react` (an optional peer dependen
 | `dedal/devtools` | `inspect()` and text reports, for tests and logs |
 | `dedal/react/devtools` | `<Devtools />` — the browser panel |
 | `dedal/devtools/panel` | `mountDevtools()` — the panel outside React |
-| `dedal/figma` | `mapping()` — Figma frames to templates, checked against the contract; the `dedal-figma pull` CLI, the `dedal-mcp` server for agents and a Claude Code skill (`skills/figma-to-dedal`) |
+| `dedal/figma` | `mapping()` — Figma frames to templates, checked against the contract; the `dedal-figma` CLI (`pull`, `audit`, `component`, `build`), the `dedal-mcp` server for agents, the Dedal Figma plugin (`figma-plugin/`) and Claude Code skills (`skills/`) |
 
 ## Documentation
 

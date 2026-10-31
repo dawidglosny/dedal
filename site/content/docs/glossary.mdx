@@ -34,3 +34,6 @@ Every term used in these docs, in one place. The five to start with — contract
 - **unmapped** — the layers of a frame that didn't become part of the template, each with its Figma path and the reason; nothing is dropped silently.
 - **native slot (Figma)** — a `SLOT` component property: a place in a Figma component where designers put other components. A Figma slot named like a contract slot fills it; other slots become the block's children.
 - **server-driven UI (SDUI)** — a model in which the server decides the structure of the screen and the frontend only renders it.
+- **audit** — `dedal-figma audit`: every component of a Figma file next to the contract — matching, drifted (props, values or slots the contract lacks), or missing in the code.
+- **build plan** — what `templateToFigma` makes of a template: library components by id, component properties by their exact keys, slot contents — the mapping applied in reverse, with every part that has no counterpart listed.
+- **Dedal plugin, bridge** — a Figma development plugin (`figma-plugin/`) that builds a build plan as a frame in the open file; it gets the plan from a local bridge (`http://localhost:7377`) started by `dedal-figma build` or `dedal-mcp`.

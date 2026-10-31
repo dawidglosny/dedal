@@ -65,9 +65,9 @@ ui.page({ sections, data, assign: { prune: 'grid, wrapper-group' } })   // for t
 - `prune` in the contract (a per-component "container" flag in the instance options) instead of on every page?
 - Is a node with slots but no children (a card with an empty slot) empty? Proposal: no — slots are the component's content.
 
-### Figma: a plugin
+### Figma: the plugin as a source
 
-Status: planned. Today frames come through the REST API (`dedal-figma pull`, `dedal-mcp`), which needs a token. A Figma plugin would convert the selected frame where the designer works: either with the contract given as JSON Schema (`ui.jsonSchema()`) and the naming convention, showing the template and the report in the plugin — or exporting the frame in the REST shape for the CLI to convert. The Plugin API also sees what REST doesn't (variables as design tokens).
+Status: planned. The Dedal plugin (`figma-plugin/`) builds frames *from* templates since 0.10 (`dedal-figma build`, `template_to_figma`). The other direction through the plugin — the selected frame → a template and its report, in Figma, without a token — would reuse the same conversion: the Plugin API gives the same node shape the REST adapter reads, and also sees what REST doesn't (variables as design tokens).
 
 ### A page builder example
 
