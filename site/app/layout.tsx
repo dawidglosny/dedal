@@ -1,4 +1,4 @@
-import './docs.css'
+import './global.css'
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { RootProvider } from 'fumadocs-ui/provider/next'
@@ -9,8 +9,8 @@ export const metadata: Metadata = {
   description: 'Change screens without changing code. The engine behind pages generated from Figma or a page builder, rendered with your own design system.',
 }
 
-/** The root layout of the docs: a root of its own (the home page keeps its hand-written CSS), Fumadocs' provider. */
-export default function DocsRootLayout({ children }: { children: ReactNode }) {
+/** One root for the home page and the docs: Fumadocs' provider (theme, search), so moving between them is client-side. */
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="flex min-h-screen flex-col">

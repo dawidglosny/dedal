@@ -3,13 +3,10 @@ import { Fragment, Suspense, type ReactNode } from 'react'
 import { Theme } from '@radix-ui/themes'
 import { inspect } from 'dedal/devtools'
 import { DevtoolsData, Render, type Registry } from 'dedal/react'
-import { Devtools } from 'dedal/react/devtools'
-import { langOf } from '@/components/code'
-import { Code } from '@/components/docs-code'
-import { GITHUB } from '@/components/header'
+import { Code, langOf } from '@/components/docs-code'
+import { GITHUB } from '@/lib/site'
 import type { Contract, Ctx } from '../contract'
 import { radixThemes } from '../registries/radix-themes'
-import { findGroup, groups, parts, readingOrder } from './index'
 import { LIVE_THROWS, live } from './live'
 import { caseCode, codeOf, runCase } from './run'
 import type { CaseLevel, CaseOutput, DocCase, DocGroup } from './types'
@@ -180,75 +177,6 @@ function Prose({ text }: { text: string }) {
   )
 }
 
-/** The menu: parts → groups; a group's cases are shown only for the group being read (the others can be expanded). */
-function Sidebar({ current }: { current: string }) {
-  const currentGroup = groups.find(group => group.slug === current || group.cases.some(docCase => docCase.slug === current))
-  return (
-    <nav className="sidebar">
-      {parts.map(part => (
-        <div key={part.title} className="sidebar-part">
-          <div className="sidebar-part-title">{part.title}</div>
-          {part.groups.map(slug => {
-            const group = findGroup(slug)!
-            const title = (
-              <Link href={docHref(group.slug)} className={`sidebar-title${group.slug === current ? ' active' : ''}`}>
-                {group.title}
-              </Link>
-            )
-            if (!group.cases.length) return <div key={slug}>{title}</div>
-            return (
-              <details key={slug} className="sidebar-group" open={group === currentGroup}>
-                <summary>
-                  {title}
-                  <span className="sidebar-count">{group.cases.length}</span>
-                </summary>
-                {group.cases.map(docCase => (
-                  <Link key={docCase.slug} href={docHref(docCase.slug)} className={`sidebar-link${docCase.slug === current ? ' active' : ''}`}>
-                    <span className={`dot ${levels[docCase.level].className}`} />
-                    {docCase.title}
-                  </Link>
-                ))}
-              </details>
-            )
-          })}
-        </div>
-      ))}
-      <div className="sidebar-legend">
-        {Object.values(levels).map(({ label, className }) => (
-          <span key={className}>
-            <span className={`dot ${className}`} /> {label}
-          </span>
-        ))}
-      </div>
-    </nav>
-  )
-}
-
-function Toc({ items }: { items: { id: string; title: string; level?: number }[] }) {
-  if (items.length < 2) return <aside className="toc" />
-  return (
-    <aside className="toc">
-      <div className="toc-title">On this page</div>
-      {items.map(item => (
-        <a key={item.id} href={`#${item.id}`} className={item.level === 3 ? 'toc-sub' : undefined}>
-          <Inline text={item.title} />
-        </a>
-      ))}
-    </aside>
-  )
-}
-
-function Shell({ current, toc, children }: { current: string; toc: { id: string; title: string; level?: number }[]; children: ReactNode }) {
-  return (
-    <div className="docs">
-      <Sidebar current={current} />
-      <main className="doc">{children}</main>
-      <Toc items={toc} />
-      <Devtools />
-    </div>
-  )
-}
-
 /** "See it live": what to open in the devtools panel for this case (or why it is empty when the build throws). */
 function LiveHint({ text, throws }: { text?: string; throws: boolean }) {
   if (!text) return null
@@ -313,32 +241,6 @@ async function DeferredCaseSection({ output, sectionKey, registry }: { output: C
 }
 
 const missing = ({ component }: { component: string }) => <div className="missing">Missing component “{component}”</div>
-
-const editLink = (file: string) => `${GITHUB}/blob/main/site/${file}`
-
-function Pager({ href }: { href: string }) {
-  const index = readingOrder.findIndex(entry => entry.href === href)
-  const prev = readingOrder[index - 1]
-  const next = readingOrder[index + 1]
-  return (
-    <div className="pager">
-      {prev ? (
-        <Link href={`${prev.href}/`} className="pager-prev">
-          <span>Previous</span>
-          {prev.title}
-        </Link>
-      ) : (
-        <span />
-      )}
-      {next && (
-        <Link href={`${next.href}/`} className="pager-next">
-          <span>Next</span>
-          {next.title}
-        </Link>
-      )}
-    </div>
-  )
-}
 
 type TocEntry = { id: string; title: string; level?: number }
 
@@ -465,36 +367,3 @@ export function CaseList({ group }: { group: DocGroup }) {
 export const editPath = (group: DocGroup, docCase?: DocCase) =>
   docCase ? `site/ui/docs/${group.file}` : (group.source ?? `site/content/docs/${group.slug}.mdx`)
 
-/** The old chrome's case page (before Fumadocs) — no longer routed. */
-export async function DocView({ group, docCase }: { group: DocGroup; docCase: DocCase }) {
-  const { toc, body } = await caseContent(group, docCase)
-  return (
-    <Shell current={docCase.slug} toc={toc}>
-      <div className="eyebrow">{group.title}</div>
-      <h1>
-        {docCase.title} <Badge level={docCase.level} />
-      </h1>
-      {body}
-      <Pager href={`/docs/${docCase.slug}`} />
-      <a className="edit" href={editLink(`ui/docs/${group.file}`)}>
-        Edit this page on GitHub
-      </a>
-    </Shell>
-  )
-}
-
-/** The old chrome's group page (before Fumadocs) — no longer routed. */
-export function GroupView({ group }: { group: DocGroup }) {
-  const { toc, body } = groupContent(group)
-  return (
-    <Shell current={group.slug} toc={toc}>
-      <div className="eyebrow">Documentation</div>
-      <h1>{group.title}</h1>
-      {body}
-      <Pager href={`/docs/${group.slug}`} />
-      <a className="edit" href={group.source ? `${GITHUB}/blob/main/${group.source}` : editLink('ui/docs/intros.ts')}>
-        Edit this page on GitHub
-      </a>
-    </Shell>
-  )
-}

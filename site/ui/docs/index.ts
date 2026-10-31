@@ -185,8 +185,3 @@ export const findCase = (slug: string): { group: DocGroup; docCase: DocCase } | 
 
 export const findGroup = (slug: string): DocGroup | undefined => groups.find(group => group.slug === slug)
 
-/** Reading order: each group page, then its cases. */
-export const readingOrder = groups.flatMap(group => [
-  { href: `/docs/${group.slug}`, title: group.title, group },
-  ...group.cases.map(docCase => ({ href: `/docs/${docCase.slug}`, title: docCase.title, group })),
-])

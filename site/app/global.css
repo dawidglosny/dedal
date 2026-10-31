@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+@import '../ui/docs/content.css';
+
+/* the Dedal mark (components/logo.tsx) */
+:root {
+  --logo-line: #4998f3;
+  --logo-core: #e28025;
+}
+.dark {
+  --logo-core: #f0953f;
+}

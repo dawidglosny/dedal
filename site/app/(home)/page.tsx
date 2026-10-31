@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { Code } from '@/components/code'
-import { GITHUB, VERSION } from '@/components/header'
+import { Code } from '@/components/docs-code'
 import { LogoMark } from '@/components/logo'
+import { GITHUB, VERSION } from '@/lib/site'
 
 const contract = `// contract.ts — the only thing the server and every frontend share
 import type { Slot } from 'dedal'
@@ -75,109 +75,119 @@ const compare = [
 
 const inline = (text: string) => text.split(/(`[^`]+`)/).map((part, i) => (part.startsWith('`') ? <code key={i}>{part.slice(1, -1)}</code> : part))
 
+const button = 'inline-flex items-center rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:bg-fd-accent'
+const primary = 'inline-flex items-center rounded-lg bg-fd-primary px-4 py-2 text-sm font-medium text-fd-primary-foreground transition-opacity hover:opacity-90'
+const card = 'rounded-xl border bg-fd-card p-5'
+
+function Section({ title, lead, children, className = '' }: { title: string; lead?: React.ReactNode; children: React.ReactNode; className?: string }) {
+  return (
+    <section className={`mx-auto w-full max-w-6xl px-6 py-14 ${className}`}>
+      <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">{title}</h2>
+      {lead && <p className="mt-3 max-w-3xl text-fd-muted-foreground">{lead}</p>}
+      <div className="mt-8">{children}</div>
+    </section>
+  )
+}
+
 export default function Home() {
   return (
-    <main className="landing">
-      <section className="hero">
-        <LogoMark size={96} className="hero-logo" />
-        <div className="hero-badge">v{VERSION} · TypeScript · zero dependencies</div>
-        <h1>
+    <main className="flex flex-1 flex-col [&_code]:rounded [&_code]:bg-fd-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.9em]">
+      <section className="mx-auto flex w-full max-w-4xl flex-col items-center px-6 pt-20 pb-10 text-center">
+        <LogoMark size={88} />
+        <div className="mt-6 rounded-full border px-3 py-1 text-xs text-fd-muted-foreground">v{VERSION} · TypeScript · zero dependencies</div>
+        <h1 className="mt-6 text-4xl font-bold tracking-tight md:text-6xl">
           Change screens
           <br />
-          <span>without changing code.</span>
+          <span className="text-fd-primary">without changing code.</span>
         </h1>
-        <p className="hero-sub">The engine behind pages generated from Figma or a page builder — rendered with your own design system.</p>
-        <p className="hero-lead">
+        <p className="mt-6 text-lg font-medium md:text-xl">The engine behind pages generated from Figma or a page builder — rendered with your own design system.</p>
+        <p className="mt-4 max-w-2xl text-fd-muted-foreground">
           A server-driven UI engine for TypeScript. Structure, data and components are kept apart: the structure of a page lives as data, so it can change
           without a code change or a release — while your components and your APIs stay exactly as they are.
         </p>
-        <div className="hero-actions">
-          <Link href="/docs/quick-start/" className="button button-primary">
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Link href="/docs/quick-start/" className={primary}>
             Quick start
           </Link>
-          <Link href="/docs/" className="button">
+          <Link href="/docs/" className={button}>
             Why Dedal
           </Link>
-          <Link href="/docs/tutorial/" className="button">
+          <Link href="/docs/tutorial/" className={button}>
             Tutorial
           </Link>
-          <a href={GITHUB} className="button">
+          <a href={GITHUB} className={button}>
             GitHub
           </a>
         </div>
-        <div className="hero-install">
+        <div className="mt-8 w-full max-w-md text-left">
           <Code code={`npm i github:dawidglosny/dedal#v${VERSION}`} lang="bash" />
         </div>
       </section>
 
-      <section className="landing-section">
-        <h2>Three things that usually live in one place</h2>
-        <p className="landing-lead">
-          A screen built from components mixes three things that change at different times, for different reasons, by different people. When the structure lives in
-          component code, every rearrangement waits for a developer and a release.
-        </p>
-        <div className="axes">
+      <Section
+        title="Three things that usually live in one place"
+        lead="A screen built from components mixes three things that change at different times, for different reasons, by different people. When the structure lives in component code, every rearrangement waits for a developer and a release."
+      >
+        <div className="grid gap-4 md:grid-cols-3">
           {axes.map(([title, what, who]) => (
-            <div key={title} className="axis-card">
-              <h3>{title}</h3>
-              <p>{what}</p>
-              <div className="axis-who">Changed by: {who}</div>
+            <div key={title} className={card}>
+              <h3 className="font-semibold">{title}</h3>
+              <p className="mt-2 text-sm text-fd-muted-foreground">{what}</p>
+              <div className="mt-4 border-t pt-3 text-xs text-fd-muted-foreground">Changed by: {who}</div>
             </div>
           ))}
         </div>
-      </section>
+      </Section>
 
-      <section className="landing-section">
-        <h2>Before and after</h2>
-        <div className="versus">
+      <Section title="Before and after">
+        <div className="grid gap-6 md:grid-cols-2">
           <div>
-            <div className="versus-label">Without Dedal — structure in code</div>
+            <div className="mb-2 text-sm font-medium text-fd-muted-foreground">Without Dedal — structure in code</div>
             <Code code={before} lang="tsx" />
           </div>
           <div>
-            <div className="versus-label versus-after">With Dedal — structure as data</div>
+            <div className="mb-2 text-sm font-medium text-fd-primary">With Dedal — structure as data</div>
             <Code code={after} lang="json" />
-            <p className="versus-note">
+            <p className="mt-3 text-sm text-fd-muted-foreground">
               Stored, versioned, edited without a release. Data reaches the cards by a selector (<code>card</code>), and your own <code>&lt;Card&gt;</code> renders
               them.
             </p>
           </div>
         </div>
-      </section>
+      </Section>
 
-      <section className="landing-section">
-        <h2>How it works</h2>
-      <div className="flow">
-        {[
-          ['Structure', 'a JSON template — in code, in a database, from Figma'],
-          ['+ Data', 'from your APIs, attached by CSS-like selectors'],
-          ['Screen description', 'plain JSON — cached, sent over the network'],
-          ['Components', 'the frontend’s registry: name → component'],
-        ].map(([title, text], i) => (
-          <div key={title} className="flow-step">
-            <div className="flow-number">{i + 1}</div>
-            <div className="flow-title">{title}</div>
-            <div className="flow-text">{text}</div>
-          </div>
-        ))}
-      </div>
-      </section>
+      <Section title="How it works">
+        <ol className="grid gap-4 md:grid-cols-4">
+          {[
+            ['Structure', 'a JSON template — in code, in a database, from Figma'],
+            ['+ Data', 'from your APIs, attached by CSS-like selectors'],
+            ['Screen description', 'plain JSON — cached, sent over the network'],
+            ['Components', 'the frontend’s registry: name → component'],
+          ].map(([title, text], i) => (
+            <li key={title} className={card}>
+              <div className="flex size-7 items-center justify-center rounded-full bg-fd-primary text-sm font-semibold text-fd-primary-foreground">{i + 1}</div>
+              <div className="mt-3 font-semibold">{title}</div>
+              <div className="mt-1 text-sm text-fd-muted-foreground">{text}</div>
+            </li>
+          ))}
+        </ol>
+      </Section>
 
-      <section className="landing-section fit">
+      <section className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-14 md:grid-cols-2">
         <div>
-          <h2>Who it is for</h2>
-          <p className="fit-lead">Web products on a shared design system, whose pages are designed in Figma or assembled in a page builder — not written in JSX.</p>
-          <ul>
+          <h2 className="text-2xl font-semibold tracking-tight">Who it is for</h2>
+          <p className="mt-3 text-fd-muted-foreground">Web products on a shared design system, whose pages are designed in Figma or assembled in a page builder — not written in JSX.</p>
+          <ul className="mt-4 list-disc space-y-2 pl-5 text-sm">
             <li>Pages from Figma — design with the design system’s components, publish, get a template.</li>
             <li>Page builders and CMSs — Dedal is the engine; the contract says what the editor can place.</li>
             <li>Many products, one design system — templates designed once, served to all.</li>
             <li>Content sites, dashboards, store pages — any structure that changes more often than its components.</li>
           </ul>
-          <p className="fit-later">Later: mobile apps — no native renderer and no contract versioning yet.</p>
+          <p className="mt-4 text-sm text-fd-muted-foreground">Later: mobile apps — no native renderer and no contract versioning yet.</p>
         </div>
         <div>
-          <h2>When it doesn’t</h2>
-          <ul>
+          <h2 className="text-2xl font-semibold tracking-tight">When it doesn’t</h2>
+          <ul className="mt-4 list-disc space-y-2 pl-5 text-sm">
             <li>Application UI — forms, state and interactions rather than blocks from a known set.</li>
             <li>A structure owned by developers that rarely changes — plain components are simpler.</li>
             <li>Sharing a component library across frameworks — that’s what Web Components are for. Dedal composes pages from the components you have; it doesn’t distribute them.</li>
@@ -185,55 +195,62 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="landing-section">
-        <h2>How it compares</h2>
-        <p className="landing-lead">
-          Dedal decides <strong>what</strong> is on the screen; your framework and components decide <strong>how</strong> it looks and behaves.
-        </p>
-        <div className="features compare">
+      <Section
+        title="How it compares"
+        lead={
+          <>
+            Dedal decides <strong>what</strong> is on the screen; your framework and components decide <strong>how</strong> it looks and behaves.
+          </>
+        }
+      >
+        <div className="grid gap-4 md:grid-cols-2">
           {compare.map(([title, solves, relation]) => (
-            <div key={title} className="feature">
-              <h3>{title}</h3>
-              <p className="compare-solves">{solves}</p>
-              <p>{relation}</p>
+            <div key={title} className={card}>
+              <h3 className="font-semibold">{title}</h3>
+              <p className="mt-1 text-sm font-medium text-fd-muted-foreground">{solves}</p>
+              <p className="mt-2 text-sm">{relation}</p>
             </div>
           ))}
         </div>
-      </section>
+      </Section>
 
-      <section className="landing-section">
-        <h2>A quick look</h2>
-        <div className="quick">
+      <Section title="A quick look">
+        <div className="grid gap-4 lg:grid-cols-3">
           <Code code={contract} title="contract.ts" />
           <Code code={server} title="server" />
           <Code code={frontend} lang="tsx" title="frontend (React)" />
         </div>
-      </section>
+      </Section>
 
-      <section className="landing-section">
-        <h2>What you get</h2>
-        <div className="features">
+      <Section title="What you get">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {features.map(([title, text]) => (
-            <div key={title} className="feature">
-              <h3>{title}</h3>
-              <p>{inline(text)}</p>
+            <div key={title} className={card}>
+              <h3 className="font-semibold">{title}</h3>
+              <p className="mt-2 text-sm text-fd-muted-foreground">{inline(text)}</p>
             </div>
           ))}
         </div>
-      </section>
+      </Section>
 
-
-
-      <section className="landing-cta">
-        <h2>Learn by example</h2>
-        <p>Every feature, warning and error is a live page: its code, the rendered result and the devtools report. Open the panel on any page and click around.</p>
-        <Link href="/docs/" className="button button-primary">
+      <section className="mx-auto my-14 w-full max-w-4xl rounded-2xl border bg-fd-card px-6 py-12 text-center">
+        <h2 className="text-2xl font-semibold tracking-tight">Learn by example</h2>
+        <p className="mx-auto mt-3 max-w-2xl text-fd-muted-foreground">
+          Every feature, warning and error is a live page: its code, the rendered result and the devtools report. Open the panel on any page and click around.
+        </p>
+        <Link href="/docs/" className={`${primary} mt-6`}>
           Read the docs
         </Link>
       </section>
 
-      <footer className="footer">
-        <a href={GITHUB}>GitHub</a> · <a href={`${GITHUB}/blob/main/CHANGELOG.md`}>Changelog</a>
+      <footer className="border-t py-8 text-center text-sm text-fd-muted-foreground">
+        <a href={GITHUB} className="hover:text-fd-foreground">
+          GitHub
+        </a>{' '}
+        ·{' '}
+        <a href={`${GITHUB}/blob/main/CHANGELOG.md`} className="hover:text-fd-foreground">
+          Changelog
+        </a>
       </footer>
     </main>
   )
