@@ -57,9 +57,14 @@ export type PageData = Record<string, Bindings | null>
 
 /** What `ui.page()` takes: the sections (fixed or per `ctx`), the page data loader, the cache and the error hook. */
 export type PageDefinition<C, Ctx> = {
-  /** Sections in render order; a function of `ctx` when they depend on context (platform, page, A/B…). */
+  /**
+   * Sections in render order; a function of `ctx` when they depend on context (platform, page, A/B…) — synchronous, or
+   * async when the sections come from storage (templates in a database, a CMS, a Figma export).
+   */
   // NoInfer: `Ctx` comes from the page definition (or the function parameter), not from the section loaders' type
-  sections: NoInfer<SectionDefinition<C, Ctx>>[] | ((ctx: Ctx) => NoInfer<SectionDefinition<C, Ctx>>[])
+  sections:
+    | NoInfer<SectionDefinition<C, Ctx>>[]
+    | ((ctx: Ctx) => NoInfer<SectionDefinition<C, Ctx>>[] | Promise<NoInfer<SectionDefinition<C, Ctx>>[]>)
   /** Page data loader (IO). Returns bindings per section — for sections without their own loader. */
   data?: (ctx: Ctx) => PageData | Promise<PageData>
   /**
@@ -152,12 +157,12 @@ export type BuildOptions = {
 
 /** A page — what `ui.page()` returns: `build`, its stages (`layout`, `load`, `assign`) and `section` for deferred sections. */
 export type Page<C, Ctx> = {
-  /** Stage 1: section layout without data (pure, cacheable). Deferred sections as placeholders. */
-  layout(ctx: Ctx, options?: BuildOptions): { sections: SectionLayout<C>[]; removedSections: string[] }
+  /** Stage 1: section layout without data (no data IO, cacheable). Deferred sections as placeholders. */
+  layout(ctx: Ctx, options?: BuildOptions): Promise<{ sections: SectionLayout<C>[]; removedSections: string[] }>
   /** Stage 2: data from the page loader and section loaders (IO), in parallel; without deferred sections. */
   load(ctx: Ctx): Promise<PageData>
   /** Stage 3: assigning data to the section layout. */
-  assign(sections: SectionLayout<C>[], data: PageData, ctx: Ctx): PageResult<C>
+  assign(sections: SectionLayout<C>[], data: PageData, ctx: Ctx): Promise<PageResult<C>>
   /** All stages in order; with the `cache` option — result from cache (outside debug mode). */
   build(ctx: Ctx, options?: BuildOptions): Promise<PageResult<C>>
   /**
@@ -194,8 +199,8 @@ export function section<C, Ctx = any>(
  * ```
  */
 export function page<C, Ctx = void>(definition: PageDefinition<C, Ctx>, options: PageOptions = {}): Page<C, Ctx> {
-  const sectionsFor = (ctx: Ctx) => {
-    const sections = typeof definition.sections === 'function' ? definition.sections(ctx) : definition.sections
+  const sectionsFor = async (ctx: Ctx) => {
+    const sections = typeof definition.sections === 'function' ? await definition.sections(ctx) : definition.sections
     const keys = new Set<string>()
 
     for (const { key } of sections) {
@@ -470,7 +475,7 @@ export function page<C, Ctx = void>(definition: PageDefinition<C, Ctx>, options:
 
   const build = async (ctx: Ctx, trace = false) => {
     const timer = trace ? createTimer() : undefined
-    const definitions = sectionsFor(ctx)
+    const definitions = await sectionsFor(ctx)
     const { sections, removedSections, layoutSelectors } = layoutOf(definitions, trace)
     timer?.mark('layout')
     // loaders only for sections present in the layout (not deferred, not removed)
@@ -497,19 +502,19 @@ export function page<C, Ctx = void>(definition: PageDefinition<C, Ctx>, options:
   const pageCache = definition.cache && (options.cache ?? createCache())
 
   return {
-    layout: (ctx, buildOptions = {}) => layoutOf(sectionsFor(ctx), buildOptions.trace),
-    load: ctx => {
-      const definitions = sectionsFor(ctx)
+    layout: async (ctx, buildOptions = {}) => layoutOf(await sectionsFor(ctx), buildOptions.trace),
+    load: async ctx => {
+      const definitions = await sectionsFor(ctx)
       return loadWith(ctx, definitions, definitions.filter(({ defer }) => !defer), true)
     },
-    assign: (sections, data, ctx) => assignWith(sections, data, sectionsFor(ctx)).result,
+    assign: async (sections, data, ctx) => assignWith(sections, data, await sectionsFor(ctx)).result,
     // debug mode bypasses the cache: neither reads from nor writes to it
     build: (ctx, buildOptions = {}) =>
       pageCache && !buildOptions.trace
         ? pageCache.fetch(cacheKeyFor(ctx), () => build(ctx), definition.cache)
         : build(ctx, buildOptions.trace),
     async section(key, ctx, buildOptions = {}) {
-      const definitions = sectionsFor(ctx)
+      const definitions = await sectionsFor(ctx)
       const definitionOfSection = definitions.find(candidate => candidate.key === key)
       if (!definitionOfSection) throw new Error(`page: no section "${key}" for this ctx (sections: ${definitions.map(candidate => candidate.key).join(', ') || 'none'})`)
 

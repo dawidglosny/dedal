@@ -71,15 +71,15 @@ for (const [sectionCount, cards] of [
   [20, 50],
 ]) {
   const page = makePage(sectionCount, cards)
-  const { sections } = page.layout()
+  const { sections } = await page.layout()
   const nodes = sections.reduce((count, { layout: root }) => count + select(root, '*').length, 0)
   const data = await page.load()
-  const result = page.assign(sections, data)
+  const result = await page.assign(sections, data)
   const iterations = nodes > 3000 ? 100 : 500
 
   console.log(`\n== ${sectionCount} sections × ${cards} cards → ${nodes} nodes ==`)
-  time('page.layout (layout+remove+patch)', () => page.layout(), iterations)
-  time('page.assign', () => page.assign(sections, data), iterations)
+  await timeAsync('page.layout (layout+remove+patch)', () => page.layout(), iterations)
+  await timeAsync('page.assign', () => page.assign(sections, data), iterations)
   time('resolve', () => ui.resolve(result), iterations)
   time('resolve trace', () => ui.resolve(result, { trace: true }), iterations)
   await timeAsync('build + resolve (full request)', async () => ui.resolve(await page.build()), iterations)

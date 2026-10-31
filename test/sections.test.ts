@@ -168,9 +168,9 @@ describe('section loaders', () => {
       sections: [main, section('ads', node('card'), { optional: true, data: () => Promise.reject(new Error('x')) })],
     })
 
-    const { sections } = home.layout({ service: 's' })
+    const { sections } = await home.layout({ service: 's' })
     const data = JSON.parse(JSON.stringify(await home.load({ service: 's' }))) as PageData
-    const result = home.assign(sections, data, { service: 's' })
+    const result = await home.assign(sections, data, { service: 's' })
 
     expect(data.ads).toBeNull()
     expect(result.report.failedSections).toEqual(['ads'])

@@ -135,9 +135,9 @@ describe('page: category page', () => {
 })
 
 describe('page: separate stages', () => {
-  it('layout() does not call the loader and gives the same layout as build() without data', () => {
+  it('layout() does not call the loader and gives the same layout as build() without data', async () => {
     loader.mockClear()
-    const { sections } = categoryPage.layout({ device: 'desktop', page: 1 })
+    const { sections } = await categoryPage.layout({ device: 'desktop', page: 1 })
 
     expect(loader).not.toHaveBeenCalled()
     expect(sections).toHaveLength(6)
@@ -146,17 +146,17 @@ describe('page: separate stages', () => {
 
   it('layout → load → assign gives the same as build()', async () => {
     const ctx: Ctx = { device: 'mobile', page: 3 }
-    const { sections } = categoryPage.layout(ctx)
-    const staged = categoryPage.assign(sections, await categoryPage.load(ctx), ctx)
+    const { sections } = await categoryPage.layout(ctx)
+    const staged = await categoryPage.assign(sections, await categoryPage.load(ctx), ctx)
 
     expect(staged).toEqual(await categoryPage.build(ctx))
   })
 
   it('passing the layout through JSON (e.g. cache or network) does not affect the result', async () => {
     const ctx: Ctx = { device: 'desktop', page: 1 }
-    const cached = JSON.parse(JSON.stringify(categoryPage.layout(ctx).sections))
+    const cached = JSON.parse(JSON.stringify((await categoryPage.layout(ctx)).sections))
 
-    expect(categoryPage.assign(cached, await categoryPage.load(ctx), ctx)).toEqual(await categoryPage.build(ctx))
+    expect(await categoryPage.assign(cached, await categoryPage.load(ctx), ctx)).toEqual(await categoryPage.build(ctx))
   })
 })
 
@@ -197,10 +197,10 @@ describe('page: policies and errors', () => {
     await expect(home.build()).rejects.toThrow('section "news": assign:')
   })
 
-  it('rejects duplicate section keys', () => {
+  it('rejects duplicate section keys', async () => {
     const home = ui.page({ sections: [section('a', node('card')), section('a', node('card'))] })
 
-    expect(() => home.layout()).toThrow('duplicate section key "a"')
+    await expect(home.layout()).rejects.toThrow('duplicate section key "a"')
   })
 
   it('build() calls sections(ctx) once', async () => {

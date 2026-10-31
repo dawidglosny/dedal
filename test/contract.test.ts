@@ -193,3 +193,52 @@ describe('validate', () => {
     ui.node('carousel')
   })
 })
+
+describe('async sections — templates from storage', () => {
+  const ui = createDedal({ contract: withZod, defaults: { card: { size: 'md' } } })
+
+  // a template store: async, like a database or a CMS
+  const stored: Record<string, unknown> = {
+    home: { news: { component: 'grid', props: { columns: 2 }, children: [{ component: 'card', repeat: 2 }] } },
+  }
+  const loads: string[] = []
+  const store = {
+    get: async (name: string) => (loads.push(name), JSON.parse(JSON.stringify(stored[name]))),
+  }
+
+  const home = ui.page<{ name: string }>({
+    // the sections come from storage, validated against the contract
+    sections: async ({ name }) => {
+      const result = await ui.validateSections(await store.get(name))
+      if (!result.ok) throw new Error(result.errors.map(error => `${error.path}: ${error.message}`).join('; '))
+      return Object.entries(result.value).map(([key, block]) => ui.section(key, block))
+    },
+    data: async () => ({ news: { card: [{ title: 'A' }, { title: 'B' }] } }),
+  })
+
+  it('build, the stages and page.section() all await the sections', async () => {
+    loads.length = 0
+    const result = await home.build({ name: 'home' })
+    const card = result.sections[0].layout.children?.[0]
+
+    expect(card?.props).toEqual({ size: 'md' }) // defaults applied to a template from JSON
+    expect(result.data['news.0']).toEqual({ title: 'A' })
+    expect(loads).toEqual(['home']) // sections(ctx) once per build
+
+    const { sections } = await home.layout({ name: 'home' })
+    expect(await home.assign(sections, await home.load({ name: 'home' }), { name: 'home' })).toEqual(result)
+    expect((await home.section('news', { name: 'home' })).sections.map(section => section.key)).toEqual(['news'])
+  })
+
+  it('a template that fails validation fails the build, with the path', async () => {
+    stored.broken = { news: { component: 'grid', children: [{ component: 'card', props: { size: 'xl' } }] } }
+    await expect(home.build({ name: 'broken' })).rejects.toThrow('news.children[0].props.size')
+  })
+
+  it('an edit in storage shows on the next build — no page per request needed', async () => {
+    stored.home = { news: { component: 'grid', children: [{ component: 'card', repeat: 3 }] } }
+    const result = await home.build({ name: 'home' })
+    expect(result.sections[0].layout.children).toHaveLength(2) // 3 cards, 2 data items: the third is removed
+    expect(result.report.sections.news.removed).toEqual(['news.2'])
+  })
+})
