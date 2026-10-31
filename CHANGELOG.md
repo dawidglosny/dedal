@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.9.0
+
+**Figma end to end** — a real page from a Figma frame, images, and tools for agents.
 
 Added:
 - `dedal/figma`: `image()` — a node's image fill as `figma-image:<imageRef>`; `imageRefs()` and `replaceImageRefs()` to resolve them.
