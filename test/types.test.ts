@@ -47,10 +47,10 @@ describe('types', () => {
   })
 
   it('repeat keeps the block type', () => {
-    const card = repeat(node('card'), 2)
+    const card = repeat(node('card', { props: { size: 'large' } }), 2)
     const size: 'small' | 'medium' | 'large' | undefined = card.props?.size
 
-    expect(size).toBe('medium')
+    expect(size).toBe('large')
   })
 
   it('LayoutNode has no repeat', () => {

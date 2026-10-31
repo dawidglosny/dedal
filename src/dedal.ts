@@ -26,7 +26,7 @@ export type DedalOptions<C> = {
    * checked with `ui.validate`. Without it, the contract is the type argument: `createDedal<Contract>()`.
    */
   contract?: ContractDefinition
-  /** Default component props, merged with the props passed to `node()`. */
+  /** Default component props, merged under every node's props when the page is built — for templates in code and from JSON alike. */
   defaults?: ComponentDefaults<C>
   /** Layout node ID generator. */
   id?: IdGenerator
@@ -71,7 +71,7 @@ export function createDedal<C extends object = never, const D extends ContractDe
 type ContractOf<C, D extends ContractDefinition> = [C] extends [never] ? InferContract<D> : C
 
 function createInstance<C extends object>(options: DedalOptions<C>) {
-  const { node, repeat, clone } = createBuilders<C>({ defaults: options.defaults })
+  const { node, repeat, clone } = createBuilders<C>()
   const cache = createCache(options.cache)
   // created on first use: Next.js sets the global AsyncLocalStorage when the server starts, possibly after this module loads
   let asyncContext: AsyncContext | undefined | null = null

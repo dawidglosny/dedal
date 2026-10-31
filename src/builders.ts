@@ -1,19 +1,14 @@
-import { deepMerge } from './merge'
-import type { BlockDefinition, BlockOf, ComponentDefaults, ComponentName } from './types'
+import type { BlockDefinition, BlockOf, ComponentName } from './types'
 
 /** `node()` options: everything from the block except the component name. Props go before children. */
 export type NodeOptions<C, N extends ComponentName<C>> = Omit<BlockOf<C, N>, 'component'>
 
-export type BuildersOptions<C> = {
-  /** Default component props, merged with the props passed to `node()`. */
-  defaults?: ComponentDefaults<C>
-}
-
 /** The template builders — `node`, `repeat`, `clone` — typed by the contract. */
 export type Builders<C> = {
   /**
-   * Creates a component block. Default props from `defaults` are deep-merged with `options.props`
-   * (passed values win, arrays and `undefined` replace the defaults).
+   * Creates a component block — exactly what is passed, typed by the contract. Component defaults are not added here
+   * but when the page is built (`layout()`), so a block from code and one parsed from JSON behave the same, and a block
+   * saved as JSON doesn't carry the defaults of the day it was created.
    *
    * @example
    * ```ts
@@ -38,13 +33,9 @@ const assertCount = (fn: string, count: number) => {
   }
 }
 
-export function createBuilders<C extends object>({ defaults = {} }: BuildersOptions<C> = {}): Builders<C> {
-  const node = <N extends ComponentName<C>>(component: N, options: NodeOptions<C, N> = {}): BlockOf<C, N> => {
-    const componentDefaults = (defaults as Record<string, Record<string, unknown> | undefined>)[component]
-    const props = deepMerge(componentDefaults ?? {}, (options.props ?? {}) as Record<string, unknown>)
-
-    return { component, ...options, props } as BlockOf<C, N>
-  }
+export function createBuilders<C extends object>(): Builders<C> {
+  const node = <N extends ComponentName<C>>(component: N, options: NodeOptions<C, N> = {}): BlockOf<C, N> =>
+    ({ component, ...options, props: { ...options.props } }) as BlockOf<C, N>
 
   const repeat = <B extends BlockDefinition<C>>(block: B, count: number): B => {
     assertCount('repeat', count)

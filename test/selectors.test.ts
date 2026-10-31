@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { layout, parseSelector, select } from '../src'
-import { node, repeat } from './fixtures'
+import { parseSelector, select } from '../src'
+import { node, repeat, ui } from './fixtures'
 
 /*
  * s                 container #page
@@ -12,7 +12,7 @@ import { node, repeat } from './fixtures'
  * └ s.1             grid
  *   └ s.1.0         card [style.height=100%]
  */
-const root = layout(
+const root = ui.layout(
   node('container', {
     alias: 'page',
     children: [
@@ -47,7 +47,8 @@ describe('matching', () => {
     ['[columns=2]', ['s.0']],
     ['card[size=small]', ['s.0.5.0']],
     ['[style.height="100%"]', ['s.1.0']],
-    ['card[size="medium"]', ['s.0.1', 's.0.2', 's.0.3', 's.0.4']],
+    // s.1.0 is a plain object, not node() — it gets the defaults too, like a template parsed from JSON
+    ['card[size="medium"]', ['s.0.1', 's.0.2', 's.0.3', 's.0.4', 's.1.0']],
   ])('%s', (selector, expected) => {
     expect(ids(selector)).toEqual(expected)
   })
@@ -83,7 +84,7 @@ describe('matching', () => {
 
   it('descendant with backtracking over ancestors', () => {
     // the nearest grid ancestor doesn't have columns=2, only a farther one matches
-    const nested = layout(
+    const nested = ui.layout(
       node('grid', {
         props: { columns: 2 },
         children: [node('grid', { children: [node('card')] })],
@@ -103,7 +104,7 @@ describe('matching', () => {
 
 describe(':root', () => {
   it('matches only the tree root', () => {
-    const nested = layout(node('grid', { children: [node('grid', { children: [node('card')] }), node('card')] }), 'r')
+    const nested = ui.layout(node('grid', { children: [node('grid', { children: [node('card')] }), node('card')] }), 'r')
 
     expect(select(nested, 'grid').map(({ id }) => id)).toEqual(['r', 'r.0'])
     expect(select(nested, 'grid:root').map(({ id }) => id)).toEqual(['r'])

@@ -1,3 +1,4 @@
+import { deepMerge } from './merge'
 import type { BlockDefinition, ComponentDefaults, LayoutNode, PathSegment, PropSource } from './types'
 
 /** Context passed to the ID generator. */
@@ -15,31 +16,24 @@ export type IdContext = {
 /** A custom node ID generator. IDs must be unique across the page — start them with the section key, like the default one. */
 export type IdGenerator = (ctx: IdContext) => string
 
-/** Options of `layout()`: the ID generator, `trace` and the defaults used to tell `default` from `template` props. */
+/** Options of `layout()`: the ID generator, `trace` and the component defaults applied to every node. */
 export type LayoutOptions = {
   /** ID generator. Default: `news`, `news.0.2`, `news.0:media`, `news.1:content.0`. */
   id?: IdGenerator
   /** Records props origin in `node.trace` (`default` / `template`) — debug mode. */
   trace?: boolean
-  /** Default component props — with `trace` they distinguish `default` from `template`. */
+  /**
+   * Default component props, merged under every node's own props (deep merge; the block's values win). Applied here,
+   * not when a block is created, so a template written in code and one parsed from JSON behave the same.
+   */
   defaults?: ComponentDefaults<unknown>
 }
 
-const sameValue = (a: unknown, b: unknown) => a === b || JSON.stringify(a) === JSON.stringify(b)
-
-/** A prop equal to the component default = `default` (`node()` merges them with block props, so we reconstruct the source). */
-const traceOf = (component: string, props: Record<string, unknown>, defaults: ComponentDefaults<unknown> = {}) => {
-  const componentDefaults = (defaults as Record<string, Record<string, unknown> | undefined>)[component] ?? {}
-
-  return Object.fromEntries(
-    Object.keys(props).map(key => [
-      key,
-      (Object.hasOwn(componentDefaults, key) && sameValue(componentDefaults[key], props[key])
-        ? { from: 'default' }
-        : { from: 'template' }) satisfies PropSource,
-    ])
+/** The origin of every prop: set by the block = `template`, otherwise it came from the defaults. */
+const traceOf = (props: Record<string, unknown>, own: Record<string, unknown>) =>
+  Object.fromEntries(
+    Object.keys(props).map(key => [key, (Object.hasOwn(own, key) ? { from: 'template' } : { from: 'default' }) satisfies PropSource])
   )
-}
 
 const defaultId: IdGenerator = ({ prefix, path, parentId }) => {
   const last = path[path.length - 1]
@@ -67,7 +61,7 @@ const expand = <C>(blocks: BlockDefinition<C>[]) =>
  * Turns a block tree into a layout tree:
  * - expands `repeat` into consecutive siblings (also in slot lists),
  * - gives every node a unique ID,
- * - normalizes `props` (always present).
+ * - applies the component defaults under each node's props (always present).
  *
  * @example
  * ```ts
@@ -117,13 +111,16 @@ export function layout<C>(block: BlockDefinition<C>, prefix: string, options: La
     }
 
     const expandedChildren = expand(children ?? [])
+    const own = props ?? {}
+    const componentDefaults = (options.defaults as Record<string, Record<string, unknown> | undefined> | undefined)?.[component]
+    const merged = componentDefaults ? deepMerge(componentDefaults, own) : { ...own }
 
     return {
       id: nodeId,
       component,
-      props: { ...props },
+      props: merged,
       ...(alias !== undefined && { alias }),
-      ...(options.trace && { trace: traceOf(component, props ?? {}, options.defaults) }),
+      ...(options.trace && { trace: traceOf(merged, own) }),
       ...(Object.keys(builtSlots).length && { slots: builtSlots }),
       ...(expandedChildren.length && {
         children: expandedChildren.map((child, index) => build(child, [...path, index], nodeId)),

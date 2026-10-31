@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { layout, patch, remove } from '../src'
-import { node, repeat } from './fixtures'
+import { patch, remove } from '../src'
+import { node, repeat, ui } from './fixtures'
 
 const build = () =>
-  layout(
+  ui.layout(
     node('grid', {
       children: [node('heading'), repeat(node('card'), 3), node('stack', { children: [node('card')] })],
     }),
@@ -47,7 +47,7 @@ describe('patch', () => {
   })
 
   it('deep-merges props', () => {
-    const root = layout(node('stack', { props: { style: { height: 'auto', width: '100%' } } }), 's')
+    const root = ui.layout(node('stack', { props: { style: { height: 'auto', width: '100%' } } }), 's')
 
     expect(patch(root, { '*': { style: { height: 'max-content' } } }).props).toEqual({
       style: { height: 'max-content', width: '100%' },
@@ -87,7 +87,7 @@ describe('remove', () => {
   })
 
   it('omits children when all children were removed', () => {
-    const root = layout(node('stack', { children: [node('card')] }), 's')
+    const root = ui.layout(node('stack', { children: [node('card')] }), 's')
 
     expect(remove(root, 'card')).toEqual({ id: 's', component: 'stack', props: {} })
   })

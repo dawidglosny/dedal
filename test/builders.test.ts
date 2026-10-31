@@ -1,54 +1,72 @@
 import { describe, expect, it } from 'vitest'
 import { createDedal } from '../src'
-import { clone, node, repeat } from './fixtures'
+import { clone, node, repeat, ui } from './fixtures'
 
 describe('node', () => {
-  it('applies default props', () => {
-    expect(node('card')).toEqual({
-      component: 'card',
-      props: { size: 'medium', variant: 'vertical', testId: 'article' },
-    })
+  it('is exactly what was passed — defaults are not baked into the block', () => {
+    expect(node('card')).toEqual({ component: 'card', props: {} })
+    expect(node('card', { props: { size: 'small' } })).toEqual({ component: 'card', props: { size: 'small' } })
   })
 
-  it('passed props win over defaults', () => {
-    expect(node('card', { props: { size: 'small' } }).props).toEqual({
-      size: 'small',
-      variant: 'vertical',
-      testId: 'article',
-    })
-  })
+  it('always sets props, and copies them', () => {
+    const props = { columns: 2 }
+    const block = node('grid', { props })
 
-  it('always sets props, even without defaults', () => {
     expect(node('grid')).toEqual({ component: 'grid', props: {} })
+    expect(block.props).toEqual(props)
+    expect(block.props).not.toBe(props)
+  })
+})
+
+describe('defaults (applied by layout)', () => {
+  const props = (block: Parameters<typeof ui.layout>[0]) => ui.layout(block, 's').props as Record<string, unknown>
+
+  it('are merged under the block props; the block wins', () => {
+    expect(props(node('card'))).toEqual({ size: 'medium', variant: 'vertical', testId: 'article' })
+    expect(props(node('card', { props: { size: 'small' } }))).toEqual({ size: 'small', variant: 'vertical', testId: 'article' })
+  })
+
+  it('apply the same way to a block from code and to one parsed from JSON', () => {
+    const fromJson = JSON.parse('{ "component": "grid", "children": [{ "component": "card", "repeat": 2, "props": { "size": "large" } }] }')
+    const fromCode = node('grid', { children: [repeat(node('card', { props: { size: 'large' } }), 2)] })
+
+    expect(ui.layout(fromJson, 's')).toEqual(ui.layout(fromCode, 's'))
+    expect(ui.layout(fromJson, 's').children?.[1].props).toEqual({ size: 'large', variant: 'vertical', testId: 'article' })
   })
 
   it('an array replaces the default instead of being appended to it', () => {
     const sources = [{ minWidth: 990, size: 'lg' }]
 
-    expect(node('image', { props: { sources } }).props?.sources).toEqual(sources)
+    expect(props(node('image', { props: { sources } })).sources).toEqual(sources)
   })
 
   it('undefined overrides the default value', () => {
-    const props = node('image', { props: { sources: undefined } }).props!
+    const merged = props(node('image', { props: { sources: undefined } }))
 
-    expect('sources' in props).toBe(true)
-    expect(props.sources).toBeUndefined()
+    expect('sources' in merged).toBe(true)
+    expect(merged.sources).toBeUndefined()
   })
 
   it('objects are deep-merged', () => {
-    const { node } = createDedal<{ box: { style?: { color?: string; margin?: string } } }>({
+    const local = createDedal<{ box: { style?: { color?: string; margin?: string } } }>({
       defaults: { box: { style: { color: 'red', margin: '0' } } },
     })
 
-    expect(node('box', { props: { style: { margin: '4px' } } }).props).toEqual({
+    expect(local.layout(local.node('box', { props: { style: { margin: '4px' } } }), 's').props).toEqual({
       style: { color: 'red', margin: '4px' },
     })
   })
 
-  it('does not mutate default props', () => {
-    node('card', { props: { size: 'large' } })
+  it('do not mutate the defaults', () => {
+    props(node('card', { props: { size: 'large' } }))
 
-    expect(node('card').props?.size).toBe('medium')
+    expect(props(node('card')).size).toBe('medium')
+  })
+
+  it('trace: a prop the block sets is "template", one it doesn\'t is "default" — even with the same value', () => {
+    const traced = ui.layout(node('card', { props: { size: 'medium' } }), 's', { trace: true })
+
+    expect(traced.trace).toEqual({ size: { from: 'template' }, variant: { from: 'default' }, testId: { from: 'default' } })
   })
 
   it('carries slots over', () => {
