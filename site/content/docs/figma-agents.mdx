@@ -1,0 +1,43 @@
+---
+title: "Agents: dedal-mcp and the skill"
+description: "The dedal-mcp server (figma_to_template, validate_template, contract_schema) and the figma-to-dedal Claude Code skill: an agent pulls a frame, sorts the report and saves the template."
+---
+
+**In short:** an agent can do the pull for you. The **`dedal-mcp`** server gives it three tools — the same conversion and report as the CLI, validation, and the contract as JSON Schema. The **`figma-to-dedal`** skill tells Claude Code how to use them: pull, read the report, fix what's a mapping problem, name what's a design problem, propose what's a contract change — and never force a template or extend the contract on its own.
+
+## dedal-mcp
+
+An MCP server over stdio, with no dependencies. Add it to your agent's configuration — for Claude Code, a `.mcp.json` in the project:
+
+```json
+{ "mcpServers": { "dedal": { "command": "npx", "args": ["dedal-mcp"], "env": { "FIGMA_TOKEN": "${FIGMA_TOKEN}" } } } }
+```
+
+Every tool takes `mapping` — the path to the mapping module, relative to the project.
+
+| Tool | Arguments | Returns |
+|---|---|---|
+| `figma_to_template` | `url` (a Figma URL or a file key), `node?`, `mapping`, `out?`, `images?`, `imageUrl?`, `force?` | the report (layers left out, warnings, errors with the Figma layer) and the templates — or writes them to `out`; an error result when the templates don't match the contract |
+| `validate_template` | `mapping`, `template` (the templates as JSON, one block, or a path to a JSON file) | `valid`, or every problem with its path |
+| `contract_schema` | `mapping` | the contract as JSON Schema: components, props with their types and allowed values, slots — what a template may contain |
+
+The tools are thin wrappers: `figma_to_template` runs `dedal-figma pull` (*dedal-figma pull*), so the agent sees exactly what you'd see in the terminal.
+
+## The figma-to-dedal skill
+
+A Claude Code skill shipped with the package: `skills/figma-to-dedal/SKILL.md`. Copy the directory to your project's `.claude/skills/`. Then give the agent a Figma link ("make the home page from this frame"), and it:
+
+1. **reads the contract** (`contract_schema`) — what a template may contain,
+2. **pulls the frame** without writing, and reads the whole report,
+3. **sorts every item** into where its fix belongs:
+   - **the mapping** — a name or a value that differs (`component('X', …)`, `variant(…, { … })`, a `componentName` rule): it makes the change,
+   - **the Figma file** — a loose text, a drawn illustration, content outside a slot: it names the layer by its path and what to change,
+   - **the contract and the registry** — a component or a variant the code doesn't have: it proposes the change and waits for you,
+4. **pulls again** until the report is clean, writes the templates and downloads the images,
+5. **validates** the result and reports what was converted, left out and changed.
+
+It never uses `force` or extends the contract without your explicit OK, and never puts the token in a file.
+
+## With Figma's own MCP server
+
+Figma's MCP server reads designs (`get_metadata`, `get_design_context`); `dedal-mcp` adds what it doesn't have — the contract and validation. Together, an agent can start a mapping for a new design system: read the frame's structure, compare its names with `contract_schema`, write only the entries that differ, and pull.

@@ -33,7 +33,7 @@ export const groups: DocGroup[] = [
   },
   {
     slug: 'introduction',
-    title: 'Introduction',
+    title: 'How the engine works',
     description: 'How Dedal works: roles, data flow, an example step by step, a glossary.',
     file: '',
     cases: [],
@@ -68,8 +68,36 @@ export const groups: DocGroup[] = [
   },
   {
     slug: 'templates-from-figma',
-    title: 'Templates from Figma',
-    description: 'dedal/figma and dedal-figma pull: component properties, native slots and text styles mapped to the contract; what didn\'t fit, reported.',
+    title: 'Figma overview',
+    description: 'From a Figma frame to a page: the mapping, the CLI, the MCP server and the skill — and how they fit.',
+    file: '',
+    cases: [],
+  },
+  {
+    slug: 'figma-file',
+    title: 'Preparing a Figma file',
+    description: 'For designers: blocks as library components, texts as properties, content in native slots, images as images — and what breaks a conversion.',
+    file: '',
+    cases: [],
+  },
+  {
+    slug: 'figma-mapping',
+    title: 'The mapping',
+    description: 'mapping(contract, …): the naming convention, explicit sources, slots, frames, options, and what convert returns.',
+    file: '',
+    cases: [],
+  },
+  {
+    slug: 'figma-cli',
+    title: 'dedal-figma pull',
+    description: 'The CLI: fetch, convert, validate, write the templates, download the images — the report, the flags, exit codes, CI.',
+    file: '',
+    cases: [],
+  },
+  {
+    slug: 'figma-agents',
+    title: 'Agents: dedal-mcp and the skill',
+    description: 'An MCP server and a Claude Code skill: an agent pulls a frame, sorts the report and saves the template.',
     file: '',
     cases: [],
   },
@@ -177,10 +205,11 @@ export const groups: DocGroup[] = [
 
 /** Parts of the menu: groups in the order of a reader's needs — first steps, learning, features, when something's wrong. */
 export const parts: { title: string; groups: string[] }[] = [
-  { title: 'Get started', groups: ['why', 'figma-demo', 'quick-start', 'introduction'] },
-  { title: 'Learn', groups: ['tutorial', 'dashboard', 'production'] },
-  { title: 'Guides', groups: ['templates-in-storage', 'templates-from-figma', 'adopting', 'clients-without-react', 'testing'] },
-  { title: 'Features', groups: ['layout', 'data', 'sections', 'cache', 'rendering'] },
+  { title: 'Get started', groups: ['why', 'quick-start', 'figma-demo'] },
+  { title: 'Figma', groups: ['templates-from-figma', 'figma-file', 'figma-mapping', 'figma-cli', 'figma-agents'] },
+  { title: 'Page builders and storage', groups: ['templates-in-storage'] },
+  { title: 'The engine', groups: ['introduction', 'tutorial', 'layout', 'data', 'sections', 'cache', 'rendering', 'production', 'dashboard'] },
+  { title: 'Guides', groups: ['adopting', 'clients-without-react', 'testing'] },
   { title: 'Troubleshooting', groups: ['errors', 'devtools'] },
   { title: 'Reference', groups: ['api', 'glossary', 'limitations'] },
 ]

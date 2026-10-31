@@ -3,7 +3,7 @@ title: "Glossary"
 description: "Every term used in these docs, in one place."
 ---
 
-Every term used in these docs, in one place. The five to start with — contract, block, section, binding, registry — are explained with an example in *Introduction*.
+Every term used in these docs, in one place. The five to start with — contract, block, section, binding, registry — are explained with an example in *How the engine works*.
 
 - **contract** — component name → its props and slots. A TypeScript type (`card: { title: string; size?: 'sm' | 'md' | 'lg'; badge?: Slot }`) or a value (`defineContract({ card: { props: schema, slots: { badge: 'one' } } })`) the type is inferred from — then templates can be validated (`ui.validate`) and exported to JSON Schema (`ui.jsonSchema`). A single source of truth for the server and the frontend.
 - **component** — a name from the contract (`card`, `grid`). It is not a React component — the registry assigns a React component to that name.

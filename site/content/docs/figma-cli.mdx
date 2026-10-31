@@ -1,0 +1,75 @@
+---
+title: dedal-figma pull
+description: "The CLI: fetch a frame from the Figma REST API, convert and validate it, write the templates, download the images — the report, the flags, exit codes, CI."
+---
+
+**In short:** `dedal-figma pull` fetches a frame, converts it with your mapping, checks it against the contract and writes the templates. What didn't make it into the template is listed with its Figma path; a template that doesn't match the contract isn't written.
+
+```bash
+FIGMA_TOKEN=… npx dedal-figma pull "https://www.figma.com/design/<file>/<name>?node-id=31-398" \
+  --mapping ./figma.mapping.mjs --out templates/home.json --images public/figma
+```
+
+```text
+1 layer(s) not in the template:
+  Frame 427/Group 12/icon/lock-open — an instance of "icon/lock-open", which no contract component maps
+3 image(s) → public/figma
+✓ 10 section(s) → templates/home.json
+```
+
+## The token
+
+A Figma personal access token (Figma → Settings → Security) with file content read access, in `FIGMA_TOKEN`. Keep it out of the repository; in CI, a secret.
+
+## Arguments and flags
+
+| | |
+|---|---|
+| `<file key \| Figma URL>` | the file; a URL with `?node-id=…` gives the node too (branch URLs work) |
+| `[node id]` | the frame to convert, when the URL has none — `1:2` or `1-2` |
+| `--mapping <module>` | required: a module whose default export is `mapping(contract, …)` |
+| `--out <file>` | where to write the templates (JSON); stdout without it |
+| `--images <dir>` | download the images (`image()` in the mapping) into a directory and put their paths in the templates |
+| `--image-url <prefix>` | how the templates refer to them — default: the directory without a leading `public/` (`public/figma` → `/figma/<ref>.png`) |
+| `--raw <file>` | also save the raw REST response |
+| `--force` | write templates that don't match the contract |
+
+The mapping module is loaded by Node: write it in JavaScript (`.mjs`), or in TypeScript with Node 23.6+ or a loader such as `tsx`.
+
+## The report
+
+Everything goes to stderr; the templates go to `--out` (or stdout):
+
+- `N layer(s) not in the template:` then `  path — reason` — every layer left out, by its path in the frame (*Preparing a Figma file* explains the reasons),
+- `warning  path: message` — an empty mapped container, slots merged into children, an image without a URL,
+- `error  template.path (Figma: layer/path): message` — a mismatch with the contract,
+- `N image(s) → dir`, then `✓ N section(s) → file`.
+
+## Exit codes
+
+| Code | When |
+|---|---|
+| `0` | the templates match the contract and were written |
+| `1` | the templates don't match the contract (nothing written — or written with `--force`, still `1`), or the Figma API request failed |
+| `2` | wrong usage: a missing flag or node id, no `FIGMA_TOKEN`, a mapping module that can't be loaded or doesn't export a mapping |
+
+So a pull in CI fails when a design uses something the code doesn't have — before the template reaches any page.
+
+## Images
+
+Figma gives image URLs only through a separate request (`GET /v1/files/:key/images`), and they expire. With `--images`, the pull resolves the references, downloads the files (`<ref>.png`, `.jpg`…) and replaces each `figma-image:<ref>` in the templates with its path. Without it, the values stay `figma-image:<ref>`, with a warning.
+
+## Testing your mapping
+
+`--raw response.json` saves the REST response. Commit it (trimmed, if it's large) as a fixture, and test the mapping without the network:
+
+```ts
+import { readFileSync } from 'node:fs'
+import fromFigma from '../figma.mapping.mjs'
+
+const response = JSON.parse(readFileSync('test/fixtures/home.figma.json', 'utf8'))
+const { ok, errors, unmapped } = await fromFigma.convert(response, '31:398')
+// expect(errors).toEqual([]); expect(unmapped).toMatchSnapshot()
+```
+
+The same conversion runs in code without the CLI — *The mapping*, "Converting in code".

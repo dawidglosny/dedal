@@ -1,5 +1,5 @@
 ---
-title: "Introduction"
+title: "How the engine works"
 description: "How Dedal works: roles, data flow, an example step by step, a glossary."
 ---
 
@@ -24,7 +24,7 @@ The model has two sides:
 
 They are connected by the **contract** — which components exist, what props and slots they take. It is the only thing both sides have to share: a TypeScript type, or a value with schemas when templates come from outside the code.
 
-Where templates come from: **Figma** (`dedal-figma pull` — *Templates from Figma*), **a page builder, a CMS or a database** (*Templates from a page builder, CMS or database*), or **code** (blocks written in TypeScript, as in the example below).
+Where templates come from: **Figma** (`dedal-figma pull` — *Figma overview*), **a page builder, a CMS or a database** (*Templates from a page builder, CMS or database*), or **code** (blocks written in TypeScript, as in the example below).
 
 In `examples/next` (Next.js, App Router) both sides live in one application: `build` and `resolve` run in a Server Component, and `<Render>` renders the result right away. The split still holds: the same page is available as JSON (`/api/home`), so a completely different frontend could render it, e.g. Web Components with their own registry.
 

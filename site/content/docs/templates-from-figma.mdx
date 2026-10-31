@@ -1,9 +1,21 @@
 ---
-title: Templates from Figma
-description: "dedal/figma and dedal-figma pull: component properties, native slots and text styles mapped to the contract; what didn't fit, reported."
+title: Figma overview
+description: "From a Figma frame to a page: what's in the box — the mapping, the CLI, the MCP server and the skill — and how the pieces fit."
 ---
 
-**In short:** designers build the page in Figma from your design system's components and publish; `dedal-figma pull` turns the frame into a template, checked against the contract. `dedal/figma` maps Figma's own building blocks — component properties, native slots, text styles — to the contract, by convention where the names match and with a few lines of mapping where they don't. Every layer that didn't make it into the template is reported with its path.
+**In short:** designers build the page in Figma from your design system's components; one command turns the frame into a Dedal template, checked against the contract; your components render it. Change the frame, pull again — the page follows, with no frontend release. Every layer that didn't make it into the template is reported with its Figma path.
+
+## What's in the box
+
+| | What it does | Page |
+|---|---|---|
+| **`dedal/figma`** | `mapping(contract, …)` — how Figma's components, properties and native slots become contract components, props and slots; by the naming convention, explicit where names differ | *The mapping* |
+| **`dedal-figma pull`** | the CLI: fetches a frame from the Figma REST API, converts it, validates it, writes the templates and downloads the images | *dedal-figma pull* |
+| **`dedal-mcp`** | an MCP server: the same pull, validation and the contract as JSON Schema, for agents | *Agents: dedal-mcp and the skill* |
+| **`figma-to-dedal`** | a Claude Code skill: pulls a frame, sorts the report into fixes, saves the template | *Agents: dedal-mcp and the skill* |
+| **`examples/figma`** | a landing page designed in Figma, pulled and rendered by Dedal | *A page from Figma, end to end* |
+
+How to build the Figma file so that it converts cleanly — sections as components, content in slots, images — is in *Preparing a Figma file*, written for designers.
 
 ## What maps to what
 
@@ -12,113 +24,25 @@ description: "dedal/figma and dedal-figma pull: component properties, native slo
 | an instance of a library component (or a variant of a component set) | a block — the component's name is the contract name (`Button` → `button`, `SectionHeading` → `sectionHeading`) |
 | component properties: text, variant, boolean, instance swap | props — `Label#3:0` → `label`, `variant` → `variant`; an instance swap gives the swapped component's name |
 | a native slot (a `SLOT` property) | a slot of the same name (`'one'` or `'many'`, from the contract); any other slot → `children` |
+| an image fill (with `image()` in the mapping) | a prop with the image's path, after the pull downloads it |
 | a frame or a group | layout — its content takes its place; a frame becomes a block only through `frame()` |
 | a text layer outside any component | reported — or, with the `text` option, a text block with the name of its Figma text style (`h2`, `body`) |
 | a hidden layer | skipped |
 
 Spacing, sizes and colors stay in the components and the design tokens; a template carries structure and props, not pixels. Texts typed in Figma become props — for a heading that's the content, for a card that will get data it's a placeholder the data replaces.
 
-The best file for this is one built like a design system: **sections are components too** — `Hero`, `SectionHeading`, `Grid` — with their texts as properties and their content in native slots. Then almost nothing needs a mapping.
-
-A working example: [`examples/figma`](https://github.com/dawidglosny/dedal/tree/main/examples/figma) — the landing page of the demo file, pulled and rendered by Dedal; change the frame, pull, and the page follows.
-
-## The mapping
-
-One contract per component library: the contract mirrors the library's components and their values, and the same library's registry renders the page. Names are compared without case, spaces, dashes and underscores; Figma's `#id` suffixes are dropped.
-
-```ts
-// figma.mapping.mjs
-import { z } from 'zod'
-import { defineContract } from 'dedal'
-import { component, mapping, swap, text } from 'dedal/figma'
-
-export const contract = defineContract({
-  section: { props: z.object({ tone: z.enum(['default', 'muted', 'dark']).optional() }) },
-  hero: { props: z.object({ title: z.string(), lead: z.string() }), slots: { badge: 'one', actions: 'many', media: 'one' } },
-  sectionHeading: { props: z.object({ title: z.string(), subtitle: z.string().optional() }), slots: { badge: 'one' } },
-  grid: {},
-  feature: { props: z.object({ title: z.string(), description: z.string(), icon: z.string().optional() }) },
-  button: { props: z.object({ label: z.string(), variant: z.enum(['default', 'outline', 'ghost']).optional() }) },
-  badge: { props: z.object({ label: z.string() }) },
-  text: { props: z.object({ text: z.string(), style: z.string().optional() }) },
-})
-
-// only what doesn't follow the convention
-export default mapping(contract, {
-  feature: component('FeatureCard', { icon: swap('Icon', name => name.replace('icon/', '')) }), // instance swap → 'braces'
-}, { section: 'section', text: 'text' })
-```
-
-Where names differ, map them explicitly — the same sources as Figma's Code Connect:
-
-- `component('Action', { … })` — a Figma component with another name; `componentName: name => name.replace(/ \(Radix\)$/, '')` in the options for a rule that applies to all of them,
-- `text('Caption')`, `variant('Kind', { Primary: 'primary' })`, `boolean('Wide')`, `swap('Icon', toValue)` — a property with another name, or other values,
-- `layer('title')` — the content of a text layer inside the node,
-- `image()` — the node's image fill: `image: component('Image', { src: image() })`,
-- `component('Split', {}, { slots: { media: 'Media' }, children: 'Content' })` — where each slot's content goes.
-
-A prop the contract doesn't have is a compile error, and an error when the mapping is created; so are two mappings for one Figma component.
-
-## Pulling a frame
-
-```sh
-FIGMA_TOKEN=… npx dedal-figma pull "https://www.figma.com/design/<file>/<name>?node-id=31-398" --mapping ./figma.mapping.mjs --out templates/home.json
-```
-
-- The token is a personal access token with file content read access, from the environment.
-- Every top-level layer of the frame is a section — its name is the section key.
-- The output is the sections as JSON. What didn't make it into the template goes to stderr: `Frame 427/Group 12/icon/lock-open — an instance of "icon/lock-open", which no contract component maps`.
-- A template that doesn't match the contract is **not written** (exit code 1), with the template path and the Figma layer: `hero.children[0].slots.badge.props.variant (Figma: hero/Content/hero/Badge/Badge): Invalid option…`. `--force` writes it anyway — still with exit code 1, so CI notices.
-- `--images public/figma` downloads the images (`image()` in the mapping) and puts their paths in the template (`/figma/<ref>.png`; `--image-url` sets the prefix). Figma gives image URLs only through a separate request, and they expire — without `--images` the values stay `figma-image:<ref>`.
-- `--raw response.json` also saves the REST response — a fixture for a test of your mapping, no network needed.
-- The mapping module is loaded by Node: write it in JavaScript, or in TypeScript with Node 23.6+ (or a loader such as `tsx`).
-
-The same in code — e.g. in a job triggered by a Figma webhook:
-
-```ts
-import fromFigma from './figma.mapping.mjs'
-
-const response = await fetch(`https://api.figma.com/v1/files/${file}/nodes?ids=${node}`, { headers: { 'X-Figma-Token': token } }).then(r => r.json())
-const { ok, sections, errors, unmapped, warnings } = await fromFigma.convert(response, node)
-```
-
-## With an agent: the MCP server and the skill
-
-- **`dedal-mcp`** — an MCP server (stdio) with three tools: `figma_to_template` (the pull, with its report), `validate_template` (templates against the contract), `contract_schema` (the contract as JSON Schema — what a template may contain). Each takes the path to the mapping module; the conversion and the report are the CLI's.
-
-```json
-{ "mcpServers": { "dedal": { "command": "npx", "args": ["dedal-mcp"], "env": { "FIGMA_TOKEN": "${FIGMA_TOKEN}" } } } }
-```
-
-- **The `figma-to-dedal` skill** for Claude Code (`skills/figma-to-dedal/SKILL.md` in the package — copy it to `.claude/skills/`). Give it a Figma link, and it:
-  1. reads the contract,
-  2. pulls the frame,
-  3. sorts the report — a fix in the mapping (it makes it), a change in the Figma file (it names the layer), or a contract change (it proposes, you approve),
-  4. saves the template.
-
-  It never extends the contract or forces a template on its own.
-- With Figma's own MCP server next to it, an agent can also read the design (`get_metadata`) to start a mapping for a new design system.
-
 ## From Figma to the page
 
-1. Designers build the page frame from library components and publish.
-2. A job — a Figma webhook, a button in your admin, a schedule — runs the pull.
-3. The result is saved as a **draft** in your template store — the rest is [Templates in a database or CMS](/docs/templates-in-storage/): preview, publish with a new version, `onPublish`.
+1. **Design** — designers build the page frame from the library's components (*Preparing a Figma file*).
+2. **Pull** — `dedal-figma pull` (or an agent through `dedal-mcp`, or a job triggered by a Figma webhook) converts the frame and checks it against the contract. A template that doesn't match isn't written; everything left out is listed.
+3. **Store** — the template is saved as a draft in your template store; previewed, published with a new version (*Templates from a page builder, CMS or database*). In the example it's simply a file in the repository.
+4. **Render** — the frontend renders it with its registry; the page follows the frame.
 
-## Files that aren't built from components
-
-Real files have plain frames with loose texts, illustrations drawn from shapes, layers called `Frame 427`. The mapping has a tool for each, and reports the rest:
-
-- `frame('hero-copy', { title: layer('title') })` — a plain frame → a block, its props from text layers. There is no naming convention for frames: they are named freely, and mock-ups reuse component names.
-- `{ ignore: ['pipeline', /-mock$/] }` — decorative layers skipped whole, reported once. Without it, an instance inside an illustration would become a block next to the real ones.
-- `{ text: 'text' }` — loose texts as text blocks, e.g. a section of plain text on a background.
-- `warnings` — what matches the contract but probably not the design: an empty container, several slots merged into children.
-
-`ok: true` means *valid against the contract*, not *faithful to the design* — read `unmapped` and `warnings`. The fix is usually in the file: a component instead of a drawn frame, an image instead of an illustration made of shapes.
+The split between the teams: designers change pages freely within the design system; a new component, prop or variant is a change to the contract and the registry — code, reviewed and released first. A design that uses something the code doesn't have stops at step 2, with the layer named.
 
 ## What to watch out for
 
-- **Names are the contract.** Renaming a component, a property or a slot in Figma without renaming it in the contract fails validation — on purpose. Agree on the names with the design team, like any API.
-- **The content of an instance belongs to the component** — only what sits in its native slots is converted. A library component nested elsewhere in an instance is reported: expose it as a property, or put it in a slot.
-- **One instance = one block.** Repeated instances aren't collapsed into `repeat`; a template with three `card` blocks works the same.
-- **Not yet:** a Figma plugin as a source, pulling only changed sections.
+- **Names are the contract.** Renaming a component, a property or a slot in Figma without renaming it in the contract fails the pull — on purpose. Agree on the names with the design team, like any API.
+- **One contract per component library.** A design built on library A is converted with A's contract and rendered with A's registry; there's no translation between libraries.
+- **`ok: true` means valid, not faithful.** The template matches the contract; whether it matches the design is what `unmapped` and `warnings` tell you — read them.
+- **Not yet:** a Figma plugin as a source (frames come through the REST API, with a token), pulling only the changed sections, Figma's variables (design tokens) in templates.

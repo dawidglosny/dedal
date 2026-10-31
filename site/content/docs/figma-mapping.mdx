@@ -1,0 +1,106 @@
+---
+title: The mapping
+description: "mapping(contract, …) from dedal/figma: the naming convention, explicit sources (text, variant, boolean, swap, layer, image), slots, frames, options, and what convert returns."
+---
+
+**In short:** a mapping tells `dedal/figma` how a Figma frame becomes templates for one contract. Where Figma's names match the contract's, nothing needs to be written; where they don't, one entry per component says so — modelled on Figma's own Code Connect. The mapping is a module whose default export is the mapping; the CLI, the MCP server and your own code all use it.
+
+## The convention
+
+```js
+// figma.mapping.mjs — names match, nothing to map
+import { mapping } from 'dedal/figma'
+import { contract } from './ui/contract.mjs'
+
+export default mapping(contract, {})
+```
+
+- **A component** is found by name: an instance of `SectionHeading` (or of a variant of the component set `SectionHeading`) → the contract component `sectionHeading`.
+- **Properties** fill props of the same name: `Title#29:17` → `title`, `variant` → `variant`, `Icon right` → `iconRight`. Text, variant and boolean properties give their value; an instance swap gives the swapped component's name.
+- **Text layers** inside a mapped frame fill props of the same name (`title`, `lead`).
+- **Native slots**: a slot named like a contract slot fills it (`Badge` → `badge`, one block or a list, as the contract says); any other slot (`Content`) becomes the block's children.
+
+Names are compared without case, spaces, dashes and underscores; Figma's `#id` suffixes are dropped. The convention fills only props the contract declares — so it needs to read the props' names from the schema; for a schema it can't read (e.g. a union), only explicit sources apply.
+
+**One contract per component library.** The contract mirrors the library — its components and their values — and the same library's registry renders the page.
+
+## Explicit sources
+
+Where names or values differ, map the component explicitly. Props not listed still follow the convention.
+
+```js
+import { boolean, component, image, layer, mapping, swap, text, variant } from 'dedal/figma'
+
+export default mapping(contract, {
+  button: component('Action', {
+    label: text('Caption'),                                     // a TEXT property with another name
+    kind: variant('Kind', { Primary: 'primary', Ghost: 'ghost' }), // a VARIANT property, values mapped
+    block: boolean('Full width'),                               // a BOOLEAN property
+  }),
+  feature: component('FeatureCard', {
+    icon: swap('Icon', name => name.replace('icon/', '')),     // INSTANCE_SWAP → 'braces'
+  }),
+  image: component('Image', { src: image() }),                  // the image fill (downloaded by the pull)
+  quote: component('Quote', { author: layer('author') }),       // a text layer inside the instance
+})
+```
+
+| Source | Reads | Gives |
+|---|---|---|
+| `text(property)` | a `TEXT` component property | its string |
+| `variant(property, values?)` | a `VARIANT` property | its value, through `values` if given |
+| `boolean(property, values?)` | a `BOOLEAN` property | `true` / `false`, or `values.true` / `values.false` |
+| `swap(property, toValue?)` | an `INSTANCE_SWAP` property | the swapped component's name, or `toValue(name, { name, set })` — `set` is the component set's name for a variant |
+| `layer(name)` | a text layer inside the node | its content (the first layer of that name not read yet) |
+| `image()` | the node's image fill | `figma-image:<ref>` — the pull downloads it and puts the path there |
+
+A prop mapped explicitly is never filled by the convention, even when its source finds nothing. A prop the contract doesn't have is a compile error, and an error when the mapping is created; so are two entries for one Figma component.
+
+## Slots
+
+```js
+split: component('Split', {}, { slots: { media: 'Media' }, children: 'Content' }),
+```
+
+- `slots` — contract slot → the Figma slot it's filled from, when the names differ.
+- `children` — the Figma slot(s) whose content becomes the block's children; with it set, other unmapped slots are reported instead of merged.
+
+The content of an instance belongs to the component — only what sits in its native slots is converted. A mapped component placed elsewhere inside an instance is reported.
+
+## Frames
+
+Plain frames (not instances) are layout: their content takes their place. A frame becomes a block only explicitly — there's no naming convention for frames, because they're named freely and mock-ups reuse component names:
+
+```js
+hero: frame('hero-copy', { title: layer('title'), lead: layer('lead') }),
+grid: frame(/^(principle-grid|features-row)$/),   // a pattern — anchor it, it isn't anchored for you
+```
+
+## Options
+
+```js
+export default mapping(contract, { /* entries */ }, {
+  section: 'section',                                  // a top-level frame with several blocks → one section block
+  text: 'text',                                        // loose text layers → { text, style } blocks (style = the Figma text style's name)
+  ignore: ['pipeline', /-mock$/],                      // decorative layers: skipped whole, reported once
+  componentName: name => name.replace(/ \(Radix\)$/, ''), // a rule for Figma names — e.g. a library suffix; applied to component() names too
+})
+```
+
+## Converting in code
+
+The CLI and the MCP server call this; you can too — e.g. in a job triggered by a Figma webhook:
+
+```ts
+import fromFigma from './figma.mapping.mjs'
+
+const response = await fetch(`https://api.figma.com/v1/files/${file}/nodes?ids=${node}`, { headers: { 'X-Figma-Token': token } }).then(r => r.json())
+const { ok, sections, errors, unmapped, warnings } = await fromFigma.convert(response, node)
+```
+
+- `sections` — one template per top-level layer of the frame, keyed by its name (a duplicate gets `-2`).
+- `errors` — validation against the contract: `{ path, figma, message }` — the template path and the Figma layer of the block.
+- `unmapped` — every layer that didn't make it into the template: `{ path, reason }`.
+- `warnings` — what matches the contract but probably not the design: an empty mapped container, several slots merged into children.
+- `fromFigma.contract` — the contract the mapping converts to.
+- `imageRefs(sections)` / `replaceImageRefs(sections, urls)` — resolve `image()` values yourself, if you don't use the CLI's `--images`.

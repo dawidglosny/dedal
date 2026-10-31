@@ -1,0 +1,56 @@
+---
+title: Preparing a Figma file
+description: "For designers: build the page from library components, sections included; texts as properties, content in native slots, images as images — and what breaks a conversion."
+---
+
+**In short:** a frame converts cleanly when it's built the way a design system is meant to be used — every block an instance of a library component, its texts in component properties, its content in native slots. What's drawn by hand (a plain frame with loose texts, an illustration made of shapes) has no counterpart in the code, so it's reported instead of converted. Nothing here is a Dedal-specific naming trick: these are Figma's own standard building blocks.
+
+## The page frame
+
+- **One frame = one page.** Its top-level layers are the page's sections, in order.
+- **The names of the top-level layers are the section keys** (`hero`, `features`, `cta`) — the code and the data refer to sections by them. Keep them stable and readable; renaming one is like renaming an API field.
+- Hidden layers (`visible: false`) are skipped — handy for drafts and alternatives kept next to the real thing.
+
+## Blocks are library components
+
+Every block on the page is an **instance of a component from the library** — buttons and badges, and also the sections themselves: `Section`, `Hero`, `SectionHeading`, `Grid`, `CTA`, `Footer`. The component's name is the name the code knows (`SectionHeading` → `sectionHeading`; case, spaces and dashes don't matter).
+
+| What the block has | Build it as | Becomes |
+|---|---|---|
+| texts that change per page (a title, a lead, a label) | **text properties** (`Title`, `Lead`, `Label`) bound to the text layers | props (`title`, `lead`, `label`) |
+| states and styles from a fixed set (a button's kind, a section's background) | **variants** (`variant=outline`, `tone=muted`) | props with that value |
+| on / off details (an icon after the label) | **boolean properties** | `true` / `false` props |
+| one of several sub-components (which icon) | an **instance swap** property | the swapped component's name (`icon/braces` → `braces`) |
+| other components inside (cards in a grid, buttons in a hero) | **native slots** (`Content`, `Actions`, `Badge`) | the block's slots or children |
+| a picture | an **`Image` component** with an image fill | an image the pull downloads |
+
+## Slots for content
+
+A slot is a place in a component where the designer puts other components — Figma's `SLOT` property. Use slots for everything a block *contains*: the cards of a grid, the buttons of a hero, the badge of a heading. Slots nest: a section's slot holds a heading whose own slot holds a badge.
+
+A slot named like a slot in the code (`Badge` → `badge`) fills it; any other slot (`Content`) becomes the block's children.
+
+## What breaks a conversion — and what to do instead
+
+| In the file | What happens | Instead |
+|---|---|---|
+| a plain frame with loose text layers (a section drawn by hand) | the texts are reported as *outside any mapped component* | a section component with text properties — or, for plain text sections, the project's `text` component |
+| an illustration or a mock-up drawn from frames and shapes | its instances would leak into the page; the developer has to `ignore` it | export it as an image and use the `Image` component |
+| content placed inside an instance, outside its slots | reported as *inside an instance of …*; it belongs to the component | put it in a slot, or expose it as a property |
+| a detached instance | it's a plain frame now — its texts are reported, the components inside it end up as blocks out of context | keep instances attached; change the component instead |
+| a component the library has but the code doesn't | reported as *an instance of "X", which no contract component maps* | ask for it to be added to the contract and the registry first |
+| a variant the code doesn't have (`variant=brand` on a badge) | the pull stops: the template isn't written | use an existing variant, or ask for the new one in the code first |
+
+Every report line names the layer by its path in the frame — `hero/Content/hero/Badge/Badge`, `Frame 427/Group 12/icon/lock-open` — so it's clear where to look.
+
+## A checklist
+
+- [ ] Every section is an instance of a section component; its top-level layer has a stable name.
+- [ ] Texts that change are component properties, not loose text layers.
+- [ ] States are variants with values the code knows.
+- [ ] Content inside blocks sits in native slots.
+- [ ] Icons are instance swaps; pictures are `Image` instances; nothing important is drawn from shapes.
+- [ ] No detached instances.
+- [ ] A pull shows no unexpected `unmapped` lines.
+
+The demo file follows this — *A page from Figma, end to end* — including one deliberately messy frame, `Frame 427`, to show what the report says about the rest.

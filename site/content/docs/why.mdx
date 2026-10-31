@@ -17,7 +17,7 @@ They change at different times, for different reasons, by different people. But 
 
 Dedal keeps them apart:
 
-- **structure** is a template — plain JSON, which can live in code, in a database, or come from Figma (*Templates from Figma*),
+- **structure** is a template — plain JSON, which can live in code, in a database, or come from Figma (*Figma overview*),
 - **data** is attached to it by selectors in CSS syntax (`card`, `#featured`, `card > :slot(badge)`) — the way CSS attaches styles to HTML, here it attaches data to the structure,
 - **components** are chosen by the frontend's registry: component name → its component.
 
@@ -33,7 +33,7 @@ So each part can change on its own: a new structure with the same data, the same
 
 Dedal is built for one setup above all: **web products on a shared design system, whose pages are designed in Figma or assembled in a page builder or a CMS** — not written in JSX.
 
-- **Pages from Figma** — designers build a page from the design system's components and publish; `dedal-figma pull` (or an agent, through the `dedal-mcp` server) turns the frame into a template checked against the contract (*Templates from Figma*, and the whole path in *A page from Figma, end to end*).
+- **Pages from Figma** — designers build a page from the design system's components and publish; `dedal-figma pull` (or an agent, through the `dedal-mcp` server) turns the frame into a template checked against the contract (*Figma overview*, and the whole path in *A page from Figma, end to end*).
 - **Page builders and CMSs** — Dedal is the engine: the contract says what the editor can place and with which props, a template is what it saves, the frontend renders it with your components.
 - **Many products, one design system** — templates designed once, served to every product, each rendering them with its registry.
 
@@ -92,4 +92,4 @@ Dedal grew out of one instance of the property above: **many content sites on on
 
 Hand-rolled versions of this keep growing the same parts: how the data reaches the right place in the template, what happens when there's less data than places, caching, and finding out why something on the page looks wrong. Dedal is those parts, typed and tested.
 
-Next: *Quick start* — a rendered page in five files; or *Introduction* — how Dedal works, step by step, on a small example.
+Next: *Quick start* — from a Figma frame (or from code) to a rendered page; *A page from Figma, end to end* — the whole path on a real file; or *How the engine works* — the engine step by step, on a small example.

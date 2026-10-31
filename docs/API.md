@@ -272,7 +272,7 @@ const { ok, sections, errors, unmapped, warnings } = await fromFigma.convert(res
 - **MCP server:** `dedal-mcp` (stdio, no dependencies) — `figma_to_template`, `validate_template`, `contract_schema`; every tool takes the path to the mapping module (`mapping(…).contract` gives its contract). **Skill:** `skills/figma-to-dedal/SKILL.md` for Claude Code.
 - **CLI:** `dedal-figma pull <file key | URL> [node] --mapping <module> [--out file.json] [--images dir] [--image-url prefix] [--raw response.json] [--force]` — the token from `FIGMA_TOKEN`; `--images` downloads the images and puts local paths in the templates; a template that doesn't match the contract isn't written (exit code 1) unless `--force` (written, still exit code 1); the mapping module's default export is the mapping.
 
-Guide: *Templates from Figma* on the documentation site. Example: [`examples/figma`](../examples/figma) — a landing page pulled from a Figma frame and rendered by Dedal. Decision record: [ADR-003](adr/003-figma-mapping.md).
+Guides: the *Figma* section of the documentation site — an overview, *Preparing a Figma file*, *The mapping*, *dedal-figma pull*, *Agents: dedal-mcp and the skill*. Example: [`examples/figma`](../examples/figma) — a landing page pulled from a Figma frame and rendered by Dedal. Decision record: [ADR-003](adr/003-figma-mapping.md).
 
 ### Page cache (`page({ cache })`)
 
