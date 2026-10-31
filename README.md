@@ -105,11 +105,11 @@ Change the structure in storage and the page follows — no frontend release (wi
 | | |
 |---|---|
 | `dedal/react` in the browser | **0.6 KB** min + gzip (`<Render>` alone: 0.5 KB); React itself is a peer dependency |
-| `dedal` core | 8.3 KB min + gzip, **zero dependencies** — in the browser only if you run `resolve` there |
+| `dedal` core | 10 KB min + gzip (with validation and JSON Schema export), **zero dependencies** — in the browser only if you run `resolve` there |
 | devtools panel | 12.6 KB min + gzip — a separate chunk, fetched only when `<Devtools />` mounts (debug mode) |
 | build + resolve, 530 nodes | **0.8 ms** |
-| build + resolve, 3620 nodes | 7 ms |
-| tests | 336 (vitest) |
+| build + resolve, 3620 nodes | 6.5 ms |
+| tests | 363 (vitest) |
 
 Timings from `npm run bench` on an Apple M-series laptop, Node 22 — run it on your machine. Sizes: the published ESM entry points, bundled and minified with esbuild, React external.
 
@@ -127,7 +127,7 @@ Dedal doesn't replace your framework or your components — it decides **what** 
 ## Installation
 
 ```bash
-npm i github:dawidglosny/dedal#v0.6.6
+npm i github:dawidglosny/dedal#v0.7.0
 ```
 
 Requires Node 20.9+. React 18+ only for `dedal/react` (an optional peer dependency). The package builds on install.
@@ -157,4 +157,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) — setup, where things are, the docs sit
 
 ## Status
 
-Version **0.6.6**. The API may still change before 1.0 — see [CHANGELOG.md](CHANGELOG.md). Plans (an Astro renderer, pruning empty containers, cache adapters): [docs/ROADMAP.md](docs/ROADMAP.md).
+Version **0.7.0**. The API may still change before 1.0 — see [CHANGELOG.md](CHANGELOG.md). Plans (an Astro renderer, pruning empty containers, cache adapters): [docs/ROADMAP.md](docs/ROADMAP.md).

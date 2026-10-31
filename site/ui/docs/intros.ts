@@ -97,7 +97,7 @@ Next: *Quick start* — a rendered page in five files; or *Introduction* — how
 ## 1. Install
 
 \`\`\`bash
-npm i github:dawidglosny/dedal#v0.6.6
+npm i github:dawidglosny/dedal#v0.7.0
 \`\`\`
 
 You need Node 20.9+ and TypeScript. For rendering with React (\`dedal/react\`) — React 18+, which your app most likely has already. The core (\`dedal\`) has no dependencies.
@@ -923,7 +923,7 @@ app/(radix)/radix/…      — Next routes that render PageView with the chosen 
 
 In a larger project blocks are usually extracted into separate modules (e.g. \`blocks.ts\`), and each page into its own file.
 
-Installation: \`npm i github:dawidglosny/dedal#v0.6.6\`. You need TypeScript and React (for \`dedal/react\`, React 18+); the server can be anything (Node 20.9+) — here it's Next.js (App Router, Server Components).`,
+Installation: \`npm i github:dawidglosny/dedal#v0.7.0\`. You need TypeScript and React (for \`dedal/react\`, React 18+); the server can be anything (Node 20.9+) — here it's Next.js (App Router, Server Components).`,
 
   production: `The tutorial covers the model. This group covers what you add before production: data shared between pages, slow sections, and not calling your APIs on every request.
 

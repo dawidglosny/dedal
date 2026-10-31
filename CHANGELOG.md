@@ -1,11 +1,29 @@
 # Changelog
 
-## Unreleased
+## 0.7.0
+
+**The contract at runtime** — templates from storage, Figma or a page builder are now a first-class path ([ADR-002](docs/adr/002-runtime-contract.md)).
+
+Added:
+- `defineContract({ card: { props: schema, slots: { badge: 'one' } } })` — the contract as a value, with any Standard Schema library (zod, valibot, arktype); `InferContract<typeof contract>` gives the same type as a hand-written contract. The core still has no dependencies.
+- `createDedal({ contract })` — the instance typed by the contract, no type argument.
+- `ui.validate(block)`, `ui.validateSections({ key: block })`, `validateTemplate(contract, block)` — every problem with its path (`news.children[2].slots.badge`): unknown components and slots (with a suggestion), the slot kind, props against their schema, `repeat`, `alias`, unknown fields. Props missing from a template are fine — data fills them.
+- `ui.jsonSchema()`, `contractToJsonSchema(contract)` — a JSON Schema of a template block and the props schema of every component (Standard JSON Schema, or `propsToJsonSchema` for other libraries).
+- Async `sections: async (ctx) => [...]` — templates loaded inside the page definition.
+- Devtools: with a contract, debug builds check every section block, deferred placeholder and `onEmpty` block against it — errors with paths in the panel and the report (`report.trace.templateErrors`); the page still renders.
+
+Breaking:
+- **`node()` no longer adds `defaults` to the block it returns** — they are merged in by `layout()` when the page is built, for blocks from code and from JSON alike. Code that read defaults from a block returned by `node()` reads them from the layout instead.
+- **`page.layout(ctx)` and `page.assign(sections, data, ctx)` return Promises** — add `await`.
+- `trace` reports a prop as `default` only when the block doesn't set it (it used to compare values).
+
+Migration: a contract written as a type keeps working unchanged (`createDedal<Contract>()`); switch to `defineContract` where templates come from outside the code.
 
 Documentation:
-- positioning: Dedal is the engine behind pages generated from Figma or a page builder, rendered with your own design system — README, the docs site's home page and *Why Dedal* lead with it; mobile apps moved to *Later*,
-- decision records in `docs/adr/`: 000 positioning, 001 scope,
-- `docs/ROADMAP.md` no longer points to design notes that aren't in the public history.
+- positioning: the engine behind pages generated from Figma or a page builder, rendered with your own design system; mobile apps moved to *Later*,
+- decision records in `docs/adr/`: 000 positioning, 001 scope, 002 the contract at runtime,
+- the docs site's contracts are values; *Tutorial* step 4, *Templates in a database or CMS* and *Templates from Figma* use validation and async sections; a new case — *A template that doesn't match the contract*,
+- `examples/web-components` on the new API; `docs/ROADMAP.md` no longer points to design notes missing from the public history.
 
 ## 0.6.6
 

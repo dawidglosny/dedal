@@ -40,7 +40,7 @@ A page builder also needs to know, at runtime, which components exist and what p
 ## Consequences
 
 - **Breaking changes (0.7.0):** `node()` no longer adds `defaults` to the block it returns; `page.layout()` and `page.assign()` are async; `createDedal` takes the contract as a value or a type argument (`createDedal<Contract>()` and `ReturnType<typeof createDedal<Contract>>` keep working).
-- Core size 8.3 → 9.9 KB min + gzip (validation and JSON Schema export are always included); benchmarks unchanged within noise.
+- Core size 8.3 → 10 KB min + gzip (validation and JSON Schema export are always included); benchmarks unchanged within noise.
 - The docs lead with the contract as a value where templates come from outside the code (the tutorial, the storage and Figma guides); the Quick start keeps the type for the simplest start.
 - A page builder example (the roadmap's next step) builds its property panels from `ui.jsonSchema().props`.
 - Not covered: whether data supplies every required prop at `resolve` — the final props aren't validated (see *Limitations*).
