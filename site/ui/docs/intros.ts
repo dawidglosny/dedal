@@ -245,138 +245,130 @@ console.log(renderToString(<Render tree={page} registry={registry} />))
 - **See inside** — the devtools panel shows where every prop came from: *Devtools*, "How to enable it".
 - **Learn it properly** — *Tutorial*, then *Layout*, *Data*, *Sections*.`,
 
-  guideStorage: `**In short:** keep templates outside the code — in a database, a CMS, a key-value store — and load them per request without hitting the store every time. This guide covers the whole loop: the stored shape, validation, caching, versions, preview and publishing. *Tutorial*, step 4 shows the idea; this is the version for a real project.
+  guideStorage: `**In short:** keep templates outside the code — in a database, a CMS, a key-value store — check them against the contract, and load them inside the page definition, cached. This guide covers the whole loop: the contract, the stored shape, validation, caching, preview, publishing and CI. *Tutorial*, step 4 shows the idea; this is the version for a real project.
+
+## The contract as a value
+
+A template from storage isn't seen by the compiler, so the contract has to exist at runtime too. Define it as a value — a props schema (any Standard Schema library: zod, valibot, arktype) and the slots of every component — and the type is inferred from it:
+
+\`\`\`ts
+// contract.ts
+import { createDedal, defineContract } from 'dedal'
+import { z } from 'zod'
+
+// the contract as a value: checked at compile time and at runtime
+export const contract = defineContract({
+  section: { props: z.object({ title: z.string().optional() }) },
+  card: { props: z.object({ title: z.string(), href: z.string(), size: z.enum(['sm', 'md', 'lg']).optional() }), slots: { badge: 'one' } },
+  badge: { props: z.object({ label: z.string() }) },
+})
+
+export const ui = createDedal({ contract, defaults: { card: { size: 'md' } } })
+\`\`\`
 
 ## The stored shape
 
-One record per page: a block per section, and a version that changes on every publish. Keep a draft and a published copy, so editors can work without touching the live page.
+A template is a block per section — plain JSON, exactly what \`node()\` builds in code. Keep a draft and a published copy, so editors can work without touching the live page; versions for a rollback are your store's business.
 
 \`\`\`json
 {
-  "version": 3,
-  "sections": {
-    "news": { "component": "section", "props": { "title": "Latest" }, "children": [
-      { "component": "card", "repeat": 2, "slots": { "badge": { "component": "badge" } } }
-    ] }
-  }
+  "news": { "component": "section", "props": { "title": "Latest" }, "children": [
+    { "component": "card", "repeat": 2, "slots": { "badge": { "component": "badge" } } }
+  ] }
 }
 \`\`\`
 
 ## Loading, validating, caching
 
-The contract is types only, so a template from storage isn't checked by the compiler — validate it when it's loaded (and when it's saved, below). Read published templates through \`ui.query\`: they are cached in the instance, refreshed in the background, and one call to \`ui.invalidate\` drops them after a publish.
+\`ui.validateSections\` checks a stored template against the contract — components and slots, the slot kind, the props that are there against their schemas — and returns every error with its path (\`news.children[0].props.size\`). Props the template leaves out are fine: the data fills them. Read published templates through \`ui.query\`: they are cached in the instance and refreshed in the background.
 
 \`\`\`ts
 // templates.ts
-import type { BlockDefinition } from 'dedal'
-import type { Contract } from './ui/contract'
-import { ui } from './ui/home'
+import { ui } from './contract'
 
-// ---- guide 1: templates in storage ----
-
-/** A stored template: one block per section, and a version that changes on every publish. */
-export type StoredTemplate = { version: number; sections: Record<string, unknown> }
-
-/** Your storage — a database table, a CMS, a key-value store. */
+/** Your storage — a database table, a CMS, a key-value store. A template: section key → block. */
 export interface TemplateStore {
-  get(name: string, state: 'published' | 'draft'): Promise<StoredTemplate | undefined>
-}
-
-// the contract is types only — the list of names is what runs
-const components = { section: 1, card: 1, badge: 1 } satisfies Record<keyof Contract, 1>
-
-/** Checks a template from outside the code; throws with the path of the first bad node. */
-export function validate(block: unknown, path: string): asserts block is BlockDefinition<Contract> {
-  if (typeof block !== 'object' || block === null) throw new Error(\`\${path}: not an object\`)
-  const { component, slots, children } = block as { component?: unknown; slots?: Record<string, unknown>; children?: unknown }
-  if (typeof component !== 'string' || !(component in components)) throw new Error(\`\${path}: unknown component \${JSON.stringify(component)}\`)
-  if (children !== undefined && !Array.isArray(children)) throw new Error(\`\${path}: children must be an array\`)
-  for (const [name, content] of Object.entries(slots ?? {})) [content].flat().forEach((child, i) => validate(child, \`\${path}:\${name}.\${i}\`))
-  ;(children as unknown[] | undefined)?.forEach((child, i) => validate(child, \`\${path}.\${i}\`))
-}
-
-export function validateTemplate(template: StoredTemplate): Record<string, BlockDefinition<Contract>> {
-  for (const [key, block] of Object.entries(template.sections)) validate(block, key)
-  return template.sections as Record<string, BlockDefinition<Contract>>
+  get(name: string, state: 'published' | 'draft'): Promise<unknown>
 }
 
 export function createTemplates(store: TemplateStore) {
-  // published templates are read through a query: cached in the instance, refreshed in the background
-  const published = ui.query({
-    key: (name: string) => ['template', name],
-    fn: async (name: string) => {
-      const template = await store.get(name, 'published')
-      if (!template) throw new Error(\`template "\${name}" is not published\`)
-      return { version: template.version, sections: validateTemplate(template) }
-    },
-    staleTime: 60_000,
-  })
+  /** Reads a template and checks it against the contract; every error comes with its path. */
+  const load = async (name: string, state: 'published' | 'draft') => {
+    const stored = await store.get(name, state)
+    if (stored === undefined) throw new Error(\`template "\${name}" has no \${state} version\`)
+    const result = await ui.validateSections(stored)
+    if (!result.ok) throw new Error(\`template "\${name}" (\${state}):\\n\` + result.errors.map(({ path, message }) => \`  \${path}: \${message}\`).join('\\n'))
+    return result.value
+  }
+
+  // published templates through a query: cached in the instance, refreshed in the background
+  const published = ui.query({ key: (name: string) => ['template', name], fn: (name: string) => load(name, 'published'), staleTime: 60_000 })
 
   return {
     published,
     /** Drafts skip the cache — editors see their last save. */
-    draft: async (name: string) => {
-      const template = await store.get(name, 'draft')
-      if (!template) throw new Error(\`template "\${name}" has no draft\`)
-      return { version: template.version, sections: validateTemplate(template) }
+    draft: (name: string) => load(name, 'draft'),
+    /** Checks a template before it's saved — refuse what doesn't match the contract. */
+    check: (stored: unknown) => ui.validateSections(stored),
+    /** After publishing: drop the cached template and the pages built from it (their cache keys start with the name). */
+    onPublish: async (name: string) => {
+      await ui.invalidate(['template', name])
+      await ui.invalidate([name])
     },
-    /** After publishing: drop the cached template and the pages built from it. */
-    onPublish: (name: string) => ui.invalidate(['template', name]),
   }
 }
 \`\`\`
 
-\`validate\` checks component names and the shape of the tree. If you want to check prop values too, add a schema per component (any validation library) next to the contract — the shape is plain JSON.
+## The page
 
-## The page per request
-
-Create the page from the current template — creating a page is cheap; the cache lives in the instance. Put the template **version** in the page cache key: a new publish is served right away, without waiting for the old entry to go stale. A preview reads the draft and isn't cached.
+\`sections\` can be async: the page reads its template on every build, inside its own definition. A preview reads the draft and isn't cached; a published page is cached until the next publish.
 
 \`\`\`ts
-/** The page for one request — from the published template, or from the draft for a preview. */
-export async function homePage({ preview = false } = {}) {
-  const template = preview ? await templates.draft('home') : await templates.published('home')
-  return ui.page({
-    sections: Object.entries(template.sections).map(([key, block]) => ui.section(key, block)),
-    data: async () => {
-      const articles = await fetchArticles()
-      return {
-        news: {
-          card: articles.map(article => ({ title: article.title, href: article.url })),
-          'card > :slot(badge)': articles.map(article => ({ label: article.category })),
-        },
-      }
+export const home = ui.page<{ preview?: boolean }>({
+  // the sections come from storage on every build: published, or the draft for a preview
+  sections: async ({ preview }) => {
+    const sections = preview ? await templates.draft('home') : await templates.published('home')
+    return Object.entries(sections).map(([key, block]) => ui.section(key, block))
+  },
+  data: async () => ({
+    news: {
+      card: [{ title: 'A', href: '/a' }, { title: 'B', href: '/b' }, { title: 'C', href: '/c' }],
+      'card > :slot(badge)': [{ label: 'x' }, { label: 'y' }, { label: 'z' }],
     },
-    // the version in the key: a new publish is served right away; previews are never cached
-    cache: preview ? undefined : { key: () => ['home', template.version] },
-  })
-}
+  }),
+  // previews are never cached; published pages are, until the next publish
+  cache: { key: ({ preview }) => (preview ? undefined : ['home']) },
+})
 \`\`\`
 
-Build a preview with \`{ trace: true }\` and render the devtools panel: editors see where every prop comes from before they publish.
+The cards in the stored template don't set \`size\` — they still get \`size: "md"\` from the instance \`defaults\`, exactly like blocks written in code.
 
 ## Publishing
 
-1. The editor (or a design-tool export, see *Templates from Figma*) saves a **draft** — validate it on save and refuse an invalid one.
-2. A preview renders the draft.
-3. Publishing copies the draft to **published** with a new version, then calls \`templates.onPublish(name)\`.
+1. The editor (or a Figma export, see *Templates from Figma*) saves a **draft** — \`templates.check\` refuses one that doesn't match the contract, with the paths of the problems.
+2. A preview renders the draft (\`{ preview: true }\`), in debug mode with devtools — editors see where every prop comes from before they publish.
+3. Publishing copies the draft to **published**, then calls \`templates.onPublish(name)\`: the cached template and the cached pages are dropped, and the next request builds from the new version.
 4. Rollback = publish an older version again.
 
 ## Validating in CI
 
-Run the same \`validateTemplate\` over every stored template in CI, and over the templates in your repository if you keep fixtures there — a renamed component in the contract shows up as a failing build, not as an empty spot on the page.
+Run \`ui.validateSections\` over every stored template in CI — a renamed component or a narrowed prop in the contract shows up as a failing build with the paths, not as an empty spot on the page.
 
 \`\`\`ts
 // scripts/validate-templates.ts
-for (const name of await store.list()) // your store's list of template names
-  validateTemplate((await store.get(name, 'published'))!)
+for (const name of await store.list()) { // your store's list of template names
+  const result = await ui.validateSections(await store.get(name, 'published'))
+  if (!result.ok) throw new Error(\`\${name}: \${result.errors.map(({ path, message }) => \`\${path} \${message}\`).join('; ')}\`)
+}
 \`\`\`
+
+The contract also exports to JSON Schema (\`ui.jsonSchema()\`), so a CMS or a backend in another language can validate templates without JavaScript.
 
 ## What to watch out for
 
 - **The release order:** add a component to every registry before any template uses it — an older frontend renders the registry's \`fallback\` (nothing by default).
-- **\`defaults\`** from the instance options are added by \`node()\` — a stored template carries its props itself.
-- **Data doesn't care about the template:** the loader places data by selectors (\`card\`), so editors can add, remove and move cards without a code change. Changing the **contract** (a renamed prop, a removed component) is a code change — and a reason to validate stored templates.`,
+- **Data doesn't care about the template:** the loader places data by selectors (\`card\`), so editors can add, remove and move cards without a code change. Changing the **contract** (a renamed prop, a removed component) is a code change — and the reason to validate stored templates.
+- **Debug builds check templates too:** with the contract as a value, devtools report a template that doesn't match it, with the path, even when nobody called \`validate\` (*A template that doesn't match the contract*).`,
 
   guideFigma: `**In short:** design the page in Figma with your design-system components, publish, and get a Dedal template — no hand-written JSON. Dedal has no Figma plugin; what it needs is a naming convention and a small converter over the Figma REST API, shown here in full.
 
@@ -395,13 +387,11 @@ Texts typed in Figma become template props. For a heading that is the content; f
 
 ## The converter
 
-It reads the response of the file nodes endpoint (\`GET /v1/files/:file_key/nodes?ids=<frame id>\`): the frame's \`document\`, plus \`components\` and \`componentSets\` — maps from ids to names. Validation runs on the result, so a component that isn't in the contract fails with the name of the layer.
+It reads the response of the file nodes endpoint (\`GET /v1/files/:file_key/nodes?ids=<frame id>\`): the frame's \`document\`, plus \`components\` and \`componentSets\` — maps from ids to names. The result is checked against the contract (\`ui.validateSections\`, the contract as a value — *Templates in a database or CMS*): a component, a slot or a prop value the contract doesn't allow fails with its path.
 
 \`\`\`ts
 // figma.ts
-import type { BlockDefinition } from 'dedal'
-import type { Contract } from './ui/contract'
-import { validate } from './templates'
+import { ui } from './storage/contract'
 
 /** The parts of a node from the Figma REST API that the converter reads (GET /v1/files/:key/nodes?ids=…). */
 export type FigmaNode = {
@@ -434,7 +424,8 @@ const parseLayerName = (name: string) => {
  * - a layer named "slot:badge" inside an instance → the slot "badge"; a frame "slot:actions" with instances → a list slot,
  * - any other frame or group is only layout in Figma — its instances go to the parent.
  */
-export function fromFigma(frame: FigmaNode, meta: FigmaMeta, known: Record<string, unknown>) {
+export async function fromFigma(frame: FigmaNode, meta: FigmaMeta) {
+  const known = ui.contract ?? {}
   const nameOf = (node: FigmaNode) => {
     const component = meta.components[node.componentId ?? '']
     return component?.componentSetId ? meta.componentSets[component.componentSetId]?.name : component?.name
@@ -463,13 +454,13 @@ export function fromFigma(frame: FigmaNode, meta: FigmaMeta, known: Record<strin
     return children // layout only
   }
 
-  const sections: Record<string, BlockDefinition<Contract>> = {}
-  for (const layer of frame.children ?? []) {
-    const [root] = (layer.children ?? []).flatMap(toBlocks)
-    validate(root, layer.name)
-    sections[layer.name] = root
-  }
-  return sections
+  // every top-level layer is a section: its name is the key, its first layer the root
+  const sections = Object.fromEntries((frame.children ?? []).map(layer => [layer.name, (layer.children ?? []).flatMap(toBlocks)[0]]))
+
+  // checked against the contract — a component, a prop or a slot the contract doesn't know fails with its path
+  const result = await ui.validateSections(sections)
+  if (!result.ok) throw new Error(result.errors.map(({ path, message }) => \`\${path}: \${message}\`).join('\\n'))
+  return result.value
 }
 \`\`\`
 
@@ -482,7 +473,7 @@ A "Home" frame with a \`section title=Latest\` frame and three card instances (e
   … ] } }
 \`\`\`
 
-An instance of a component that isn't in the contract stops the conversion: \`hero: unknown component "Button/Primary"\`.
+What doesn't fit the contract stops the conversion, with the path: \`hero.component: unknown component "Button/Primary"\`, or a variant the contract doesn't allow — \`news.children[0].props.size: Invalid option: expected one of "sm"|"md"|"lg"\`.
 
 ## From Figma to the page
 
@@ -744,7 +735,7 @@ Point the page's loaders at fixtures — pass the API client in (\`createHomePag
 ## Five words to start with
 
 You need only these to follow the rest of this page (the full glossary is at the end):
-- **contract** — a TypeScript type: which components exist and what props they take. The server and the frontend share it.
+- **contract** — which components exist, what props they take, which slots they have. A TypeScript type, or a value with schemas (\`defineContract\`) that templates are also checked against at runtime. The server and the frontend share it.
 - **block** — a piece of layout: \`node('card', { props })\`, or the same thing as plain JSON. Structure only, no data.
 - **section** — one part of the page (a header, a news list) with its own template and its own data; it has a key, like \`news\`.
 - **binding** — "this data goes to these nodes": \`{ card: articles }\`. The key is a selector in CSS syntax.
@@ -954,7 +945,7 @@ The same reasoning applies to other screens assembled from a known set of blocks
   glossary: `Every term used in these docs, in one place. The five to start with — contract, block, section, binding, registry — are explained with an example in *Introduction*.
 
 - **server-driven UI (SDUI)** — a model in which the server decides the structure of the screen and the frontend only renders it.
-- **contract** — a TypeScript type: component name → its props (\`card: { title: string; size?: 'sm' | 'md' | 'lg'; badge?: Slot }\`). A single source of truth for the server and the frontend.
+- **contract** — component name → its props and slots. A TypeScript type (\`card: { title: string; size?: 'sm' | 'md' | 'lg'; badge?: Slot }\`) or a value (\`defineContract({ card: { props: schema, slots: { badge: 'one' } } })\`) the type is inferred from — then templates can be validated (\`ui.validate\`) and exported to JSON Schema (\`ui.jsonSchema\`). A single source of truth for the server and the frontend.
 - **component** — a name from the contract (\`card\`, \`grid\`). It is not a React component — the registry assigns a React component to that name.
 - **instance** — the result of \`createDedal<Contract>(options)\`, created once per project; you take \`node\`, \`repeat\`, \`section\`, \`page\`, \`query\`, \`resolve\` from it.
 - **block** — a tree built from \`node()\` / \`repeat()\` or written as plain JSON: pure structure, without data and without IDs. A plain value (or a function returning a block) that can be exported and used across many pages.
@@ -971,7 +962,7 @@ The same reasoning applies to other screens assembled from a known set of blocks
 - **binding** — an entry in a section's data: \`{ selector: items }\`. The selector picks nodes, and the items go to them one by one.
 - **assign** — the stage in which bindings are distributed to nodes; this is where the rules for missing data apply (\`onShortage\`, \`onSurplus\`, \`onEmpty\`).
 - **PageResult** — the result of \`build\`: the sections' layout, data (node ID → data) and a report. Plain JSON.
-- **defaults** — default props of a component, added by \`node()\` when the block is created.
+- **defaults** — default props of a component, merged under every node's props when the page is built — for templates in code and from JSON alike.
 - **toProps** — maps data (the API shape) to component props; pure functions without IO.
 - **resolve** — combines the layout with data into final props; the result is a **ResolvedPage**.
 - **registry** — a map of component → React component on the frontend side.
@@ -990,9 +981,9 @@ The same reasoning applies to other screens assembled from a known set of blocks
 
 ## Templates
 
-- **No built-in runtime validation.** The contract is types only; templates from outside the code must be validated by the app (*Templates in a database or CMS* has a validator). An unknown component in an unvalidated template renders the registry's \`fallback\`.
-- **JSON templates don't get \`defaults\`.** \`node()\` adds them; a template parsed from JSON carries its props itself.
-- **\`sections\` is synchronous.** A template from async storage is loaded first, and the page is created per request (*Templates in a database or CMS*).
+- **Validation needs the contract as a value.** With a contract written as a type only, templates from outside the code aren't checked — use \`defineContract\` (*Templates in a database or CMS*). An unknown component in an unchecked template renders the registry's \`fallback\`.
+- **Template props are checked as far as they go.** A prop missing from a template isn't an error (data fills it at \`resolve\`); whether the data then supplies every required prop isn't checked against the schema — the final props aren't validated.
+- **JSON Schema export needs Standard JSON Schema or a converter.** zod 4 works as it is; for other libraries pass \`propsToJsonSchema\` (e.g. \`@valibot/to-json-schema\`).
 - **Selectors are a subset of CSS.** Components, aliases, attributes, \`:first-child\` / \`:last-child\` / \`:nth-child\` / \`:nth-last-child\`, \`:slot\`, \`:root\`, descendant, child and lists. No classes, \`:not()\`, \`:has()\`, \`+\` or \`~\` (*Layout*).
 
 ## Data
@@ -1118,7 +1109,7 @@ A single flat list of data per section (first element to the first component, se
 
 Data can have the API's shape (\`Article\`) rather than the component's props. **toProps** (an instance option) maps it per component to the contract's props — a pure module, no IO, runs on the server and on the frontend. It receives \`{ props, data, node, ctx }\` and is called for every node of the given component, **including those without data** (\`data: undefined\`). Without toProps, data (it must be an object) is merged with props directly (deep merge, data wins).
 
-Props precedence: \`defaults\` (added by \`node()\` when the block is created) → props from the block → section \`patch\` → data. \`resolve\` passes the props from the layout and the data to \`toProps\` — its result is the final props (hence \`...props\` in the mapping). Devtools show the source of every prop.
+Props precedence: \`defaults\` (merged under the block's props when the page is built) → props from the block → section \`patch\` → data. \`resolve\` passes the props from the layout and the data to \`toProps\` — its result is the final props (hence \`...props\` in the mapping). Devtools show the source of every prop.
 
 ## When the counts don't match
 
@@ -1216,7 +1207,7 @@ The word appears in two unrelated places:
 ## Page stages
 
 \`page.build(ctx)\` is three stages in a single call (plus cache). They are also available separately — e.g. when you want to cache the layout independently of the data:
-- \`page.layout(ctx)\` — the sections' layout, no IO,
+- \`page.layout(ctx)\` — the sections' layout, without data (async: \`sections\` may load templates),
 - \`page.load(ctx)\` — page data and section loaders (in parallel),
 - \`page.assign(sections, data, ctx)\` — data assignment, the result is a \`PageResult\`.
 
@@ -1523,7 +1514,7 @@ A build in debug mode measures time with the \`performance.now()\` clock at seve
 \`\`\`
 
 **Stages** (the first bar and the legend):
-- **layout** — calling \`sections(ctx)\`, turning blocks into nodes (expanding \`repeat\`, IDs), \`remove\` and \`patch\` for all sections. Pure CPU, no IO — usually a fraction of a millisecond. (\`defaults\` are already in the blocks — \`node()\` adds them when the blocks are created.)
+- **layout** — calling \`sections(ctx)\`, turning blocks into nodes (expanding \`repeat\`, IDs), \`remove\` and \`patch\` for all sections. Usually a fraction of a millisecond — pure CPU, unless an async \`sections\` loads templates (then that time is here too). \`defaults\` are merged in at this stage.
 - **data loading** — from the end of the layout until **all** loaders have finished (the page's \`data\` and section loaders). Loaders run in parallel, so this stage takes roughly as long as the slowest of them — not as long as their sum.
 - **assign** — distributing data to nodes (bindings), \`onShortage\`, \`onEmpty\`. Pure CPU again.
 - **total** — the sum of the three stages, i.e. the \`build\` time.

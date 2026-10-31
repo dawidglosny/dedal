@@ -1,9 +1,10 @@
 import { createDedal, type DedalOptions } from 'dedal'
-import type { Contract } from './contract'
+import { contract, type Contract } from './contract'
 import { toProps } from './to-props'
 
-/** Instance options: default props and data-to-props mappings (also used by the docs cases). */
+/** Instance options: the contract, default props and data-to-props mappings (also used by the docs cases). */
 export const options: DedalOptions<Contract> = {
+  contract,
   defaults: {
     card: { size: 'md' },
     grid: { gap: 'md' },

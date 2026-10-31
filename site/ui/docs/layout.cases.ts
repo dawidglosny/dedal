@@ -162,6 +162,24 @@ const variants = ui.page<Ctx>({
 })
 // #endregion
 
+// #region template-contract
+// a stored template with mistakes, used without ui.validate — devtools check it against the contract anyway
+const stored = JSON.parse(`{
+  "component": "section",
+  "props": { "title": "Latest" },
+  "children": [
+    { "component": "grid", "props": { "columns": 6 }, "children": [
+      { "component": "card", "repeat": 3, "props": { "size": "xl" }, "slots": { "badges": { "component": "badge" } } }
+    ] }
+  ]
+}`)
+
+const templateContract = ui.page<Ctx>({
+  sections: [section('news', stored)],
+  data: async () => ({ news: { card: await articles(3) } }),
+})
+// #endregion
+
 export const layoutCases: DocCase[] = [
   {
     slug: 'blocks-repeat',
@@ -226,5 +244,16 @@ export const layoutCases: DocCase[] = [
     description:
       '`sections` can be a function of `ctx` — different blocks, props or a set of sections per variant (here `device: "mobile"`: 1 column, 2 cards). `ctx` should be serializable; if the page has `cache`, `cache.key(ctx)` must include whatever the variants depend on (here `device`).',
     run: build(ui, variants, { device: 'mobile' }),
+  },
+  {
+    slug: 'template-contract',
+    title: 'A template that doesn\'t match the contract',
+    level: 'error',
+    description: `A template from outside the code — a database, a CMS, a Figma export — isn't checked by the compiler. With the contract as a value (\`createDedal({ contract })\`), a **debug build checks every template against it**: the section blocks, the placeholders of deferred sections and the \`onEmpty\` blocks. Problems are reported, not thrown — the page still renders, so you see the result and the cause side by side.
+
+Here the stored template has three mistakes: \`columns: 6\` (the contract allows 1–4), \`size: "xl"\` (sm, md or lg) and a slot \`badges\` (the card's slot is \`badge\`). Devtools list each with its path — \`news.children[0].children[0].slots.badges\` — and suggest the slot name.
+
+In production, check templates before they reach a page: \`ui.validate\` / \`ui.validateSections\` when a template is saved and when it's loaded (*Templates in a database or CMS*).`,
+    run: build(ui, templateContract),
   },
 ]

@@ -1,4 +1,4 @@
-import type { BlockDefinition, Page, PageResult } from 'dedal'
+import type { Page, PageResult } from 'dedal'
 import type { Registry } from 'dedal/react'
 import type { Contract, Ctx } from '../contract'
 import { analytics } from '../dashboard/api'
@@ -71,29 +71,21 @@ const savedLayouts = new Map<string, string>([
   ],
 ])
 
-const widgets = { board: 1, panel: 1, stat: 1, chart: 1, table: 1, alert: 1 } satisfies Record<keyof DashboardContract, 1>
-
-function validate(block: unknown, path: string): asserts block is BlockDefinition<DashboardContract> {
-  const { component, children } = (block ?? {}) as { component?: string; children?: unknown[] }
-  if (!component || !(component in widgets)) throw new Error(`layout ${path}: unknown widget ${JSON.stringify(component)}`)
-  children?.forEach((child, i) => validate(child, `${path}.${i}`))
-}
-
-// the page per request, from the customer's current layout; the layout version in the cache key
-async function customerDashboard(customer: string) {
-  const { version, sections } = JSON.parse(savedLayouts.get(customer)!) as { version: number; sections: Record<string, unknown> }
-  for (const [key, block] of Object.entries(sections)) validate(block, key)
-
-  return dash.page<DashboardCtx>({
-    sections: Object.entries(sections as Record<string, BlockDefinition<DashboardContract>>).map(([key, block]) => dash.section(key, block)),
-    // the same data loader for every customer — it doesn't know the layout
-    data: async ({ customer }) => {
-      const [metrics, points, rows] = await Promise.all([analytics.kpis(customer), analytics.ordersSeries(), ticketRows()])
-      return { kpis: { stat: metrics }, activity: { chart: [{ points }], table: [{ rows }] } }
-    },
-    cache: { key: ctx => ['dashboard', ctx.customer, version, ctx.role] },
-  })
-}
+// the sections come from the customer's saved layout on every build — checked against the contract first
+const customerDashboard = dash.page<DashboardCtx>({
+  sections: async ({ customer }) => {
+    const result = await dash.validateSections(JSON.parse(savedLayouts.get(customer)!).sections)
+    if (!result.ok) throw new Error(result.errors.map(({ path, message }) => `${path}: ${message}`).join('\n'))
+    return Object.entries(result.value).map(([key, block]) => dash.section(key, block))
+  },
+  // the same data loader for every customer — it doesn't know the layout
+  data: async ({ customer }) => {
+    const [metrics, points, rows] = await Promise.all([analytics.kpis(customer), analytics.ordersSeries(), ticketRows()])
+    return { kpis: { stat: metrics }, activity: { chart: [{ points }], table: [{ rows }] } }
+  },
+  // cached per customer and role; when a customer saves a new layout: dash.invalidate(['dashboard', customer])
+  cache: { key: ctx => ['dashboard', ctx.customer, ctx.role] },
+})
 // #endregion
 
 // #region dashboard-missing
@@ -148,10 +140,10 @@ The contract (above) has nothing in common with the content-site examples elsewh
     registry,
     description: `Many dashboards let users arrange their own: drag a widget up, make a chart wider, hide a number. That arrangement is structure — and it belongs in storage, not in code.
 
-Here the customer "acme" saved version 7 of their layout: tickets first, the chart across the full width, two numbers instead of four. The page is created per request from the saved layout, validated (an unknown widget fails loudly), and the layout version is part of the cache key — the same pattern as step 4 of the *Tutorial*, in a different domain.
+Here the customer "acme" saved version 7 of their layout: tickets first, the chart across the full width, two numbers instead of four. The page reads the saved layout on every build (\`sections\` is async), checks it against the dashboard's contract — an unknown widget or a column count the contract doesn't allow fails with its path — and is cached per customer and role, invalidated when the customer saves. The same pattern as step 4 of the *Tutorial*, in a different domain.
 
 The data loader is the same for every customer and knows nothing about the layout: the four metrics go to the two \`stat\` places in order, and the other two are skipped (\`onSurplus: 'ignore'\` — the yellow warning in devtools says how many). If "acme" adds a third number tomorrow, it fills in without any code change.`,
-    run: async () => run(await customerDashboard('acme'), { role: 'admin', customer: 'acme' })(),
+    run: run(customerDashboard, { role: 'admin', customer: 'acme' }),
   },
   {
     slug: 'dashboard-missing',

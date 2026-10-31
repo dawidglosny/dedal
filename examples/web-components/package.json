@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "dedal": "file:vendor/dedal.tgz"
+    "dedal": "file:vendor/dedal.tgz",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

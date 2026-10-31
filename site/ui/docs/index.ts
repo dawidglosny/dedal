@@ -69,7 +69,7 @@ export const groups: DocGroup[] = [
   {
     slug: 'templates-in-storage',
     title: 'Templates in a database or CMS',
-    description: 'Stored templates in a real project: validation, caching, versions, preview, publishing, CI.',
+    description: 'Stored templates in a real project: the contract as a value, validation, caching, preview, publishing, CI.',
     intro: intros.guideStorage,
     file: '',
     cases: [],

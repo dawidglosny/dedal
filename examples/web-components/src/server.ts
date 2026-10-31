@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import type { Ctx } from './contract'
-import { homePage } from './home.page'
+import { home } from './home.page'
 import { ui } from './ui'
 
 const files: Record<string, [file: string, type: string]> = {
@@ -20,9 +20,8 @@ createServer(async (request, response) => {
   // a deferred section on its own: /api/section?key=forYou — the same ctx as the page
   if (url.pathname === '/api/home' || url.pathname === '/api/section') {
     try {
-      const page = await homePage()
       const key = url.searchParams.get('key')
-      const result = url.pathname === '/api/section' && key ? await page.section(key, ctx) : await page.build(ctx)
+      const result = url.pathname === '/api/section' && key ? await home.section(key, ctx) : await home.build(ctx)
       const resolved = ui.resolve(result, { ctx })
       response.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify(resolved))
     } catch (error) {

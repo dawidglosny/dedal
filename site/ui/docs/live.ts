@@ -11,7 +11,7 @@ export const live: Record<string, string> = {
   'tutorial-data':
     '*tree* → section `news`: `section` → `grid` → three `card`s with the IDs `news.0.0`, `news.0.1`, `news.0.2`. *sections* → `✓ card — 3 data items for 3 nodes`. `pick` on a card → **data** (the article) and `assigned by card`.',
   'tutorial-template-as-data':
-    '`pick` on the heading → `title: "Today" ← template` — it came from the stored JSON. *tree* → four cards in a two-column grid; *sections* → `✓ card — 4 data items for 4 nodes`, and `cache key` with the template version.',
+    '`pick` on the heading → `title: "Today" ← template` — it came from the stored JSON. `pick` on a card → `size: "md" ← default`: the stored template doesn\'t set it, the instance defaults do. *sections* → `✓ card — 4 data items for 4 nodes`.',
   'tutorial-slots':
     '*tree* → in every card, the nodes `badge :slot(badge)` and `avatar :slot(footer)`, marked with ● (they have data). `pick` on a card → **data** has `headline`, `slug` (the API shape), **props** has `title ← data`, `href ← data`, `size ← default` — the work of toProps and defaults.',
   'tutorial-variants':
@@ -33,7 +33,7 @@ export const live: Record<string, string> = {
   'dashboard-roles':
     '`pick` on a number → *node* shows the `stat` widget, its data (a metric from the analytics API) and `assigned by stat`. *tree* → two sections, `kpis` and `activity`, with the panels `#orders` and `#tickets`.',
   'dashboard-customer-layout':
-    '*sections* → `kpis`: `! stat — 4 data items for 2 nodes` (the surplus is skipped), and `cache key` with the customer and the layout version. `pick` on the table panel → `span: 2 ← template` — from the saved JSON.',
+    '*sections* → `kpis`: `! stat — 4 data items for 2 nodes` (the surplus is skipped), and `cache key` with the customer and the role. `pick` on the table panel → `span: 2 ← template` — from the saved JSON.',
   'dashboard-missing':
     '*sections* → `✗ incidents failed — the loader threw "status API: 503"`. *timing* → the `incidents` loader in red, `page data` next to it.',
 
@@ -52,6 +52,9 @@ export const live: Record<string, string> = {
   'remove-root': '*sections* → `! promo removed — the section\'s remove option removed its root`. *tree* has only the `news` section.',
   variants:
     '*tree* → one column and two cards (the `mobile` variant). `pick` on the grid → *node* → `columns: 1 ← template`. On the example\'s home page, switch `ctx.device` to see both variants.',
+
+  'template-contract':
+    '*sections* → three errors at the top, each with its path: `news.children[0].props.columns`, `news.children[0].children[0].props.size`, `news.children[0].children[0].slots.badges` — "did you mean badge?". The page still renders: the grid, three cards, no badges.',
 
   // data
   bindings:

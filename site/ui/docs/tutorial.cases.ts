@@ -1,6 +1,5 @@
-import type { BlockDefinition } from 'dedal'
 import type { Article } from '@/content/articles'
-import type { Contract, Ctx } from '../contract'
+import type { Ctx } from '../contract'
 import { articles, build, ui } from './shared'
 import type { DocCase } from './types'
 
@@ -47,18 +46,17 @@ const withData = ui.page<Ctx>({
 
 // #region tutorial-template-as-data
 // a template store — in a real project a database, a CMS or a Figma export; here JSON in memory.
-// The editors saved version 2 of "latest": a new heading, two columns, four cards.
+// The editors saved a new version of the "latest" page: a new heading, two columns, four cards.
 const storage = new Map<string, string>([
   [
     'latest',
     `{
-      "version": 2,
-      "block": {
+      "news": {
         "component": "section",
         "props": { "title": "Today" },
         "children": [
           { "component": "grid", "props": { "columns": 2 }, "children": [
-            { "component": "card", "repeat": 4, "props": { "size": "md" } }
+            { "component": "card", "repeat": 4 }
           ] }
         ]
       }
@@ -66,35 +64,15 @@ const storage = new Map<string, string>([
   ],
 ])
 
-// the contract is types only — a template from outside the code is checked at runtime
-const components = {
-  container: 1, section: 1, grid: 1, flex: 1, hero: 1, card: 1, badge: 1, avatar: 1,
-  button: 1, image: 1, tabs: 1, list: 1, separator: 1, skeleton: 1,
-} satisfies Record<keyof Contract, 1>
-
-function validate(block: unknown, path: string): asserts block is BlockDefinition<Contract> {
-  const { component, slots, children } = (block ?? {}) as { component?: string; slots?: Record<string, unknown>; children?: unknown[] }
-  if (!component || !(component in components)) throw new Error(`template ${path}: unknown component ${JSON.stringify(component)}`)
-  for (const [name, content] of Object.entries(slots ?? {})) [content].flat().forEach((child, i) => validate(child, `${path}:${name}.${i}`))
-  children?.forEach((child, i) => validate(child, `${path}.${i}`))
-}
-
-async function loadTemplate(name: string) {
-  const { version, block } = JSON.parse(storage.get(name)!) as { version: number; block: unknown }
-  validate(block, name)
-  return { version, block }
-}
-
-// the page is created per request from the current template; its version goes into the cache key,
-// so a new version is served right away instead of waiting for the old entry to go stale
-async function latestPage() {
-  const template = await loadTemplate('latest')
-  return ui.page<Ctx>({
-    sections: [section('news', template.block)],
-    data: async () => ({ news: { card: await articles(4) } }),
-    cache: { key: ctx => ['latest', template.version, ctx.device] },
-  })
-}
+const latestPage = ui.page<Ctx>({
+  // the sections come from storage on every build — checked against the contract first
+  sections: async () => {
+    const result = await ui.validateSections(JSON.parse(storage.get('latest')!))
+    if (!result.ok) throw new Error(result.errors.map(({ path, message }) => `${path}: ${message}`).join('\n'))
+    return Object.entries(result.value).map(([key, block]) => section(key, block))
+  },
+  data: async () => ({ news: { card: await articles(4) } }),
+})
 // #endregion
 
 // #region tutorial-slots
@@ -263,11 +241,13 @@ The frontend doesn't know it is rendering a home page or where the articles came
       { title: 'contract (the part this tutorial starts with)', file: 'ui/contract.ts', region: 'tutorial' },
       { title: 'registry (card)', file: 'ui/registries/radix-themes.tsx', region: 'card' },
     ],
-    description: `The two halves agree on one thing: the **contract** — a TypeScript type listing which components a page can use and what props they take. It is the only code the server and the frontend share.
+    description: `The two halves agree on one thing: the **contract** — which components a page can use, what props they take and which slots they have. It is the only code the server and the frontend share.
 
-- \`card: { title: string; href: string; size?: 'sm' | 'md' | 'lg'; badge?: Slot }\` — the card's props; \`Slot\` is a place for another component (a badge, an avatar),
+Here the contract is a **value**: a schema of the props of every component (zod here — any library that implements Standard Schema works) and its slots. The TypeScript type is inferred from it (\`InferContract<typeof contract>\`), so it's one source of truth for the compiler and for checking templates at runtime (step 4).
+
+- \`card\` — its props (\`title\`, \`href\`, \`size\`…) and two slots, \`badge\` and \`footer\` — places for another component (\`'one'\` node; \`'many'\` for a list),
 - the values are neutral (\`sm | md | lg\`), not taken from a specific library — each frontend translates them its own way,
-- the full contract of these docs has more components (a hero, a grid, an avatar, tabs…) — the same idea, more names; \`ui/contract.ts\` in the repository.
+- the full contract of these docs has more components (a hero, a grid, an avatar, tabs…) — \`ui/contract.ts\` in the repository; a contract can also be a plain TypeScript type (*Quick start*), when there are no templates to check at runtime.
 
 The **registry** is the frontend's half: component name → its component. Above is the card in Radix Themes — it gets the contract's props and its slots as ready React elements. \`satisfies Registry<Contract>\` makes a missing component or a wrong prop a compile error. A different frontend (shadcn/ui, Web Components, a mobile app) has a different registry for the same contract.
 
@@ -294,26 +274,26 @@ Why a selector, and not just a list in order? Because the template will change �
     level: 'ok',
     description: `So far the template was TypeScript code: changing it means a code change and a release. Now the same kind of block lives **outside the code** — in a database, a CMS, or as an export from Figma (*Templates in a database or CMS*, *Templates from Figma*). \`node()\` only builds an object like \`{ component: 'card', props: { … } }\`, so a template can be plain JSON.
 
-Here the editors saved version 2 of the "latest" template — a new heading, two columns, four cards:
+Here the editors saved a new version of the "latest" page — a new heading, two columns, four cards:
 
 \`\`\`
-version 1 (step 3)                          version 2 (stored)
+before (step 3)                             now (stored)
 "title": "Latest"                     →     "title": "Today"
 "columns": 3                          →     "columns": 2
 "card" × 3                            →     "card" × 4
 \`\`\`
 
-The page below is built from version 2 — **the page code didn't change**, and neither did the data loader: the \`card\` binding finds the cards no matter how many there are or where they sit.
+The page below is built from the stored version — **the page code didn't change**, and neither did the data loader: the \`card\` binding finds the cards no matter how many there are or where they sit.
 
-Three things to get right when templates come from outside the code:
-- **Validate them.** The contract is types only, so a stored template isn't checked by the compiler. \`validate()\` checks component names when the template is loaded — a typo fails loudly, instead of rendering the registry's fallback.
-- **Create the page per request** from the current template. Creating a page is cheap; the cache lives in the instance, not in the page object.
-- **Put the template version in the cache key** (\`['latest', template.version, device]\`) — a new version is served on the next request, without waiting for the cached page to go stale.
+What makes it safe:
+- **\`ui.validateSections\`** checks the stored template against the contract from step 2 — known components and slots, the props that are there against their schemas — and every error comes with its path (\`news.children[0].children[0].props.size: …\`). Props the template leaves out are fine: the data fills them.
+- **\`sections\` can be async** — the template is read on every build, inside the page definition. With a page cache, call \`ui.invalidate\` when a new version is published.
+- **\`defaults\` apply to JSON too** — the stored cards don't say \`size\`, and still get \`size: "md"\` from the instance options, exactly like cards from \`node()\`.
 
-One difference from code: JSON templates don't get component \`defaults\` — \`node()\` adds them, and a JSON template doesn't go through \`node()\`. Write the props out (\`"size": "md"\`).
+In debug mode, devtools check every template against the contract as well: a template that doesn't match shows up as an error with its path, and the page still renders.
 
 This is the core of server-driven UI: editors and designers change pages, developers change components.`,
-    run: async () => build(ui, await latestPage())(),
+    run: build(ui, latestPage),
   },
   {
     slug: 'tutorial-slots',

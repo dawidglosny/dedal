@@ -1,8 +1,9 @@
 import { createDedal, type ToPropsInput } from 'dedal'
 import type { Article } from './api'
-import type { Contract } from './contract'
+import { contract, type Contract } from './contract'
 
-export const ui = createDedal<Contract>({
+export const ui = createDedal({
+  contract,
   toProps: {
     card: ({ props, data }: ToPropsInput<Contract, 'card', Article>) =>
       data ? { ...props, heading: data.headline, href: `/articles/${data.slug}` } : props,
