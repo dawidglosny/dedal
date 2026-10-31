@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.10.0
+
+**The design system next to the code, and back to Figma** — Figma components proposed as contract entries, a whole library compared with the contract, and templates built as Figma frames through a Dedal plugin.
 
 Added:
 - `contractFromFigma(entry, { mapping? })` (`dedal/figma`) — a Figma component or component set → a proposed contract entry (`TEXT` → string, `VARIANT` → enum of its options, `BOOLEAN` → boolean, `INSTANCE_SWAP` → the swapped component's name, native slots → slots), a registry stub, a mapping entry, the questions the design doesn't answer, and the drift from the contract's entry; `mapping(…).keyFor()`.
