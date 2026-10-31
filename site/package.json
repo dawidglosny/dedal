@@ -7,7 +7,8 @@
     "dedal": "rm -rf vendor && mkdir vendor && npm pack ../ --pack-destination vendor && mv vendor/dedal-*.tgz vendor/dedal.tgz && npm install ./vendor/dedal.tgz",
     "dev": "next dev",
     "build": "next build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check-links": "node scripts/check-links.mjs out .."
   },
   "dependencies": {
     "@radix-ui/themes": "^3.3.0",
