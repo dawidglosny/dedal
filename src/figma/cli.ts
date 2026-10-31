@@ -8,7 +8,7 @@
 import { mkdir, writeFile as fsWriteFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { imageRefs, replaceImageRefs, type FigmaConversion, type FigmaNodesResponse } from './index'
+import { contractFromFigma, imageRefs, replaceImageRefs, type ComponentProposal, type FigmaConversion, type FigmaNode, type FigmaNodesResponse } from './index'
 
 /** What `run` needs from the outside world — replaced in tests. */
 export type CliDeps = {
@@ -23,7 +23,12 @@ export type CliDeps = {
   stderr: (text: string) => void
 }
 
-type Converter = { convert(response: FigmaNodesResponse, nodeId: string): Promise<FigmaConversion<unknown>> }
+type Converter = {
+  convert(response: FigmaNodesResponse, nodeId: string): Promise<FigmaConversion<unknown>>
+  contract: import('../contract').ContractDefinition
+  keyFor: (figmaName: string) => string | undefined
+  componentName?: (name: string) => string
+}
 
 const USAGE = `Usage: dedal-figma pull <file key | Figma URL> [node id] --mapping <module> [--out <file>] [--images <dir>] [--image-url <prefix>] [--raw <file>] [--force]
 
@@ -35,6 +40,13 @@ const USAGE = `Usage: dedal-figma pull <file key | Figma URL> [node id] --mappin
   --image-url <path> how the template refers to them (default: the directory without a leading public/ — public/figma → /figma)
   --raw <file>       also save the raw REST response (e.g. as a test fixture)
   --force            write the templates even when they don't match the contract
+
+       dedal-figma component <Figma URL of a component, a component set or an instance> [--mapping <module>]
+       dedal-figma audit <file key | Figma URL> --mapping <module>
+
+  component          propose a contract entry for a Figma component: props, slots, a registry stub, a mapping entry,
+                     the questions to answer — and, with --mapping, how it differs from the contract's entry
+  audit              every component of the file: mapped to the contract, drifted from it, or missing in the code
 
 The token is read from FIGMA_TOKEN (a personal access token with file content read access).`
 
@@ -96,6 +108,7 @@ export async function run(argv: string[], deps: CliDeps = defaultDeps()): Promis
     return 2
   }
   const [command, target, nodeArg] = args.positional
+  if (!args.flags.help && (command === 'component' || command === 'audit') && target) return inspectComponents(command, target, nodeArg, args.flags, deps)
   if (args.flags.help || command !== 'pull' || !target) {
     stderr(`${USAGE}\n`)
     return args.flags.help ? 0 : 2
@@ -207,4 +220,148 @@ export async function run(argv: string[], deps: CliDeps = defaultDeps()): Promis
     stderr(`${result.ok ? '✓' : '!'} ${count} section(s) → ${args.flags.out}\n`)
   } else deps.stdout(json)
   return result.ok ? 0 : 1
+}
+
+// ---- component / audit: the design system next to the contract
+
+type Flags = Record<string, string | true>
+
+async function figmaGet(deps: CliDeps, token: string, path: string): Promise<{ ok: true; body: any } | { ok: false; message: string }> {
+  try {
+    const response = await deps.fetch(`https://api.figma.com/v1/${path}`, { headers: { 'X-Figma-Token': token } })
+    const body = (await response.json()) as { err?: string }
+    return response.ok ? { ok: true, body } : { ok: false, message: `Figma API: ${response.status} ${body.err ?? 'unexpected response'}` }
+  } catch (error) {
+    return { ok: false, message: `Figma API: the request failed — ${(error as Error).message}` }
+  }
+}
+
+const formatProposal = (proposal: ComponentProposal) => {
+  const lines = [`${proposal.figmaName} → ${proposal.key}`, '', 'Contract entry (defineContract):', proposal.code, '', 'Registry entry to start from:', proposal.registryStub]
+  if (proposal.mappingEntry) lines.push('', 'Mapping entry:', proposal.mappingEntry)
+  if (proposal.drift) {
+    const { key, missingProps, missingValues, missingSlots, extraProps } = proposal.drift
+    const changes = [
+      ...missingProps.map(prop => `  - prop "${prop}" is in the design, not in the contract`),
+      ...Object.entries(missingValues).map(([prop, values]) => `  - "${prop}": values ${values.map(value => `"${value}"`).join(', ')} are in the design, not in the contract`),
+      ...missingSlots.map(slot => `  - slot "${slot}" is in the design, not in the contract`),
+      ...extraProps.map(prop => `  - prop "${prop}" is in the contract, not in the design (filled by data, or stale?)`),
+    ]
+    lines.push('', changes.length ? `The contract already has "${key}" — it differs:\n${changes.join('\n')}` : `The contract already has "${key}" — it matches the design.`)
+  }
+  if (proposal.questions.length) lines.push('', 'Questions before adding it:', ...proposal.questions.map(question => `  - ${question}`))
+  return lines.join('\n') + '\n'
+}
+
+async function inspectComponents(command: 'component' | 'audit', target: string, nodeArg: string | undefined, flags: Flags, deps: CliDeps): Promise<number> {
+  const { stderr } = deps
+  let file: string, node: string | undefined
+  try {
+    ;({ file, node } = parseFigmaUrl(target))
+  } catch (error) {
+    stderr(`${(error as Error).message}\n`)
+    return 2
+  }
+  node = nodeArg ? nodeArg.replaceAll('-', ':') : node
+  const token = deps.env.FIGMA_TOKEN
+  if (!token) {
+    stderr(`FIGMA_TOKEN is not set — create a personal access token in Figma (Settings → Security) with file content read access\n`)
+    return 2
+  }
+  let converter: Converter | undefined
+  if (typeof flags.mapping === 'string') {
+    try {
+      const module = await deps.importModule(resolve(deps.cwd, flags.mapping))
+      converter = (module.default ?? module.fromFigma) as Converter
+    } catch (error) {
+      stderr(`${flags.mapping}: can't load the mapping module — ${(error as Error).message.split('\n')[0]}\n`)
+      return 2
+    }
+    if (!converter || typeof converter.keyFor !== 'function') {
+      stderr(`${flags.mapping}: the default export must be a mapping — export default mapping(contract, { … })\n`)
+      return 2
+    }
+  } else if (command === 'audit') {
+    stderr(`--mapping is required for audit\n\n${USAGE}\n`)
+    return 2
+  }
+
+  if (command === 'component') {
+    if (!node) {
+      stderr(`a node id is required — the URL of the component (?node-id=…) or an argument\n`)
+      return 2
+    }
+    let got = await figmaGet(deps, token, `files/${encodeURIComponent(file)}/nodes?ids=${encodeURIComponent(node)}`)
+    if (!got.ok) return stderr(`${got.message}\n`), 1
+    let entry = (got.body as FigmaNodesResponse).nodes[node]
+    // an instance or a variant → its main component (the set, for a variant)
+    const doc = entry?.document
+    const mainId =
+      doc?.type === 'INSTANCE' && doc.componentId
+        ? (entry!.components[doc.componentId]?.componentSetId ?? doc.componentId)
+        : doc?.type === 'COMPONENT' && entry!.components[doc.id]?.componentSetId
+          ? entry!.components[doc.id]!.componentSetId
+          : undefined
+    if (mainId) {
+      got = await figmaGet(deps, token, `files/${encodeURIComponent(file)}/nodes?ids=${encodeURIComponent(mainId)}`)
+      if (!got.ok) return stderr(`${got.message}\n`), 1
+      entry = (got.body as FigmaNodesResponse).nodes[mainId]
+      if (!entry) {
+        stderr(`the main component of "${doc!.name}" isn't in this file — a component from a library file; open it there and point at it\n`)
+        return 1
+      }
+    }
+    if (!entry) return stderr(`figma: node "${node}" is not in the file\n`), 1
+    try {
+      deps.stdout(formatProposal(contractFromFigma(entry, { ...(converter && { mapping: converter }) })))
+    } catch (error) {
+      stderr(`${(error as Error).message}\n`)
+      return 1
+    }
+    return 0
+  }
+
+  // audit: every component set and standalone component of the file
+  const got = await figmaGet(deps, token, `files/${encodeURIComponent(file)}`)
+  if (!got.ok) return stderr(`${got.message}\n`), 1
+  const body = got.body as { document: FigmaNode; components: FigmaNodesResponse['nodes'][string] extends infer E ? (E extends { components: infer C } ? C : never) : never; componentSets: Record<string, { name: string }> }
+  const found: FigmaNode[] = []
+  const walk = (current: FigmaNode, inSet: boolean) => {
+    if (current.type === 'COMPONENT_SET' || (current.type === 'COMPONENT' && !inSet)) found.push(current)
+    for (const child of current.children ?? []) walk(child, inSet || current.type === 'COMPONENT_SET')
+  }
+  walk(body.document, false)
+  // instance-swap targets (icons…) are assets, not blocks: skip the components sharing a swap default's prefix
+  const swapPrefixes = new Set<string>()
+  for (const component of found) {
+    for (const definition of Object.values((component as { componentPropertyDefinitions?: Record<string, { type: string; defaultValue?: unknown }> }).componentPropertyDefinitions ?? {})) {
+      const target = definition.type === 'INSTANCE_SWAP' && typeof definition.defaultValue === 'string' ? body.components?.[definition.defaultValue]?.name : undefined
+      if (target?.includes('/')) swapPrefixes.add(target.slice(0, target.lastIndexOf('/') + 1))
+    }
+  }
+  const isAsset = (name: string) => [...swapPrefixes].some(prefix => name.startsWith(prefix))
+  const assets = found.filter(component => isAsset(component.name)).length
+  const rows = { matches: [] as string[], drifted: [] as string[], missing: [] as string[] }
+  for (const component of found.filter(component => !isAsset(component.name))) {
+    const proposal = contractFromFigma({ document: component, components: body.components ?? {}, componentSets: body.componentSets ?? {} }, { mapping: converter! })
+    if (!proposal.drift) rows.missing.push(`  ${component.name} (${component.id}) — no contract component; propose one: dedal-figma component <url>?node-id=${component.id.replace(':', '-')}`)
+    else {
+      const { missingProps, missingValues, missingSlots } = proposal.drift
+      const changes = [...missingProps.map(p => `prop ${p}`), ...Object.entries(missingValues).map(([p, v]) => `${p}: ${v.join(', ')}`), ...missingSlots.map(slot => `slot ${slot}`)]
+      if (changes.length) rows.drifted.push(`  ${component.name} → ${proposal.drift.key}: in the design, not in the contract — ${changes.join('; ')}`)
+      else rows.matches.push(`  ${component.name} → ${proposal.drift.key}`)
+    }
+  }
+  deps.stdout(
+    [
+      `${found.length - assets} component(s) in the file${assets ? ` (and ${assets} instance-swap target(s) — ${[...swapPrefixes].join(', ')}… — skipped)` : ''}`,
+      `matching the contract (${rows.matches.length}):`,
+      ...rows.matches,
+      `drifted from the contract (${rows.drifted.length}):`,
+      ...rows.drifted,
+      `missing in the code (${rows.missing.length}):`,
+      ...rows.missing,
+    ].join('\n') + '\n'
+  )
+  return 0
 }

@@ -524,6 +524,10 @@ export function mapping<
   return {
     /** The contract the mapping converts to — for tools that validate templates or describe the contract (`dedal-mcp`). */
     contract,
+    /** The contract component a Figma component (or component set) name maps to — explicitly or by the convention. */
+    keyFor: (figmaName: string): string | undefined => components.get(lookupName(figmaName))?.key,
+    /** The `componentName` rule of the mapping, if any. */
+    componentName: options.componentName,
     /** Converts a node of a nodes response (`GET /v1/files/:key/nodes?ids=…`): its top-level layers become sections. */
     async convert(response: FigmaNodesResponse, nodeId: string): Promise<FigmaConversion<C>> {
       const entry = response.nodes[nodeId] ?? response.nodes[nodeId.replaceAll('-', ':')]
@@ -543,3 +547,5 @@ export function mapping<
     },
   }
 }
+
+export { contractFromFigma, type ComponentProposal, type ContractDrift, type FigmaPropertyDefinition, type ProposedProp, type ProposedSlot } from './component'

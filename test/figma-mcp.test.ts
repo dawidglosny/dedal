@@ -23,7 +23,7 @@ describe('dedal-mcp', () => {
     const init = (await handle({ jsonrpc: '2.0', id: 0, method: 'initialize', params: { protocolVersion: '2025-06-18' } }, deps)) as { result: { protocolVersion: string; serverInfo: unknown; capabilities: unknown } }
     expect(init.result).toMatchObject({ protocolVersion: '2025-06-18', serverInfo: { name: 'dedal', version: '0.9.0' }, capabilities: { tools: {} } })
     const list = (await handle({ jsonrpc: '2.0', id: 1, method: 'tools/list' }, deps)) as { result: { tools: { name: string }[] } }
-    expect(list.result.tools.map(tool => tool.name)).toEqual(['figma_to_template', 'validate_template', 'contract_schema'])
+    expect(list.result.tools.map(tool => tool.name)).toEqual(['figma_to_template', 'figma_component_to_contract', 'figma_audit', 'validate_template', 'contract_schema'])
     expect(await handle({ jsonrpc: '2.0', id: 2, method: 'ping' }, deps)).toEqual({ jsonrpc: '2.0', id: 2, result: {} })
     expect(await handle({ jsonrpc: '2.0', method: 'notifications/initialized' }, deps)).toBeUndefined()
     expect(await handle({ jsonrpc: '2.0', id: 3, method: 'resources/list' }, deps)).toMatchObject({ error: { code: -32601 } })
@@ -44,6 +44,17 @@ describe('dedal-mcp', () => {
   it('figma_to_template: a missing token or mapping is an error result, not a crash', async () => {
     const noToken = await handle({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'figma_to_template', arguments: { url: 'KEY', node: '1:2', mapping } } }, { ...deps, env: {} })
     expect(noToken).toMatchObject({ result: { isError: true, content: [{ text: expect.stringContaining('FIGMA_TOKEN is not set') }] } })
+  })
+
+  it('figma_component_to_contract: the proposal, read-only', async () => {
+    const landing = JSON.parse(readFileSync(new URL('./fixtures/figma-landing.json', import.meta.url), 'utf8'))
+    const result = (await handle(
+      { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'figma_component_to_contract', arguments: { url: 'https://www.figma.com/design/KEY/x?node-id=3-136', mapping } } },
+      { ...deps, fetch: async () => ({ ok: true, status: 200, json: async () => ({ nodes: { '3:136': landing.nodes['3:136'] } }) }) }
+    )) as { result: { content: { text: string }[]; isError?: boolean } }
+    expect(result.result.isError).toBeUndefined()
+    expect(result.result.content[0]!.text).toContain('Button → button')
+    expect(result.result.content[0]!.text).toContain('it matches the design')
   })
 
   it('validate_template: sections or one block; every problem with its path', async () => {

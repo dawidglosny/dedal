@@ -12,7 +12,7 @@ Dedal renders pages from templates (JSON) with the project's own components. `de
 - **The frame:** a Figma URL with `?node-id=…` (or a file key and a node id). Every top-level layer of the frame becomes a section.
 - **The mapping module:** usually `figma.mapping.mjs` / `figma.mapping.js` — its default export is `mapping(contract, { … }, options)`. Find it with a search for `from 'dedal/figma'`. If the project has none, see *A new mapping* below.
 - **`FIGMA_TOKEN`** in the environment: a Figma personal access token with file content read access. If it's missing, ask the user to set it — never ask them to paste it into the chat.
-- **Tools:** the `dedal-mcp` server (`figma_to_template`, `validate_template`, `contract_schema`) if it's configured; otherwise the CLI — `npx dedal-figma pull <url> --mapping <module> [--out file.json] [--images public/figma]`. Both give the same conversion and the same report.
+- **Tools:** the `dedal-mcp` server (`figma_to_template`, `validate_template`, `contract_schema`; `figma_component_to_contract` and `figma_audit` for missing components) if it's configured; otherwise the CLI — `npx dedal-figma pull <url> --mapping <module> [--out file.json] [--images public/figma]`. Both give the same conversion and the same report.
 
 ## The workflow
 
@@ -20,7 +20,7 @@ Dedal renders pages from templates (JSON) with the project's own components. `de
 2. **Pull without writing** — `figma_to_template` without `out` (CLI: without `--out`). Read the whole report before changing anything.
 3. **Sort what the report says**, item by item:
    - **`unmapped` — a layer left out**, with its Figma path and the reason:
-     - *an instance of "X", which no contract component maps* → X is a library component whose name differs from the contract's: add `component('X', …)` to the mapping, or a `componentName` rule for a whole library (`name => name.replace(/ \(Radix\)$/, '')`). If no contract component fits, it's a **missing component** — see step 4.
+     - *an instance of "X", which no contract component maps* → either X is a library component whose name differs from the contract's — add `component('X', …)` to the mapping, or a `componentName` rule for a whole library (`name => name.replace(/ \(Radix\)$/, '')`) — or **X may be a component the code doesn't have yet**. When no contract component fits, say so to the user and offer the `figma-component-to-code` skill (`figma_component_to_contract` gives the proposed contract entry and the questions to ask). Don't decide between the two on your own when it isn't obvious — ask.
      - *a text layer outside any mapped component* → loose text: map its frame with `frame('name', { prop: layer('layer name') })`, or enable `text: '<text component>'` if the contract has a text block, or it belongs in a component property in Figma.
      - *inside an instance of "X"* → content inside a component that isn't in a native slot: in Figma, put it in a slot or expose it as a property.
      - decorative layers (illustrations, mock-ups, diagrams) → `ignore: ['layer name', /pattern/]` in the options, or an image component in Figma.
@@ -45,6 +45,8 @@ When a project has a contract but no mapping yet:
 4. Keep the mapping next to the contract it imports, in plain JavaScript if the CLI loads it.
 
 ## Rules
+
+- When something is ambiguous — which component a layer is, whether a fix belongs in the mapping, the file or the contract — ask the user instead of guessing.
 
 - One contract per component library: a design built on library A is converted with A's contract and rendered with A's registry.
 - `ok: true` means *valid against the contract*, not *faithful to the design* — always read `unmapped` and `warnings`.

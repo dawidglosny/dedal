@@ -47,6 +47,30 @@ const tools = [
     },
   },
   {
+    name: 'figma_component_to_contract',
+    description:
+      'Propose a contract entry for a Figma component (a component, a component set, or an instance — resolved to its main component): props from its component properties (TEXT → string, VARIANT → enum of its options, BOOLEAN → boolean, INSTANCE_SWAP → the swapped component\'s name), slots from its native slots, a registry entry to start from, a mapping entry when needed, and the questions to ask the user before adding it. With `mapping`: whether the contract already has it and how it differs. Read-only — it changes nothing.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        url: { type: 'string', description: 'A Figma URL with ?node-id=… of the component, the set or an instance — or a file key.' },
+        node: { type: 'string', description: 'The node id, when the URL has none.' },
+        mapping: { ...mappingInput, description: `${mappingInput.description} Optional: to compare with the contract.` },
+      },
+      required: ['url'],
+    },
+  },
+  {
+    name: 'figma_audit',
+    description:
+      'Every component of a Figma file next to the contract: which match it, which drifted (props, variant values or slots in the design that the contract lacks), which are missing in the code. Instance-swap targets (icons) are skipped. Read-only.',
+    inputSchema: {
+      type: 'object',
+      properties: { url: { type: 'string', description: 'A Figma URL or a file key.' }, mapping: mappingInput },
+      required: ['url', 'mapping'],
+    },
+  },
+  {
     name: 'validate_template',
     description: 'Validate Dedal templates (an object: section key → block, or one block) against the contract of a mapping module. Returns every problem with its path.',
     inputSchema: {
@@ -91,6 +115,13 @@ async function callTool(name: string, args: Record<string, unknown>, deps: McpDe
     const report = stderr.trim() || 'converted — nothing left out, no warnings'
     return text(stdout ? `${report}\n\nTemplates:\n${stdout}` : report, code !== 0)
   }
+  if (name === 'figma_component_to_contract' || name === 'figma_audit') {
+    const argv = [name === 'figma_audit' ? 'audit' : 'component', String(args.url ?? ''), ...(args.node ? [String(args.node)] : [])]
+    if (typeof args.mapping === 'string') argv.push('--mapping', args.mapping)
+    let output = ''
+    const code = await run(argv, { ...defaultDeps(), ...deps, stdout: chunk => void (output += chunk), stderr: chunk => void (output += chunk) })
+    return text(output.trim(), code !== 0)
+  }
   if (name === 'validate_template') {
     const contract = await contractOf(deps, args.mapping)
     const template = typeof args.template === 'string' ? JSON.parse(await readFile(resolve(deps.cwd, args.template), 'utf8')) : args.template
@@ -118,7 +149,7 @@ export async function handle(message: Request, deps: McpDeps): Promise<Json | un
         capabilities: { tools: {} },
         serverInfo: { name: 'dedal', version: deps.env.DEDAL_VERSION ?? packageVersion() },
         instructions:
-          'Dedal tools: turn a Figma frame into Dedal templates checked against the contract (figma_to_template), validate templates (validate_template), read what a template may contain (contract_schema). Every tool takes the path to the project\'s mapping module.',
+          'Dedal tools: turn a Figma frame into Dedal templates checked against the contract (figma_to_template), propose a contract entry for a Figma component (figma_component_to_contract), compare a whole Figma file with the contract (figma_audit), validate templates (validate_template), read what a template may contain (contract_schema). The tools take the path to the project\'s mapping module.',
       })
     case 'ping':
       return reply({})

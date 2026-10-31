@@ -117,3 +117,60 @@ describe('dedal-figma pull', () => {
     expect(() => parseFigmaUrl('https://example.com/x')).toThrow('not a Figma file URL')
   })
 })
+
+describe('dedal-figma component / audit', () => {
+  const landing = JSON.parse(readFileSync(new URL('./fixtures/figma-landing.json', import.meta.url), 'utf8'))
+  const nodesOf = (url: string) => {
+    const ids = decodeURIComponent(new URL(url).searchParams.get('ids') ?? '').split(',')
+    return { nodes: Object.fromEntries(ids.map(id => [id, landing.nodes[id] ?? null])) }
+  }
+  // GET /v1/files/:key — a page holding the library's components and icons
+  const file = {
+    document: { id: '0:0', name: 'Document', type: 'DOCUMENT', children: [{ id: '2:46', name: 'Components', type: 'CANVAS', children: [
+      landing.nodes['3:136'].document, landing.nodes['3:147'].document, landing.nodes['3:148'].document,
+      { id: '3:6', name: 'icon/layers', type: 'COMPONENT' }, { id: '3:10', name: 'icon/braces', type: 'COMPONENT' },
+      { id: '9:9', name: 'PricingCard', type: 'COMPONENT', componentPropertyDefinitions: { 'Plan#1:0': { type: 'TEXT', defaultValue: 'Pro' } } },
+    ] }] },
+    components: { ...landing.nodes['3:148'].components, '3:6': { name: 'icon/layers' }, '3:10': { name: 'icon/braces' } },
+    componentSets: {},
+  }
+  const fetch: CliDeps['fetch'] = async url => ({ ok: true, status: 200, json: async () => (url.includes('/nodes?') ? nodesOf(url) : file) })
+
+  it('component: a proposal for an instance\'s main component, with the drift from the contract', async () => {
+    const { deps, out } = setup({ fetch })
+    // 3:148 is FeatureCard itself; an instance would be resolved to it the same way
+    expect(await run(['component', 'https://www.figma.com/design/KEY/x?node-id=3-148', '--mapping', mappingModule], deps)).toBe(0)
+    expect(out.stdout).toContain('FeatureCard → feature')
+    expect(out.stdout).toContain('Contract entry (defineContract):')
+    expect(out.stdout).toContain('The contract already has "feature" — it matches the design.')
+    expect(out.stdout).toContain('"icon" is an instance swap')
+  })
+
+  it('component: a variant is resolved to its set', async () => {
+    const variant = { nodes: { '3:88': { document: { id: '3:88', name: 'variant=outline', type: 'COMPONENT' }, components: { '3:88': { name: 'variant=outline', componentSetId: '3:136' } }, componentSets: { '3:136': { name: 'Button' } } } } }
+    const { deps, out } = setup({ fetch: async url => ({ ok: true, status: 200, json: async () => (url.includes('ids=3%3A88') ? variant : nodesOf(url)) }) })
+    expect(await run(['component', 'KEY', '3:88'], deps)).toBe(0)
+    expect(out.stdout).toContain('Button → button')
+  })
+
+  it('audit: matching, drifted, missing — icons skipped as swap targets', async () => {
+    const { deps, out } = setup({ fetch })
+    const older = async () => {
+      const { mapping, component, swap } = await import('../src/figma')
+      const { defineContract } = await import('../src')
+      const { z } = await import('zod')
+      return { default: mapping(defineContract({
+        button: { props: z.object({ label: z.string(), variant: z.enum(['default', 'outline']).optional() }) },
+        badge: { props: z.object({ label: z.string(), variant: z.enum(['default', 'secondary', 'outline', 'brand', 'accent']).optional() }) },
+        feature: { props: z.object({ title: z.string(), description: z.string(), icon: z.string().optional() }) },
+      }), { feature: component('FeatureCard', { icon: swap('Icon') }) }) }
+    }
+    deps.importModule = older
+    expect(await run(['audit', 'KEY', '--mapping', 'm.mjs'], deps)).toBe(0)
+    expect(out.stdout).toContain('4 component(s) in the file (and 2 instance-swap target(s) — icon/… — skipped)')
+    expect(out.stdout).toMatch(/matching the contract \(2\):\n  Badge → badge\n  FeatureCard → feature/)
+    expect(out.stdout).toContain('Button → button: in the design, not in the contract — prop iconRight; prop size; variant: secondary, ghost, brand')
+    expect(out.stdout).toContain('PricingCard (9:9) — no contract component; propose one: dedal-figma component <url>?node-id=9-9')
+    expect(await run(['audit', 'KEY'], setup({ fetch }).deps)).toBe(2) // --mapping required
+  })
+})

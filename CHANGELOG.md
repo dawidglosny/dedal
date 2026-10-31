@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+Added:
+- `contractFromFigma(entry, { mapping? })` (`dedal/figma`) — a Figma component or component set → a proposed contract entry (`TEXT` → string, `VARIANT` → enum of its options, `BOOLEAN` → boolean, `INSTANCE_SWAP` → the swapped component's name, native slots → slots), a registry stub, a mapping entry, the questions the design doesn't answer, and the drift from the contract's entry; `mapping(…).keyFor()`.
+- `dedal-figma component <url>` (a component, a set or an instance) and `dedal-figma audit <file> --mapping` (every component of the file: matching, drifted, missing in the code); the same in `dedal-mcp`: `figma_component_to_contract`, `figma_audit`.
+- The `figma-component-to-code` skill: a Figma component → a contract entry and a registry component, asking the user wherever the design leaves a choice open; `figma-to-dedal` offers it when a pull reports a component the code doesn't have.
+
 ## 0.9.1
 
 No changes to the API or behavior — the documentation, rebuilt around Figma as the main path.

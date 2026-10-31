@@ -18,6 +18,8 @@ Every tool takes `mapping` — the path to the mapping module, relative to the p
 | Tool | Arguments | Returns |
 |---|---|---|
 | `figma_to_template` | `url` (a Figma URL or a file key), `node?`, `mapping`, `out?`, `images?`, `imageUrl?`, `force?` | the report (layers left out, warnings, errors with the Figma layer) and the templates — or writes them to `out`; an error result when the templates don't match the contract |
+| `figma_component_to_contract` | `url` (the component, the set or an instance), `node?`, `mapping?` | the proposed contract entry, a registry entry, a mapping entry, the questions to ask, and how it differs from the contract — read-only |
+| `figma_audit` | `url` (the file), `mapping` | every component of the file: matching the contract, drifted from it, missing in the code — read-only |
 | `validate_template` | `mapping`, `template` (the templates as JSON, one block, or a path to a JSON file) | `valid`, or every problem with its path |
 | `contract_schema` | `mapping` | the contract as JSON Schema: components, props with their types and allowed values, slots — what a template may contain |
 
@@ -37,6 +39,18 @@ A Claude Code skill shipped with the package: `skills/figma-to-dedal/SKILL.md`. 
 5. **validates** the result and reports what was converted, left out and changed.
 
 It never uses `force` or extends the contract without your explicit OK, and never puts the token in a file.
+
+## The figma-component-to-code skill
+
+`skills/figma-component-to-code/SKILL.md`: a component exists in the Figma library and not in the code — after a pull reported it, an audit listed it, or because the user asks. The skill:
+
+1. gets the proposal (`figma_component_to_contract`) — props, slots, the questions the design doesn't answer, the drift from the contract if it has the component,
+2. **asks the user** every open question — required texts, slot kinds, swap values, the name in code, where the file goes and which component to follow in style,
+3. writes the React component in the house style, from the design (Figma's MCP `get_design_context`, when available),
+4. shows the contract entry, the registry entry and the mapping entry — and applies them only after approval,
+5. type-checks and re-runs the pull or the validation.
+
+`figma-to-dedal` hands over to it: when a pull reports an instance no contract component maps, it says the component may be missing and offers this skill.
 
 ## With Figma's own MCP server
 

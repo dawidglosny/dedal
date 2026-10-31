@@ -59,6 +59,31 @@ So a pull in CI fails when a design uses something the code doesn't have — bef
 
 Figma gives image URLs only through a separate request (`GET /v1/files/:key/images`), and they expire. With `--images`, the pull resolves the references, downloads the files (`<ref>.png`, `.jpg`…) and replaces each `figma-image:<ref>` in the templates with its path. Without it, the values stay `figma-image:<ref>`, with a warning.
 
+## Components: what the code lacks
+
+Two read-only commands put the Figma library next to the contract — help for everyday work on a design system, not only for pages.
+
+```bash
+npx dedal-figma audit "https://www.figma.com/design/<file>/<name>" --mapping ./figma.mapping.mjs
+```
+
+```text
+4 component(s) in the file (and 15 instance-swap target(s) — icon/… — skipped)
+matching the contract (2):
+  Badge → badge
+  FeatureCard → feature
+drifted from the contract (1):
+  Button → button: in the design, not in the contract — prop iconRight; prop size; variant: secondary, ghost, brand
+missing in the code (1):
+  PricingCard (9:9) — no contract component; propose one: dedal-figma component <url>?node-id=9-9
+```
+
+```bash
+npx dedal-figma component "https://www.figma.com/design/<file>/<name>?node-id=9-9" --mapping ./figma.mapping.mjs
+```
+
+`component` takes a component, a component set or any instance (resolved to its main component) and proposes what to add: the contract entry (`TEXT` → `z.string()`, `VARIANT` → `z.enum([...options])`, `BOOLEAN` → `z.boolean()`, `INSTANCE_SWAP` → the swapped component's name, native slots → slots), a registry entry to start from, a mapping entry when needed, and the **questions** the design doesn't answer — which texts are required, whether a slot holds one block or a list, how to shorten a swap value. With `--mapping`, it also says whether the contract already has the component and how it differs. In code: `contractFromFigma(entry, { mapping })` from `dedal/figma`.
+
 ## Testing your mapping
 
 `--raw response.json` saves the REST response. Commit it (trimmed, if it's large) as a fixture, and test the mapping without the network:

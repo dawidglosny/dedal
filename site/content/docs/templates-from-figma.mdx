@@ -11,8 +11,10 @@ description: "From a Figma frame to a page: what's in the box — the mapping, t
 |---|---|---|
 | **`dedal/figma`** | `mapping(contract, …)` — how Figma's components, properties and native slots become contract components, props and slots; by the naming convention, explicit where names differ | *The mapping* |
 | **`dedal-figma pull`** | the CLI: fetches a frame from the Figma REST API, converts it, validates it, writes the templates and downloads the images | *dedal-figma pull* |
+| **`dedal-figma audit` / `component`** | the library next to the contract: which components match, drifted or are missing in the code; a proposed contract entry for a component, with the questions to ask | *dedal-figma pull* |
 | **`dedal-mcp`** | an MCP server: the same pull, validation and the contract as JSON Schema, for agents | *Agents: dedal-mcp and the skill* |
 | **`figma-to-dedal`** | a Claude Code skill: pulls a frame, sorts the report into fixes, saves the template | *Agents: dedal-mcp and the skill* |
+| **`figma-component-to-code`** | a Claude Code skill: a Figma component → a contract entry and a registry component, asking where the design is open | *Agents: dedal-mcp and the skill* |
 | **`examples/figma`** | a landing page designed in Figma, pulled and rendered by Dedal | *A page from Figma, end to end* |
 
 How to build the Figma file so that it converts cleanly — sections as components, content in slots, images — is in *Preparing a Figma file*, written for designers.
