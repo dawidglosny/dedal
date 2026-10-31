@@ -958,6 +958,12 @@ a {
   color: var(--text);
 }
 
+.fit-later {
+  margin: 12px 0 0;
+  color: var(--text-faint);
+  font-size: 14px;
+}
+
 .fit ul {
   margin: 0;
   padding-left: 20px;

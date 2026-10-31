@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+Documentation:
+- positioning: Dedal is the engine behind pages generated from Figma or a page builder, rendered with your own design system — README, the docs site's home page and *Why Dedal* lead with it; mobile apps moved to *Later*,
+- decision records in `docs/adr/`: 000 positioning, 001 scope,
+- `docs/ROADMAP.md` no longer points to design notes that aren't in the public history.
+
 ## 0.6.6
 
 No changes to the API or behavior. The package gains JSDoc descriptions for the 26 exported types that had none.

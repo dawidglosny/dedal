@@ -24,6 +24,7 @@ Requires Node 20.9+.
 | `examples/next`, `examples/web-components` | examples that install the package like a user would |
 | `docs/API.md` | the API reference (rendered on the site too) |
 | `docs/ROADMAP.md` | open plans and the principles behind them |
+| `docs/adr/` | decision records — read [001](docs/adr/001-scope.md) (scope) before proposing a larger feature |
 | `bench/` | the benchmark behind `npm run bench` |
 
 ## The docs site and the examples

@@ -1,6 +1,6 @@
 # Roadmap — open plans and development principles
 
-Things not yet done, open questions and the principles we follow in further work. User documentation (how to use the package) is on the [documentation site](https://dawidglosny.github.io/dedal/) (sources in [`site`](../site)), the [README](../README.md) and the [API reference](API.md). The earlier contracts (cache, devtools, performance) have been implemented — their full text, with measurements and the reasoning behind decisions, is in the git history (`docs/CACHE.md`, `docs/DEVTOOLS.md`, `docs/PERFORMANCE.md`, up to version 0.5.2).
+Things not yet done, open questions and the principles we follow in further work. User documentation (how to use the package) is on the [documentation site](https://dawidglosny.github.io/dedal/) (sources in [`site`](../site)), the [README](../README.md) and the [API reference](API.md). The earlier design notes (cache, devtools, performance) have been implemented: their decisions live in the code, the tests, the docs and the principles below. Decisions from now on are recorded in [adr/](adr/).
 
 ## Principles for further development
 

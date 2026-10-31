@@ -4,9 +4,9 @@
 
 **Change screens without changing code.**
 
-Structure, data and components — kept apart, joined at the last moment.
+Dedal is the engine behind pages **generated from Figma or assembled in a page builder**, rendered with **your own design system**. Structure, data and components — kept apart, joined at the last moment.
 
-Dedal is a TypeScript engine for **server-driven UI**. In a typical component tree three different things are tangled together in one place:
+Under the hood it's a TypeScript engine for **server-driven UI**. In a typical component tree three different things are tangled together in one place:
 
 | | What it is | Who changes it, and when |
 |---|---|---|
@@ -26,15 +26,15 @@ data (your APIs) ───────────┘
 
 ## Who it is for
 
-Not a kind of company or industry, but a property of the UI: **its structure changes on a different schedule, by different people, or comes from a different system than its components**. When that's true, keeping the structure in component code means a code change and a release for every rearrangement.
+Dedal is built for one setup above all: **web products on a shared design system, whose pages are designed in Figma or assembled in a page builder or a CMS** — not written in JSX.
 
-That property shows up in many places:
-- **mobile apps** — a new screen layout without a store release and waiting for users to update,
-- **content sites and landing pages** — editors and marketers rearrange sections every day,
-- **dashboards** — which widgets, in what order, per role or per customer,
-- **onboarding and flows** — the steps and their order tuned by product, not by code,
-- **stores** — campaign pages, category layouts, A/B tests of the page structure,
-- **one design system, many products** — templates designed once (even in Figma — [Templates from Figma](https://dawidglosny.github.io/dedal/docs/templates-from-figma/)) and served to all of them.
+- **Pages from Figma** — designers build a page from the design system's components and publish; a converter turns the frame into a template ([Templates from Figma](https://dawidglosny.github.io/dedal/docs/templates-from-figma/)).
+- **Page builders and CMSs** — Dedal is the engine: the contract says what the editor can place and with which props, a template is what it saves, the frontend renders it with your components.
+- **Many products, one design system** — templates designed once, served to every product, each rendering them with its registry.
+
+More generally, it fits any UI whose **structure changes on a different schedule, by different people, or comes from a different system than its components**: content sites and landing pages rearranged by editors, dashboards arranged per role or customer, store pages and A/B tests of the page structure.
+
+**Later: mobile apps.** The page is plain JSON a native app could render, but Dedal has no native renderer and no contract versioning yet — see the [roadmap](docs/ROADMAP.md).
 
 It's probably not worth it when:
 - the UI is mostly forms, state and interactions (an editor, a checkout) rather than blocks assembled from a known set,
@@ -145,6 +145,7 @@ Requires Node 20.9+. React 18+ only for `dedal/react` (an optional peer dependen
 - **Quick start** — [a rendered page in five files](https://dawidglosny.github.io/dedal/docs/quick-start/): install, a contract, a page, a registry, render in Next.js or plain Node.
 - **Guide** — **[dawidglosny.github.io/dedal](https://dawidglosny.github.io/dedal/)**: why Dedal, how it works, a tutorial (ending with a template edited without a release), the same engine in another domain (a dashboard), and every feature, warning and error as a live page with its code, result and devtools report.
 - **Limitations** — [what Dedal doesn't do (yet)](https://dawidglosny.github.io/dedal/docs/limitations/).
+- **Decisions** — [docs/adr](docs/adr): the positioning, the scope, and every larger decision with its alternatives.
 - **API reference** — [on the site](https://dawidglosny.github.io/dedal/docs/api/) (source: [docs/API.md](docs/API.md)): formats, design rules, every option; every exported function and type in the [type reference](https://dawidglosny.github.io/dedal/types/), generated from the source.
 - **Examples**
   - [`examples/next`](examples/next) — Next.js: one page, two component libraries (Radix Themes and shadcn/ui), cache, streaming, devtools,

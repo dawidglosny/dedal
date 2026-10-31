@@ -86,10 +86,10 @@ export default function Home() {
           <br />
           <span>without changing code.</span>
         </h1>
-        <p className="hero-sub">Structure, data and components — kept apart, joined at the last moment.</p>
+        <p className="hero-sub">The engine behind pages generated from Figma or a page builder — rendered with your own design system.</p>
         <p className="hero-lead">
-          A server-driven UI engine for TypeScript. The structure of a screen lives as data, so it can change without a code change or a release — while your
-          components and your APIs stay exactly as they are.
+          A server-driven UI engine for TypeScript. Structure, data and components are kept apart: the structure of a page lives as data, so it can change
+          without a code change or a release — while your components and your APIs stay exactly as they are.
         </p>
         <div className="hero-actions">
           <Link href="/docs/quick-start/" className="button button-primary">
@@ -166,15 +166,14 @@ export default function Home() {
       <section className="landing-section fit">
         <div>
           <h2>Who it is for</h2>
-          <p className="fit-lead">Any UI whose structure changes on a different schedule, by different people, or comes from a different system than its components.</p>
+          <p className="fit-lead">Web products on a shared design system, whose pages are designed in Figma or assembled in a page builder — not written in JSX.</p>
           <ul>
-            <li>Mobile apps — a new screen layout without a store release.</li>
-            <li>Content sites and landing pages — sections rearranged every day.</li>
-            <li>Dashboards — which widgets, in what order, per role or customer.</li>
-            <li>Onboarding and flows — steps tuned by product, not by code.</li>
-            <li>Stores — campaign pages, A/B tests of the page structure.</li>
-            <li>One design system, many products — templates designed once, served to all.</li>
+            <li>Pages from Figma — design with the design system’s components, publish, get a template.</li>
+            <li>Page builders and CMSs — Dedal is the engine; the contract says what the editor can place.</li>
+            <li>Many products, one design system — templates designed once, served to all.</li>
+            <li>Content sites, dashboards, store pages — any structure that changes more often than its components.</li>
           </ul>
+          <p className="fit-later">Later: mobile apps — no native renderer and no contract versioning yet.</p>
         </div>
         <div>
           <h2>When it doesn’t</h2>

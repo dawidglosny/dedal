@@ -3,7 +3,7 @@
  * this way, how to use it and what to watch out for. English prose, technical names as used in the code.
  */
 export const intros = {
-  why: `Dedal keeps three things apart that a typical component tree tangles together — **structure, data and components** — and joins them at the last moment. This page explains why that is useful, who it is for and who it isn't for, and how it compares with what you may already use.
+  why: `Dedal is the engine behind pages **generated from Figma or assembled in a page builder**, rendered with **your own design system**. To do that it keeps three things apart that a typical component tree tangles together — **structure, data and components** — and joins them at the last moment. This page explains why that is useful, who it is for and who it isn't for, and how it compares with what you may already use.
 
 ## Three things in one place
 
@@ -46,14 +46,15 @@ The frontend has the building blocks; the server sends the instructions. A new l
 
 ## Who it is for
 
-Not a kind of company or industry, but a property of the UI: **its structure changes on a different schedule, by different people, or comes from a different system than its components**. That property shows up in many places:
+Dedal is built for one setup above all: **web products on a shared design system, whose pages are designed in Figma or assembled in a page builder or a CMS** — not written in JSX.
 
-- **mobile apps** — a new screen layout without a store release and waiting for users to update,
-- **content sites and landing pages** — editors and marketers rearrange sections every day,
-- **dashboards** — which widgets, in what order, per role or per customer,
-- **onboarding and multi-step flows** — the steps and their order tuned by product, not by code,
-- **stores** — campaign pages, category layouts, A/B tests of the page structure,
-- **one design system, many products** — templates designed once (even in Figma — *Templates from Figma*) and served to all of them.
+- **Pages from Figma** — designers build a page from the design system's components and publish; a converter turns the frame into a template (*Templates from Figma*).
+- **Page builders and CMSs** — Dedal is the engine: the contract says what the editor can place and with which props, a template is what it saves, the frontend renders it with your components.
+- **Many products, one design system** — templates designed once, served to every product, each rendering them with its registry.
+
+More generally, it fits any UI whose **structure changes on a different schedule, by different people, or comes from a different system than its components**: content sites and landing pages rearranged by editors, dashboards arranged per role or customer (*Another domain: a dashboard*), store pages and A/B tests of the page structure, onboarding steps tuned by product.
+
+**Later: mobile apps.** A native app could render the JSON Dedal produces, but there is no native renderer and no contract versioning yet — older app versions would need both (*A client without React* shows the idea).
 
 ## When it doesn't
 
