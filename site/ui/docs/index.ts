@@ -61,7 +61,7 @@ export const groups: DocGroup[] = [
   },
   {
     slug: 'templates-in-storage',
-    title: 'Templates in a database or CMS',
+    title: 'Templates from a page builder, CMS or database',
     description: 'Stored templates in a real project: the contract as a value, validation, caching, preview, publishing, CI.',
     file: '',
     cases: [],
@@ -177,9 +177,9 @@ export const groups: DocGroup[] = [
 
 /** Parts of the menu: groups in the order of a reader's needs — first steps, learning, features, when something's wrong. */
 export const parts: { title: string; groups: string[] }[] = [
-  { title: 'Get started', groups: ['why', 'quick-start', 'introduction'] },
+  { title: 'Get started', groups: ['why', 'figma-demo', 'quick-start', 'introduction'] },
   { title: 'Learn', groups: ['tutorial', 'dashboard', 'production'] },
-  { title: 'Guides', groups: ['templates-in-storage', 'templates-from-figma', 'figma-demo', 'adopting', 'clients-without-react', 'testing'] },
+  { title: 'Guides', groups: ['templates-in-storage', 'templates-from-figma', 'adopting', 'clients-without-react', 'testing'] },
   { title: 'Features', groups: ['layout', 'data', 'sections', 'cache', 'rendering'] },
   { title: 'Troubleshooting', groups: ['errors', 'devtools'] },
   { title: 'Reference', groups: ['api', 'glossary', 'limitations'] },

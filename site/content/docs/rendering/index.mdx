@@ -9,7 +9,7 @@ Rendering is two steps: `resolve` (combining the layout with data into props) an
 
 ## resolve
 
-`ui.resolve(result, { ctx })` turns a `PageResult` (layout and data separately) into a `ResolvedPage` — a tree of `{ key, component, props, slots, children }` with final props. For each node: when the component has `toProps`, its result is the final props (it receives the props from the layout — already with `defaults` — the node's data and `ctx`); without `toProps`, data (an object) is merged with props (deep merge).
+`ui.resolve(result, { ctx })` turns a `PageResult` (layout and data separately) into a `ResolvedPage` — a tree of `{ key, component, props, slots, children }` with final props. For each node: when the component has `toProps`, its result is the final props — it receives the props from the layout (already with `defaults`), the node's data and `ctx`. Without `toProps`, the data (an object) is deep-merged into the props.
 
 `resolve` is a pure function — it can run on the server (as in these docs) or on the frontend, when the frontend receives a `PageResult` through an API. It checks the format version (`dedal: 1`) and rejects unknown ones.
 

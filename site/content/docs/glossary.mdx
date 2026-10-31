@@ -5,7 +5,6 @@ description: "Every term used in these docs, in one place."
 
 Every term used in these docs, in one place. The five to start with — contract, block, section, binding, registry — are explained with an example in *Introduction*.
 
-- **server-driven UI (SDUI)** — a model in which the server decides the structure of the screen and the frontend only renders it.
 - **contract** — component name → its props and slots. A TypeScript type (`card: { title: string; size?: 'sm' | 'md' | 'lg'; badge?: Slot }`) or a value (`defineContract({ card: { props: schema, slots: { badge: 'one' } } })`) the type is inferred from — then templates can be validated (`ui.validate`) and exported to JSON Schema (`ui.jsonSchema`). A single source of truth for the server and the frontend.
 - **component** — a name from the contract (`card`, `grid`). It is not a React component — the registry assigns a React component to that name.
 - **instance** — the result of `createDedal<Contract>(options)`, created once per project; you take `node`, `repeat`, `section`, `page`, `query`, `resolve` from it.
@@ -34,3 +33,4 @@ Every term used in these docs, in one place. The five to start with — contract
 - **pull** — `dedal-figma pull`: fetch a frame from the Figma REST API, convert it with the mapping, validate it against the contract, write the templates (and download the images).
 - **unmapped** — the layers of a frame that didn't become part of the template, each with its Figma path and the reason; nothing is dropped silently.
 - **native slot (Figma)** — a `SLOT` component property: a place in a Figma component where designers put other components. A Figma slot named like a contract slot fills it; other slots become the block's children.
+- **server-driven UI (SDUI)** — a model in which the server decides the structure of the screen and the frontend only renders it.

@@ -3,7 +3,7 @@ title: A page from Figma, end to end
 description: "The demo: a landing page designed in Figma, pulled by dedal-figma and rendered by Dedal — every file, the loop, what the contract stops."
 ---
 
-**In short:** a landing page designed in Figma becomes a page in production without anyone writing its structure in code. Designers build the frame from the design system's components; `dedal-figma pull` turns it into a template checked against the contract; Dedal renders it with your React components. Change the frame, pull again — the page follows. This page walks through the whole example, file by file; the code below is included from [`examples/figma`](https://github.com/dawidglosny/dedal/tree/main/examples/figma), so it's what actually runs.
+**In short:** a landing page designed in Figma becomes a rendered page without anyone writing its structure in code. Designers build the frame from the design system's components; `dedal-figma pull` turns it into a template checked against the contract; Dedal renders it with your React components. Change the frame, pull again — the page follows. This page walks through the whole example, file by file; the code below is included from [`examples/figma`](https://github.com/dawidglosny/dedal/tree/main/examples/figma), so it's what actually runs.
 
 ## The design
 
@@ -31,7 +31,7 @@ Two lines. Everything else follows the naming convention — `Hero` → `hero`, 
 
 - `FeatureCard` is named differently in code (`feature`), and its icon is an instance swap — the swapped component's name (`icon/braces`) becomes the prop (`braces`).
 - `Image` takes its `src` from the instance's image fill — Figma gives image URLs only through a separate request, and they expire, so the pull downloads the files.
-- `section: 'section'` wraps a top-level frame that holds several blocks (here only `Frame 427`); `text: 'text'` turns its loose texts into text blocks with the name of their Figma text style.
+- `section: 'section'`: a top-level frame with several blocks inside becomes one `section` block (here only `Frame 427`). `text: 'text'`: its loose texts become text blocks, with the name of their Figma text style.
 
 ## Pulling the frame
 
@@ -100,6 +100,8 @@ With `?debug=1` the devtools panel opens: click any element and see its props an
 What the contract doesn't allow stops the pull before anything is written — with the template path and the Figma layer. Say the code's badge had only `default`, `secondary` and `outline`, and the design used the `brand` variant:
 
 ```text
+1 layer(s) not in the template:
+  Frame 427/Group 12/icon/lock-open — an instance of "icon/lock-open", which no contract component maps
 error  hero.children[0].slots.badge.props.variant (Figma: hero/Content/hero/Badge/Badge): Invalid option: expected one of "default"|"secondary"|"outline"
 error  principle.children[0].slots.badge.props.variant (Figma: principle/Content/section-heading/Badge/Badge): Invalid option: expected one of "default"|"secondary"|"outline"
 …
@@ -111,5 +113,5 @@ That's the split between the two teams: designers change pages freely within the
 ## What this example doesn't show
 
 - **Data.** Everything on this page comes from the design. A page with data — articles in the cards, prices in a table — adds a loader and binds it with selectors (`feature`, `#featured`); the texts typed in Figma become placeholders the data replaces (*Data*).
-- **Storing and publishing.** Here the template is a file in the repository. In production the pull saves a draft to your template store, and publishing makes it live (*Templates in a database or CMS*).
+- **Storing and publishing.** Here the template is a file in the repository. In production the pull saves a draft to your template store, and publishing makes it live (*Templates from a page builder, CMS or database*).
 - **Design tokens.** The colors are copied into the CSS by hand; Figma's variables aren't part of the template.

@@ -4,9 +4,9 @@
 
 **Change screens without changing code.**
 
-Dedal is the engine behind pages **generated from Figma or assembled in a page builder**, rendered with **your own design system**. Structure, data and components — kept apart, joined at the last moment.
+Dedal is the engine behind pages **generated from Figma or assembled in a page builder**, rendered with **your own design system**. The structure of a page is stored as JSON, apart from your data and your components, and the three meet only when the page is built.
 
-Under the hood it's a TypeScript engine for **server-driven UI**. In a typical component tree three different things are tangled together in one place:
+How it works: in a typical component tree three different things are tangled together in one place —
 
 | | What it is | Who changes it, and when |
 |---|---|---|
@@ -16,7 +16,7 @@ Under the hood it's a TypeScript engine for **server-driven UI**. In a typical c
 
 Dedal keeps them apart. Structure is a template — plain JSON. Data is attached to it by CSS-like selectors, the way CSS attaches styles to HTML. The result is a JSON description of the screen, which the frontend renders with its own registry of components. Each of the three can change on its own schedule, by different people: new structure with the same data, the same data in a new structure, the same description rendered by a different set of components.
 
-Named after Daedalus (Dedal in Polish), the mythical architect: the server designs the page, the frontend builds it.
+The pattern is known as server-driven UI: the server sends a description of the screen, the frontend renders it with its own components. Named after Daedalus (Dedal in Polish), the mythical architect: the server designs the page, the frontend builds it.
 
 ```
 structure (template, JSON) ─┐
@@ -40,6 +40,36 @@ It's probably not worth it when:
 - the UI is mostly forms, state and interactions (an editor, a checkout) rather than blocks assembled from a known set,
 - developers own the structure and it rarely changes — plain components are simpler,
 - your problem is **sharing a component library** across apps or frameworks — that's what Web Components or a multi-framework build of your library are for. Dedal doesn't distribute components; it composes screens from the ones you already have.
+
+## From Figma
+
+Designers build the page from the design system's components — sections included, their content in native Figma slots. A mapping says where Figma's names differ from the contract; everything else follows the convention:
+
+```js
+// figma.mapping.mjs
+import { component, image, mapping, swap } from 'dedal/figma'
+import { contract } from './contract.mjs'
+
+export default mapping(contract, {
+  feature: component('FeatureCard', { icon: swap('Icon', name => name.replace('icon/', '')) }),
+  image: component('Image', { src: image() }),
+}, { section: 'section', text: 'text' })
+```
+
+```text
+$ FIGMA_TOKEN=… npx dedal-figma pull "https://www.figma.com/design/…?node-id=31-398" --mapping ./figma.mapping.mjs --out templates/home.json --images public/figma
+1 layer(s) not in the template:
+  Frame 427/Group 12/icon/lock-open — an instance of "icon/lock-open", which no contract component maps
+3 image(s) → public/figma
+✓ 10 section(s) → templates/home.json
+```
+
+- **Validation stops the pull** — a variant the code doesn't have, a prop of the wrong type: nothing is written, and the error names the template path and the Figma layer.
+- **Every layer left out is listed** — with its Figma path and the reason; nothing is dropped silently.
+- **The page follows the design** — the frontend renders the template with your components; change the frame, pull again, reload.
+- **With an agent** — `dedal-mcp` (an MCP server) and a Claude Code skill (`skills/figma-to-dedal`) run the same pull and sort its report.
+
+See [`examples/figma`](examples/figma) and [*A page from Figma, end to end*](https://dawidglosny.github.io/dedal/docs/figma-demo/).
 
 ## A quick look
 
@@ -87,41 +117,16 @@ const registry = { grid: Grid, card: Card, badge: Badge } satisfies Registry<Con
 <Render tree={page} registry={registry} />
 ```
 
-Change the structure in storage and the page follows — no frontend release (with a page cache: after `ui.invalidate()` or once the entry goes stale). Templates loaded from storage aren't seen by TypeScript — with the contract as a value, `ui.validate` checks them against it — see [Templates as JSON](docs/API.md#templates-as-json).
-
-## From Figma
-
-Designers build the page from the design system's components — sections included, their content in native Figma slots. A mapping says where Figma's names differ from the contract; everything else follows the convention:
-
-```js
-// figma.mapping.mjs
-import { component, image, mapping, swap } from 'dedal/figma'
-import { contract } from './contract.mjs'
-
-export default mapping(contract, {
-  feature: component('FeatureCard', { icon: swap('Icon', name => name.replace('icon/', '')) }),
-  image: component('Image', { src: image() }),
-})
-```
-
-```text
-$ FIGMA_TOKEN=… npx dedal-figma pull "https://www.figma.com/design/…?node-id=31-398" --mapping ./figma.mapping.mjs --out templates/home.json --images public/figma
-1 layer(s) not in the template:
-  Frame 427/Group 12/icon/lock-open — an instance of "icon/lock-open", which no contract component maps
-3 image(s) → public/figma
-✓ 10 section(s) → templates/home.json
-```
-
-The template is checked against the contract — a variant the code doesn't have stops the pull, with the template path and the Figma layer; every layer that didn't make it in is listed. The frontend renders it with your components; change the frame, pull again, and the page follows. The same through an agent: `dedal-mcp` (an MCP server) and a Claude Code skill (`skills/figma-to-dedal`). See [`examples/figma`](examples/figma) and [*A page from Figma, end to end*](https://dawidglosny.github.io/dedal/docs/figma-demo/).
+Change the structure in storage and the page follows — no frontend release. If the page is cached, it updates after `ui.invalidate()` or when the entry goes stale. Templates loaded from storage aren't seen by TypeScript — with the contract as a value, `ui.validate` checks them against it — see [Templates as JSON](docs/API.md#templates-as-json).
 
 ## What you get
 
 - **Structure is data.** Templates are plain JSON — store them, version them, generate them from Figma. Changing a page doesn't change code.
-- **One contract, checked at compile time and at runtime.** Components, props and slots — as a TypeScript type, or as a value with schemas (zod, valibot…) the type is inferred from. Then templates from storage or Figma are validated with paths to every problem (`news.children[2].props.size`), devtools flag mismatches in debug builds, and the contract exports to JSON Schema — for a page builder's property panels or a CMS.
+- **One contract, checked at compile time and at runtime.** Components, props and slots, typed at compile time. Written as a value with schemas (zod, valibot…), it also validates templates from Figma or storage at runtime — with a path to every problem (`news.children[2].props.size`) — flags mismatches in devtools, and exports to JSON Schema for a page builder's property panels or a CMS.
 - **Data placed by selectors.** `card`, `#featured`, `card > :slot(badge)`, `card:nth-child(odd)` — CSS syntax you already know, instead of fragile indexes. Adding a heading to a template doesn't shift the data.
 - **Explicit rules for missing data.** Fewer articles than cards, an API that fails, an empty section — each case has a default that keeps the page alive and an option to make it strict. Nothing disappears silently: everything is in the report.
 - **Variants without copies.** `patch` and `remove` adjust a template per device, site or A/B variant — one template, many versions.
-- **Speed.** Page and data-source cache (stale-while-revalidate, no request stampedes, invalidation by prefix), loaders running in parallel, streaming of slow sections. A 530-node page builds and resolves in under 1 ms.
+- **Speed.** Page and data-source cache (stale-while-revalidate, no request stampedes, invalidation by prefix), loaders running in parallel, streaming of slow sections. A 530-node page builds and resolves in under a millisecond.
 - **Devtools.** A browser panel that shows, for any element on the page, where each prop came from (default, template, patch, data), which selector assigned the data, what got dropped and why, and how long each loader and query took.
 - **A bonus: no lock-in.** Because the page is plain JSON, the registry is the only place that knows your components — switching component libraries doesn't touch the pages, and the zero-dependency core works with any renderer (React included; [Web Components](examples/web-components) in a few lines).
 
@@ -185,4 +190,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) — setup, where things are, the docs sit
 
 ## Status
 
-Version **0.9.0**. The API may still change before 1.0 — see [CHANGELOG.md](CHANGELOG.md). Plans (an Astro renderer, pruning empty containers, cache adapters): [docs/ROADMAP.md](docs/ROADMAP.md).
+Version **0.9.0**. The API may still change before 1.0 — see [CHANGELOG.md](CHANGELOG.md). Plans (a Figma plugin, a page builder example, an Astro renderer, pruning empty containers, cache adapters): [docs/ROADMAP.md](docs/ROADMAP.md).

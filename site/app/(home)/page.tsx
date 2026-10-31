@@ -41,7 +41,7 @@ const features = [
   ['Data placed by selectors', '`card`, `#featured`, `card > :slot(badge)` — CSS syntax instead of indexes. Adding a heading doesn’t shift the data.'],
   ['Explicit rules for missing data', 'Fewer items than places, a failing API, an empty section: safe defaults, a strict mode, and a report of everything dropped.'],
   ['Variants without copies', '`patch` and `remove` adapt one template per device, site or experiment.'],
-  ['Speed', 'Page and data cache with stale-while-revalidate, parallel loaders, streaming. A 530-node page builds in under a millisecond.'],
+  ['Speed', 'Page and data cache with stale-while-revalidate, parallel loaders, streaming. A 530-node page builds and resolves in under a millisecond.'],
   ['Devtools', 'Click any element and see where each prop came from, which selector placed the data and what went missing.'],
   ['A bonus: no lock-in', 'The page is plain JSON and only the registry knows your components — switch libraries without touching pages.'],
 ]
@@ -108,7 +108,7 @@ export default function Home() {
         </h1>
         <p className="mt-6 text-lg font-medium md:text-xl">The engine behind pages generated from Figma or a page builder — rendered with your own design system.</p>
         <p className="mt-4 max-w-2xl text-fd-muted-foreground">
-          A server-driven UI engine for TypeScript. Structure, data and components are kept apart: the structure of a page lives as data, so it can change
+          How it works: the structure of a page lives as data — a JSON template, pulled from Figma or saved by a page builder — kept apart from your data and your components, so it can change
           without a code change or a release — while your components and your APIs stay exactly as they are.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -137,7 +137,7 @@ export default function Home() {
         <ol className="grid gap-4 md:grid-cols-3">
           {[
             ['Design', 'Sections and components from the library, content in native Figma slots — no naming tricks.'],
-            ['Pull', '`dedal-figma pull` (or an agent through `dedal-mcp`): converted, validated, every layer left out reported with its path.'],
+            ['Pull', '`dedal-figma pull` (or an agent through `dedal-mcp`) converts the frame, checks it against the contract and lists every layer it left out.'],
             ['Render', 'The template is plain JSON; the registry maps its names to your React components.'],
           ].map(([title, text], i) => (
             <li key={title} className={card}>

@@ -15,8 +15,8 @@ What Dedal doesn't do — or doesn't do yet. Knowing this before you start saves
 
 ## Templates
 
-- **Validation needs the contract as a value.** With a contract written as a type only, templates from outside the code aren't checked — use `defineContract` (*Templates in a database or CMS*). An unknown component in an unchecked template renders the registry's `fallback`.
-- **Template props are checked as far as they go.** A prop missing from a template isn't an error (data fills it at `resolve`); whether the data then supplies every required prop isn't checked against the schema — the final props aren't validated.
+- **Validation needs the contract as a value.** With a contract written as a type only, templates from outside the code aren't checked — use `defineContract` (*Templates from a page builder, CMS or database*). An unknown component in an unchecked template renders the registry's `fallback`.
+- **Validation checks the props a template sets, not the final props.** A prop missing from a template isn't an error (data fills it at `resolve`); whether the data then supplies every required prop isn't checked against the schema.
 - **JSON Schema export needs Standard JSON Schema or a converter.** zod 4 works as it is; for other libraries pass `propsToJsonSchema` (e.g. `@valibot/to-json-schema`).
 - **Selectors are a subset of CSS.** Components, aliases, attributes, `:first-child` / `:last-child` / `:nth-child` / `:nth-last-child`, `:slot`, `:root`, descendant, child and lists. No classes, `:not()`, `:has()`, `+` or `~` (*Layout*).
 

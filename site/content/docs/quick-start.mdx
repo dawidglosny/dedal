@@ -1,19 +1,124 @@
 ---
 title: "Quick start"
-description: "Install, a contract, a page, a registry — and a rendered page in five files."
+description: "From a Figma frame to a rendered page: a contract, a mapping, a pull, a registry. Or the same in code, without Figma."
 ---
 
-From nothing to a rendered page in five files. The code on this page is complete — copy it into a TypeScript project and it runs.
-
-## 1. Install
+Two ways in. **From a Figma frame** is what Dedal is built for: designers build the page from your design system's components, one command turns the frame into a template, your components render it. **In code** needs no Figma — the structure is written in TypeScript, the same engine renders it.
 
 ```bash
 npm i github:dawidglosny/dedal#v0.9.0
 ```
 
-You need Node 20.9+ and TypeScript. For rendering with React (`dedal/react`) — React 18+, which your app most likely has already. The core (`dedal`) has no dependencies.
+You need Node 20.9+. For rendering with React (`dedal/react`) — React 18+, which your app most likely has already. The core (`dedal`) has no dependencies.
 
-## 2. The contract
+To see path A working before you set anything up, run [`examples/figma`](https://github.com/dawidglosny/dedal/tree/main/examples/figma) — a landing page pulled from a Figma frame; its template is in the repository, so it runs without a token (*A page from Figma, end to end*).
+
+## A. From a Figma frame
+
+### 1. The design
+
+In Figma, build the page from your library's components — the sections too. Say the library has a `Section` component with a `Title` text property and a `Content` slot, a `Card` with `Title` and `Href` text properties and a `Badge` slot, and a `Badge` with a `Label`. The page frame holds `Section` instances; their `Content` slots hold cards; each card's `Badge` slot holds a badge.
+
+That's the whole convention: **component, property and slot names match the contract** (case, spaces and dashes don't matter, nor Figma's `#3:0` suffixes). Where they don't, the mapping says so (step 3).
+
+### 2. The contract
+
+The contract lists the components a page can use, their props and their slots. It is written as a value with schemas — templates from Figma are data, so they are checked against it at runtime — and the TypeScript type is inferred from it. Plain JavaScript here, because the CLI loads it too.
+
+```js
+// ui/contract.mjs
+import { z } from 'zod'
+import { defineContract } from 'dedal'
+
+export const contract = defineContract({
+  section: { props: z.object({ title: z.string().optional() }) },
+  card: { props: z.object({ title: z.string(), href: z.string().optional() }), slots: { badge: 'one' } },
+  badge: { props: z.object({ label: z.string() }) },
+})
+```
+
+### 3. The mapping
+
+```js
+// figma.mapping.mjs
+import { mapping } from 'dedal/figma'
+import { contract } from './ui/contract.mjs'
+
+// names match → nothing to map; add component('FigmaName', { … }) where they don't
+export default mapping(contract, {})
+```
+
+The `Content` slot isn't a contract slot, so its cards become the section's children; the card's `Badge` slot fills the contract slot `badge`.
+
+### 4. Pull the frame
+
+```bash
+FIGMA_TOKEN=… npx dedal-figma pull "https://www.figma.com/design/<file>/<name>?node-id=1-2" --mapping ./figma.mapping.mjs --out templates/home.json
+```
+
+`FIGMA_TOKEN` is a personal access token (Figma → Settings → Security) with file content read access. Every top-level layer of the frame becomes a section of `templates/home.json`. The CLI checks the result against the contract — a template that doesn't match isn't written — and lists every layer it left out, with its path:
+
+```json
+{ "news": { "component": "section", "props": { "title": "Latest" }, "children": [
+  { "component": "card", "props": { "title": "Night trains are coming back", "href": "/a/night-trains" },
+    "slots": { "badge": { "component": "badge", "props": { "label": "Travel" } } } },
+  … ] } }
+```
+
+### 5. Render it
+
+The registry gives each contract name a React component — slots arrive as props named after the slot, the block's children as `children`. The page checks the template against the contract, builds it and renders it:
+
+```tsx
+// ui/registry.tsx
+import type { InferContract } from 'dedal'
+import type { Registry } from 'dedal/react'
+import type { contract } from './contract.mjs'
+
+export const registry = {
+  section: ({ title, children }) => (
+    <section>
+      <h2>{title}</h2>
+      <div className="grid">{children}</div>
+    </section>
+  ),
+  card: ({ title, href, badge }) => (
+    <article>
+      {badge}
+      <a href={href}>{title}</a>
+    </article>
+  ),
+  badge: ({ label }) => <span className="badge">{label}</span>,
+} satisfies Registry<InferContract<typeof contract>>
+```
+
+```tsx
+// app/page.tsx — Next.js (App Router), a Server Component
+import { createDedal } from 'dedal'
+import { Render } from 'dedal/react'
+import template from '@/templates/home.json'
+import { contract } from '@/ui/contract.mjs'
+import { registry } from '@/ui/registry'
+
+const ui = createDedal({ contract })
+
+export default async function Page() {
+  const checked = await ui.validateSections(template)
+  if (!checked.ok) throw new Error(checked.errors.map(error => `${error.path}: ${error.message}`).join('\n'))
+  const home = ui.page({ sections: Object.entries(checked.value).map(([key, block]) => ui.section(key, block)) })
+  return <Render tree={ui.resolve(await home.build())} registry={registry} />
+}
+```
+
+Change the frame in Figma — reorder the sections, add a card, edit a title — pull again, and the page follows. No code change.
+
+The texts typed in Figma are the page's content here. For cards that should show your articles, add a `data` function and bind it with selectors (`card`, `card > :slot(badge)`) — path B shows how; the texts from Figma become placeholders the data replaces.
+
+## B. In code
+
+The same kind of page with the structure written in TypeScript — no Figma, no token. The code is complete: copy it into a TypeScript project and it runs.
+
+### 1. The contract
 
 The contract lists the components a page can use and their props. It is types only, and it is the one thing the server and the frontend share. `Slot` marks a place for another component.
 
@@ -28,9 +133,9 @@ export type Contract = {
 }
 ```
 
-Here the contract is a TypeScript type — the simplest start. When templates come from outside the code (a database, a CMS, Figma), write it as a value with schemas instead (`defineContract`): the same type is inferred from it, and templates are checked against it at runtime (*Templates in a database or CMS*).
+Here the contract is a TypeScript type — the simplest start when the structure stays in code. When templates come from outside the code (Figma, a page builder, a database), write it as a value with schemas, as in path A: the same type is inferred from it, and templates are checked against it at runtime.
 
-## 3. A page: structure and data
+### 2. A page: structure and data
 
 Create one instance per project. A page has **sections** — each with a template (the structure) — and a `data` function that loads data and says where it goes. `card` and `card > :slot(badge)` are selectors, in CSS syntax: "every card" and "the badge in every card".
 
@@ -79,7 +184,7 @@ export const fetchArticles = async () => [
 ]
 ```
 
-## 4. The registry
+### 3. The registry
 
 On the frontend, each name from the contract gets a component — from any library or your own design system. Slots arrive as props named after the slot (`badge`), children from the template as `children`. `satisfies Registry<Contract>` makes a missing component or a wrong prop a compile error.
 
@@ -105,7 +210,7 @@ export const registry = {
 } satisfies Registry<Contract>
 ```
 
-## 5. Render
+### 4. Render
 
 `home.build()` loads the data and puts it into the structure; `ui.resolve()` turns that into the final props — plain JSON, the description of the page. `<Render>` draws it with the registry.
 
@@ -144,16 +249,17 @@ console.log(renderToString(<Render tree={page} registry={registry} />))
 </div></section>
 ```
 
-**Another frontend** (a mobile app, Web Components, a different framework) — send the description as JSON and render it there with its own registry: `Response.json(page)`. `examples/web-components` does exactly that.
+**Another frontend** (Web Components, a different framework) — send the description as JSON and render it there with its own registry: `Response.json(page)`. `examples/web-components` does exactly that.
 
 ## What just happened
 
-- The **structure** (a section, three cards, a badge in each) is in the template, not in JSX. Change `repeat(…, 3)` to `4`, or add a heading — the data still finds the cards.
+- The **structure** (a section, three cards, a badge in each) is in the template, not in JSX — pulled from Figma in path A, written as a block in path B. Change it — in the frame, or `repeat(…, 3)` to `4` — and the page follows; the data still finds the cards.
 - The **data** reached its place by selectors, not by position.
 - The **components** are only in the registry — swap them for another library, and the page code doesn't change.
 
 ## Next steps
 
+- **From Figma, properly** — the mapping, images, the CLI and the agent tools: *Templates from Figma*; the whole example file by file: *A page from Figma, end to end*.
 - **The template as data** — move the structure out of the code, into JSON stored on the server: *Tutorial*, step 4.
 - **See inside** — the devtools panel shows where every prop came from: *Devtools*, "How to enable it".
 - **Learn it properly** — *Tutorial*, then *Layout*, *Data*, *Sections*.

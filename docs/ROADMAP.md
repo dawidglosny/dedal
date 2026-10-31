@@ -65,14 +65,15 @@ ui.page({ sections, data, assign: { prune: 'grid, wrapper-group' } })   // for t
 - `prune` in the contract (a per-component "container" flag in the instance options) instead of on every page?
 - Is a node with slots but no children (a card with an empty slot) empty? Proposal: no — slots are the component's content.
 
-### Templates stored as JSON
+### Figma: a plugin
 
-Status: proposal, not implemented.
+Status: planned. Today frames come through the REST API (`dedal-figma pull`, `dedal-mcp`), which needs a token. A Figma plugin would convert the selected frame where the designer works: either with the contract given as JSON Schema (`ui.jsonSchema()`) and the naming convention, showing the template and the report in the plugin — or exporting the frame in the REST shape for the CLI to convert. The Plugin API also sees what REST doesn't (variables as design tokens).
 
-Blocks are plain JSON, so templates can live outside the code (a database, a design-tool export) — see `examples/web-components`. Two gaps today:
-- **`defaults` are not applied** — `node()` adds them when a block is created in code; a block parsed from JSON never goes through `node()`. Proposal: apply `defaults` in `layout()` (props from the block win), so both paths behave the same; `trace` already reports `default` as a source there.
-- **No runtime validation** — the contract is types only, so an unknown component or a wrong slot name in a stored template is found only at render time (`fallback`). Proposal: an optional `createDedal({ components })` list (or a validator function) checked when a section is created, with an error pointing to the path in the template.
-- **`sections` is synchronous** — a template loaded from async storage (a database) can't be read inside `sections(ctx)`. Today: load it first and create the page per request (`examples/web-components/src/home.page.ts`, *Tutorial* step 4), with the template version in the cache key. Proposal: allow `sections: async (ctx) => [...]` — `layout` would become async, which touches `page.layout()` and the cache path.
+### A page builder example
+
+Status: planned. The second source of templates after Figma, shown on a working editor: a palette of the contract's components, property panels generated from the contract's JSON Schema (`ui.jsonSchema()`), a live preview through `<Render>`, sections reordered by dragging, the template saved only when `ui.validateSections` accepts it.
+
+*Templates stored as JSON* — the runtime contract, `defaults` applied in `layout()`, async `sections` — shipped in 0.7.0 ([ADR-002](adr/002-runtime-contract.md)).
 
 ### `dedal/astro`
 

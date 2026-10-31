@@ -27,7 +27,7 @@ A working example: [`examples/figma`](https://github.com/dawidglosny/dedal/tree/
 One contract per component library: the contract mirrors the library's components and their values, and the same library's registry renders the page. Names are compared without case, spaces, dashes and underscores; Figma's `#id` suffixes are dropped.
 
 ```ts
-// figma.mapping.ts
+// figma.mapping.mjs
 import { z } from 'zod'
 import { defineContract } from 'dedal'
 import { component, mapping, swap, text } from 'dedal/figma'
@@ -62,13 +62,13 @@ A prop the contract doesn't have is a compile error, and an error when the mappi
 ## Pulling a frame
 
 ```sh
-FIGMA_TOKEN=… npx dedal-figma pull "https://www.figma.com/design/<file>/<name>?node-id=31-398" --mapping ./figma.mapping.js --out templates/home.json
+FIGMA_TOKEN=… npx dedal-figma pull "https://www.figma.com/design/<file>/<name>?node-id=31-398" --mapping ./figma.mapping.mjs --out templates/home.json
 ```
 
 - The token is a personal access token with file content read access, from the environment.
 - Every top-level layer of the frame is a section — its name is the section key.
 - The output is the sections as JSON. What didn't make it into the template goes to stderr: `Frame 427/Group 12/icon/lock-open — an instance of "icon/lock-open", which no contract component maps`.
-- A template that doesn't match the contract is **not written** (exit code 1), with the template path and the Figma layer: `hero.children[0].slots.badge.props.variant (Figma: hero/Content/hero/Badge/Badge): Invalid option…`. `--force` writes it anyway.
+- A template that doesn't match the contract is **not written** (exit code 1), with the template path and the Figma layer: `hero.children[0].slots.badge.props.variant (Figma: hero/Content/hero/Badge/Badge): Invalid option…`. `--force` writes it anyway — still with exit code 1, so CI notices.
 - `--images public/figma` downloads the images (`image()` in the mapping) and puts their paths in the template (`/figma/<ref>.png`; `--image-url` sets the prefix). Figma gives image URLs only through a separate request, and they expire — without `--images` the values stay `figma-image:<ref>`.
 - `--raw response.json` also saves the REST response — a fixture for a test of your mapping, no network needed.
 - The mapping module is loaded by Node: write it in JavaScript, or in TypeScript with Node 23.6+ (or a loader such as `tsx`).
@@ -76,7 +76,7 @@ FIGMA_TOKEN=… npx dedal-figma pull "https://www.figma.com/design/<file>/<name>
 The same in code — e.g. in a job triggered by a Figma webhook:
 
 ```ts
-import fromFigma from './figma.mapping'
+import fromFigma from './figma.mapping.mjs'
 
 const response = await fetch(`https://api.figma.com/v1/files/${file}/nodes?ids=${node}`, { headers: { 'X-Figma-Token': token } }).then(r => r.json())
 const { ok, sections, errors, unmapped, warnings } = await fromFigma.convert(response, node)
@@ -90,7 +90,13 @@ const { ok, sections, errors, unmapped, warnings } = await fromFigma.convert(res
 { "mcpServers": { "dedal": { "command": "npx", "args": ["dedal-mcp"], "env": { "FIGMA_TOKEN": "${FIGMA_TOKEN}" } } } }
 ```
 
-- **The `figma-to-dedal` skill** for Claude Code (`skills/figma-to-dedal/SKILL.md` in the package — copy it to `.claude/skills/`): give it a Figma link; it reads the contract, pulls the frame, sorts the report — a fix in the mapping, a change in the Figma file (with the layer path), or a contract change it proposes and you approve — and saves the template. It never extends the contract or forces a template on its own.
+- **The `figma-to-dedal` skill** for Claude Code (`skills/figma-to-dedal/SKILL.md` in the package — copy it to `.claude/skills/`). Give it a Figma link, and it:
+  1. reads the contract,
+  2. pulls the frame,
+  3. sorts the report — a fix in the mapping (it makes it), a change in the Figma file (it names the layer), or a contract change (it proposes, you approve),
+  4. saves the template.
+
+  It never extends the contract or forces a template on its own.
 - With Figma's own MCP server next to it, an agent can also read the design (`get_metadata`) to start a mapping for a new design system.
 
 ## From Figma to the page

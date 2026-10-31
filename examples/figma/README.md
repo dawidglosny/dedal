@@ -17,7 +17,7 @@ FIGMA_TOKEN=… npm run pull   # fetch the frame, convert, validate, download th
 npm run dev              # http://localhost:3000 — add ?debug=1 for the devtools panel
 ```
 
-The template in the repository works without a token; its images are placeholders until the first `npm run pull`.
+The template and its images in the repository come from a pull, so the page runs without a token; `npm run pull` refreshes them from the Figma file.
 
 ## The loop
 

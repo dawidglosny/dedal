@@ -32,5 +32,5 @@ Dedal is positioned as **the engine behind pages generated from Figma or assembl
 ## Consequences
 
 - README, the docs site's home page and *Why Dedal* lead with Figma and page builders; mobile is under *Later*.
-- Priorities follow: the contract available at runtime (a page builder needs its property panels, a Figma converter needs validation), Figma support as part of the package, a page builder example. See the [roadmap](../ROADMAP.md).
+- Priorities follow: the contract available at runtime (a page builder needs its property panels, a Figma mapping needs validation), Figma support as part of the package, a page builder example. See the [roadmap](../ROADMAP.md).
 - Features that serve only the general case (actions, versioning for native clients) wait until there is a reason to return to mobile.

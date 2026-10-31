@@ -3,7 +3,7 @@ title: "Why Dedal"
 description: "Structure, data and components kept apart: why, who it is for and who it isn't, how it compares."
 ---
 
-Dedal is the engine behind pages **generated from Figma or assembled in a page builder**, rendered with **your own design system**. To do that it keeps three things apart that a typical component tree tangles together — **structure, data and components** — and joins them at the last moment. This page explains why that is useful, who it is for and who it isn't for, and how it compares with what you may already use.
+Dedal is the engine behind pages **generated from Figma or assembled in a page builder**, rendered with **your own design system**. A component tree usually mixes **structure, data and components**; Dedal separates them and joins them only when the page is built. This page explains why that is useful, who it is for and who it isn't for, and how it compares with what you may already use.
 
 ## Three things in one place
 
@@ -29,7 +29,19 @@ data (your APIs) ───────────┘
 
 So each part can change on its own: a new structure with the same data, the same data in a new structure, the same description rendered by a different set of components.
 
-## The idea: send the screen, not only the data
+## Who it is for
+
+Dedal is built for one setup above all: **web products on a shared design system, whose pages are designed in Figma or assembled in a page builder or a CMS** — not written in JSX.
+
+- **Pages from Figma** — designers build a page from the design system's components and publish; `dedal-figma pull` (or an agent, through the `dedal-mcp` server) turns the frame into a template checked against the contract (*Templates from Figma*, and the whole path in *A page from Figma, end to end*).
+- **Page builders and CMSs** — Dedal is the engine: the contract says what the editor can place and with which props, a template is what it saves, the frontend renders it with your components.
+- **Many products, one design system** — templates designed once, served to every product, each rendering them with its registry.
+
+More generally, it fits any UI whose **structure changes on a different schedule, by different people, or comes from a different system than its components**: content sites and landing pages rearranged by editors, dashboards arranged per role or customer (*Another domain: a dashboard*), store pages and A/B tests of the page structure, onboarding steps tuned by product.
+
+**Later: mobile apps.** A native app could render the JSON Dedal produces, but there is no native renderer and no contract versioning yet — older app versions would need both (*A client without React* shows the idea).
+
+## Under the hood: send the screen, not only the data
 
 In **server-driven UI** the server sends a description of the screen — "a `grid` with two columns, inside it two `card`s with these titles" — and the frontend renders whatever it gets from a catalog of its own components:
 
@@ -45,18 +57,6 @@ server-driven UI
 ```
 
 The frontend has the building blocks; the server sends the instructions. A new layout needs no new blocks. Only a new kind of block (a new component) touches the frontend.
-
-## Who it is for
-
-Dedal is built for one setup above all: **web products on a shared design system, whose pages are designed in Figma or assembled in a page builder or a CMS** — not written in JSX.
-
-- **Pages from Figma** — designers build a page from the design system's components and publish; `dedal-figma pull` (or an agent, through the `dedal-mcp` server) turns the frame into a template checked against the contract (*Templates from Figma*, and the whole path in *A page from Figma, end to end*).
-- **Page builders and CMSs** — Dedal is the engine: the contract says what the editor can place and with which props, a template is what it saves, the frontend renders it with your components.
-- **Many products, one design system** — templates designed once, served to every product, each rendering them with its registry.
-
-More generally, it fits any UI whose **structure changes on a different schedule, by different people, or comes from a different system than its components**: content sites and landing pages rearranged by editors, dashboards arranged per role or customer (*Another domain: a dashboard*), store pages and A/B tests of the page structure, onboarding steps tuned by product.
-
-**Later: mobile apps.** A native app could render the JSON Dedal produces, but there is no native renderer and no contract versioning yet — older app versions would need both (*A client without React* shows the idea).
 
 ## When it doesn't
 
@@ -78,11 +78,11 @@ Dedal decides **what** is on the page. Your framework and components decide **ho
 ## What you get
 
 - **Structure is data** — plain JSON templates you can store, version and generate.
-- **One contract, two checks** — components, props and slots, shared by the server and every frontend: typed at compile time, and — written as a value with schemas — validated at runtime (templates from storage or Figma, with a path to every problem) and exported to JSON Schema (a page builder's property panels).
+- **One contract, two checks** — components, props and slots, shared by the server and every frontend. Typed at compile time. Written as a value with schemas, also validated at runtime — templates from Figma or storage, with a path to every problem — and exported to JSON Schema for a page builder's property panels.
 - **Data placed by selectors** — `card`, `#featured`, `card > :slot(badge)`: CSS syntax instead of indexes, so adding a heading doesn't shift the data.
 - **Explicit rules for missing data** — fewer items than places, a failing API, an empty section: safe defaults, a strict mode when you want it, and a report of everything that was dropped.
 - **Variants without copies** — `patch` and `remove` adapt one template per device, site or experiment.
-- **Speed** — page and data-source cache with stale-while-revalidate, loaders in parallel, streaming of slow sections; building a 530-node page takes under a millisecond.
+- **Speed** — page and data-source cache with stale-while-revalidate, loaders in parallel, streaming of slow sections; a 530-node page builds and resolves in under a millisecond.
 - **Devtools** — click any element on the page and see where each prop came from, which selector placed the data and what went missing.
 - **A bonus: no lock-in** — the page is plain JSON and the registry is the only place that knows your components: switching component libraries doesn't touch the pages, and the zero-dependency core works with any renderer.
 

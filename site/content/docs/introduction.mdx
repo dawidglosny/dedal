@@ -7,7 +7,7 @@ This page shows how Dedal works: who does what, how data flows from a template t
 
 ## Five words to start with
 
-You need only these to follow the rest of this page (the full glossary is at the end):
+You need only these to follow the rest of this page (the full glossary is on its own page — *Glossary*):
 
 - **contract** — which components exist, what props they take, which slots they have. A TypeScript type, or a value with schemas (`defineContract`) that templates are also checked against at runtime. The server and the frontend share it.
 - **block** — a piece of layout: `node('card', { props })`, or the same thing as plain JSON. Structure only, no data.
@@ -22,9 +22,11 @@ The model has two sides:
 - the **server** keeps the templates (blocks), loads the data, puts the two together (`build`) and turns the result into final props (`resolve`),
 - the **frontend** maps component names to its components (the registry) and renders the finished tree (`<Render>`).
 
-They are connected by the **contract** — a TypeScript type describing which components exist and what props they take. It is the only thing both sides have to share.
+They are connected by the **contract** — which components exist, what props and slots they take. It is the only thing both sides have to share: a TypeScript type, or a value with schemas when templates come from outside the code.
 
-In `examples/next` (Next.js, App Router) both sides live in one application: `build` and `resolve` run in a Server Component, and `<Render>` renders the result right away. The split still holds: the same page is available as JSON (`/api/home`), so a completely different frontend could render it, e.g. a mobile app with its own registry.
+Where templates come from: **Figma** (`dedal-figma pull` — *Templates from Figma*), **a page builder, a CMS or a database** (*Templates from a page builder, CMS or database*), or **code** (blocks written in TypeScript, as in the example below).
+
+In `examples/next` (Next.js, App Router) both sides live in one application: `build` and `resolve` run in a Server Component, and `<Render>` renders the result right away. The split still holds: the same page is available as JSON (`/api/home`), so a completely different frontend could render it, e.g. Web Components with their own registry.
 
 ## End-to-end example
 

@@ -10,7 +10,7 @@ description: "Pages, the registry and toProps in tests: build reports, resolve i
 - **pages** — they build, every binding finds its nodes, nothing is removed or fails unexpectedly,
 - **the registry** — every component a page uses has an implementation,
 - **toProps** — plain functions: data in, props out,
-- **stored templates** — validated in CI (*Templates in a database or CMS*),
+- **stored templates** — validated in CI (*Templates from a page builder, CMS or database*),
 - **the contract** — the type checker: `satisfies Registry<Contract>` and typed templates fail the build when they drift apart.
 
 ## A page test
