@@ -1,3 +1,4 @@
+import { join } from 'node:path'
 import type { NextConfig } from 'next'
 import { createMDX } from 'fumadocs-mdx/next'
 
@@ -10,8 +11,9 @@ const config: NextConfig = {
   env: { NEXT_PUBLIC_BASE_PATH: basePath },
   trailingSlash: true,
   images: { unoptimized: true },
-  turbopack: { root: import.meta.dirname },
-  outputFileTracingRoot: import.meta.dirname,
+  // the repository root: the docs include files from outside site/ (docs/API.md, the examples' code)
+  turbopack: { root: join(import.meta.dirname, '..') },
+  outputFileTracingRoot: join(import.meta.dirname, '..'),
 }
 
 // fumadocs-mdx: compiles content/docs/*.mdx (configured in source.config.ts) into the `.source` collections

@@ -1,0 +1,115 @@
+---
+title: A page from Figma, end to end
+description: "The demo: a landing page designed in Figma, pulled by dedal-figma and rendered by Dedal — every file, the loop, what the contract stops."
+---
+
+**In short:** a landing page designed in Figma becomes a page in production without anyone writing its structure in code. Designers build the frame from the design system's components; `dedal-figma pull` turns it into a template checked against the contract; Dedal renders it with your React components. Change the frame, pull again — the page follows. This page walks through the whole example, file by file; the code below is included from [`examples/figma`](https://github.com/dawidglosny/dedal/tree/main/examples/figma), so it's what actually runs.
+
+## The design
+
+The [Figma file](https://www.figma.com/design/AOw4RpmACCpyhHI9YXRJVG/Dedal?node-id=31-398) is built like a design system, not like a mock-up:
+
+- **sections are library components** — `Section` (with a `tone` variant: default, muted, dark), `Hero`, `SectionHeading`, `Grid`, `Split`, `Step`, `CodeBlock`, `CTA`, `Navbar`, `Footer`, `Image`,
+- **their texts are component properties** — `Title`, `Subtitle`, `Lead`, `Tagline`,
+- **their content sits in native slots** — `Section` has a `Content` slot, `Hero` has `Badge`, `Actions` and `Media`, `SectionHeading` has `Badge`; slots hold instances of other components, which have slots of their own,
+- **the small components come from shadcn/ui** — `Button`, `Badge`, `FeatureCard` with their own properties and variants,
+- **illustrations are images** — `Image` instances with an image fill, not pictures drawn from frames and shapes.
+
+One frame — `Frame 427` — is deliberately built the way real files often are: a plain frame with loose texts and an icon outside any component. It shows what happens to what the mapping doesn't cover.
+
+## The contract
+
+The contract describes the design system: which components exist, their props and their slots. It's plain JavaScript, because the CLI (Node) loads it too — the app and the pull share one file.
+
+<include lang="js" meta='title="ui/contract.mjs"'>../../../examples/figma/ui/contract.mjs</include>
+
+## The mapping
+
+Two lines. Everything else follows the naming convention — `Hero` → `hero`, `Title#29:17` → `title`, the slot `Badge` → the slot `badge`:
+
+<include lang="js" meta='title="figma.mapping.mjs"'>../../../examples/figma/figma.mapping.mjs</include>
+
+- `FeatureCard` is named differently in code (`feature`), and its icon is an instance swap — the swapped component's name (`icon/braces`) becomes the prop (`braces`).
+- `Image` takes its `src` from the instance's image fill — Figma gives image URLs only through a separate request, and they expire, so the pull downloads the files.
+- `section: 'section'` wraps a top-level frame that holds several blocks (here only `Frame 427`); `text: 'text'` turns its loose texts into text blocks with the name of their Figma text style.
+
+## Pulling the frame
+
+```bash
+FIGMA_TOKEN=… npm run pull
+```
+
+```text
+1 layer(s) not in the template:
+  Frame 427/Group 12/icon/lock-open — an instance of "icon/lock-open", which no contract component maps
+3 image(s) → public/figma
+✓ 10 section(s) → templates/home.json
+```
+
+Every top-level layer of the frame is a section. What didn't make it into the template is listed with its Figma layer path — nothing is dropped silently. A section of the result:
+
+```json
+"principle": {
+  "component": "section",
+  "props": { "tone": "default" },
+  "children": [
+    {
+      "component": "sectionHeading",
+      "props": { "title": "Three things change at different speeds.\nKeep them apart.", "subtitle": "…", "align": "center", "tone": "default" },
+      "slots": { "badge": { "component": "badge", "props": { "label": "THE IDEA", "variant": "brand" } } }
+    },
+    {
+      "component": "grid",
+      "children": [
+        { "component": "feature", "props": { "title": "Structure", "description": "…", "icon": "pen-tool" } },
+        …
+      ]
+    }
+  ]
+}
+```
+
+The `Section` instance became `section` with its variant as a prop; the content of its `Content` slot became its children; the `SectionHeading` inside kept its own slot, `badge`.
+
+## The registry
+
+One React component per contract component — here shadcn/ui, Tailwind and the file's colors. Slots arrive as props named after the slot, the block's children as `children`:
+
+<include lang="tsx" meta='title="ui/registry.tsx"'>../../../examples/figma/ui/registry.tsx#heading</include>
+
+<include lang="tsx" meta='title="ui/registry.tsx"'>../../../examples/figma/ui/registry.tsx#feature</include>
+
+The registry is the only place that knows the components. The same template rendered with another registry is the same page in another library.
+
+## The page
+
+The template is checked against the contract when the page is built — a template from outside the code isn't seen by TypeScript — then built, resolved and rendered:
+
+<include lang="ts" meta='title="ui/home.ts"'>../../../examples/figma/ui/home.ts</include>
+
+<include lang="tsx" meta='title="app/page.tsx"'>../../../examples/figma/app/page.tsx</include>
+
+With `?debug=1` the devtools panel opens: click any element and see its props and where each came from — here `template` for everything, because the whole page comes from the design.
+
+## The loop
+
+1. Change the frame in Figma: reorder the sections, edit a heading, switch a button's variant, swap a feature's icon, add a card to a grid, switch a section's tone.
+2. `npm run pull`.
+3. Reload the page. No code change, no release of the frontend.
+
+What the contract doesn't allow stops the pull before anything is written — with the template path and the Figma layer. Say the code's badge had only `default`, `secondary` and `outline`, and the design used the `brand` variant:
+
+```text
+error  hero.children[0].slots.badge.props.variant (Figma: hero/Content/hero/Badge/Badge): Invalid option: expected one of "default"|"secondary"|"outline"
+error  principle.children[0].slots.badge.props.variant (Figma: principle/Content/section-heading/Badge/Badge): Invalid option: expected one of "default"|"secondary"|"outline"
+…
+✗ 6 error(s) — nothing written (--force writes anyway)
+```
+
+That's the split between the two teams: designers change pages freely within the design system; a new component or a new variant is a change to the contract and the registry — code, reviewed and released first.
+
+## What this example doesn't show
+
+- **Data.** Everything on this page comes from the design. A page with data — articles in the cards, prices in a table — adds a loader and binds it with selectors (`feature`, `#featured`); the texts typed in Figma become placeholders the data replaces (*Data*).
+- **Storing and publishing.** Here the template is a file in the repository. In production the pull saves a draft to your template store, and publishing makes it live (*Templates in a database or CMS*).
+- **Design tokens.** The colors are copied into the CSS by hand; Figma's variables aren't part of the template.

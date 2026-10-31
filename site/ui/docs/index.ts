@@ -74,6 +74,13 @@ export const groups: DocGroup[] = [
     cases: [],
   },
   {
+    slug: 'figma-demo',
+    title: 'A page from Figma, end to end',
+    description: 'The demo: a landing page designed in Figma, pulled by dedal-figma and rendered by Dedal — every file, the loop, what the contract stops.',
+    file: '',
+    cases: [],
+  },
+  {
     slug: 'adopting',
     title: 'Adopting in an existing app',
     description: 'One block first, your components kept, a registry as an adapter — grow from there, or stop.',
@@ -172,7 +179,7 @@ export const groups: DocGroup[] = [
 export const parts: { title: string; groups: string[] }[] = [
   { title: 'Get started', groups: ['why', 'quick-start', 'introduction'] },
   { title: 'Learn', groups: ['tutorial', 'dashboard', 'production'] },
-  { title: 'Guides', groups: ['templates-in-storage', 'templates-from-figma', 'adopting', 'clients-without-react', 'testing'] },
+  { title: 'Guides', groups: ['templates-in-storage', 'templates-from-figma', 'figma-demo', 'adopting', 'clients-without-react', 'testing'] },
   { title: 'Features', groups: ['layout', 'data', 'sections', 'cache', 'rendering'] },
   { title: 'Troubleshooting', groups: ['errors', 'devtools'] },
   { title: 'Reference', groups: ['api', 'glossary', 'limitations'] },

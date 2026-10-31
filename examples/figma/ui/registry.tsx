@@ -58,6 +58,7 @@ export const registry = {
     </div>
   ),
 
+  // #region heading
   sectionHeading: ({ title, subtitle, align = 'center', tone = 'default', badge }) => (
     <div className={cn('flex max-w-[820px] flex-col gap-4', align === 'center' ? 'items-center text-center' : 'items-start')}>
       {badge}
@@ -65,6 +66,8 @@ export const registry = {
       {subtitle && <p className={cn('text-xl', tone === 'inverse' ? 'text-blueprint-foreground/75' : 'text-muted-foreground')}>{subtitle}</p>}
     </div>
   ),
+
+  // #endregion heading
 
   grid: ({ children }) => <div className="grid w-full gap-6 md:grid-cols-[repeat(auto-fit,minmax(320px,1fr))]">{children}</div>,
 
@@ -163,6 +166,7 @@ export const registry = {
     </ShadcnBadge>
   ),
 
+  // #region feature
   feature: ({ title, description, icon }) => (
     <div className="flex flex-col gap-4 rounded-xl border bg-card p-6">
       <span className="flex size-10 items-center justify-center rounded-lg bg-brand-soft text-brand">
@@ -174,6 +178,7 @@ export const registry = {
       </div>
     </div>
   ),
+  // #endregion feature
 } satisfies Registry<Contract>
 
 /** A loose text from Figma, styled by the name of its Figma text style (`h3`, `body-sm`) — the design system's type scale. */
