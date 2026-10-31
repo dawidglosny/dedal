@@ -88,6 +88,8 @@ export type DevtoolsPayload = {
     timings?: BuildTiming[]
     /** `resolve` issues not tied to a node (e.g. data without a node). */
     issues: { id: string; message: string }[]
+    /** Templates that don't match the contract, with their paths — only from `build(ctx, { trace: true })` with a contract. */
+    templateErrors?: { path: string; message: string }[]
   }
 }
 
@@ -230,6 +232,7 @@ export function inspect<C>(result: PageResult<C>, resolved: ResolvedPage<C>): De
       ...(result.report.trace?.sectionErrors && { sectionErrors: result.report.trace.sectionErrors }),
       ...(result.report.trace?.cacheOption && { cacheOption: true as const }),
       ...(result.report.trace?.timing && { timings: [result.report.trace.timing] }),
+      ...(result.report.trace?.templateErrors && { templateErrors: result.report.trace.templateErrors }),
       issues: pageIssues,
     },
   }
@@ -324,6 +327,10 @@ export function mergePayloads(payloads: DevtoolsPayload[]): DevtoolsPayload {
     union(merged.page.emptySections, payload.page.emptySections ?? [])
     for (const issue of payload.page.issues) {
       if (!merged.page.issues.some(known => known.id === issue.id && known.message === issue.message)) merged.page.issues.push(issue)
+    }
+    for (const error of payload.page.templateErrors ?? []) {
+      const known = (merged.page.templateErrors ??= [])
+      if (!known.some(other => other.path === error.path && other.message === error.message)) known.push(error)
     }
     if (merged.page.cacheKey === undefined && payload.page.cacheKey !== undefined) merged.page.cacheKey = payload.page.cacheKey
     if (payload.page.cacheOption) merged.page.cacheOption = true
@@ -571,6 +578,10 @@ export function pageMessages(payload: DevtoolsPayload): DevtoolsMessage[] {
             ? 'cache key: none — cache.key returned undefined for this ctx, so the page is not cached'
             : 'cache key: none — the page has no cache option',
     })
+  }
+
+  for (const { path, message } of page.templateErrors ?? []) {
+    messages.push({ level: 'error', subject: path, text: `template doesn't match the contract — ${message}` })
   }
 
   const unmatched = payload.sections.flatMap(section => section.diagnosis?.unmatched ?? [])

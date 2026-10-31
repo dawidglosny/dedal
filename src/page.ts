@@ -1,3 +1,5 @@
+import type { ContractDefinition } from './contract'
+import { validateTemplate, type ValidationError } from './validate'
 import { assign, type AssignPolicies, type AssignReport, type Bindings, type DataMap } from './assign'
 import { createCache, hashKey, type Cache, type PageCacheOptions } from './cache'
 import { describeValue } from './describe'
@@ -105,6 +107,11 @@ export type PageTrace<C = unknown> = {
   layoutSelectors?: Record<string, LayoutSelectorReport[]>
   /** Stage, loader and query timings of this build. */
   timing?: BuildTiming
+  /**
+   * Templates that don't match the contract (`createDedal({ contract })`): the section blocks, deferred placeholders and
+   * `onEmpty` blocks of this build, each error with its path. Reported, not thrown — the page still builds.
+   */
+  templateErrors?: ValidationError[]
 }
 
 /** A `remove` / `patch` selector of a section and the number of nodes it matched. */
@@ -144,6 +151,8 @@ export type PageOptions = {
   cache?: Cache
   /** Async context for query timings in debug builds (`createDedal({ AsyncLocalStorage })`). */
   context?: () => AsyncContext | undefined
+  /** The contract value — debug builds validate the templates against it (`report.trace.templateErrors`). */
+  contract?: ContractDefinition
 }
 
 /** Page stage options. */
@@ -209,6 +218,18 @@ export function page<C, Ctx = void>(definition: PageDefinition<C, Ctx>, options:
     }
 
     return sections
+  }
+
+  /** Debug builds with a contract: every template of these sections against it — reported, not thrown. */
+  const templateErrorsOf = async (definitions: SectionDefinition<C, Ctx>[]): Promise<ValidationError[]> => {
+    const contract = options.contract
+    if (!contract) return []
+    const checks = definitions.flatMap(({ key, block, defer, onEmpty }) => [
+      validateTemplate(contract, block, key),
+      ...(defer ? [validateTemplate(contract, defer.fallback, `${key}.defer.fallback`)] : []),
+      ...(typeof onEmpty === 'object' ? [validateTemplate(contract, onEmpty, `${key}.onEmpty`)] : []),
+    ])
+    return (await Promise.all(checks)).flat()
   }
 
   /** Section layout: block → `remove` → `patch`; `null` when the root was removed. */
@@ -481,7 +502,11 @@ export function page<C, Ctx = void>(definition: PageDefinition<C, Ctx>, options:
     // loaders only for sections present in the layout (not deferred, not removed)
     const present = new Set(sections.filter(({ deferred }) => !deferred).map(({ key }) => key))
     const errors: Record<string, string> = {}
-    const data = await loadWith(ctx, definitions, definitions.filter(({ key }) => present.has(key)), true, trace ? errors : undefined, timer)
+    // debug builds validate the templates against the contract, alongside the loaders
+    const [data, templateErrors] = await Promise.all([
+      loadWith(ctx, definitions, definitions.filter(({ key }) => present.has(key)), true, trace ? errors : undefined, timer),
+      trace ? templateErrorsOf(definitions) : [],
+    ])
     timer?.mark('load')
     const { result, removedLayouts } = assignWith(sections, data, definitions, trace)
     timer?.mark('assign')
@@ -493,6 +518,7 @@ export function page<C, Ctx = void>(definition: PageDefinition<C, Ctx>, options:
         ...withRemoved(removedLayouts),
         ...withErrors(errors),
         ...(layoutSelectors && { layoutSelectors }),
+        ...(templateErrors.length && { templateErrors }),
         timing: timer.result('page'),
       }
     }
@@ -524,7 +550,10 @@ export function page<C, Ctx = void>(definition: PageDefinition<C, Ctx>, options:
       timer?.mark('layout')
       const sections = root ? [{ key, layout: root }] : []
       const errors: Record<string, string> = {}
-      const data = root ? await loadWith(ctx, [definitionOfSection], [definitionOfSection], false, buildOptions.trace ? errors : undefined, timer) : {}
+      const [data, templateErrors] = await Promise.all([
+        root ? loadWith(ctx, [definitionOfSection], [definitionOfSection], false, buildOptions.trace ? errors : undefined, timer) : {},
+        buildOptions.trace ? templateErrorsOf([definitionOfSection]) : [],
+      ])
       timer?.mark('load')
       const { result, removedLayouts } = assignWith(sections, data, [definitionOfSection], buildOptions.trace)
       timer?.mark('assign')
@@ -539,6 +568,7 @@ export function page<C, Ctx = void>(definition: PageDefinition<C, Ctx>, options:
           ...withRemoved(removedLayouts),
           ...withErrors(errors),
           ...(hits?.length && { layoutSelectors: { [key]: hits } }),
+          ...(templateErrors.length && { templateErrors }),
           ...(timer && { timing: timer.result(key) }),
         }
       }

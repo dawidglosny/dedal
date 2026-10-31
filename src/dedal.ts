@@ -101,7 +101,7 @@ function createInstance<C extends object>(options: DedalOptions<C>) {
     section: <Ctx = any>(key: string, block: BlockDefinition<C>, sectionOptions?: SectionOptions<C, Ctx>): SectionDefinition<C, Ctx> =>
       section(key, block, sectionOptions),
     page: <Ctx = void>(definition: PageDefinition<C, Ctx>): Page<C, Ctx> =>
-      page(definition, { id: options.id, policies: options.assign, cache, defaults: options.defaults, context }),
+      page(definition, { id: options.id, policies: options.assign, cache, defaults: options.defaults, context, contract: options.contract }),
     /**
      * Query — a cached data source, shared by pages and sections.
      * The result is frozen and shared — read-only.

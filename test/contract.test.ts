@@ -7,6 +7,7 @@ import Ajv2020 from 'ajv/dist/2020'
 import * as v from 'valibot'
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import { z } from 'zod'
+import { inspect, mergePayloads, pageMessages, reportText } from '../src/devtools'
 import { createDedal, defineContract, type BlockDefinition, type InferContract, type PropsOf, type Slot, type SlotName } from '../src'
 import type { Registry } from '../src/react'
 
@@ -293,5 +294,48 @@ describe('jsonSchema', () => {
   it('is plain JSON', () => {
     const schema = ui.jsonSchema()
     expect(JSON.parse(JSON.stringify(schema))).toEqual(schema)
+  })
+})
+
+describe('devtools: templates against the contract', () => {
+  const ui = createDedal({ contract: withZod })
+  const page = ui.page({
+    sections: [
+      ui.section('news', { component: 'grid', children: [{ component: 'card', props: { size: 'xl' } as never }] }),
+      ui.section('promo', ui.node('card'), { defer: { fallback: { component: 'skeleton' } as never } }),
+    ],
+    data: async () => ({ news: { card: [{ title: 'A' }] } }),
+  })
+
+  it('a debug build reports templates that don\'t match the contract — and still builds', async () => {
+    const result = await page.build(undefined, { trace: true })
+    expect(result.report.trace?.templateErrors).toEqual([
+      { path: 'news.children[0].props.size', message: expect.any(String) },
+      { path: 'promo.defer.fallback.component', message: 'unknown component "skeleton"' },
+    ])
+    expect(result.sections.map(section => section.key)).toEqual(['news', 'promo'])
+
+    const payload = inspect(result, ui.resolve(result))
+    const errors = pageMessages(payload).filter(message => message.level === 'error')
+    expect(errors.map(message => message.subject)).toEqual(['news.children[0].props.size', 'promo.defer.fallback.component'])
+    expect(reportText(payload)).toContain("template doesn't match the contract — unknown component \"skeleton\"")
+  })
+
+  it('outside debug mode nothing is validated', async () => {
+    expect((await page.build()).report.trace).toBeUndefined()
+  })
+
+  it('page.section() validates its section too; merged payloads keep the errors once', async () => {
+    const full = await page.build(undefined, { trace: true })
+    const section = await page.section('promo', undefined, { trace: true })
+    expect(section.report.trace?.templateErrors).toEqual([{ path: 'promo.defer.fallback.component', message: 'unknown component "skeleton"' }])
+
+    const merged = mergePayloads([inspect(full, ui.resolve(full)), inspect(section, ui.resolve(section))])
+    expect(merged.page.templateErrors).toHaveLength(2)
+  })
+
+  it('an instance without a contract value builds as before', async () => {
+    const plain = createDedal<FromZod>().page({ sections: [{ key: 'x', block: { component: 'card' } }] })
+    expect((await plain.build(undefined, { trace: true })).report.trace?.templateErrors).toBeUndefined()
   })
 })
