@@ -1,0 +1,109 @@
+---
+title: "A client without React"
+description: "The page format, a renderer in a few dozen lines, older mobile apps, types on the client."
+---
+
+**In short:** `dedal/react` is one renderer of many possible. The page Dedal produces is plain JSON with a small, fixed shape, and a renderer is a function that walks it — a few dozen lines in any language: a mobile app, Web Components, server-side templates.
+
+## The format
+
+`ui.resolve()` returns a `ResolvedPage`:
+
+```ts
+type ResolvedPage = {
+  dedal: 1                                              // the format version — check it
+  sections: { key: string; tree: ResolvedNode; deferred?: true }[]
+  issues: { id: string; message: string }[]             // problems resolve worked around
+}
+
+type ResolvedNode = {
+  key: string                                           // a stable ID — use it as the key in lists
+  component: string                                     // a name from the contract
+  props: Record<string, unknown>                       // final props, plain JSON
+  slots?: Record<string, ResolvedNode | ResolvedNode[]> // named places: one node or a list
+  children?: ResolvedNode[]
+}
+```
+
+Serve it from an endpoint — `Response.json(ui.resolve(await page.build(ctx), { ctx }))` — and the client renders it.
+
+## A renderer
+
+Walk the tree: look up the component, render the slots and children first, pass them to it. This one produces HTML strings, with no dependencies:
+
+```ts
+import type { ResolvedNode, ResolvedPage } from 'dedal'
+import type { Contract } from './ui/contract'
+
+// a renderer without React: component name → a function from props, slots and children to HTML
+type Html = string
+type Renderer = (props: Record<string, any>, slots: Record<string, Html | Html[]>, children: Html[]) => Html
+
+const escape = (text: unknown) => String(text ?? '').replace(/[&<>"']/g, char => `&#${char.charCodeAt(0)};`)
+
+const views: Record<keyof Contract, Renderer> = {
+  section: (props, _, children) => `<section><h2>${escape(props.title)}</h2>${children.join('')}</section>`,
+  card: (props, slots) => `<article>${slots.badge ?? ''}<a href="${escape(props.href)}">${escape(props.title)}</a></article>`,
+  badge: props => `<span class="badge">${escape(props.label)}</span>`,
+}
+
+function renderNode(node: ResolvedNode<Contract>): Html {
+  const view = views[node.component as keyof Contract]
+  if (!view) return '' // an unknown component: render nothing (or a placeholder) — an older client, a newer server
+  const slots = Object.fromEntries(
+    Object.entries(node.slots ?? {}).map(([name, content]) => [name, Array.isArray(content) ? content.map(renderNode) : renderNode(content)])
+  )
+  return view(node.props as Record<string, any>, slots, (node.children ?? []).map(renderNode))
+}
+
+export const renderPage = (page: ResolvedPage<Contract>) => page.sections.map(({ tree }) => renderNode(tree)).join('\n')
+```
+
+The same walk works in Swift or Kotlin (a view per component name), and with Web Components — `examples/web-components` renders the tree into custom elements, with Dedal slots mapped onto native `<slot>`s.
+
+Three rules every renderer needs:
+
+- **an unknown component** renders nothing or a placeholder — never crashes: the server may know components an older client doesn't,
+- **`deferred: true`** marks a placeholder of a deferred section: render it, then fetch the section from its own endpoint (*Deferred without Suspense*),
+- **`dedal`** — refuse a format version you don't know.
+
+## Older clients
+
+A web frontend updates on every deploy; a mobile app doesn't. Let the client say what it supports — an app version in `ctx` — and remove what it can't render, in the template rather than in the client:
+
+```ts
+import { createDedal } from 'dedal'
+import type { Contract } from './ui/contract'
+
+const ui = createDedal<Contract>()
+const { node, repeat, section } = ui
+
+// the app tells the server what it supports; older versions don't get components they can't render
+type Ctx = { appVersion: number }
+const BADGES_SINCE = 42 // the app version that added the badge component
+
+const home = ui.page<Ctx>({
+  sections: ({ appVersion }) => [
+    section('news', node('section', { props: { title: 'Latest' }, children: [repeat(node('card', { slots: { badge: node('badge') } }), 2)] }), {
+      remove: appVersion < BADGES_SINCE ? 'badge' : [],
+    }),
+  ],
+  data: async ({ appVersion }) => {
+    const articles = [{ title: 'A', href: '/a', category: 'x' }, { title: 'B', href: '/b', category: 'y' }]
+    return {
+      news: {
+        card: articles.map(({ title, href }) => ({ title, href })),
+        // no badges in the template for older apps — no badge data either
+        ...(appVersion >= BADGES_SINCE && { 'card > :slot(badge)': articles.map(article => ({ label: article.category })) }),
+      },
+    }
+  },
+  cache: { key: ctx => ['home', ctx.appVersion >= BADGES_SINCE] },
+})
+```
+
+App 41 gets cards without badges, app 42 with them — and no devtools warnings for either, because the badge data is skipped together with the badges. The app version is in the cache key, so the two variants are cached separately.
+
+## Types on the client
+
+The contract is a TypeScript type. A TypeScript client imports it directly (`examples/web-components` does). For Swift or Kotlin, keep the contract as the source of truth and generate the client types from it, or write them by hand next to the registry and check them against stored templates in CI.

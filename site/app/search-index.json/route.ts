@@ -14,7 +14,7 @@ const plain = (text: string) =>
 
 export function GET() {
   const entries: SearchEntry[] = groups.flatMap(group => [
-    { href: `/docs/${group.slug}/`, title: group.title, group: 'Documentation', text: plain(`${group.description} ${group.intro}`) },
+    { href: `/docs/${group.slug}/`, title: group.title, group: 'Documentation', text: plain(`${group.description} ${group.intro ?? ''}`) },
     ...group.cases.map(docCase => ({
       href: `/docs/${docCase.slug}/`,
       title: docCase.title,

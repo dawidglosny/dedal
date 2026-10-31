@@ -1,0 +1,129 @@
+---
+title: "Templates in a database or CMS"
+description: "Stored templates in a real project: the contract as a value, validation, caching, preview, publishing, CI."
+---
+
+**In short:** keep templates outside the code — in a database, a CMS, a key-value store — check them against the contract, and load them inside the page definition, cached. This guide covers the whole loop: the contract, the stored shape, validation, caching, preview, publishing and CI. *Tutorial*, step 4 shows the idea; this is the version for a real project.
+
+## The contract as a value
+
+A template from storage isn't seen by the compiler, so the contract has to exist at runtime too. Define it as a value — a props schema (any Standard Schema library: zod, valibot, arktype) and the slots of every component — and the type is inferred from it:
+
+```ts
+// contract.ts
+import { createDedal, defineContract } from 'dedal'
+import { z } from 'zod'
+
+// the contract as a value: checked at compile time and at runtime
+export const contract = defineContract({
+  section: { props: z.object({ title: z.string().optional() }) },
+  card: { props: z.object({ title: z.string(), href: z.string(), size: z.enum(['sm', 'md', 'lg']).optional() }), slots: { badge: 'one' } },
+  badge: { props: z.object({ label: z.string() }) },
+})
+
+export const ui = createDedal({ contract, defaults: { card: { size: 'md' } } })
+```
+
+## The stored shape
+
+A template is a block per section — plain JSON, exactly what `node()` builds in code. Keep a draft and a published copy, so editors can work without touching the live page; versions for a rollback are your store's business.
+
+```json
+{
+  "news": { "component": "section", "props": { "title": "Latest" }, "children": [
+    { "component": "card", "repeat": 2, "slots": { "badge": { "component": "badge" } } }
+  ] }
+}
+```
+
+## Loading, validating, caching
+
+`ui.validateSections` checks a stored template against the contract — components and slots, the slot kind, the props that are there against their schemas — and returns every error with its path (`news.children[0].props.size`). Props the template leaves out are fine: the data fills them. Read published templates through `ui.query`: they are cached in the instance and refreshed in the background.
+
+```ts
+// templates.ts
+import { ui } from './contract'
+
+/** Your storage — a database table, a CMS, a key-value store. A template: section key → block. */
+export interface TemplateStore {
+  get(name: string, state: 'published' | 'draft'): Promise<unknown>
+}
+
+export function createTemplates(store: TemplateStore) {
+  /** Reads a template and checks it against the contract; every error comes with its path. */
+  const load = async (name: string, state: 'published' | 'draft') => {
+    const stored = await store.get(name, state)
+    if (stored === undefined) throw new Error(`template "${name}" has no ${state} version`)
+    const result = await ui.validateSections(stored)
+    if (!result.ok) throw new Error(`template "${name}" (${state}):\n` + result.errors.map(({ path, message }) => `  ${path}: ${message}`).join('\n'))
+    return result.value
+  }
+
+  // published templates through a query: cached in the instance, refreshed in the background
+  const published = ui.query({ key: (name: string) => ['template', name], fn: (name: string) => load(name, 'published'), staleTime: 60_000 })
+
+  return {
+    published,
+    /** Drafts skip the cache — editors see their last save. */
+    draft: (name: string) => load(name, 'draft'),
+    /** Checks a template before it's saved — refuse what doesn't match the contract. */
+    check: (stored: unknown) => ui.validateSections(stored),
+    /** After publishing: drop the cached template and the pages built from it (their cache keys start with the name). */
+    onPublish: async (name: string) => {
+      await ui.invalidate(['template', name])
+      await ui.invalidate([name])
+    },
+  }
+}
+```
+
+## The page
+
+`sections` can be async: the page reads its template on every build, inside its own definition. A preview reads the draft and isn't cached; a published page is cached until the next publish.
+
+```ts
+export const home = ui.page<{ preview?: boolean }>({
+  // the sections come from storage on every build: published, or the draft for a preview
+  sections: async ({ preview }) => {
+    const sections = preview ? await templates.draft('home') : await templates.published('home')
+    return Object.entries(sections).map(([key, block]) => ui.section(key, block))
+  },
+  data: async () => ({
+    news: {
+      card: [{ title: 'A', href: '/a' }, { title: 'B', href: '/b' }, { title: 'C', href: '/c' }],
+      'card > :slot(badge)': [{ label: 'x' }, { label: 'y' }, { label: 'z' }],
+    },
+  }),
+  // previews are never cached; published pages are, until the next publish
+  cache: { key: ({ preview }) => (preview ? undefined : ['home']) },
+})
+```
+
+The cards in the stored template don't set `size` — they still get `size: "md"` from the instance `defaults`, exactly like blocks written in code.
+
+## Publishing
+
+1. The editor (or a Figma export, see *Templates from Figma*) saves a **draft** — `templates.check` refuses one that doesn't match the contract, with the paths of the problems.
+2. A preview renders the draft (`{ preview: true }`), in debug mode with devtools — editors see where every prop comes from before they publish.
+3. Publishing copies the draft to **published**, then calls `templates.onPublish(name)`: the cached template and the cached pages are dropped, and the next request builds from the new version.
+4. Rollback = publish an older version again.
+
+## Validating in CI
+
+Run `ui.validateSections` over every stored template in CI — a renamed component or a narrowed prop in the contract shows up as a failing build with the paths, not as an empty spot on the page.
+
+```ts
+// scripts/validate-templates.ts
+for (const name of await store.list()) { // your store's list of template names
+  const result = await ui.validateSections(await store.get(name, 'published'))
+  if (!result.ok) throw new Error(`${name}: ${result.errors.map(({ path, message }) => `${path} ${message}`).join('; ')}`)
+}
+```
+
+The contract also exports to JSON Schema (`ui.jsonSchema()`), so a CMS or a backend in another language can validate templates without JavaScript.
+
+## What to watch out for
+
+- **The release order:** add a component to every registry before any template uses it — an older frontend renders the registry's `fallback` (nothing by default).
+- **Data doesn't care about the template:** the loader places data by selectors (`card`), so editors can add, remove and move cards without a code change. Changing the **contract** (a renamed prop, a removed component) is a code change — and the reason to validate stored templates.
+- **Debug builds check templates too:** with the contract as a value, devtools report a template that doesn't match it, with the path, even when nobody called `validate` (*A template that doesn't match the contract*).

@@ -1,0 +1,32 @@
+---
+title: "Glossary"
+description: "Every term used in these docs, in one place."
+---
+
+Every term used in these docs, in one place. The five to start with — contract, block, section, binding, registry — are explained with an example in *Introduction*.
+
+- **server-driven UI (SDUI)** — a model in which the server decides the structure of the screen and the frontend only renders it.
+- **contract** — component name → its props and slots. A TypeScript type (`card: { title: string; size?: 'sm' | 'md' | 'lg'; badge?: Slot }`) or a value (`defineContract({ card: { props: schema, slots: { badge: 'one' } } })`) the type is inferred from — then templates can be validated (`ui.validate`) and exported to JSON Schema (`ui.jsonSchema`). A single source of truth for the server and the frontend.
+- **component** — a name from the contract (`card`, `grid`). It is not a React component — the registry assigns a React component to that name.
+- **instance** — the result of `createDedal<Contract>(options)`, created once per project; you take `node`, `repeat`, `section`, `page`, `query`, `resolve` from it.
+- **block** — a tree built from `node()` / `repeat()` or written as plain JSON: pure structure, without data and without IDs. A plain value (or a function returning a block) that can be exported and used across many pages.
+- **node** — an element of the tree: component, props, children, slots, an optional alias. In the layout it gets an ID.
+- **children and slot** — two ways of nesting. Children are regular content (`children` in React). A slot is a named place declared in the contract as `Slot` (one node) or `Slot[]` (a list) — it goes to the prop with that name.
+- **ID** — a node identifier derived from its position: `news` (section root), `news.0.1` (children), `news.0:badge` (slot), `hero:actions.1` (list slot). Layout and data meet by ID.
+- **alias** — a name given to a node in a block (`alias: 'featured'`), referenced by the selector `#featured`.
+- **selector** — an expression in CSS syntax that selects nodes (`card`, `#featured`, `card:first-child`, `card > :slot(badge)`). The same matcher works in patch, remove, bindings, `required` and devtools.
+- **section** — a piece of the page: a unique key, a block and rules (patch, remove, loader, onEmpty…). The key is the prefix of its node IDs and the key of its data.
+- **page** — a list of sections (fixed or dependent on ctx), where they get their data from, and an optional cache.
+- **ctx** — the request context (e.g. `{ device }`); it is passed to `sections`, loaders, `cache.key` and `toProps`.
+- **layout** — the tree of a section's nodes after expanding `repeat`, assigning IDs, `remove` and `patch` — still without data.
+- **loader** — an async function returning data: the page's `data` (for many sections) or a section's `data` (for that section only).
+- **binding** — an entry in a section's data: `{ selector: items }`. The selector picks nodes, and the items go to them one by one.
+- **assign** — the stage in which bindings are distributed to nodes; this is where the rules for missing data apply (`onShortage`, `onSurplus`, `onEmpty`).
+- **PageResult** — the result of `build`: the sections' layout, data (node ID → data) and a report. Plain JSON.
+- **defaults** — default props of a component, merged under every node's props when the page is built — for templates in code and from JSON alike.
+- **toProps** — maps data (the API shape) to component props; pure functions without IO.
+- **resolve** — combines the layout with data into final props; the result is a **ResolvedPage**.
+- **registry** — a map of component → React component on the frontend side.
+- **query** — a data source with the instance's cache (`ui.query`), shared by loaders and requests.
+- **deferred section** — a section built in a separate request and streamed in later (`defer`).
+- **trace** — debug mode: props origin, a detailed report, timings — for devtools.

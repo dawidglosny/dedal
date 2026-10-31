@@ -1,0 +1,12 @@
+---
+title: "Going to production"
+description: "Shared sections with their own loaders, streaming of slow sections, queries and page cache."
+---
+
+The tutorial covers the model. This group covers what you add before production: data shared between pages, slow sections, and not calling your APIs on every request.
+
+- **Shared sections** — a section with its own loader (a header, a menu, a featured article) is defined once and added to any page; its loader runs in parallel with the page's.
+- **Deferred sections** — slow or personalised sections go out later, streamed in, so they don't hold up the page.
+- **Queries and page cache** — a data source fetched once and shared by loaders and requests; the whole page result cached per key, refreshed in the background.
+
+The details of each are in the groups that follow: *Sections* (loaders, `optional`, `defer`) and *Cache & queries* (keys, statuses, store, invalidation).

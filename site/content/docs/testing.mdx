@@ -1,0 +1,70 @@
+---
+title: "Testing"
+description: "Pages, the registry and toProps in tests: build reports, resolve issues, devtools messages, snapshots."
+---
+
+**In short:** most of what can go wrong with a Dedal page is visible without a browser — in the build report, in `resolve` issues, in the devtools messages. Put them in tests.
+
+## What to test
+
+- **pages** — they build, every binding finds its nodes, nothing is removed or fails unexpectedly,
+- **the registry** — every component a page uses has an implementation,
+- **toProps** — plain functions: data in, props out,
+- **stored templates** — validated in CI (*Templates in a database or CMS*),
+- **the contract** — the type checker: `satisfies Registry<Contract>` and typed templates fail the build when they drift apart.
+
+## A page test
+
+With any test runner — here Node's built-in one (`node --test`):
+
+```tsx
+import assert from 'node:assert/strict'
+import { test } from 'node:test'
+import { inspect, pageMessages, reportText } from 'dedal/devtools'
+import { renderToString } from 'react-dom/server'
+import { Render } from 'dedal/react'
+import { home, ui } from './ui/home'
+import { registry } from './ui/registry'
+
+test('the home page builds without problems', async () => {
+  const result = await home.build(undefined, { trace: true })
+  const resolved = ui.resolve(result, { onIssue: 'throw' }) // bad data → an exception, not a quiet fallback
+
+  const problems = pageMessages(inspect(result, resolved)).filter(message => message.level !== 'info')
+  assert.deepEqual(problems, [], reportText(inspect(result, resolved))) // the report as the failure message
+
+  assert.equal(result.report.removedSections.length, 0)
+  assert.equal(Object.keys(result.report.failedSections ?? {}).length, 0)
+})
+
+test('every component the page uses is in the registry', async () => {
+  const page = ui.resolve(await home.build())
+  const missing: string[] = []
+  const fallback = ({ component }: { component: string }) => (missing.push(component), null)
+  renderToString(<Render tree={page} registry={registry} fallback={fallback} />)
+  assert.deepEqual(missing, [])
+})
+
+test('a selector typo is reported', async () => {
+  const broken = ui.page({
+    sections: [ui.section('news', ui.node('section', { children: [ui.node('card', { slots: { badge: ui.node('badge') } })] }))],
+    data: async () => ({ news: { card: [{ title: 'a' }], 'card > :slot(badges)': [{ label: 'x' }] } }),
+  })
+  const result = await broken.build(undefined, { trace: true })
+  const errors = pageMessages(inspect(result, ui.resolve(result))).filter(message => message.level === 'error')
+  assert.match(errors[0].text, /binding matches no node/)
+})
+```
+
+- `build(ctx, { trace: true })` keeps the details the devtools need; `inspect()` turns them into a payload, and `pageMessages()` into messages — the same ones as the panel's *sections* tab,
+- `resolve(…, { onIssue: 'throw' })` turns bad data (a `toProps` that throws, data that isn't an object) into an exception instead of a quiet fallback,
+- `reportText()` as the failure message: a failing test prints the whole report — what went where, what got dropped and why,
+- a `fallback` that records names catches components missing from the registry.
+
+## Data for tests
+
+Point the page's loaders at fixtures — pass the API client in (`createHomePage(api)`) or mock the module. Test the edges the page is supposed to survive: an empty list, fewer items than places, a failing optional section — each has a defined outcome (*Data*, *Sections*), so it can be asserted.
+
+## Snapshots
+
+`reportText(inspect(result, resolved))` is plain text and stable — a good snapshot. It changes when the structure, the bindings or the data placement change, and the diff says what changed.

@@ -431,33 +431,39 @@ export async function caseContent(group: DocGroup, docCase: DocCase): Promise<{ 
 
 /** The content of a group page, under its title: the context of this part of Dedal, then its cases. */
 export function groupContent(group: DocGroup): { toc: TocEntry[]; body: ReactNode } {
-  const toc = [...proseHeadings(group.intro), ...(group.cases.length ? [{ id: 'cases', title: 'Cases in this group' }] : [])]
+  const toc = [...proseHeadings(group.intro ?? ''), ...(group.cases.length ? [{ id: 'cases', title: 'Cases in this group' }] : [])]
   const body = (
     <>
-      <Prose text={group.intro} />
+      <Prose text={group.intro ?? ''} />
 
-      {group.cases.length > 0 && (
-        <>
-          <h2 id="cases">Cases in this group</h2>
-          <div className="case-list not-prose">
-            {group.cases.map(docCase => (
-              <Link key={docCase.slug} href={docHref(docCase.slug)} className="case-card">
-                <span className={`dot ${levels[docCase.level].className}`} />
-                <span className="case-title">{docCase.title}</span>
-                <span className="case-level">{levels[docCase.level].label}</span>
-              </Link>
-            ))}
-          </div>
-        </>
-      )}
+      <CaseList group={group} />
     </>
   )
   return { toc, body }
 }
 
+/** The cases of a group, under its intro — also below the MDX group pages. */
+export function CaseList({ group }: { group: DocGroup }) {
+  if (!group.cases.length) return null
+  return (
+    <>
+      <h2 id="cases">Cases in this group</h2>
+      <div className="case-list not-prose">
+        {group.cases.map(docCase => (
+          <Link key={docCase.slug} href={docHref(docCase.slug)} className="case-card">
+            <span className={`dot ${levels[docCase.level].className}`} />
+            <span className="case-title">{docCase.title}</span>
+            <span className="case-level">{levels[docCase.level].label}</span>
+          </Link>
+        ))}
+      </div>
+    </>
+  )
+}
+
 /** The file to edit for a page, relative to the repository root. */
 export const editPath = (group: DocGroup, docCase?: DocCase) =>
-  docCase ? `site/ui/docs/${group.file}` : (group.source ?? 'site/ui/docs/intros.ts')
+  docCase ? `site/ui/docs/${group.file}` : (group.source ?? `site/content/docs/${group.slug}.mdx`)
 
 /** The old chrome's case page (before Fumadocs) — no longer routed. */
 export async function DocView({ group, docCase }: { group: DocGroup; docCase: DocCase }) {

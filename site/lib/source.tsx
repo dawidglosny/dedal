@@ -71,7 +71,7 @@ function tsFiles(): VirtualFile<{ pageData: TsPageData; metaData: MetaData }>[] 
         type: 'page',
         path: dir ? `${dir}index.ts` : `${group.slug}.ts`,
         slugs: [group.slug],
-        data: { kind: 'group', slug: group.slug, title: group.title, description: group.description, structuredData: structure(`${group.description}\n\n${group.intro}`) },
+        data: { kind: 'group', slug: group.slug, title: group.title, description: group.description, structuredData: structure(`${group.description}\n\n${group.intro ?? ''}`) },
       })
     for (const docCase of group.cases) {
       if (mdxSlugs.has(docCase.slug)) continue

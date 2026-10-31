@@ -1,0 +1,79 @@
+---
+title: "Rendering"
+description: "Registry, toProps and resolve problems (issues)."
+---
+
+**In short:** the last mile — turning the page description into real components on the screen. The server produces a tree of component names and props; the frontend's registry decides which component each name means.
+
+Rendering is two steps: `resolve` (combining the layout with data into props) and `<Render>` (props → React components through the registry).
+
+## resolve
+
+`ui.resolve(result, { ctx })` turns a `PageResult` (layout and data separately) into a `ResolvedPage` — a tree of `{ key, component, props, slots, children }` with final props. For each node: when the component has `toProps`, its result is the final props (it receives the props from the layout — already with `defaults` — the node's data and `ctx`); without `toProps`, data (an object) is merged with props (deep merge).
+
+`resolve` is a pure function — it can run on the server (as in these docs) or on the frontend, when the frontend receives a `PageResult` through an API. It checks the format version (`dedal: 1`) and rejects unknown ones.
+
+## Registry
+
+The registry maps component names from the contract to React components:
+
+```tsx
+const registry = { card: Card, grid: Grid, … } satisfies Registry<Contract>
+<Render tree={resolved} registry={registry} fallback={Missing} />
+```
+
+A component in the registry receives (`RenderProps<Contract, 'card'>`):
+
+- the props from the contract (without slots),
+- each slot as a prop named after it: `ReactNode` for `Slot`, `ReactNode[]` for `Slot[]`,
+- children from the layout as `children`.
+
+```tsx
+card: ({ title, href, size = 'md', badge, footer }) => (
+  <Card data-size={size}>
+    {badge}
+    <a href={href}>{title}</a>
+    {footer}
+  </Card>
+)
+```
+
+`satisfies Registry<Contract>` checks at compile time that all components are present and the props match. The registry is an adapter: the contract describes what the page needs, and the registry translates it to the API of a specific library (badge `variant: 'secondary'` → `variant="soft"` in Radix Themes) — switching libraries is a change to the registry, not to the server.
+
+`<Render>` uses no hooks or state — it works in React Server Components, in SSR and on the client; components in the registry can be client components (`'use client'`). Options: `fallback` (a component for components missing from the registry, receives `{ component, nodeKey }` — below), `deferred` (how to render a deferred section: receives `{ sectionKey, fallback }`, where `fallback` is the section's placeholder already rendered; without it only the placeholder shows — see *Sections*), `debug` (markers for devtools).
+
+## Problems that don't break the page
+
+`resolve` doesn't throw on bad data — it collects **issues** (`resolved.issues`: `{ id, message }`), and the node gets the props from the layout:
+
+- non-object data without toProps,
+- an exception in toProps, or toProps returning a non-object,
+- data for an ID that isn't in the layout (layout and data from different builds).
+
+A component missing from the registry renders `fallback` (or nothing). Why: one bad article shouldn't take down the whole page. Where you'd rather have a hard error (tests, CI) — `resolve(result, { onIssue: 'throw' })`.
+
+## The fallback for a missing component
+
+`<Render fallback={Missing}>` renders `Missing` instead of every node whose component isn't in the registry. It receives `{ component, nodeKey }` — the name from the template and the node's ID. Without `fallback` such a node renders nothing, together with its children and slots.
+
+```tsx
+// development: make it visible
+const Missing = ({ component, nodeKey }: { component: string; nodeKey: string }) => (
+  <div style={{ border: '2px dashed red', padding: 8 }}>Missing component “{component}” ({nodeKey})</div>
+)
+
+// production: render nothing, but report it
+const Missing = ({ component }: { component: string }) => {
+  reportMissing(component) // your logging / metrics
+  return null
+}
+```
+
+When it happens: a template uses a component the frontend doesn't have yet — a stored template edited before the frontend release, an older mobile app, a typo in a JSON template. That's why the order of releases is: **the component in the registry first, then in templates**. Devtools list every missing component and the nodes it affects (*Component missing from the registry*).
+
+Not to be confused with `defer: { fallback }` — the placeholder of a deferred section (*Sections*).
+
+## What to watch out for
+
+- Issues are visible in `resolved.issues` and in devtools (`!` in *tree*, messages in *sections*) — it's worth logging them in production.
+- A frontend older than the server: a component that isn't in the registry renders `fallback` — deploy new components to the frontend first, then use them in blocks.

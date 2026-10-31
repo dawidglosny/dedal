@@ -1,0 +1,62 @@
+---
+title: "Cache & queries"
+description: "Page cache, queries and their statuses, invalidate."
+---
+
+**In short:** don't build the same page or call the same API on every request. Dedal can keep whole pages and individual data sources in memory, serve them instantly and refresh them in the background.
+
+Two levels of cache: **page** (the whole `build` result) and **query** (individual data sources). Both live in the instance and work in stale-while-revalidate mode.
+
+## Page cache
+
+`page({ cache: { key: ctx => ['home', ctx.device] } })` stores the `build` result under a key. The key is an array of JSON values covering everything the sections and data depend on — here `device`. A key of `undefined` = this ctx isn't cached (e.g. a logged-in user). Without the `cache` option the page isn't cached at all.
+
+Stale-while-revalidate (entry age):
+
+- up to `staleTime` (default 5 s) — result from cache (`hit`),
+- up to `maxAge` (default 5 min) — the old result immediately, refreshed in the background (`stale`),
+- older, or no entry — build and wait for the result (`miss`),
+- concurrent requests for the same key wait for a single build (no stampede of API calls),
+- errors aren't cached; when a background refresh fails, the previous entry stays.
+
+Timings are set for the instance (`createDedal({ cache: { staleTime, maxAge } })`) and overridden per page (`cache: { key, staleTime, maxAge }`) or per query. It must hold that `0 <= staleTime <= maxAge`.
+
+## Query
+
+```ts
+const articlesQuery = ui.query({
+  key: (count: number) => ['articles', count],   // the key must cover all parameters of fn
+  fn: (count: number) => api.latest(count),
+  staleTime: 60_000,
+})
+
+const list = await articlesQuery(8)               // in a page or section loader
+```
+
+A query is a data source cached in the instance, shared by pages, sections and requests — e.g. a menu fetched once for all pages. A key of `undefined` = this call skips the cache (`bypass`). A result from cache is frozen and shared between requests — read-only: `[...items].sort()`, not `items.sort()`. The result must be JSON (an external store serializes it — a `Date` or a `Map` won't survive).
+
+Query is optional — a loader is a plain async function, and you can call any source in it (fetch, an API client, a cache the application already has).
+
+## Why in the instance
+
+The cache lives as long as the instance: create it once (at module level), not in every request. Pages and queries have separate key spaces (a page's `['menu']` and a query's `['menu']` are different entries), but they are shared between pages — start a page's key with its name.
+
+`ui.invalidate(prefix)` removes page and query entries whose key starts with `prefix` (`[]` — all of them), e.g. after publishing in a CMS: `ui.invalidate(['articles'])`.
+
+## Store and instance options
+
+`createDedal({ cache: { … } })`:
+
+- `store` — the entry store; by default `memoryStore()` (process memory, LRU, 500 entries). For multiple server instances — your own adapter (Redis, KV) with `get`, `set`, `delete` methods; optionally `deletePrefix` (without it `invalidate` removes only the entry with exactly that key) and `lock` (one refresh at a time across the whole cluster),
+- `waitUntil` — on edge / serverless hands the background refresh to the environment (e.g. `waitUntil` from `@vercel/functions`) so it isn't cut off after the response,
+- `onEvent` — cache events (`{ key, status, ms }`) for logs and metrics.
+
+## Debug and cache
+
+Debug mode (`trace`) **bypasses the page cache** — it neither reads nor writes; devtools always show a fresh build. The query cache keeps working; the *timing* tab shows the status of each query: `miss`, `hit`, `stale`, `bypass`, `error` (query timings need `AsyncLocalStorage` — available in Node, Next.js and edge runtimes; elsewhere pass it to `createDedal({ AsyncLocalStorage })`).
+
+## What to watch out for
+
+- User-dependent data: put the user in the key or use an `undefined` key — otherwise one user will see another user's page. Better: make the personalized part a deferred section (outside the page cache).
+- A query key that omits one of the `fn` parameters will return a result for different parameters.
+- Results from cache are frozen — mutating them throws an exception.

@@ -1,0 +1,30 @@
+---
+title: "Errors (thrown)"
+description: "Exceptions that abort build or resolve — with the message text."
+---
+
+**In short:** most problems don't break the page — they show up as warnings in devtools. The ones on this page do: they stop the build with an exception, because carrying on would hide a bug. Each message says where, what and how to fix it.
+
+Some problems abort the build or `resolve` with an exception — these are programmer errors (a bad block, bad syntax, conflicting configuration) or situations you yourself marked as unacceptable (`onShortage: 'error'`, `onEmpty: 'error'`, a loader without `optional`).
+
+## Why exceptions
+
+Silently working around such errors would hide them until production. An exception on the first build (locally, in tests) points to the problem right away.
+
+## How to read the messages
+
+Every message says:
+
+- **where** — the section (`section "news": …`), the binding, the selector with the position,
+- **what came in** — e.g. `got array (3 items)`, `got 0`,
+- **what to do** — e.g. `wrap it in a container`, `remove "news" from page data or drop the section's loader`.
+
+A loader error keeps the original error in `cause`.
+
+## When the page doesn't build
+
+Devtools won't show anything — there's no payload because there's no page. What's left is the exception message (in the server log, in the Next overlay). The pages in this group catch the exception and display its message.
+
+## Exception vs warning
+
+Shortage, surplus and empty sections don't break the page by default (a **warning** in devtools). Bad data (`resolve` issues) and a binding with no matches are an **error** (✗) in devtools, but the page renders. They only become exceptions once you set `'error'` (`onShortage`, `onSurplus`, `onEmpty`) or `onIssue: 'throw'` in `resolve`. A wrong data shape (a list instead of bindings, a binding that isn't a list) and anything that depends on the code (syntax, block structure, configuration) is always an exception.

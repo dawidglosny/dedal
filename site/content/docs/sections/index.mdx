@@ -1,0 +1,102 @@
+---
+title: "Sections"
+description: "Loaders; optional, empty and deferred sections."
+---
+
+**In short:** a page is a stack of sections — a header, a hero, the latest news, recommendations. Each section has its own template and its own rules: where its data comes from, and what to do when that data is missing or slow.
+
+A section is a piece of the page: a key, a block and rules. A page (`ui.page`) is a list of sections plus where they get their data from.
+
+```ts
+const home = ui.page<Ctx>({
+  sections: ctx => [header, ui.section('news', newsBlock, { patch: { … } })],  // or a fixed array
+  data: async ctx => ({ news: { card: await api.latest() } }),               // page data
+  cache: { key: ctx => ['home', ctx.device] },                               // optional
+  onSectionError: (error, { section }) => log(section, error),               // optional
+})
+```
+
+Section options (`ui.section(key, block, options)`): `remove`, `patch` (see *Layout*), `policies` (see *Data*), `data`, `optional`, `onEmpty`, `required`, `defer` — described below. A section key must be unique within the page.
+
+## Where a section gets its data
+
+- **page data** — `page({ data: (ctx) => ({ news: {...}, hero: {...} }) })` — one place for many sections,
+- **section loader** — `section(key, block, { data: (ctx) => bindings })` — the section loads its own data; it returns the bindings of that section only (without the section key),
+- **no data** — a static section: renders the layout alone (e.g. a heading with text in the block).
+
+A section loader lets you build **shared sections** (header, footer, menu): you define them once with a loader and include them in many pages without repeating their data in each one. All loaders and the page data run **in parallel**. Loaders run only for sections present on the page (not for those removed with `remove: ':root'` or deferred).
+
+## When something goes wrong
+
+- **A loader error** aborts the build by default — a page missing a key section shouldn't render silently. `optional: true` removes only that section instead (e.g. recommendations), and the error goes to the page's `onSectionError` (logs, metrics).
+- **An empty section** — the section received bindings (from a loader or from page data), but after assignment no node has data. `onEmpty` decides: `'remove'` (default), `'keep'`, a block (an empty state, e.g. "No results") or `'error'`. `required: 'card'` counts only nodes matching the selector — for when the heading always gets data, and it's the cards that decide whether the section makes sense.
+- **A section without bindings** — when the page data has no entry under its key or the loader returned `undefined`, the section isn't "empty" in the `onEmpty` sense: it stays with just the layout (devtools warn when this looks like a mistake).
+
+## Deferred sections (streaming)
+
+A slow section doesn't have to hold up the page: it can arrive later, and until then the page shows a placeholder.
+
+`defer: { fallback }` — the page result contains only a placeholder (`fallback`, with `deferred: true`), and the loader doesn't run. The content is built by `page.section(key, ctx)` in a separate call — it returns a `PageResult` with that one section, so `resolve` and `<Render>` work unchanged. In Next it's an async Server Component inside `<Suspense>`: the page goes out immediately, and the slow section (recommendations, personalized data) arrives when it's ready.
+
+```tsx
+async function Deferred({ sectionKey, ctx }: { sectionKey: string; ctx: Ctx }) {
+  const resolved = ui.resolve(await home.section(sectionKey, ctx), { ctx })
+  return <Render tree={resolved} registry={registry} />
+}
+
+<Render
+  tree={resolved}
+  registry={registry}
+  deferred={({ sectionKey, fallback }) => (
+    <Suspense fallback={fallback}>
+      <Deferred sectionKey={sectionKey} ctx={ctx} />
+    </Suspense>
+  )}
+/>
+```
+
+Without the `deferred` prop, `<Render>` shows only the fallback. A deferred section is outside the page cache (only the placeholder is cached) — a good place for per-user data.
+
+**The placeholder is a block.** `defer.fallback` is structure, like any template: built on the server, part of the page result and its cache, rendered by the registry. Use a component from the contract — a skeleton that mimics the section, so the page doesn't jump when the content arrives (*Deferred: the placeholder*).
+
+**When the section fails or is empty.** The page has already gone out, so `page.section()` decides what replaces the placeholder:
+
+- loader error, section `optional` — no sections in the result (`report.failedSections`, `onSectionError`): the placeholder disappears,
+- loader error, section not `optional` — `page.section()` throws: in Next the error goes to the nearest error boundary, with an endpoint to its error response,
+- empty section with `onEmpty: 'remove'` — no sections (`report.removedSections`): the placeholder disappears.
+
+Deferred sections are usually the optional part of a page, so mark them `optional` (*Deferred: when the section fails or is empty*).
+
+**Without `<Suspense>`** (a single-page app, Web Components, a mobile app): give deferred sections their own endpoint — `page.section(key, ctx)` + `resolve` on the server; on the client, render the page, find sections with `deferred: true`, fetch each one and swap it in (or remove the placeholder when the result has no section). `ctx` travels with the request (*Deferred without Suspense*, `examples/web-components`).
+
+## Two fallbacks
+
+The word appears in two unrelated places:
+
+- `defer: { fallback }` — a **block** shown in place of a deferred section until its content arrives. Defined on the server, part of the page.
+- `<Render fallback={…}>` — a **React component** rendered instead of a node whose component isn't in the registry. Defined on the frontend; see *Rendering*.
+
+(And `<Suspense fallback>` is React's own: in the `deferred` callback it receives the first one, already rendered.)
+
+## Page stages
+
+`page.build(ctx)` is three stages in a single call (plus cache). They are also available separately — e.g. when you want to cache the layout independently of the data:
+
+- `page.layout(ctx)` — the sections' layout, without data (async: `sections` may load templates),
+- `page.load(ctx)` — page data and section loaders (in parallel),
+- `page.assign(sections, data, ctx)` — data assignment, the result is a `PageResult`.
+
+## Why it works this way
+
+Every "what if something's missing" decision is explicit and has a default that doesn't break the page where that's safe (empty promotions disappear) and does break it where silence would be a bug (a loader error without `optional`). Everything that was removed or skipped is in the report (`report.removedSections`, `failedSections`, `emptySections`, `unknownData`) and in devtools.
+
+## How to use it
+
+- Shared sections (header, footer) — with their own loader, exported and included in pages.
+- "Nice to have" sections — `optional: true`; sections without which the page makes no sense — `onEmpty: 'error'`.
+- Slow or personalized ones — `defer`.
+
+## What to watch out for
+
+- Page data under the key of a section that has its own loader, or of a deferred section, is an exception (it's unclear which one should win).
+- Data under a key that isn't on the page (a typo, a section from another variant) is skipped — devtools: `unknownData` with a hint.

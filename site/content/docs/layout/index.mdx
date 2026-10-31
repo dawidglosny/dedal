@@ -1,0 +1,82 @@
+---
+title: "Layout"
+description: "Blocks, slots, aliases, patch and remove — the structure of a section before it gets data."
+---
+
+**In short:** the layout is the skeleton of a section — "a heading, then a grid of six cards, each with a badge" — with no articles in it yet. Write it once, fill it with any data, adjust it per page or device without copying it.
+
+The layout is the structure of a section: which components, in what order, in which slots, with which props — **without data**. You describe it with blocks: `node(component, { props, children, slots, alias })`.
+
+## Why a separate layout
+
+The layout doesn't depend on data, so:
+
+- it can be built without API calls (pure CPU, a fraction of a millisecond),
+- the same block handles different data (3 articles or 30 — repeat and the missing-data rules decide what stays),
+- a layout change (order, variants, A/B) is a change to a block on the server, not a frontend deployment.
+
+## Builders: node, repeat, clone
+
+You take them from the instance (`ui.node`, `ui.repeat`, `ui.clone`) — that way they are typed by the contract and add `defaults`.
+
+- `node(component, { props, children, slots, alias })` — a single node. The instance `defaults` are merged with `props` (deep merge: nested objects are merged, arrays and `undefined` replace the default value).
+- `repeat(block, n)` — the same block `n` times as consecutive siblings; `n` is an integer `>= 1`. Each copy gets its own ID.
+- `clone(n, a, b)` — repeats a sequence of blocks: `clone(2, a, b)` gives `[a, b, a, b]` (to spread into `children`).
+
+A block is a plain TypeScript value — you can parameterize it with a function (`cards(title, count)`), compose it from smaller blocks, export it and use it across many pages.
+
+## Children and slots
+
+- **children** — the regular content of a node (a list). In React it goes to the component's `children`.
+- **slots** — named places declared in the contract as a prop of type `Slot` (one node, e.g. `media` in the hero) or `Slot[]` (a list, e.g. `actions`). In React they go to the prop named after the slot as a ready-made element (or an array of elements).
+
+Slots are part of the layout, not the data: the server decides what goes into a slot (a badge, an avatar, buttons). Data is assigned to nodes in slots like to any other node — with the selector `:slot(name)`.
+
+## Node IDs
+
+The ID follows from the position in the layout (after expanding `repeat`):
+
+- section root — the section key: `news`,
+- child — parent ID + `.` + index: `news.0`, `news.0.2`,
+- single slot — parent ID + `:` + slot name: `news.0:badge`,
+- list slot — additionally the index within the slot: `hero:actions.1`.
+
+Layout and data meet by ID, even when they came from different places (cache, network). Changing a block changes the IDs — that's why layout and data should always come from the same `build`.
+
+A custom ID generator (`createDedal({ id })`) is possible, but it must produce IDs unique across the **whole page** — the simplest way is to start with `prefix` (the section key), like the built-in one.
+
+## patch and remove
+
+A section can modify a block without copying it:
+
+- `patch: { selector: props }` — applies props to the matched nodes (deep merge; when several patches set the same prop, the later entry wins),
+- `remove: selector` (or a list of selectors) — removes the matched nodes together with their subtree, including from slots.
+
+Order of stages: block → `remove` → `patch` → data assignment. Patch selectors see the tree **before** patching (the way CSS sees the DOM) — a patch that changes `size` doesn't affect whether another patch with `[size=lg]` matches.
+
+## Selectors — cheat sheet
+
+CSS syntax, matched against the tree of a single section (`:root` is the section root):
+
+- `card` — component; `*` — any node,
+- `#featured` — alias,
+- `[size]` — the prop exists; `[size=lg]` — the prop has a value (compared as a string); `[style.height="100%"]` — a nested prop, value in quotes,
+- `:first-child`, `:last-child`, `:nth-child(2)`, `:nth-child(odd)` / `(even)`, `:nth-child(3n+1)`, `:nth-last-child(…)` — position counted from 1, after expanding `repeat`; in a list slot — within the slot,
+- `:slot` — a node in any slot; `:slot(badge)` — in the `badge` slot,
+- `:root` — the section root,
+- `a b` — descendant (also through slots), `a > b` — direct child or slot content, `a, b` — one of the selectors.
+
+Other CSS constructs (classes `.x`, `:not()`, `:has()`, `+`, `~`) are not supported — they produce a syntax error with the position. The same matcher works in patch, remove, bindings and devtools — learn it once, use it everywhere. You can test a selector in the search field of the *tree* tab in devtools before you put it in your code.
+
+## How to use it
+
+- Define blocks for recurring layouts (a list of cards, a hero, a grid).
+- In a section use the block and adjust it with `patch` / `remove` instead of copying the block with a small change.
+- Variants (mobile / desktop, A/B) — `sections: (ctx) => [...]`: different blocks or different patches per ctx.
+- Give an alias to places you need to refer to regardless of position (a featured card).
+
+## What to watch out for
+
+- A selector that matches nothing (a typo, a changed block) doesn't raise an error — devtools show it as a warning (with a hint when the selector can be corrected).
+- `remove: ':root'` removes the whole section — its loader doesn't run, and page data under its key goes to `unknownData`.
+- A section root is a single node (it can't be repeated with `repeat`), and a single slot accepts one node — several require a list slot (`Slot[]`).

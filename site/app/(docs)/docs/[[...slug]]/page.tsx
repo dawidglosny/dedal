@@ -5,7 +5,7 @@ import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/page
 import type { TOCItemType } from 'fumadocs-core/toc'
 import { source } from '@/lib/source'
 import { findCase, findGroup, groups } from '@/ui/docs'
-import { Badge, caseContent, editPath, groupContent, Inline } from '@/ui/docs/doc-view'
+import { Badge, caseContent, CaseList, editPath, groupContent, Inline } from '@/ui/docs/doc-view'
 
 // every group and case page is generated at build time — the cases run once, and their devtools payloads are in the HTML
 export const dynamicParams = false
@@ -34,12 +34,16 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
   // a page written in MDX
   if (page.type === 'mdx') {
     const MDX = page.data.body
+    // a group page in MDX: its cases listed below the text
+    const group = findGroup(page.slugs[page.slugs.length - 1] ?? '')
+    const toc = group?.cases.length ? [...page.data.toc, { title: 'Cases in this group', url: '#cases', depth: 2 }] : page.data.toc
     return (
-      <DocsPage toc={page.data.toc} editOnGithub={{ ...github, path: `site/content/docs/${page.path}` }}>
+      <DocsPage toc={toc} editOnGithub={{ ...github, path: `site/content/docs/${page.path}` }}>
         <DocsTitle>{page.data.title}</DocsTitle>
         <DocsDescription>{page.data.description}</DocsDescription>
         <DocsBody>
           <MDX components={defaultMdxComponents} />
+          {group && <CaseList group={group} />}
         </DocsBody>
       </DocsPage>
     )
@@ -60,7 +64,7 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
     )
   }
 
-  // a group page not converted to MDX yet: the intro from ui/docs/intros.ts, rendered by Prose
+  // a group page without MDX (the API reference, read from docs/API.md), rendered by Prose
   const group = findGroup(page.data.slug)!
   const { toc, body } = groupContent(group)
   return (

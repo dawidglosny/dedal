@@ -1,0 +1,230 @@
+---
+title: "Devtools"
+description: "The panel, timing, building without trace."
+---
+
+**In short:** a panel in the browser that answers "why does this element look like this?" — click anything on the page and see where each prop came from, which data went where, what got lost, and what was slow.
+
+Devtools show what Dedal did with a specific page: where every prop came from, which data went where, what got lost and why, how long the build took and which queries went to the API. This page describes where that information comes from and how to read it — tab by tab.
+
+## Where the panel gets its data
+
+```
+page.build(ctx, { trace: true })   build in debug mode: records props origin, bindings report, timings
+        │                          (bypasses the page cache — always a fresh build)
+ui.resolve(result, { trace: true }) combines layout + data, with the origin of every prop
+        │
+inspect(result, resolved)          devtools payload — plain JSON: sections, nodes, messages, timings
+        │
+<DevtoolsData payload />           payload embedded in the page in <script type="application/json">
+<Render debug />                   every node wrapped in <dedal-node data-dedal-key="…"> (for "pick")
+<Devtools />                       panel (Shadow DOM): reads the payload scripts, including ones streamed in later
+```
+
+The panel doesn't ask the server for anything — everything is in the payload from the moment of rendering. A deferred section (streaming) arrives with its own payload; the panel merges them into a single view.
+
+## How to enable it (Next, React Server Components)
+
+Four pieces in debug mode: build and resolve with `trace`, markers in the DOM, the payload on the page, and the panel. A simplified version of `ui/page-view.tsx` from `examples/next` (here `isDebug()` simply means `?debug=1`):
+
+```tsx
+import { Suspense } from 'react'
+import { inspect } from 'dedal/devtools'
+import { DevtoolsData, Render } from 'dedal/react'
+import { Devtools } from 'dedal/react/devtools'
+
+export async function PageView({ ctx, registry }: { ctx: Ctx; registry: Registry<Contract> }) {
+  const debug = await isDebug()                                 // see "Enabling it safely"
+  const result = await home.build(ctx, { trace: debug })        // 1. props origin, report, timings; bypasses the page cache
+  const resolved = ui.resolve(result, { ctx, trace: debug })
+
+  return (
+    <>
+      <Render
+        tree={resolved}
+        registry={registry}
+        debug={debug}                                           // 2. node markers in the DOM (for "pick")
+        deferred={({ sectionKey, fallback }) => (
+          <Suspense fallback={fallback}>
+            <DeferredSection sectionKey={sectionKey} ctx={ctx} registry={registry} debug={debug} />
+          </Suspense>
+        )}
+      />
+      {debug && <DevtoolsData payload={inspect(result, resolved)} />}   {/* 3. payload for the panel */}
+      {debug && <Devtools />}                                            {/* 4. panel */}
+    </>
+  )
+}
+
+// a deferred section adds its own payload — the panel merges it with the page payload
+async function DeferredSection({ sectionKey, ctx, registry, debug }: { sectionKey: string; ctx: Ctx; registry: Registry<Contract>; debug: boolean }) {
+  const result = await home.section(sectionKey, ctx, { trace: debug })
+  const resolved = ui.resolve(result, { ctx, trace: debug })
+  return (
+    <>
+      <Render tree={resolved} registry={registry} debug={debug} />
+      {debug && <DevtoolsData payload={inspect(result, resolved)} />}
+    </>
+  )
+}
+```
+
+- `inspect` (`dedal/devtools`) — a pure function: a payload (JSON) with an index of nodes, selectors, data, messages and timings.
+- `<DevtoolsData>` (`dedal/react`) — embeds the payload as `<script type="application/json" data-dedal-devtools>`, with escaping (data containing `</script>` won't close the script).
+- `<Devtools />` (`dedal/react/devtools`) — a client component; the panel code is loaded dynamically only after mounting. Without the `open` prop the panel is open or closed the way it was left in this browser tab; `open` / `open={false}` forces the state.
+
+## Enabling it safely
+
+Debug mode **exposes the structure and data of the page** (all props, node data, cache keys) and bypasses the page cache — every request in debug is a full build with API calls. That's why the application turns it on, deliberately:
+
+- outside production — always, or with a switch (`examples/next`: `?debug=1`),
+- in production — only for trusted people, e.g. a cookie with a secret set by a protected endpoint. A query param alone in production is an invitation to everyone.
+
+```ts
+import { cookies } from 'next/headers'
+
+export async function isDebug() {
+  if (process.env.NODE_ENV !== 'production') return true
+  const token = process.env.DEDAL_DEBUG_TOKEN
+  return Boolean(token) && (await cookies()).get('dedal_debug')?.value === token
+}
+```
+
+Without debug mode nothing changes: the `build` / `resolve` result is the same as without devtools, the DOM has no markers, and the panel code isn't loaded.
+
+## Other environments
+
+- **React without RSC (SPA, SSR)** — the same components: `<Render debug>`, `<DevtoolsData>`, `<Devtools />`. `inspect()` also works in the browser.
+- **Backend → frontend (an API with JSON)** — the backend does `build(ctx, { trace: true })` only for trusted requests; the frontend calls `resolve` and `inspect()` (pure functions) on its side and renders as above.
+- **Without React** — `mountDevtools()` from `dedal/devtools/panel` after the page loads; embed the payload as `<script type="application/json" data-dedal-devtools>`, replacing `<` with `\u003c`. Without node markers in the DOM the panel shows *tree*, *sections* and *timing*, but doesn't highlight elements, and `pick` won't find anything.
+
+## Opening the panel
+
+With debug mode on, a button sits in the bottom-right corner of the page: the Dedal logo (a blue labyrinth "D" with an orange core), with no text. Click it, or press `Alt+Shift+S`, to open the panel; `⇤` / `⇥` moves both to the other side of the screen. The button exists only where the app renders `<Devtools />` — in debug mode; a page without it has no button, no panel and no devtools code.
+
+## node — a single element of the page
+
+`pick` and click an element on the page (or select a node in *tree*):
+
+- **component, ID, section, slot** — the ID follows from the position in the block (`news.0.1`, `hero:actions.0`),
+- **selector** — the shortest selector that matches only this node (for patch and bindings), with `copy`; `not unique` when it can't be pointed to unambiguously,
+- **data** — the node's raw data (the API shape) and the binding that assigned it (`assigned by card`),
+- **issues** — `resolve` problems (non-object data, a toProps error) and a component missing from the registry,
+- **props** — final props with their origin: `← default` (instance defaults), `← template` (block), `← patch <selector>` (which patch; when several match, the later one wins), `← data` (from data through toProps or deep merge), `← layout` (from the layout, without details — the page was built without `trace`),
+- **parent / children** — navigating the tree (hovering highlights, clicking navigates).
+
+Origin applies to top-level props: a patch `{ style: { height } }` marks the source of the `style` prop. A prop equal to the default value is marked as `default` even when the block set the same value — the result is identical then. The suggested selector is computed on the page after `assign` — when `assign` removed siblings (e.g. a card without data), the `:nth-child` position in the block may differ. `Esc` cancels `pick`.
+
+## tree — the whole page
+
+All sections and nodes in tree order. `●` — the node has data, `!` — issues or missing from the registry. Sections removed because of data are shown with their layout from before `assign` ("removed — no data; layout before assign") — you can see what they were waiting for.
+
+The search field searches in three ways at once: **selector** (the same matcher as patch / bindings — you can test a selector before you put it in your code), **text in the ID, section key and alias** (`news`, `news.0.1`, `#featured`) and **text in the data** (a fragment of a title, an id, a URL — from 2 characters). Data that didn't make it onto the page but contains the text is listed as "not on the page" (with the section, binding and index). Attribute selectors (`[size=lg]`) see the props from the layout, not from the data. "only matches" keeps only the matches and their ancestors.
+
+## sections — what went wrong
+
+At the top, page messages, one line per problem: `✗` error, `!` warning, `·` info. Below, each section: where it gets its data from (`source: page / section / deferred / none`), its bindings in the form "X data items for Y nodes" and underneath — what came of it and what to do. Hovering over a binding highlights the nodes on the page that received its data; clicking opens *tree* with its selector.
+
+## timing — where the numbers come from
+
+A build in debug mode measures time with the `performance.now()` clock at several points. All times in *timing* are in milliseconds **from the start of that build** (rounded to 0.1 ms).
+
+```
+0 ms                                                               total
+├─ layout ─┼──────────────── data loading ──────────────────┼─ assign ─┤
+           ├─ page data  ███████████                        │
+           ├─ hero       ██████                             │
+           └─ related    ████████████████████████████████████  ← slowest
+                         query miss ███████  query hit ▏
+```
+
+**Stages** (the first bar and the legend):
+
+- **layout** — calling `sections(ctx)`, turning blocks into nodes (expanding `repeat`, IDs), `remove` and `patch` for all sections. Usually a fraction of a millisecond — pure CPU, unless an async `sections` loads templates (then that time is here too). `defaults` are merged in at this stage.
+- **data loading** — from the end of the layout until **all** loaders have finished (the page's `data` and section loaders). Loaders run in parallel, so this stage takes roughly as long as the slowest of them — not as long as their sum.
+- **assign** — distributing data to nodes (bindings), `onShortage`, `onEmpty`. Pure CPU again.
+- **total** — the sum of the three stages, i.e. the `build` time.
+
+**Loaders** (bars on the timeline): each loader is measured separately — from the call to completion (or error). The bar starts where the loader started and its length is the loader's duration. They all start at the same moment (right after the layout), which is why the bars start evenly. `page data` is the page's `data` function; the other names are the keys of sections with a loader. `slowest` — the loader the whole build is waiting on; red — the loader threw an exception.
+
+**Queries** (under a loader): every `ui.query` call during a build in debug mode records its key, cache status, start and duration. How do we know which loader called it? Dedal runs each loader in an async context (`AsyncLocalStorage`) carrying its name, and the query reads that context — even after an `await`. Thanks to this, two concurrent requests that use the same instance and the same cache don't mix up their queries. In Next `AsyncLocalStorage` is global; elsewhere pass `createDedal({ AsyncLocalStorage })` from `node:async_hooks` — without it *timing* shows only the stages and loaders.
+
+What a query's status and time mean:
+
+- `miss` — fetched: not in the cache, or the entry expired (`maxAge`); time ≈ the duration of the `fn` call (API),
+- `hit` — from cache, fresh (`staleTime` hasn't passed); time ≈ 0,
+- `stale` — from cache, but past `staleTime`: the old result immediately (time ≈ 0), while the refresh runs in the background — **outside the measurement**, the next request will get the fresh one,
+- `bypass` — a query without a key: always fetched, no cache,
+- `error` — `fn` threw.
+
+Two simultaneous calls with the same key are a single fetch (deduplication): both have the status `miss`, and the second one lasts as long as it waited for the first.
+
+## What timing doesn't include
+
+- `resolve`, React rendering, sending the HTML to the browser, Next overhead — only `build` is measured,
+- `stale` refreshes in the background,
+- **the page cache** — a build with trace bypasses it, so *timing* always shows a full build. In production a page from cache (`hit`) doesn't run loaders at all.
+
+That's why the numbers in debug are "the worst case for the page" and "the real state of the query cache". On top of that: `npm run dev` mode is slower than a production build, and the first request after the server starts is slower than the following ones (empty query cache, JIT warm-up).
+
+## How to read timing
+
+- **The page is slow** → which loader has `slowest`; it determines data loading. Speeding up the others won't help.
+- **A long loader with no queries under it** → a slow source outside `ui.query` (a direct fetch, a database) — consider `ui.query` with `staleTime`, `defer` or the page cache.
+- **The same query is a `miss` on every refresh** → `staleTime: 0`, the key changes on every request (e.g. it contains a time), or the query has no key (`bypass`).
+- **Queries in one loader start one after another** (the second starts ≈ when the first ends) → sequential `await`s in the loader; if they're independent, use `Promise.all`.
+- **A red loader** → *sections* will show the error message.
+
+## Common problems
+
+**The panel is empty.** `No devtools payload on this page` — the page didn't embed the payload: in debug mode render `<DevtoolsData payload={inspect(result, resolved)} />`. `built without trace — …` — the payload is there, but the build ran without `trace`: missing are item counts, props origin, bindings with no matches and sections removed because of data (see the *Build without trace* case).
+
+**A component doesn't render.** `✗ card is not in the registry — …` — the registry doesn't have the component; the node renders the `fallback` from `<Render>` or nothing. Requires `<Render debug>` (the `data-dedal-missing` marker).
+
+**A patch doesn't apply.** *sections* → `! patch “crad” matches no node in this section — it has no effect. Did you mean: card?` (for `remove`: `… nothing is removed.`). If the selector matches but the prop has a different value — check the origin in *node*: a later patch or the data may have overridden it.
+
+**A card got no data or disappeared.** *sections* → the section's bindings: `! card — 2 data items for 4 nodes` (`(1 null)` — some items are `null`; without trace: `2 of 4 nodes filled`), and underneath the effect: `2 nodes removed — …` or `2 nodes left empty (onShortage: 'keep')`, and for a surplus `3 data items not shown — no node left for them:` with a list.
+
+**Data didn't make it onto the page even though the section received it.** `✗ crad — 3 data items for 0 nodes` with `No node in this section matches “crad” … Did you mean: card?` (a typo, also in a slot name) or `“#featured” matches nodes already filled by “card” … Move “#featured” before “card”` (wrong order of bindings). `news.2.0 had data, but their parent news.2 was removed` — the data was lost together with the removed parent.
+
+**Where did this article end up?** *tree* → type a fragment of the title, the id or the URL. Nodes whose data contains it are highlighted in the tree and on the page; if the article didn't make it onto the page — `! not on the page: section … · card [4] …`.
+
+**A section isn't on the page.** The page messages in *sections* give the reason: `failed` (the loader of an `optional` section threw — with the error message), `removed` (empty with `onEmpty: 'remove'`, a root without data, or `remove` in the section definition), `empty` (`kept` / `replaced by the onEmpty block`), `unknownData` (data under a key that isn't on the page — with a hint).
+
+**The page shows stale data.** *sections* → `cache key`. Debug mode bypasses the page cache, so it shows a fresh build — if the data is up to date in debug but not without it, it's a stale cache entry (`staleTime`, `ui.invalidate()`).
+
+## Other features
+
+- `copy report` — a text report (URL, messages, sections with problems, timings) for a bug report — the same as the "devtools report" on the pages of these docs,
+- `Alt+Shift+S` opens and closes the panel; `⇤` / `⇥` moves it to the other side of the screen; the panel remembers whether it was open, the tab and the side within the browser tab (`sessionStorage`), even after a reload.
+
+## Limitations and costs (debug mode only)
+
+- **Markers change the DOM** — `<Render debug>` wraps every node in `<dedal-node style="display: contents">`: CSS selectors that depend on structure (`.grid > .card`, `:first-child`) may behave differently, and where HTML requires specific children (`<table>`, `<ul>`, `<select>`), the structure breaks.
+- **Debug bypasses the page cache** — every request is a full build with API calls.
+- **The cost of `inspect()` and the payload size** — on the order of a few ms and 150–250 KB for ~500 nodes, a few dozen ms and 1–2 MB for ~4000 nodes; the size depends mainly on the amount of data.
+- **A snapshot, not live state** — the panel shows the page as of the server render; it doesn't see client-side changes (component state).
+- **Read-only** — the panel doesn't change the layout or the data.
+
+## Programmatically
+
+The same functions are in `dedal/devtools` — they work in Node, in tests and in logs:
+
+```ts
+import { inspect, mergePayloads, pageMessages, reportText, searchNodes, selectNodes } from 'dedal/devtools'
+
+const result = await home.build(ctx, { trace: true })
+const payload = inspect(result, ui.resolve(result, { ctx, trace: true }))
+
+payload.nodes['news.0'].selector             // suggested selector
+payload.nodes['news.0'].props.size           // { value: 'lg', source: { from: 'patch', selector: '…', section: 'news' } }
+payload.sections[0].diagnosis                // unmatched, layout, removed, dropped
+selectNodes(payload, 'grid > card')          // IDs of matching nodes — the same matcher as patch / bindings
+searchNodes(payload, 'title')                // the *tree* search: { bySelector, byText, byData, lost }
+pageMessages(payload)                        // page messages: { level, subject, text, suggestions? }
+reportText(payload, { title })               // text report (the same as "copy report")
+payload.page.timings                         // timings: [{ scope, total, layout, load, assign, loaders, queries? }]
+mergePayloads([pagePayload, sectionPayload]) // page payload + a deferred section
+```
+
+Example tests: "no binding loses data" — `expect(pageMessages(payload).filter(m => m.level === 'error')).toEqual([])`; "the featured card patch matches exactly one node" — `expect(selectNodes(payload, 'grid > card:first-child')).toHaveLength(1)`.

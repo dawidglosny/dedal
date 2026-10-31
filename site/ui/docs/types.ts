@@ -44,9 +44,12 @@ export type DocGroup = {
   title: string
   /** One line for the menu and the group list. */
   description: string
-  /** The group page: context, how it works, why so, how to use — Polish prose; `## ` headings, ``` code blocks, `- ` lists. */
-  intro: string
-  /** The file the page text comes from, relative to the repository root — for "Edit this page" (default: the intros file). */
+  /**
+   * The group page text, for a group without an MDX page in `content/docs` (today only the API reference, read from
+   * `docs/API.md`): `## ` headings, ``` code blocks, `- ` lists. Group pages are written in MDX.
+   */
+  intro?: string
+  /** The file the page text comes from, relative to the repository root — for "Edit this page" (default: the group's MDX page). */
   source?: string
   /** The group file whose `#region`s are shown as code (empty for groups without cases). */
   file: string

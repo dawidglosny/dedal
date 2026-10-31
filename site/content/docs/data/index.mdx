@@ -1,0 +1,56 @@
+---
+title: "Data"
+description: "Bindings: how data reaches nodes, and what happens on shortage and surplus."
+---
+
+**In short:** you have a list of articles and a template with cards; this is how the articles land in the cards. You say *which* nodes get the data (`card`, `#featured`) instead of counting positions, so the template can change without breaking the data.
+
+Data reaches the layout through **bindings**: a section's data is an object `{ selector: items }`. The selector picks nodes in the section, and consecutive items go to consecutive matched nodes — in tree order.
+
+```ts
+data: async () => ({
+  news: {                                   // section key
+    card: articles,                         // binding: each card gets the next article
+    'card > :slot(badge)': categories,      // binding to slots
+  },
+})
+```
+
+## Why selectors and not a single list
+
+A single flat list of data per section (first element to the first component, second to the second…) breaks with every block change: adding a heading shifts all the data by one. Bindings are addressed — `card` gets the articles, `badge` the categories, regardless of their order in the block. Data never crosses between sections — the section key is explicit.
+
+## How assignment works exactly
+
+- **In short:** items fill the matching nodes top to bottom, in the order they appear on the page.
+- **Tree order**, exactly: a node, then its slots (in the order from the block), then its children — recursively. The first item goes to the first matched node in that order.
+- **The order of bindings matters**: they are processed in entry order, and a node taken by an earlier binding is skipped by later ones. That's why specific ones (`#featured`) are written before general ones (`card`).
+- **Shape**: a binding is an array of items or `{ items, onShortage, onSurplus }` (custom rules for that binding). An item can be anything serializable to JSON — an object, a string, a number; `null` / `undefined` = no data for that node.
+- **The result** is a map `node ID → item` in `PageResult.data`; only `resolve` combines it with props.
+
+## Data vs props
+
+Data can have the API's shape (`Article`) rather than the component's props. **toProps** (an instance option) maps it per component to the contract's props — a pure module, no IO, runs on the server and on the frontend. It receives `{ props, data, node, ctx }` and is called for every node of the given component, **including those without data** (`data: undefined`). Without toProps, data (it must be an object) is merged with props directly (deep merge, data wins).
+
+Props precedence: `defaults` (merged under the block's props when the page is built) → props from the block → section `patch` → data. `resolve` passes the props from the layout and the data to `toProps` — its result is the final props (hence `...props` in the mapping). Devtools show the source of every prop.
+
+## When the counts don't match
+
+API data rarely fits the layout perfectly:
+
+- **fewer items than nodes** — `onShortage`: `'remove'` (default — a node without data disappears together with its subtree), `'keep'` (stays with the props from the layout, e.g. a placeholder), `'error'` (exception),
+- **more items than nodes** — `onSurplus`: `'ignore'` (default — the surplus is skipped) or `'error'`,
+- `null` / `undefined` in the list = no data for that node (as with a list that's too short).
+
+The rules are set on three levels — the narrower one wins: instance (`createDedal({ assign: { onShortage, onSurplus } })`), section (`section(key, block, { policies })`), a single binding (`{ items, onShortage }`).
+
+## How to use it
+
+- Prepare data per component (a list of articles for `card`, categories for `badge`), not one list for the whole section.
+- Write specific bindings (`#featured`) before general ones (`card`).
+- Decide what happens on shortage: cards that disappear (`remove`) or fixed slots (`keep`).
+
+## What to watch out for
+
+- Mismatches (a binding with no matches, wrong order, data that got lost) don't break the page — devtools show them in *sections* with an explanation and a list of the data that didn't make it onto the page.
+- `onShortage: 'remove'` on a container also removes its children — together with the data they already received (*Dropped data*).
