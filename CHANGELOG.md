@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.9.1
+
+No changes to the API or behavior — the documentation, rebuilt around Figma as the main path.
+
+Documentation:
+- a **Figma** section: an overview, *Preparing a Figma file* (for designers), *The mapping*, *dedal-figma pull*, *Agents: dedal-mcp and the skill*,
+- *Quick start* from a Figma frame first, from code second; *A page from Figma, end to end* in *Get started*,
+- the sidebar reorganised: Get started → Figma → Page builders and storage → The engine → Guides → Troubleshooting → Reference; *Introduction* is now *How the engine works*,
+- the README and the home page lead with Figma; server-driven UI named once, lower down; mobile promises removed (it's under *Later*),
+- facts checked against the code: the README's mapping example, `--force` still exits 1, ADR-003; the roadmap lists a Figma plugin and a page builder example.
+
 ## 0.9.0
 
 **Figma end to end** — a real page from a Figma frame, images, and tools for agents.
