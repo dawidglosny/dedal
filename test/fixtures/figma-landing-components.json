@@ -736,6 +736,12 @@
                 "value": "Figma frame → typed JSON → Dedal → your page"
                }
               },
+              "fills": [
+               {
+                "type": "IMAGE",
+                "imageRef": "f36126ad54bf950ebdceaa024f76d6bfdefecb3d"
+               }
+              ],
               "children": [
                {
                 "id": "I31:421;29:399;31:432;30:409;31:458;29:428",
@@ -1304,6 +1310,12 @@
             "value": "A Figma frame next to the template Dedal produces from it"
            }
           },
+          "fills": [
+           {
+            "type": "IMAGE",
+            "imageRef": "c707a6594499f1267bb1e24fbda16aae0fc56003"
+           }
+          ],
           "children": [
            {
             "id": "I31:519;29:401;31:533;29:428",
@@ -2523,6 +2535,12 @@
                 "value": "The Dedal devtools panel: where each prop of a card came from"
                }
               },
+              "fills": [
+               {
+                "type": "IMAGE",
+                "imageRef": "bbd8e9a1878a1c103f26c67cbd982c0f16768cd0"
+               }
+              ],
               "children": [
                {
                 "id": "I31:667;29:403;31:673;29:426;31:707;29:428",

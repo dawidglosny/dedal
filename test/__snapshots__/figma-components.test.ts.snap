@@ -168,6 +168,7 @@ export default async function Home() {
             "component": "image",
             "props": {
               "alt": "The Dedal devtools panel: where each prop of a card came from",
+              "src": "figma-image:bbd8e9a1878a1c103f26c67cbd982c0f16768cd0",
             },
           },
         },
@@ -339,6 +340,7 @@ Ship it without a release.",
             "component": "image",
             "props": {
               "alt": "Figma frame → typed JSON → Dedal → your page",
+              "src": "figma-image:f36126ad54bf950ebdceaa024f76d6bfdefecb3d",
             },
           },
         },
@@ -492,6 +494,7 @@ Keep them apart.",
         "component": "image",
         "props": {
           "alt": "A Figma frame next to the template Dedal produces from it",
+          "src": "figma-image:c707a6594499f1267bb1e24fbda16aae0fc56003",
         },
       },
       {

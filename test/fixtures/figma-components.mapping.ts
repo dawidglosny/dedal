@@ -1,7 +1,7 @@
 /** The contract and mapping for the component version of the demo file — also a `--mapping` module for the CLI. */
 import { z } from 'zod'
 import { defineContract } from '../../src'
-import { component, mapping, swap } from '../../src/figma'
+import { component, image, mapping, swap } from '../../src/figma'
 
 // the contract mirrors the library: section components with their properties and slots, plus shadcn/ui's own
 export const contract = defineContract({
@@ -14,7 +14,7 @@ export const contract = defineContract({
   },
   grid: {},
   split: { slots: { content: 'many', media: 'one' } },
-  image: { props: z.object({ alt: z.string() }) },
+  image: { props: z.object({ alt: z.string(), src: z.string().optional() }) },
   step: { props: z.object({ number: z.string(), title: z.string(), description: z.string() }) },
   checkItem: { props: z.object({ text: z.string(), tone: z.enum(['default', 'inverse']).optional() }) },
   codeBlock: { props: z.object({ filename: z.string(), code: z.string() }) },
@@ -37,7 +37,10 @@ export const contract = defineContract({
 // almost everything by convention: component names, property names, slot names
 const fromFigma = mapping(
   contract,
-  { feature: component('FeatureCard', { icon: swap('Icon', name => name.replace('icon/', '')) }) },
+  {
+    feature: component('FeatureCard', { icon: swap('Icon', name => name.replace('icon/', '')) }),
+    image: component('Image', { src: image() }), // the picture is the instance's image fill
+  },
   { section: 'section', text: 'text' }
 )
 

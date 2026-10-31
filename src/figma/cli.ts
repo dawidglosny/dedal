@@ -5,10 +5,10 @@
  * FIGMA_TOKEN=… dedal-figma pull https://www.figma.com/design/AOw4…/Landing?node-id=31-398 --mapping ./figma.mapping.js --out templates/home.json
  * ```
  */
-import { writeFile as fsWriteFile } from 'node:fs/promises'
-import { resolve } from 'node:path'
+import { mkdir, writeFile as fsWriteFile } from 'node:fs/promises'
+import { dirname, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import type { FigmaConversion, FigmaNodesResponse } from './index'
+import { imageRefs, replaceImageRefs, type FigmaConversion, type FigmaNodesResponse } from './index'
 
 /** What `run` needs from the outside world — replaced in tests. */
 export type CliDeps = {
@@ -16,19 +16,23 @@ export type CliDeps = {
   cwd: string
   fetch: (url: string, init: { headers: Record<string, string> }) => Promise<{ ok: boolean; status: number; json(): Promise<unknown> }>
   importModule: (path: string) => Promise<Record<string, unknown>>
-  writeFile: (path: string, content: string) => Promise<void>
+  writeFile: (path: string, content: string | Uint8Array) => Promise<void>
+  /** Downloads a file (an image from Figma's storage): its bytes and content type. */
+  download: (url: string) => Promise<{ bytes: Uint8Array; type: string }>
   stdout: (text: string) => void
   stderr: (text: string) => void
 }
 
 type Converter = { convert(response: FigmaNodesResponse, nodeId: string): Promise<FigmaConversion<unknown>> }
 
-const USAGE = `Usage: dedal-figma pull <file key | Figma URL> [node id] --mapping <module> [--out <file>] [--raw <file>] [--force]
+const USAGE = `Usage: dedal-figma pull <file key | Figma URL> [node id] --mapping <module> [--out <file>] [--images <dir>] [--image-url <prefix>] [--raw <file>] [--force]
 
   <file key | URL>   the Figma file; a URL with ?node-id=… gives the node too
   [node id]          the frame to convert — its top-level layers become sections (1:2 or 1-2)
   --mapping <module> a module whose default export is mapping(contract, …) from dedal/figma
   --out <file>       where to write the templates (JSON); stdout without it
+  --images <dir>     download the images (image() in the mapping) into a directory; without it they stay figma-image:<ref>
+  --image-url <path> how the template refers to them (default: the directory without a leading public/ — public/figma → /figma)
   --raw <file>       also save the raw REST response (e.g. as a test fixture)
   --force            write the templates even when they don't match the contract
 
@@ -67,7 +71,15 @@ const defaultDeps = (): CliDeps => ({
   cwd: process.cwd(),
   fetch: (url, init) => fetch(url, init),
   importModule: path => import(pathToFileURL(path).href),
-  writeFile: (path, content) => fsWriteFile(path, content),
+  writeFile: async (path, content) => {
+    await mkdir(dirname(path), { recursive: true })
+    await fsWriteFile(path, content)
+  },
+  download: async url => {
+    const response = await fetch(url)
+    if (!response.ok) throw new Error(`${response.status} for ${url}`)
+    return { bytes: new Uint8Array(await response.arrayBuffer()), type: response.headers.get('content-type') ?? '' }
+  },
   stdout: text => process.stdout.write(text),
   stderr: text => process.stderr.write(text),
 })
@@ -154,7 +166,41 @@ export async function run(argv: string[], deps: CliDeps = defaultDeps()): Promis
     }
   }
 
-  const json = JSON.stringify(result.sections, null, 2) + '\n'
+  // images: Figma gives their URLs through another request, and the URLs expire — download them with the templates
+  let sections: unknown = result.sections
+  const refs = [...imageRefs(sections)]
+  if (refs.length && typeof args.flags.images === 'string') {
+    const dir = args.flags.images
+    const prefix = typeof args.flags['image-url'] === 'string' ? args.flags['image-url'] : `/${dir.replace(/^(\.\/)?public\//, '').replace(/^\/+/, '')}`
+    let urls: Record<string, string | null>
+    try {
+      const images = await deps.fetch(`https://api.figma.com/v1/files/${encodeURIComponent(file)}/images`, { headers: { 'X-Figma-Token': token } })
+      urls = ((await images.json()) as { meta?: { images?: Record<string, string | null> } }).meta?.images ?? {}
+    } catch (error) {
+      stderr(`Figma API: the image request failed — ${(error as Error).message}\n`)
+      return 1
+    }
+    const paths: Record<string, string> = {}
+    for (const ref of refs) {
+      const url = urls[ref]
+      if (!url) {
+        stderr(`warning  image ${ref}: Figma returned no URL — left as figma-image:${ref}\n`)
+        continue
+      }
+      try {
+        const { bytes, type } = await deps.download(url)
+        const ext = /svg/.test(type) ? 'svg' : /jpe?g/.test(type) ? 'jpg' : /gif/.test(type) ? 'gif' : /webp/.test(type) ? 'webp' : 'png'
+        await deps.writeFile(resolve(deps.cwd, dir, `${ref}.${ext}`), bytes)
+        paths[ref] = `${prefix.replace(/\/+$/, '')}/${ref}.${ext}`
+      } catch (error) {
+        stderr(`warning  image ${ref}: download failed (${(error as Error).message}) — left as figma-image:${ref}\n`)
+      }
+    }
+    sections = replaceImageRefs(sections, paths)
+    stderr(`${Object.keys(paths).length} image(s) → ${dir}\n`)
+  } else if (refs.length) stderr(`warning  ${refs.length} image(s) left as figma-image:<ref> — pass --images <dir> to download them\n`)
+
+  const json = JSON.stringify(sections, null, 2) + '\n'
   if (typeof args.flags.out === 'string') {
     await deps.writeFile(resolve(deps.cwd, args.flags.out), json)
     stderr(`${result.ok ? '✓' : '!'} ${count} section(s) → ${args.flags.out}\n`)

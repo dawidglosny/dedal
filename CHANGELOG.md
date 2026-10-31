@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+Added:
+- `dedal/figma`: `image()` — a node's image fill as `figma-image:<imageRef>`; `imageRefs()` and `replaceImageRefs()` to resolve them.
+- `dedal-figma pull --images <dir> [--image-url <prefix>]` — downloads the images (Figma's image URLs expire) and puts local paths in the templates.
+
 ## 0.8.0
 
 **Figma in the package** — `dedal/figma` turns a Figma frame into templates, checked against the contract ([ADR-003](docs/adr/003-figma-mapping.md)).

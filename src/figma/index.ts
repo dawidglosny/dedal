@@ -21,6 +21,8 @@ export type FigmaNode = {
   componentPropertyReferences?: Record<string, string>
   /** Text layers: their content. */
   characters?: string
+  /** Fills — an image fill carries an `imageRef`, resolved to a URL through `GET /v1/files/:key/images`. */
+  fills?: { type: string; visible?: boolean; imageRef?: string }[]
   /** Styles applied to the node, by kind: `{ text: '2:36' }` — resolved to a name through the entry's `styles`. */
   styles?: Record<string, string>
   children?: FigmaNode[]
@@ -103,6 +105,36 @@ export const swap = (
 export const layer = (name: string): FigmaSource => ({
   read: ({ textLayer }) => textLayer(name),
 })
+
+/** The prefix of an image reference in a converted template: `figma-image:<imageRef>` — see `image()`. */
+export const FIGMA_IMAGE = 'figma-image:'
+
+/**
+ * The node's image fill → `figma-image:<imageRef>`. Figma gives image URLs only through a separate request, and they
+ * expire — `dedal-figma pull --images <dir>` downloads the images and replaces these values with local paths.
+ */
+export const image = (): FigmaSource => ({
+  read: ({ node }) => {
+    const fill = node.fills?.find(fill => fill.type === 'IMAGE' && fill.visible !== false && fill.imageRef)
+    return fill ? `${FIGMA_IMAGE}${fill.imageRef}` : undefined
+  },
+})
+
+/** Every `figma-image:<ref>` value in converted templates — the image references to download. */
+export function imageRefs(value: unknown, into = new Set<string>()): Set<string> {
+  if (typeof value === 'string' && value.startsWith(FIGMA_IMAGE)) into.add(value.slice(FIGMA_IMAGE.length))
+  else if (Array.isArray(value)) for (const item of value) imageRefs(item, into)
+  else if (value && typeof value === 'object') for (const item of Object.values(value)) imageRefs(item, into)
+  return into
+}
+
+/** A copy of converted templates with `figma-image:<ref>` values replaced (`ref → URL or path`). */
+export function replaceImageRefs<T>(value: T, urls: Record<string, string>): T {
+  if (typeof value === 'string' && value.startsWith(FIGMA_IMAGE)) return (urls[value.slice(FIGMA_IMAGE.length)] ?? value) as T
+  if (Array.isArray(value)) return value.map(item => replaceImageRefs(item, urls)) as T
+  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, replaceImageRefs(item, urls)])) as T
+  return value
+}
 
 // ---- the mapping
 

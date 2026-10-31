@@ -93,4 +93,5 @@ const result = await shadcnFromFigma.convert(response, '5:2')
 - Tests run on the real, trimmed REST response of the demo file — no network in tests.
 - The demo: each version of the landing page converted with its own library's contract and rendered with that library — the shadcn/ui frame as a shadcn/ui page, the Radix frame as a Radix page; the docs site's home page built from one of them by Dedal.
 - Checked (2026-11-01): the REST API returns native slots, nested ones too. The component version of the demo (`test/fixtures/figma-landing-components.json` — sections as library components, content in slots, mock-ups as `Image` instances) converts with one explicit mapping entry; only a deliberately messy frame is reported.
-- Open: image sources (`imageRef` in an image fill → a URL through `GET /v1/images`); the plugin adapter; incremental updates (only changed sections).
+- Images (0.9): `image()` gives `figma-image:<imageRef>`; `pull --images` resolves the refs through `GET /v1/files/:key/images` and downloads the files, because the URLs expire.
+- Open: the plugin adapter; incremental updates (only changed sections).

@@ -7,11 +7,17 @@ const fixture = JSON.parse(readFileSync(new URL('./fixtures/figma-landing-compon
 const mappingModule = new URL('./fixtures/figma-components.mapping.ts', import.meta.url).pathname
 
 const setup = (overrides: Partial<CliDeps> = {}) => {
-  const out = { stdout: '', stderr: '', files: {} as Record<string, string>, requests: [] as { url: string; token?: string }[] }
+  const out = { stdout: '', stderr: '', files: {} as Record<string, string | Uint8Array>, requests: [] as { url: string; token?: string }[], downloads: [] as string[] }
   const deps: CliDeps = {
     env: { FIGMA_TOKEN: 'figd_test' },
     cwd: '/project',
-    fetch: async (url, init) => (out.requests.push({ url, token: init.headers['X-Figma-Token'] }), { ok: true, status: 200, json: async () => fixture }),
+    fetch: async (url, init) => {
+      out.requests.push({ url, token: init.headers['X-Figma-Token'] })
+      // the images endpoint: every image reference → a (temporary) URL
+      const body = url.endsWith('/images') ? { meta: { images: { f36126ad54bf950ebdceaa024f76d6bfdefecb3d: 'https://s3.example/pipeline', missing: null } } } : fixture
+      return { ok: true, status: 200, json: async () => body }
+    },
+    download: async url => (out.downloads.push(url), { bytes: new Uint8Array([137, 80, 78, 71]), type: 'image/png' }),
     importModule: path => import(path),
     writeFile: async (path, content) => void (out.files[path] = content),
     stdout: text => void (out.stdout += text),
@@ -27,7 +33,7 @@ describe('dedal-figma pull', () => {
     const code = await run(['pull', 'https://www.figma.com/design/AOw4RpmACCpyhHI9YXRJVG/Dedal?node-id=31-398', '--mapping', mappingModule, '--out', 'templates/home.json'], deps)
     expect(code).toBe(0)
     expect(out.requests).toEqual([{ url: 'https://api.figma.com/v1/files/AOw4RpmACCpyhHI9YXRJVG/nodes?ids=31%3A398', token: 'figd_test' }])
-    const sections = JSON.parse(out.files['/project/templates/home.json']!)
+    const sections = JSON.parse(out.files['/project/templates/home.json'] as string)
     expect(Object.keys(sections)).toEqual(['nav', 'hero', 'principle', 'showcase', 'features', 'devtools', 'contract', 'Frame 427', 'cta', 'footer'])
     expect(out.stderr).toContain('1 layer(s) not in the template')
     expect(out.stderr).toContain('Frame 427/Group 12/icon/lock-open')
@@ -38,7 +44,24 @@ describe('dedal-figma pull', () => {
     const { deps, out } = setup()
     expect(await run(['pull', 'AOw4RpmACCpyhHI9YXRJVG', '31-398', '--mapping', mappingModule, '--raw', 'raw.json'], deps)).toBe(0)
     expect(Object.keys(JSON.parse(out.stdout))).toContain('hero')
-    expect(JSON.parse(out.files['/project/raw.json']!).nodes['31:398']).toBeDefined()
+    expect(JSON.parse(out.files['/project/raw.json'] as string).nodes['31:398']).toBeDefined()
+  })
+
+  it('--images downloads the images and puts local paths in the templates; without it they stay references', async () => {
+    const { deps, out } = setup()
+    expect(await run(['pull', 'AOw4RpmACCpyhHI9YXRJVG', '31:398', '--mapping', mappingModule, '--out', 'home.json', '--images', 'public/figma'], deps)).toBe(0)
+    expect(out.requests.map(r => r.url)).toContain('https://api.figma.com/v1/files/AOw4RpmACCpyhHI9YXRJVG/images')
+    expect(out.downloads).toEqual(['https://s3.example/pipeline'])
+    expect(out.files['/project/public/figma/f36126ad54bf950ebdceaa024f76d6bfdefecb3d.png']).toBeInstanceOf(Uint8Array)
+    const json = out.files['/project/home.json'] as string
+    expect(json).toContain('"src": "/figma/f36126ad54bf950ebdceaa024f76d6bfdefecb3d.png"')
+    expect(out.stderr).toMatch(/image .*: Figma returned no URL/) // the other two references got no URL
+    expect(json).toContain('figma-image:')
+
+    const without = setup()
+    expect(await run(['pull', 'AOw4RpmACCpyhHI9YXRJVG', '31:398', '--mapping', mappingModule], without.deps)).toBe(0)
+    expect(without.out.stderr).toContain("image(s) left as figma-image:<ref> — pass --images <dir>")
+    expect(without.out.downloads).toEqual([])
   })
 
   it('templates that don\'t match the contract: errors with the Figma layer, nothing written unless --force', async () => {

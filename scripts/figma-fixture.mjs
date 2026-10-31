@@ -1,5 +1,5 @@
 // Trims a Figma REST API response (GET /v1/files/:key/nodes) to the fields `dedal/figma` reads:
-// structure, names, component links and properties, texts, text styles, visibility. Geometry, fills and vector shapes go.
+// structure, names, component links and properties, texts, text styles, image fills, visibility. Geometry, fills and vector shapes go.
 // Usage: node scripts/figma-fixture.mjs test/fixtures/raw/figma-landing.json test/fixtures/figma-landing.json
 import { readFileSync, writeFileSync } from 'node:fs'
 
@@ -9,6 +9,9 @@ const SHAPES = new Set(['VECTOR', 'ELLIPSE', 'BOOLEAN_OPERATION', 'STAR', 'LINE'
 
 const trim = node => {
   const out = Object.fromEntries(Object.entries(node).filter(([key]) => KEEP.has(key)))
+  // image fills only: their reference, for image()
+  const images = (node.fills ?? []).filter(fill => fill.type === 'IMAGE').map(({ type, visible, imageRef }) => ({ type, ...(visible === false && { visible }), imageRef }))
+  if (images.length) out.fills = images
   const children = (node.children ?? []).filter(child => !SHAPES.has(child.type)).map(trim)
   return children.length ? { ...out, children } : out
 }

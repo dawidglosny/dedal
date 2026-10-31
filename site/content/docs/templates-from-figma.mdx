@@ -52,6 +52,7 @@ Where names differ, map them explicitly — the same sources as Figma's Code Con
 - `component('Action', { … })` — a Figma component with another name; `componentName: name => name.replace(/ \(Radix\)$/, '')` in the options for a rule that applies to all of them,
 - `text('Caption')`, `variant('Kind', { Primary: 'primary' })`, `boolean('Wide')`, `swap('Icon', toValue)` — a property with another name, or other values,
 - `layer('title')` — the content of a text layer inside the node,
+- `image()` — the node's image fill: `image: component('Image', { src: image() })`,
 - `component('Split', {}, { slots: { media: 'Media' }, children: 'Content' })` — where each slot's content goes.
 
 A prop the contract doesn't have is a compile error, and an error when the mapping is created; so are two mappings for one Figma component.
@@ -66,6 +67,7 @@ FIGMA_TOKEN=… npx dedal-figma pull "https://www.figma.com/design/<file>/<name>
 - Every top-level layer of the frame is a section — its name is the section key.
 - The output is the sections as JSON. What didn't make it into the template goes to stderr: `Frame 427/Group 12/icon/lock-open — an instance of "icon/lock-open", which no contract component maps`.
 - A template that doesn't match the contract is **not written** (exit code 1), with the template path and the Figma layer: `hero.children[0].slots.badge.props.variant (Figma: hero/Content/hero/Badge/Badge): Invalid option…`. `--force` writes it anyway.
+- `--images public/figma` downloads the images (`image()` in the mapping) and puts their paths in the template (`/figma/<ref>.png`; `--image-url` sets the prefix). Figma gives image URLs only through a separate request, and they expire — without `--images` the values stay `figma-image:<ref>`.
 - `--raw response.json` also saves the REST response — a fixture for a test of your mapping, no network needed.
 - The mapping module is loaded by Node: write it in JavaScript, or in TypeScript with Node 23.6+ (or a loader such as `tsx`).
 
@@ -100,4 +102,4 @@ Real files have plain frames with loose texts, illustrations drawn from shapes, 
 - **Names are the contract.** Renaming a component, a property or a slot in Figma without renaming it in the contract fails validation — on purpose. Agree on the names with the design team, like any API.
 - **The content of an instance belongs to the component** — only what sits in its native slots is converted. A library component nested elsewhere in an instance is reported: expose it as a property, or put it in a slot.
 - **One instance = one block.** Repeated instances aren't collapsed into `repeat`; a template with three `card` blocks works the same.
-- **Not yet:** image sources (an image fill's reference → a URL through the Figma images endpoint), a Figma plugin as a source, pulling only changed sections.
+- **Not yet:** a Figma plugin as a source, pulling only changed sections.
