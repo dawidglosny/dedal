@@ -149,6 +149,7 @@ Requires Node 20.9+. React 18+ only for `dedal/react` (an optional peer dependen
 - **Decisions** — [docs/adr](docs/adr): the positioning, the scope, and every larger decision with its alternatives.
 - **API reference** — [on the site](https://dawidglosny.github.io/dedal/docs/api/) (source: [docs/API.md](docs/API.md)): formats, design rules, every option; every exported function and type in the [type reference](https://dawidglosny.github.io/dedal/types/), generated from the source.
 - **Examples**
+  - [`examples/figma`](examples/figma) — a landing page designed in Figma, pulled by `dedal-figma` and rendered by Dedal: change the frame, pull, the page follows,
   - [`examples/next`](examples/next) — Next.js: one page, two component libraries (Radix Themes and shadcn/ui), cache, streaming, devtools,
   - [`examples/web-components`](examples/web-components) — a JSON template, a plain Node server, custom elements in the browser.
 

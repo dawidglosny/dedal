@@ -20,6 +20,8 @@ Spacing, sizes and colors stay in the components and the design tokens; a templa
 
 The best file for this is one built like a design system: **sections are components too** — `Hero`, `SectionHeading`, `Grid` — with their texts as properties and their content in native slots. Then almost nothing needs a mapping.
 
+A working example: [`examples/figma`](https://github.com/dawidglosny/dedal/tree/main/examples/figma) — the landing page of the demo file, pulled and rendered by Dedal; change the frame, pull, and the page follows.
+
 ## The mapping
 
 One contract per component library: the contract mirrors the library's components and their values, and the same library's registry renders the page. Names are compared without case, spaces, dashes and underscores; Figma's `#id` suffixes are dropped.
