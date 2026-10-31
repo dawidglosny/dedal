@@ -1,6 +1,8 @@
 export { createDedal } from './dedal'
 export { defineContract } from './contract'
 export type { ComponentDefinition, ContractDefinition, InferContract, SlotKind, StandardResult, StandardSchema } from './contract'
+export { validateTemplate } from './validate'
+export type { ValidationError, ValidationResult } from './validate'
 export type { InstanceResolveOptions, Dedal, DedalOptions } from './dedal'
 export type { Builders, NodeOptions } from './builders'
 export { assign } from './assign'

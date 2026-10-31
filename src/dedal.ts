@@ -1,6 +1,7 @@
 import { assign, type AssignPolicies, type AssignResult, type Bindings } from './assign'
 import { createBuilders } from './builders'
 import { createCache, type CacheKey, type CacheOptions } from './cache'
+import type { ContractDefinition, InferContract } from './contract'
 import { createAsyncContext, type AsyncContext, type AsyncLocalStorageClass } from './timing'
 import { createQuery, namespaced, PAGE_NAMESPACE, QUERY_NAMESPACE, type Query, type QueryOptions } from './query'
 import { layout, type IdGenerator } from './layout'
@@ -16,9 +17,15 @@ import {
   type ToProps,
 } from './resolve'
 import type { BlockDefinition, ComponentDefaults, LayoutNode, Selected } from './types'
+import { validateTemplate, type ValidationResult } from './validate'
 
-/** Options of `createDedal()`: default props, `toProps` mappings, the ID generator, assignment policies and the cache. */
+/** Options of `createDedal()`: the contract, default props, `toProps` mappings, the ID generator, assignment policies and the cache. */
 export type DedalOptions<C> = {
+  /**
+   * The contract as a value (`defineContract`) — the instance is typed by it, and templates from outside the code can be
+   * checked with `ui.validate`. Without it, the contract is the type argument: `createDedal<Contract>()`.
+   */
+  contract?: ContractDefinition
   /** Default component props, merged with the props passed to `node()`. */
   defaults?: ComponentDefaults<C>
   /** Layout node ID generator. */
@@ -44,16 +51,26 @@ export type DedalOptions<C> = {
 export type InstanceResolveOptions<C> = Omit<ResolveOptions<C>, 'toProps'>
 
 /**
- * Creates an engine instance for contract `C`. Types, default props and the ID generator are given once,
+ * Creates an engine instance. The contract is either a value — `createDedal({ contract })`, typed by it and able to
+ * validate templates — or a type argument, `createDedal<Contract>()`. Default props and the ID generator are given once,
  * and all instance functions are already typed by the contract.
  *
  * @example
  * ```ts
- * export const ui = createDedal<Contract>({ defaults: { card: { size: 'md' } } })
+ * export const ui = createDedal({ contract, defaults: { card: { size: 'md' } } })
  * export const { node, repeat, clone } = ui
  * ```
  */
-export function createDedal<C extends object>(options: DedalOptions<C> = {}) {
+export function createDedal<C extends object = never, const D extends ContractDefinition = ContractDefinition>(
+  options: DedalOptions<ContractOf<C, D>> & { contract?: D } = {}
+): Dedal<ContractOf<C, D>> {
+  return createInstance(options as DedalOptions<ContractOf<C, D>>)
+}
+
+/** The instance's contract: the type argument when given (`createDedal<Contract>()`), otherwise inferred from `contract`. */
+type ContractOf<C, D extends ContractDefinition> = [C] extends [never] ? InferContract<D> : C
+
+function createInstance<C extends object>(options: DedalOptions<C>) {
   const { node, repeat, clone } = createBuilders<C>({ defaults: options.defaults })
   const cache = createCache(options.cache)
   // created on first use: Next.js sets the global AsyncLocalStorage when the server starts, possibly after this module loads
@@ -104,8 +121,33 @@ export function createDedal<C extends object>(options: DedalOptions<C> = {}) {
       resolve(result, { ...resolveOptions, toProps: options.toProps }),
     resolveTree: (root: LayoutNode<C>, data?: DataMap, resolveOptions: InstanceResolveOptions<C> = {}): ResolvedTree<C> =>
       resolveTree(root, data, { ...resolveOptions, toProps: options.toProps }),
+    /** The contract given to `createDedal({ contract })`, if any. */
+    contract: options.contract,
+    /**
+     * Checks a template from outside the code (a database, a CMS, a Figma export) against the contract: known components
+     * and slots, the slot kind, props against their schemas, `repeat`. Props missing from the template are fine — data
+     * fills them at `resolve`. Needs `createDedal({ contract })`.
+     */
+    validate: async (value: unknown, path = 'template'): Promise<ValidationResult<BlockDefinition<C>>> => {
+      const errors = await validateTemplate(requireContract(options.contract), value, path)
+      return errors.length ? { ok: false, errors } : { ok: true, value: value as BlockDefinition<C>, errors: [] }
+    },
+    /** `validate` for templates stored per section — `{ news: block, hero: block }`; paths start with the section key. */
+    validateSections: async (value: unknown): Promise<ValidationResult<Record<string, BlockDefinition<C>>>> => {
+      const contract = requireContract(options.contract)
+      if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+        return { ok: false, errors: [{ path: 'sections', message: 'expected an object: section key → block' }] }
+      }
+      const errors = (await Promise.all(Object.entries(value).map(([key, block]) => validateTemplate(contract, block, key)))).flat()
+      return errors.length ? { ok: false, errors } : { ok: true, value: value as Record<string, BlockDefinition<C>>, errors: [] }
+    },
   }
 }
 
+const requireContract = (contract: ContractDefinition | undefined): ContractDefinition => {
+  if (!contract) throw new Error('validate: the instance has no contract value — create it with createDedal({ contract: defineContract({ … }) })')
+  return contract
+}
+
 /** A Dedal instance — what `createDedal<Contract>()` returns: builders, `page`, `section`, `query`, `resolve`, `invalidate`. */
-export type Dedal<C extends object> = ReturnType<typeof createDedal<C>>
+export type Dedal<C extends object> = ReturnType<typeof createInstance<C>>

@@ -102,3 +102,94 @@ describe('defineContract', () => {
     expect(bad.issues?.length).toBeGreaterThan(0)
   })
 })
+
+describe('validate', () => {
+  const ui = createDedal({ contract: withZod })
+
+  it('a valid template passes and comes back typed by the contract', async () => {
+    const result = await ui.validate({
+      component: 'grid',
+      props: { columns: 2 },
+      children: [
+        { component: 'card', repeat: 3, props: { size: 'md' }, slots: { badge: { component: 'divider' } } },
+        { component: 'tabs', props: { labels: ['A'] }, slots: { content: [{ component: 'card' }] } },
+      ],
+    })
+    expect(result).toEqual({ ok: true, value: expect.objectContaining({ component: 'grid' }), errors: [] })
+    if (result.ok) expectTypeOf(result.value).toEqualTypeOf<BlockDefinition<FromZod>>()
+  })
+
+  it('props missing from the template are fine — data fills them; props that are there must match', async () => {
+    // card requires title, but a template usually leaves it to the data
+    expect((await ui.validate({ component: 'card' })).ok).toBe(true)
+
+    const result = await ui.validate({ component: 'card', props: { size: 'xl', href: 42 } })
+    expect(result.errors.map(error => error.path).sort()).toEqual(['template.props.href', 'template.props.size'])
+  })
+
+  it('every problem has a path, in tree order', async () => {
+    const result = await ui.validate(
+      {
+        component: 'grid',
+        children: [
+          { component: 'card', slots: { badges: { component: 'divider' } } },
+          { component: 'carousel' },
+          { component: 'tabs', slots: { content: { component: 'card' } } },
+          { component: 'card', slots: { badge: [{ component: 'divider' }] } },
+          { component: 'card', repeat: 0, colour: 'red' },
+          'card',
+        ],
+      },
+      'news'
+    )
+    expect(result.errors).toEqual([
+      { path: 'news.children[0].slots.badges', message: '"card" has no slot "badges" — did you mean "badge"?' },
+      { path: 'news.children[1].component', message: 'unknown component "carousel"' }, // too far from any name for a suggestion
+      { path: 'news.children[2].slots.content', message: 'expected a list of blocks (the slot is "many"), got an object' },
+      { path: 'news.children[3].slots.badge', message: 'expected one block (the slot is "one"), got an array (1 items)' },
+      { path: 'news.children[4].colour', message: 'unknown field "colour" — a block has component, props, slots, children, alias, repeat' },
+      { path: 'news.children[4].repeat', message: 'expected an integer >= 1, got number 0' },
+      { path: 'news.children[5]', message: 'expected a block (an object with "component"), got string "card"' },
+    ])
+  })
+
+  it('nested paths reach into slots and props', async () => {
+    const result = await ui.validate({
+      component: 'tabs',
+      slots: { content: [{ component: 'card' }, { component: 'card', props: { size: 'huge' } }] },
+    })
+    expect(result.errors).toEqual([{ path: 'template.slots.content[1].props.size', message: expect.any(String) }])
+  })
+
+  it('works with valibot and with an async schema', async () => {
+    const asyncSchema = {
+      '~standard': {
+        version: 1,
+        vendor: 'test',
+        validate: async (value: unknown) =>
+          typeof (value as { label?: unknown }).label === 'string' ? { value } : { issues: [{ message: 'label must be a string', path: ['label'] }] },
+      },
+    } as const
+    const contract = defineContract({ badge: { props: asyncSchema }, card: { props: v.object({ title: v.optional(v.string()) }) } })
+    const local = createDedal({ contract })
+
+    expect((await local.validate({ component: 'card', props: { title: 1 } })).errors).toEqual([{ path: 'template.props.title', message: expect.any(String) }])
+    expect((await local.validate({ component: 'badge', props: { label: 2 } })).errors).toEqual([{ path: 'template.props.label', message: 'label must be a string' }])
+  })
+
+  it('validateSections: templates stored per section, paths start with the section key', async () => {
+    const result = await ui.validateSections({ news: { component: 'grid' }, hero: { component: 'heroo' } })
+    expect(result).toEqual({ ok: false, errors: [{ path: 'hero.component', message: 'unknown component "heroo"' }] })
+    expect((await ui.validateSections([])).errors[0].path).toBe('sections')
+  })
+
+  it('an instance without a contract value says how to get one', async () => {
+    await expect(createDedal<FromZod>().validate({ component: 'card' })).rejects.toThrow('createDedal({ contract')
+  })
+
+  it('createDedal({ contract }) is typed by the contract', () => {
+    expectTypeOf(ui).toEqualTypeOf<ReturnType<typeof createDedal<FromZod>>>()
+    // @ts-expect-error — not in the contract
+    ui.node('carousel')
+  })
+})
